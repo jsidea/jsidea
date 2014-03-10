@@ -1,0 +1,4 @@
+jsidea
+======
+
+jsidea core library
