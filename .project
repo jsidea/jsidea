@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>jsidea</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>com.palantir.typescript.typeScriptBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>com.palantir.typescript.typeScriptNature</nature>
+	</natures>
+	<filteredResources>
+		<filter>
+			<id>0</id>
+			<name></name>
+			<type>22</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-location-matches-false-true-.*[^bin].*jsidea[\/\\]ts[\/\\].*\.js</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>0</id>
+			<name></name>
+			<type>22</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-references.typescript.js</arguments>
+			</matcher>
+		</filter>
+	</filteredResources>
+</projectDescription>
