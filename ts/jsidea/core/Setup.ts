@@ -1,0 +1,1 @@
+var trace = console.log ? console.log : function(...args) { };
