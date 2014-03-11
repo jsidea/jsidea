@@ -15,7 +15,6 @@ module jsidea.test {
             p.x = 5;
             p.y = 5;
             trace(p.toString());
-            trace(p.distance(new 
             trace(p.length);
             p.normalize();
             trace(p.length);
