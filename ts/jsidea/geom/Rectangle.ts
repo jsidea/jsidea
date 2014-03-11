@@ -3,7 +3,7 @@ module jsidea.geom {
         width: number;
         height: number;
     }
-    export interface IRectangle extends IRectangleValue {
+    export interface IRectangle extends IRectangleValue, jsidea.core.IDisposable {
         clone(): IRectangle;
         copyFrom(rectangle: IRectangleValue): void;
     }
@@ -40,6 +40,9 @@ module jsidea.geom {
 
         public containsRect(rectangle: IRectangleValue): boolean {
             return false;
+        }
+        
+        public dispose(): void {
         }
 
         public toString(): string {

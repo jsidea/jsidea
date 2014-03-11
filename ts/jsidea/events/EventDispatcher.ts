@@ -1,9 +1,9 @@
 module jsidea.events {
-    interface IEventDispatcherKeyMatch {
+    interface IEventDispatcherKey {
         eventType?: string;
         key?: string
     }
-    interface IEventDispatcherListener {
+    interface IEventDispatcherSlot {
         listener: Function;
         once: boolean;
         eventType?: string;
@@ -11,21 +11,27 @@ module jsidea.events {
         key?: string;
         data?: any
     }
-    export interface IEventDispatcher {
+    export interface IEventDispatcher extends jsidea.core.IDisposable {
         bind(eventType: string, listener: (event: IEvent, data?: any) => void): void;
         bind(eventType: string, listener: (event: IEvent, data?: any) => void, context: any): void;
         bind(eventType: string, listener: (event: IEvent, data?: any) => void, context: any, data: any): void;
         unbind(eventType: string): void;
         trigger(eventType: string): void;
         trigger(eventType: string, event: IEvent): void;
+        broadcast(eventType: string): void;
+        broadcast(eventType: string, event: IEvent): void;
+        binded(eventType: string): boolean;
     }
     export class EventDispatcher implements IEventDispatcher {
 
-        private _listener: IEventDispatcherListener[] = [];
+        private static _dispatcher: IEventDispatcher[] = [];
+        private _listener: IEventDispatcherSlot[] = [];
         private _target: any = null;
 
         constructor(target: any = null) {
             this._target = target ? target : this;
+
+            EventDispatcher._dispatcher.push(this);
         }
 
         public once(
@@ -42,7 +48,6 @@ module jsidea.events {
             context: any = null,
             data: any = null,
             once: boolean = false): void {
-
             var entries = EventDispatcher.parseEventType(eventType);
             var l = entries.length;
             for (var i = 0; i < l; ++i)
@@ -56,8 +61,13 @@ module jsidea.events {
                 });
         }
 
-        public unbind(
-            eventType: string): void {
+        public binded(eventType: string): boolean {
+            var entries = EventDispatcher.parseEventType(eventType);
+            var matches = EventDispatcher.getMatches(this, entries);
+            return matches.length > 0;
+        }
+
+        public unbind(eventType: string): void {
             var entries = EventDispatcher.parseEventType(eventType);
             var matches = EventDispatcher.getMatches(this, entries);
             var l = matches.length;
@@ -81,18 +91,36 @@ module jsidea.events {
                 event.eventType = matches[i].eventType;
                 event.eventKey = matches[i].key;
                 matches[i].listener.call(matches[i].context, event, matches[i].data);
-                
-                if(matches[i].once)
-                     this._listener.splice(this._listener.indexOf(matches[i]), 1);
+
+                if (matches[i].once)
+                    this._listener.splice(this._listener.indexOf(matches[i]), 1);
             }
+        }
+
+        public broadcast(
+            eventType: string,
+            event: IEvent = null): void {
+            event = event ? event : new Event();
+            event.broadcast = true;
+            var disps = EventDispatcher._dispatcher;
+            var l = disps.length;
+            for (var i = 0; i < l; ++i) {
+                disps[i].trigger(eventType, event);
+            }
+        }
+
+        public dispose(): void {
+            EventDispatcher._dispatcher.splice(EventDispatcher._dispatcher.indexOf(this));
+            this._listener = null;
+            this._target = null;
         }
 
         public toString(): string {
             return "[jsidea.events.EventDispatcher]";
         }
 
-        private static getMatches(dispatcher: EventDispatcher, entries: IEventDispatcherKeyMatch[]): IEventDispatcherListener[] {
-            var matches: IEventDispatcherListener[] = [];
+        private static getMatches(dispatcher: EventDispatcher, entries: IEventDispatcherKey[]): IEventDispatcherSlot[] {
+            var matches: IEventDispatcherSlot[] = [];
             var listenerCount: number = dispatcher._listener.length;
             var l: number = entries.length;
             for (var i = 0; i < l; ++i) {
@@ -110,9 +138,6 @@ module jsidea.events {
                     //if matched on eventType
                     else if (eventEntry.eventType == listenerEntry.eventType) {
                     }
-                    //if matched on key only (listener has no eventType set)
-                    //                    else if (!listenerEntry.eventType && eventEntry.key == listenerEntry.key) {
-                    //                    }
                     else {
                         continue;
                     }
@@ -123,7 +148,7 @@ module jsidea.events {
             return matches;
         }
 
-        private static parseEventType(eventType: string): IEventDispatcherKeyMatch[] {
+        private static parseEventType(eventType: string): IEventDispatcherKey[] {
             var entries = eventType.replace(/\s{2,}/g, ' ').split(" ");
             var l = entries.length;
             var result = [];

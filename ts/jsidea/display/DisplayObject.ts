@@ -4,13 +4,16 @@ module jsidea.display {
         element: JQuery;
         originX: number;
         originY: number;
+        validate(): void;
     }
     export class DisplayObject extends jsidea.events.EventDispatcher {
 
         private _transform: jsidea.geom.ITransform;
-        private _element: JQuery;
+        private _element: JQuery = null;
         private _originX: number = 0;
         private _originY: number = 0;
+        private _originXAbsolute: boolean = true;
+        private _originYAbsolute: boolean = true;
         private _x: number = 0;
         private _y: number = 0;
         private _scaleX: number = 1;
@@ -28,8 +31,7 @@ module jsidea.display {
         constructor(element: JQuery = null) {
             super();
             this._transform = new jsidea.geom.Transform(this);
-            if (element)
-                this.element = element;
+            this.element = element;
         }
 
         public get transform(): jsidea.geom.ITransform {
@@ -63,6 +65,18 @@ module jsidea.display {
             this.invalidate();
         }
 
+        public get originXAbsolute(): boolean {
+            return this._originXAbsolute;
+        }
+
+        public set originXAbsolute(value: boolean) {
+            if (this._originXAbsolute == value)
+                return;
+            this._originXAbsolute = value;
+            this._isDirtyOrigin = true;
+            this.invalidate();
+        }
+
         public get originY(): number {
             return this._originY;
         }
@@ -71,6 +85,18 @@ module jsidea.display {
             if (this._originY == value)
                 return;
             this._originY = value;
+            this._isDirtyOrigin = true;
+            this.invalidate();
+        }
+
+        public get originYAbsolute(): boolean {
+            return this._originYAbsolute;
+        }
+
+        public set originYAbsolute(value: boolean) {
+            if (this._originYAbsolute == value)
+                return;
+            this._originYAbsolute = value;
             this._isDirtyOrigin = true;
             this.invalidate();
         }
@@ -162,6 +188,12 @@ module jsidea.display {
         public configureElement(element: JQuery): void {
             element.data("jsidea-display-object", this);
             element.addClass("jsidea-display-object");
+            var origin = jsidea.geom.Transform.extractOrigin(element);
+            this._originX = origin.valueX;
+            this._originXAbsolute = origin.xAbsolute;
+            this._originY = origin.valueY;
+            this._originYAbsolute = origin.yAbsolute;
+            this._transform.refresh();
         }
 
         public deconfigureElement(element: JQuery): void {
@@ -170,6 +202,9 @@ module jsidea.display {
         }
 
         public validate(): void {
+            if (this._isDirty) {
+                this.unbind("tick.display_object");
+            }
             if (this._element
                 && (this._isDirtyPosition
                 || this._isDirtyScale
@@ -178,8 +213,10 @@ module jsidea.display {
                 || this._isDirtyOrigin)) {
 
                 var m = this._transform.matrix;
-                this.element.css("transform-origin", (this._originX) + "px " + (this._originY) + "px");
-                this.element.css("transform", m.css);
+                this.element.css("transform-origin",
+                    (this._originX) + (this._originXAbsolute ? "px " : "% ")
+                    + (this._originY) + (this._originYAbsolute ? "px " : "% "));
+                this.element.css("transform", m.cssMatrix);
 
                 var evt = new jsidea.events.TransformEvent();
                 evt.translated = this._isDirtyPosition;
@@ -196,15 +233,17 @@ module jsidea.display {
             this._isDirtySkew = false;
             this._isDirtyOrigin = false;
             this._isDirty = false;
-
-            //TODO: remove listener for validation phase
         }
 
         public invalidate(): void {
-            if (!this._isDirty)
+            if (this._isDirty)
                 return;
             this._isDirty = true;
-            //TODO: set listener for validation phase
+            this.bind("tick.display_object", this.validate, this);
+        }
+
+        public dispose(): void {
+            super.dispose();
         }
 
         public toString(): string {

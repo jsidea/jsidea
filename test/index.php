@@ -6,7 +6,7 @@
 <title>jsidea</title>
 <?php include (realpath ( dirname ( __FILE__ ) . '/../php/Ressource.php')); Ressource::importAll ( "jsidea" );?>
 </head>
-<body class='debug'>
+<body data-hook="jsidea.test.TestApplication">
 	<div id="content"></div>
 </body>
 </html>

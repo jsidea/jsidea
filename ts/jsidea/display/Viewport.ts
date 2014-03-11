@@ -6,6 +6,10 @@ module jsidea.display {
             super(element);
         }
 
+        public dispose(): void {
+            super.dispose();
+        }
+        
         public toString(): string {
             return "[jsidea.display.Viewport]";
         }

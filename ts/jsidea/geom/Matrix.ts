@@ -5,8 +5,8 @@ module jsidea.geom {
         c: number;
         d: number;
     }
-    export interface IMatrix extends IMatrixValue {
-        css: string;
+    export interface IMatrix extends IMatrixValue, jsidea.core.IDisposable {
+        cssMatrix: string;
         clone(): IMatrix;
         copyFrom(matrix: IMatrixValue): void;
         identity(): void;
@@ -20,8 +20,8 @@ module jsidea.geom {
         originBox(x: number, y: number, originX: number, originY: number, scaleX: number, scaleY: number, rotation: number): void;
         invert(): void;
         concat(value: IMatrixValue): void;
-        decompose(): ITransformTarget;
-        decompose(target: ITransformTarget): ITransformTarget;
+        decompose(): ITransformValue;
+        decompose(target: ITransformValue): ITransformValue;
     }
     export class Matrix implements IMatrix {
 
@@ -73,6 +73,12 @@ module jsidea.geom {
             this.x = x * a_tmp + y * c_tmp + this.x;
             this.y = x * b_tmp + y * d_tmp + this.y;
         }
+
+//        public prependTranslate(x: number, y: number): void {
+//            var x1 = this.x;
+//            this.x = x1 * this.a + this.y * this.c + x;
+//            this.y = x1 * this.b + this.y * this.d + y;
+//        }
 
         public identity(): void {
             this.a = 1;
@@ -150,7 +156,7 @@ module jsidea.geom {
             this.y = -(a * this.y - b * x) / n;
         }
 
-        public decompose(target: ITransformTarget = null): ITransformTarget {
+        public decompose(target: ITransformValue = null): ITransformValue {
             target = target ? target : { x: 0, y: 0, scaleX: 0, scaleY: 0, skewX: 0, skewY: 0, rotation: 0 };
             target.x = this.x;
             target.y = this.y;
@@ -172,7 +178,7 @@ module jsidea.geom {
             return target;
         }
 
-        public get css(): string {
+        public get cssMatrix(): string {
             return "matrix("
                 + this.a.toFixed(10) + ","
                 + this.b.toFixed(10) + ","
@@ -182,21 +188,14 @@ module jsidea.geom {
                 + this.y.toFixed(10) + ")";
         }
 
-        public set css(value: string) {
+        public set cssMatrix(value: string) {
             var trans = value.replace("matrix(", "").replace(")", "").split(",");
-            this.a = this.toNumber(trans[0], 1);
-            this.b = this.toNumber(trans[1], 0);
-            this.c = this.toNumber(trans[2], 0);
-            this.d = this.toNumber(trans[3], 1);
-            this.x = this.toNumber(trans[4], 0);
-            this.y = this.toNumber(trans[5], 0);
-        }
-
-        private toNumber(value: any, defaultValue: number): number {
-            value = parseFloat(value);
-            if (isNaN(value))
-                return defaultValue;
-            return value;
+            this.a = parseNumber(trans[0], 1);
+            this.b = parseNumber(trans[1], 0);
+            this.c = parseNumber(trans[2], 0);
+            this.d = parseNumber(trans[3], 1);
+            this.x = parseNumber(trans[4], 0);
+            this.y = parseNumber(trans[5], 0);
         }
 
         public originBox(
@@ -222,6 +221,9 @@ module jsidea.geom {
             this.d = theta * scaleY;
             this.x = theta * -originX + gamma * originY + x;
             this.y = gamma * -originX + theta * -originY + y;
+        }
+
+        public dispose(): void {
         }
 
         public toString(): string {

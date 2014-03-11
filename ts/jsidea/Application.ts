@@ -1,80 +1,96 @@
 module jsidea {
     export class Application extends jsidea.events.EventDispatcher {
 
-        public version: jsidea.core.IVersion;
+        private _version: jsidea.core.IVersion;
+        private _active: boolean = false;
+        private _autoActive: boolean = false;
+        private _autoTick: boolean = false;
+        private _frameRate: number = 60;
+        private _tickInterval: number = 0;
 
         constructor() {
             super();
 
+            this.autoActive = true;
+            this.autoTick = true;
+            //abstract create method
             this.create();
+            //initial tick
+            this.tick();
         }
 
         public create(): void {
-            this.version = new jsidea.core.Version();
-            //            var pt = new create.Point(0, 0);
-            //            trace(pt.toString());
-            //            var vea.display.Viewport();
-
-            this.testDisplayObject();
-        }
-        private testDisplayObject(): void {
-            var d = new jsidea.display.DisplayObject();
-            d.element = $("<div>TEST</div>");
-            d.x = 100;
-            d.y = 100;
-            d.rotation = 45;
-            d.originX = 25;
-            d.originY = 25;
-            d.scaleX = 2;
-            d.scaleY = 2;
-            d.validate();
-            $("#content").append(d.element);
-            
-            var b = new jsidea.display.DisplayObject();
-            b.element = $("<div>AAA</div>");
-            b.originX = d.originX;
-            b.originY = d.originY;
-//            b.skewX = 45;
-            b.element.css("left", "10px");
-            b.element.css("margin-left", "10px");
-            b.validate();
-            d.element.append(b.element);
-            
-            var c = new jsidea.display.DisplayObject();
-            c.element = $("<div>CCC</div>");
-            c.originX = b.originX;
-            c.originY = b.originY;
-            c.transform.matrix = b.transform.sceneTransform;
-            c.validate();
-            $("#content").append(c.element);
-            
-            trace(b.transform.sceneTransform.css);
-        }
-        
-        private testEventDispatcher(): void {
-            var d = new jsidea.events.EventDispatcher();
-            d.bind("click.setup", (e:jsidea.events.IEvent) => trace(e.eventType));
-            d.trigger(".setup");
         }
 
-        private testMatrix(): void {
-            var m = new jsidea.geom.Matrix();
-            m.translate(-100, -100);
-            m.scale(2, 2);
-            m.rotateDegree(45);
-            m.translate(100, 100);
-            trace(m.decompose());
+        public get active(): boolean {
+            return this._active;
+        }
 
-            var div = $("<div></div>");
-            div.css({ backgroundColor: "#FF00FF", width: "200px", height: "200px", top: "0", left: "0", position: "absolute", transformOrigin: "0% 0%", transition: "all 1s" });
-            $("#content").append(div);
-            trace(m.css);
-            div.delay(500).queue(() => div.css({ transform: m.css }));
+        public set active(value: boolean) {
+            if (this._active == value)
+                return;
+            this._active = value;
 
-            div.append($("<div style='top:50%; left:50%; position:absolute; width:10px; height:10px; background-color:#FF0000'></div>"));
-            var p = m.transform(0, 0);
-            trace(p.toString());
+            this.broadcast(this._active ? jsidea.events.Event.ACTIVATE : jsidea.events.Event.DEACTIVATE,
+                new jsidea.events.Event());
+        }
+
+        public get autoActive(): boolean {
+            return this._autoActive;
+        }
+
+        public set autoActive(value: boolean) {
+            if (this._autoActive == value)
+                return;
+            this._autoActive = value;
+
+            if (this._autoActive) {
+                this._active = document.visibilityState == "visible";
+                $(document).bind("visibilitychange.jsidea_application", () => this.onVisibilityChange());
+            }
+            else
+                $(document).unbind("visibilitychange.jsidea_application");
+        }
+
+        public get frameRate(): number {
+            return this._frameRate;
+        }
+
+        public set frameRate(value: number) {
+            value = value < 0 ? 0 : value;
+            if (this._frameRate == value)
+                return;
+            this._frameRate = value;
+            this.refreshTickInterval();
+        }
+
+        public tick(): void {
+            this.broadcast(jsidea.events.Event.TICK);
+        }
+
+        public get autoTick(): boolean {
+            return this._autoTick;
+        }
+
+        public set autoTick(value: boolean) {
+            if (this._autoTick == value)
+                return;
+            this._autoTick = value;
+            this.refreshTickInterval();
+        }
+
+        public get version(): jsidea.core.IVersion {
+            return this._version;
+        }
+
+        private onVisibilityChange(): void {
+            this.active = document.visibilityState == "visible";
+        }
+
+        private refreshTickInterval(): void {
+            clearInterval(this._tickInterval);
+            if (this._autoTick && this._frameRate > 0)
+                this._tickInterval = setInterval(() => this.tick(), 1000 / this._frameRate);
         }
     }
 }
-$(window).ready(() => new jsidea.Application());

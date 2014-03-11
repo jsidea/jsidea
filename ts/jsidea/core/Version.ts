@@ -1,5 +1,5 @@
 module jsidea.core {
-    export interface IVersion {
+    export interface IVersion extends jsidea.core.IDisposable {
         state: string;
         major: number;
         build: number;
@@ -29,21 +29,24 @@ module jsidea.core {
         public get versionString(): string {
             return this.state + " " + this.major + "." + this.build + "." + this.revision;
         }
-        
+
         public get state(): string {
             return "alpha";
         }
-        
+
         public get major(): number {
             return 0;
         }
-        
+
         public get build(): number {
             return 0;
         }
-        
+
         public get revision(): number {
             return 1;
+        }
+
+        public dispose(): void {
         }
 
         public toString(): string {
