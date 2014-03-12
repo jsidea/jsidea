@@ -106,18 +106,17 @@ module jsidea.geom {
 
             var l = matrices.length;
             var m = matrices[l - 1];
-            for (var i = l - 2; i >= 0; --i) {
+            for (var i = l - 2; i >= 0; --i)
                 m.concat(matrices[i]);
-            }
 
             return m;
         }
 
         private static extractTransform(element: JQuery, includeOrigin: boolean): IMatrix {
             var cachedDisplayObject: jsidea.display.IDisplayObject = element.data("jsidea-display-object");
-            if (cachedDisplayObject) {
+            if (cachedDisplayObject)
                 cachedDisplayObject.validate();
-            }
+
             var matrix = this.extractMatrix(element);
 
             if (includeOrigin) {

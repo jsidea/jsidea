@@ -5,6 +5,11 @@ class Ressource {
 		echo self::importJavaScript ( $projectName );
 		echo self::importTypeScript ( $projectName );
 	}
+	public static function importAllMinified($projectName) {
+		echo self::importCSSOnline ( "/eventfive/jsidea/bin/jsidea/css/jsidea.min.css" );
+		echo self::importJavaScriptOnline ( "/eventfive/jsidea/bin/jsidea/js/jsidea.libs.min.js" );
+		echo self::importJavaScriptOnline ( "/eventfive/jsidea/bin/jsidea/js/jsidea.min.js" );
+	}
 	public static function importCSS($projectName, $referencesFileName = "references.css.xml") {
 		return self::parseXML ( array (
 				'Ressource',
@@ -35,6 +40,9 @@ class Ressource {
 	}
 	public static function importJavaScriptOnline($url) {
 		return "<script type='text/javascript' src='$url'></script>\n";
+	}
+	private static function importCSSOnline($url) {
+		return "<link type='text/css' rel='stylesheet' href='$url' >\n";
 	}
 	private static function encodeCSS($projectPathRelative, $importPath) {
 		return "<link type='text/css' rel='stylesheet' href='$projectPathRelative/css/$importPath' >\n";

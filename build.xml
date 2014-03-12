@@ -27,27 +27,60 @@
 	<property name="JS_DIST" value="${JS_DIR_DIST}/${PROJECT_NAME}.libs.js" />
 	<property name="PHP_DIR" value="${PROJECT_PATH}/php" />
 	<property name="PHP_DIR_DIST" value="${PROJECT_BIN}/php" />
+	<property name="YUI" value="${PROJECT_PATH}/authoring/plugins/yuicompressor.jar" />
 
 	<target name="release" description="Release">
-		<echo message="${PROJECT_NAME} : merge css" />
+		<echo message="${PROJECT_NAME} : Merge CSS" />
 		<xmlproperty file="${PROJECT_PATH}/${REFERENCES_CSS_FILE_NAME}" collapseAttributes="true" />
 		<concat destfile="${CSS_DIST}" fixlastline="yes" eol="lf">
 			<filelist dir="${CSS_DIR}" files="${css_scripts.src}" />
 		</concat>
-		<echo message="${PROJECT_NAME} : merge js" />
+		<echo message="${PROJECT_NAME} : Merge JavaScript" />
 		<xmlproperty file="${PROJECT_PATH}/${REFERENCES_JS_FILE_NAME}" collapseAttributes="true" />
 		<concat destfile="${JS_DIST}" fixlastline="yes" eol="lf">
 			<filelist dir="${JS_DIR}" files="${js_scripts.src}" />
 		</concat>
-		<echo message="${PROJECT_NAME} : compile TypeScript" />
+		<echo message="${PROJECT_NAME} : Compile TypeScript" />
 		<exec executable="${tsc}">
 			<arg value="--out" />
 			<arg value="${TS_DIST}" />
+			<arg value="-target" />
+			<arg value="ES5" />
 			<arg value="${PROJECT_PATH}/${REFERENCES_TS_FILE_NAME}" />
 		</exec>
-		<echo message="${PROJECT_NAME} : copy assets" />
+		<echo message="${PROJECT_NAME} : Copy assets" />
 		<copy todir="${ASSETS_DIR_DIST}">
 			<fileset dir="${ASSETS_DIR}" includes="**" />
 		</copy>
+		<echo message="${PROJECT_NAME} : Minify TypeScript" />
+		<apply executable="java" parallel="false">
+			<fileset dir="${JS_DIR_DIST}" includes="${PROJECT_NAME}.js" />
+			<arg line="-jar" />
+			<arg path="${YUI}" />
+			<srcfile />
+			<arg line="-o" />
+			<mapper type="glob" from="${PROJECT_NAME}.js" to="${JS_DIR_DIST}/${PROJECT_NAME}.min.js" />
+			<targetfile />
+		</apply>
+		<echo message="${PROJECT_NAME} : Minify JavaScript" />
+		<apply executable="java" parallel="false">
+			<fileset dir="${JS_DIR_DIST}" includes="${PROJECT_NAME}.libs.js" />
+			<arg line="-jar" />
+			<arg path="${YUI}" />
+			<srcfile />
+			<arg line="-o" />
+			<mapper type="glob" from="${PROJECT_NAME}.libs.js" to="${JS_DIR_DIST}/${PROJECT_NAME}.libs.min.js" />
+			<targetfile />
+		</apply>
+		<echo message="${PROJECT_NAME} : Minify CSS" />
+		<apply executable="java" parallel="false">
+			<fileset dir="${CSS_DIR_DIST}" includes="${PROJECT_NAME}.css" />
+			<arg line="-jar" />
+			<arg path="${YUI}" />
+			<srcfile />
+			<arg line="-o" />
+			<mapper type="glob" from="${PROJECT_NAME}.css" to="${CSS_DIR_DIST}/${PROJECT_NAME}.min.css" />
+			<targetfile />
+		</apply>
 	</target>
 </project>
