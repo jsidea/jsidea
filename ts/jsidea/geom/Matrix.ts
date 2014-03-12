@@ -1,9 +1,11 @@
 module jsidea.geom {
-    export interface IMatrixValue extends IPointValue {
+    export interface IMatrixValue {
         a: number;
         b: number;
         c: number;
         d: number;
+        tx: number;
+        ty: number;
     }
     export interface IMatrix extends IMatrixValue, jsidea.core.IDisposable {
         cssMatrix: string;
@@ -33,8 +35,8 @@ module jsidea.geom {
             public b: number = 0,
             public c: number = 0,
             public d: number = 1,
-            public x: number = 0,
-            public y: number = 0) {
+            public tx: number = 0,
+            public ty: number = 0) {
         }
 
         public clone(): IMatrix {
@@ -43,8 +45,8 @@ module jsidea.geom {
                 this.b,
                 this.c,
                 this.d,
-                this.x,
-                this.y);
+                this.tx,
+                this.ty);
         }
 
         public copyFrom(value: IMatrixValue): void {
@@ -52,15 +54,15 @@ module jsidea.geom {
             this.b = value.b;
             this.c = value.c;
             this.d = value.d;
-            this.x = value.x;
-            this.y = value.y;
+            this.tx = value.tx;
+            this.ty = value.ty;
         }
 
         public concat(value: IMatrixValue): void {
-            this.append(value.a, value.b, value.c, value.d, value.x, value.y);
+            this.append(value.a, value.b, value.c, value.d, value.tx, value.ty);
         }
 
-        public append(a: number, b: number, c: number, d: number, x: number, y: number): void {
+        public append(a: number, b: number, c: number, d: number, tx: number, ty: number): void {
             var a_tmp: number = this.a;
             var b_tmp: number = this.b;
             var c_tmp: number = this.c;
@@ -70,23 +72,17 @@ module jsidea.geom {
             this.b = a * b_tmp + b * d_tmp;
             this.c = c * a_tmp + d * c_tmp;
             this.d = c * b_tmp + d * d_tmp;
-            this.x = x * a_tmp + y * c_tmp + this.x;
-            this.y = x * b_tmp + y * d_tmp + this.y;
+            this.tx = tx * a_tmp + ty * c_tmp + this.tx;
+            this.ty = tx * b_tmp + ty * d_tmp + this.ty;
         }
-
-//        public prependTranslate(x: number, y: number): void {
-//            var x1 = this.x;
-//            this.x = x1 * this.a + this.y * this.c + x;
-//            this.y = x1 * this.b + this.y * this.d + y;
-//        }
 
         public identity(): void {
             this.a = 1;
             this.b = 0;
             this.c = 0;
             this.d = 1;
-            this.x = 0;
-            this.y = 0;
+            this.tx = 0;
+            this.ty = 0;
         }
 
         public deltaTransform(x: number, y: number): IPoint {
@@ -97,8 +93,8 @@ module jsidea.geom {
 
         public transform(x: number, y: number): IPoint {
             return new Point(
-                this.a * x + this.c * y + this.x,
-                this.b * x + this.d * y + this.y);
+                this.a * x + this.c * y + this.tx,
+                this.b * x + this.d * y + this.ty);
         }
 
         public rotateDegree(angle: number): void {
@@ -108,7 +104,7 @@ module jsidea.geom {
         public rotate(angle: number): void {
             var a: number = this.a;
             var c: number = this.c;
-            var x: number = this.x;
+            var x: number = this.tx;
 
             var THETA: number = Math.cos(angle);
             var BETA: number = Math.sin(angle);
@@ -116,8 +112,8 @@ module jsidea.geom {
             this.b = a * BETA + this.b * THETA;
             this.c = c * THETA - this.d * BETA;
             this.d = c * BETA + this.d * THETA;
-            this.x = x * THETA - this.y * BETA;
-            this.y = x * BETA + this.y * THETA;
+            this.tx = x * THETA - this.ty * BETA;
+            this.ty = x * BETA + this.ty * THETA;
         }
 
         public scale(scaleX: number, scaleY: number): void {
@@ -125,8 +121,8 @@ module jsidea.geom {
             this.b *= scaleY;
             this.c *= scaleX;
             this.d *= scaleY;
-            this.x *= scaleX;
-            this.y *= scaleY;
+            this.tx *= scaleX;
+            this.ty *= scaleY;
         }
 
         public skew(skewX: number, skewY: number): void {
@@ -135,9 +131,9 @@ module jsidea.geom {
             this.append(Math.cos(skewY), Math.sin(skewY), -Math.sin(skewX), Math.cos(skewX), 0, 0);
         }
 
-        public translate(x: number, y: number): void {
-            this.x += x;
-            this.y += y;
+        public translate(dx: number, dy: number): void {
+            this.tx += dx;
+            this.ty += dy;
         }
 
         public invert(): void {
@@ -145,21 +141,21 @@ module jsidea.geom {
             var b: number = this.b;
             var c: number = this.c;
             var d: number = this.d;
-            var x: number = this.x;
+            var x: number = this.tx;
             var n: number = a * d - b * c;
 
             this.a = d / n;
             this.b = -b / n;
             this.c = -c / n;
             this.d = a / n;
-            this.x = (c * this.y - d * x) / n;
-            this.y = -(a * this.y - b * x) / n;
+            this.tx = (c * this.ty - d * x) / n;
+            this.ty = -(a * this.ty - b * x) / n;
         }
 
         public decompose(target: ITransformValue = null): ITransformValue {
             target = target ? target : { x: 0, y: 0, scaleX: 0, scaleY: 0, skewX: 0, skewY: 0, rotation: 0 };
-            target.x = this.x;
-            target.y = this.y;
+            target.x = this.tx;
+            target.y = this.ty;
             target.scaleX = Math.sqrt(this.a * this.a + this.b * this.b);
             target.scaleY = Math.sqrt(this.c * this.c + this.d * this.d);
             var skewX: number = Math.atan2(-this.c, this.d);
@@ -184,8 +180,8 @@ module jsidea.geom {
                 + this.b.toFixed(10) + ","
                 + this.c.toFixed(10) + ","
                 + this.d.toFixed(10) + ","
-                + this.x.toFixed(10) + ","
-                + this.y.toFixed(10) + ")";
+                + this.tx.toFixed(10) + ","
+                + this.ty.toFixed(10) + ")";
         }
 
         public set cssMatrix(value: string) {
@@ -194,8 +190,8 @@ module jsidea.geom {
             this.b = parseNumber(trans[1], 0);
             this.c = parseNumber(trans[2], 0);
             this.d = parseNumber(trans[3], 1);
-            this.x = parseNumber(trans[4], 0);
-            this.y = parseNumber(trans[5], 0);
+            this.tx = parseNumber(trans[4], 0);
+            this.ty = parseNumber(trans[5], 0);
         }
 
         public originBox(
@@ -219,8 +215,8 @@ module jsidea.geom {
             this.b = gamma * scaleX;
             this.c = -gamma * scaleY;
             this.d = theta * scaleY;
-            this.x = theta * -originX + gamma * originY + x;
-            this.y = gamma * -originX + theta * -originY + y;
+            this.tx = theta * -originX + gamma * originY + x;
+            this.ty = gamma * -originX + theta * -originY + y;
         }
 
         public dispose(): void {
@@ -232,8 +228,8 @@ module jsidea.geom {
                 + " b=" + this.b
                 + " c=" + this.c
                 + " d=" + this.d
-                + " x=" + this.x
-                + " y=" + this.y + "]";
+                + " x=" + this.tx
+                + " y=" + this.ty + "]";
         }
     }
 }

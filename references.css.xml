@@ -2,6 +2,7 @@
 <!DOCTYPE css-source>
 <css_scripts>
 	<src>jsidea-application.css</src>
-	<src>jsidea-display-object.css</src>
-	<src>jsidea-viewport.css</src>
+	<src>jsidea-display-element.css</src>
+	<src>jsidea-ui-dialog.css</src>
+	<src>jsidea-ui-uielement.css</src>
 </css_scripts>

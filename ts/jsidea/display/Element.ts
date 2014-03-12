@@ -1,15 +1,17 @@
 module jsidea.display {
-    export interface IDisplayObject extends jsidea.events.IEventDispatcher, jsidea.geom.ITransformTarget {
+    export interface IElement extends jsidea.events.IEventDispatcher, jsidea.geom.ITransformTarget {
         transform: jsidea.geom.ITransform;
-        element: JQuery;
         originX: number;
         originY: number;
+        offsetX: number;
+        offsetY: number;
         validate(): void;
     }
-    export class DisplayObject extends jsidea.events.EventDispatcher {
+    export class Element extends jsidea.events.EventDispatcher implements IElement {
 
         private _transform: jsidea.geom.ITransform;
-        private _element: JQuery = null;
+        private _visual: JQuery = null;
+        private _visualElement: HTMLElement;
         private _originX: number = 0;
         private _originY: number = 0;
         private _originXAbsolute: boolean = true;
@@ -26,30 +28,64 @@ module jsidea.display {
         private _isDirtySkew: boolean = false;
         private _isDirtyPosition: boolean = false;
         private _isDirtyOrigin: boolean = false;
+        private _isDirtyOffset: boolean = false;
         private _isDirty: boolean = false;
+        private _invalidated: boolean = false;
 
-        constructor(element: JQuery = null) {
+        constructor(visual: JQuery = null) {
             super();
+
+            this.create(visual);
+        }
+
+        private create(visual: JQuery): void {
             this._transform = new jsidea.geom.Transform(this);
-            this.element = element;
+            this.visual = visual;
         }
 
         public get transform(): jsidea.geom.ITransform {
             return this._transform;
         }
 
-        public get element(): JQuery {
-            return this._element;
+        public get visual(): JQuery {
+            return this._visual;
         }
 
-        public set element(element: JQuery) {
-            if (this._element == element)
+        public set visual(visual: JQuery) {
+            if (this._visual == visual)
                 return;
-            if (this._element)
-                this.deconfigureElement(this._element);
-            this._element = element;
-            if (this._element)
-                this.configureElement(this._element);
+            if (this._visual)
+                this.deconfigureVisual(this._visual);
+            
+            this._visual = visual;
+            this._visualElement = this._visual ? this._visual[0] : null;
+            
+            if (this._visual)
+                this.configureVisual(this._visual);
+            this.invalidate();
+        }
+
+        public get offsetX(): number {
+            return this._visual[0].offsetLeft;
+        }
+
+        public set offsetX(value: number) {
+            if (this._visualElement.offsetLeft == value)
+                return;
+            this._visualElement.offsetLeft = value;
+            this._isDirtyOffset = true;
+            this.invalidate();
+        }
+
+        public get offsetY(): number {
+            return this._visualElement.offsetTop;
+        }
+
+        public set offsetY(value: number) {
+            if (this._visualElement.offsetTop == value)
+                return;
+            this._visualElement.offsetTop = value;
+            this._isDirtyOffset = true;
             this.invalidate();
         }
 
@@ -185,10 +221,10 @@ module jsidea.display {
             this.invalidate();
         }
 
-        public configureElement(element: JQuery): void {
-            element.data("jsidea-display-object", this);
-            element.addClass("jsidea-display-object");
-            var origin = jsidea.geom.Transform.extractOrigin(element);
+        public configureVisual(visual: JQuery): void {
+            visual.data("jsidea-display-element", this);
+            visual.addClass("jsidea-display-element");
+            var origin = jsidea.geom.Transform.extractOrigin(visual);
             this._originX = origin.valueX;
             this._originXAbsolute = origin.xAbsolute;
             this._originY = origin.valueY;
@@ -196,16 +232,17 @@ module jsidea.display {
             this._transform.refresh();
         }
 
-        public deconfigureElement(element: JQuery): void {
-            element.data("jsidea-display-object", null);
-            element.removeClass("jsidea-display-object");
+        public deconfigureVisual(visual: JQuery): void {
+            visual.data("jsidea-display-element", null);
+            visual.removeClass("jsidea-display-element");
         }
 
         public validate(): void {
-            if (this._isDirty) {
+            if (this._isDirty && this._invalidated) {
                 this.unbind("tick.display_object");
+                this._invalidated = false;
             }
-            if (this._element
+            if (this._visual
                 && (this._isDirtyPosition
                 || this._isDirtyScale
                 || this._isDirtyRotation
@@ -213,10 +250,10 @@ module jsidea.display {
                 || this._isDirtyOrigin)) {
 
                 var m = this._transform.matrix;
-                this.element.css("transform-origin",
+                this.visual.css("transform-origin",
                     (this._originX) + (this._originXAbsolute ? "px " : "% ")
                     + (this._originY) + (this._originYAbsolute ? "px " : "% "));
-                this.element.css("transform", m.cssMatrix);
+                this.visual.css("transform", m.cssMatrix);
 
                 var evt = new jsidea.events.TransformEvent();
                 evt.translated = this._isDirtyPosition;
@@ -227,11 +264,16 @@ module jsidea.display {
                 this.trigger(jsidea.events.TransformEvent.TRANSFORM, evt);
             }
 
+            if (this._isDirtyOffset) {
+
+            }
+
             this._isDirtyPosition = false;
             this._isDirtyScale = false;
             this._isDirtyRotation = false;
             this._isDirtySkew = false;
             this._isDirtyOrigin = false;
+            this._isDirtyOffset = false;
             this._isDirty = false;
         }
 
@@ -239,15 +281,21 @@ module jsidea.display {
             if (this._isDirty)
                 return;
             this._isDirty = true;
+            this._invalidated = true;
             this.bind("tick.display_object", this.validate, this);
         }
 
         public dispose(): void {
+            this._transform.dispose();
+            if (this._visual)
+                this._visual.remove();
+            this.visual = null;
+            this._transform = null;
             super.dispose();
         }
 
         public toString(): string {
-            return "[jsidea.display.DisplayObject]";
+            return "[jsidea.display.Element]";
         }
     }
 }

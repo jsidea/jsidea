@@ -13,7 +13,7 @@ module jsidea.geom {
         rotation: number;
     }
     export interface ITransformTarget extends ITransformValue {
-        element: JQuery;
+        visual: JQuery;
     }
     export interface ITransform extends jsidea.core.IDisposable {
         target: ITransformTarget;
@@ -54,13 +54,13 @@ module jsidea.geom {
         public get sceneTransform(): IMatrix {
             if (!this.target)
                 return null;
-            return Transform.getConcatenatedMatrix(this.target.element, false);
+            return Transform.getConcatenatedMatrix(this.target.visual, false);
         }
 
         public get windowTransform(): IMatrix {
             if (!this.target)
                 return null;
-            return Transform.getConcatenatedMatrix(this.target.element, true);
+            return Transform.getConcatenatedMatrix(this.target.visual, true);
         }
 
         public localToGlobal(x: number, y: number): IPoint {
@@ -80,9 +80,9 @@ module jsidea.geom {
         }
 
         public refresh(): void {
-            if (!this.target || !this.target.element)
+            if (!this.target || !this.target.visual)
                 return;
-            this.matrix = Transform.extractMatrix(this.target.element);
+            this.matrix = Transform.extractMatrix(this.target.visual);
         }
 
         public dispose(): void {
@@ -93,13 +93,13 @@ module jsidea.geom {
             return "[jsidea.geom.Transform]";
         }
 
-        private static getConcatenatedMatrix(element: JQuery, includeOrigin: boolean): IMatrix {
+        private static getConcatenatedMatrix(visual: JQuery, includeOrigin: boolean): IMatrix {
             var matrices: IMatrix[] = [];
-            matrices.push(Transform.extractTransform(element, includeOrigin));
-            var p = element.parent();
+            matrices.push(Transform.extractTransform(visual, includeOrigin));
+            var p = visual.parent();
             while (p && p.length > 0) {
                 matrices.push(Transform.extractTransform(p, includeOrigin));
-                if (p.get(0) == document.body)
+                if (p.get(0) == document.body)// || p.css("display") == "fixed")
                     break;
                 p = p.parent();
             }
@@ -112,35 +112,53 @@ module jsidea.geom {
             return m;
         }
 
-        private static extractTransform(element: JQuery, includeOrigin: boolean): IMatrix {
-            var cachedDisplayObject: jsidea.display.IDisplayObject = element.data("jsidea-display-object");
+        private static extractTransform(visual: JQuery, includeOrigin: boolean): IMatrix {
+            var cachedDisplayObject: jsidea.display.IElement = visual.data("jsidea-display-element");
             if (cachedDisplayObject)
                 cachedDisplayObject.validate();
 
-            var matrix = this.extractMatrix(element);
+            var matrix = this.extractMatrix(visual);
 
             if (includeOrigin) {
-                var origin = this.extractOrigin(element);
+                var origin = this.extractOrigin(visual);
                 var k = matrix.deltaTransform(origin.x, origin.y);
-                matrix.x += origin.x - k.x;
-                matrix.y += origin.y - k.y;
+                matrix.tx += origin.x - k.x;
+                matrix.ty += origin.y - k.y;
             }
 
-            matrix.x += element.get(0).offsetLeft;
-            matrix.y += element.get(0).offsetTop;
+            matrix.tx += visual.get(0).offsetLeft;
+            matrix.ty += visual.get(0).offsetTop;
+
+            if (visual.css("position") == "fixed" && visual[0].parentElement && visual.children().length == 0) {
+                matrix.tx -= visual[0].parentElement.offsetLeft;
+                matrix.ty -= visual[0].parentElement.offsetTop;
+
+//                console.log(visual[0].offsetLeft - visual[0].parentElement.offsetLeft,
+//                    visual[0].offsetTop - visual[0].parentElement.offsetTop,
+//                     visual.css("position"), "A");
+            }
+//            else
+//                console.log(visual.get(0).offsetLeft, visual.get(0).offsetTop, visual.css("position"), "B");
+            //console.log(visual[0].offsetParent.clientLeft, visual[0].offsetParent.clientTop);
+//            console.log(matrix.cssMatrix);
+
             return matrix;
         }
 
-        public static extractMatrix(element: JQuery): IMatrix {
+        public static extractMatrix(visual: JQuery): IMatrix {
             var m = new Matrix();
-            m.cssMatrix = element.css("transform");
+            m.cssMatrix = visual.css("transform");
             return m;
         }
 
-        public static extractOrigin(element: JQuery): ITransformOrigin {
-            var cssStr = element.css("transform-origin");
+        public static extractOrigin(visual: JQuery): ITransformOrigin {
+            var cssStr = visual.css("transform-origin");
+            //            console.log(cssStr);
             var xStr = cssStr.split(" ")[0];
             var yStr = cssStr.split(" ")[1];
+            xStr = xStr ? xStr : "px";
+            yStr = yStr ? yStr : "px";
+
             var xVal, yVal, xValRaw, yValRaw, xAbsolute, yAbsolute;
             if (xStr.indexOf("px") >= 0) {
                 xVal = parseNumber(xStr.replace("px", ""), 0);
@@ -155,13 +173,13 @@ module jsidea.geom {
             if (xStr.indexOf("%") >= 0) {
                 xVal = parseNumber(xStr.replace("%", ""), 0);
                 xValRaw = xVal;
-                xVal = (xVal / 100) * element.width();
+                xVal = (xVal / 100) * visual.width();
                 xAbsolute = false;
             }
             if (yStr.indexOf("%") >= 0) {
                 yVal = parseNumber(yStr.replace("%", ""), 0);
                 yValRaw = yVal;
-                yVal = (yVal / 100) * element.height();
+                yVal = (yVal / 100) * visual.height();
                 yAbsolute = false;
             }
 

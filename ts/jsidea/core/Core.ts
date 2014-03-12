@@ -6,7 +6,7 @@ module jsidea.core {
 }
 
 //shortcut for console.log
-var trace = console.log ? console.log : function(...args) { };
+//var trace = console.log ? console.log : function(...args) { };
 
 //fix missing indexOf function
 if (!Array.prototype.indexOf) {
