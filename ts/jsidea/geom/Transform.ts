@@ -64,8 +64,7 @@ module jsidea.geom {
         }
 
         public localToGlobal(x: number, y: number): IPoint {
-            var st = this.windowTransform;
-            return st.transform(x, y);
+            return Transform.getLocalToGlobal(this.target.visual, x, y);
         }
 
         public localToLocal(x: number, y: number, target: ITransform): IPoint {
@@ -74,9 +73,7 @@ module jsidea.geom {
         }
 
         public globalToLocal(x: number, y: number): IPoint {
-            var st = this.windowTransform;
-            st.invert();
-            return st.transform(x, y);
+            return Transform.getGlobalToLocal(this.target.visual, x, y);
         }
 
         public refresh(): void {
@@ -105,12 +102,24 @@ module jsidea.geom {
             return Transform.getConcatenatedMatrix(visual, false);
         }
 
+        public static getGlobalToLocal(visual: JQuery, x: number, y: number): jsidea.geom.IPoint {
+            var wt = Transform.getWindowTransform(visual);
+            wt.invert();
+            return wt.transform(x, y);
+        }
+
+        public static getLocalToGlobal(visual: JQuery, x: number, y: number): jsidea.geom.IPoint {
+            var wt = Transform.getWindowTransform(visual);
+            return wt.transform(x, y);
+        }
+
         private static getConcatenatedMatrix(visual: JQuery, includeOrigin: boolean): IMatrix {
             var matrices: IMatrix[] = [];
             matrices.push(Transform.extractTransform(visual, includeOrigin));
             var p = visual.parent();
-            while (p && p.length > 0) {
-                matrices.push(Transform.extractTransform(p, includeOrigin));
+            while (p && p.length > 0 && p.get(0) != document) {
+                var m = Transform.extractTransform(p, includeOrigin);
+                matrices.push(m);
                 if (p.get(0) == document.body)// || p.css("display") == "fixed")
                     break;
                 p = p.parent();
@@ -119,7 +128,8 @@ module jsidea.geom {
             var l = matrices.length;
             var m = matrices[l - 1];
             for (var i = l - 2; i >= 0; --i)
-                m.concat(matrices[i]);
+                if (!matrices[i].isIdentity())
+                    m.concat(matrices[i]);
 
             return m;
         }
@@ -131,7 +141,7 @@ module jsidea.geom {
 
             var matrix = this.extractMatrix(visual);
 
-            if (includeOrigin) {
+            if (includeOrigin) {// && p.get(0) == document.body
                 var origin = this.extractOrigin(visual);
                 var k = matrix.deltaTransform(origin.x, origin.y);
                 matrix.tx += origin.x - k.x;
@@ -140,8 +150,9 @@ module jsidea.geom {
 
             matrix.tx += visual.get(0).offsetLeft;
             matrix.ty += visual.get(0).offsetTop;
-
-            if (visual.css("position") == "fixed" && visual[0].parentElement && visual.children().length == 0) {
+            
+            var isFixed: boolean = visual.get(0).ownerDocument ? visual.css("position") == "fixed" : false;
+            if (isFixed && visual[0].parentElement && visual.children().length == 0) {
                 matrix.tx -= visual[0].parentElement.offsetLeft;
                 matrix.ty -= visual[0].parentElement.offsetTop;
 
@@ -159,12 +170,15 @@ module jsidea.geom {
 
         public static extractMatrix(visual: JQuery): IMatrix {
             var m = new Matrix();
-            m.cssMatrix = visual.css("transform");
+            if (visual.get(0).ownerDocument)
+                m.cssMatrix = visual.css("transform");
+                else
+            console.log(visual);
             return m;
         }
 
         public static extractOrigin(visual: JQuery): ITransformOrigin {
-            var cssStr = visual.css("transform-origin");
+            var cssStr = visual.get(0).ownerDocument ? visual.css("transform-origin") : "0px 0px";
             //            console.log(cssStr);
             var xStr = cssStr.split(" ")[0];
             var yStr = cssStr.split(" ")[1];

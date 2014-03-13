@@ -5,6 +5,7 @@
 /// <reference path='ts/jsidea/events/Event.ts' />
 /// <reference path='ts/jsidea/events/TransformEvent.ts' />
 /// <reference path='ts/jsidea/model/Ressource.ts' />
+/// <reference path='ts/jsidea/model/conversion/XMLConverter.ts' />
 /// <reference path='ts/jsidea/geom/Point.ts' />
 /// <reference path='ts/jsidea/geom/Rectangle.ts' />
 /// <reference path='ts/jsidea/geom/Matrix.ts' />

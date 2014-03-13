@@ -24,6 +24,7 @@ module jsidea.geom {
         concat(value: IMatrixValue): void;
         decompose(): ITransformValue;
         decompose(target: ITransformValue): ITransformValue;
+        isIdentity(): boolean;
     }
     export class Matrix implements IMatrix {
 
@@ -83,6 +84,15 @@ module jsidea.geom {
             this.d = 1;
             this.tx = 0;
             this.ty = 0;
+        }
+
+        public isIdentity(): boolean {
+            return this.a == 1 &&
+                this.b == 0 &&
+                this.c == 0 &&
+                this.d == 1 &&
+                this.tx == 0 &&
+                this.ty == 0;
         }
 
         public deltaTransform(x: number, y: number): IPoint {
@@ -221,13 +231,13 @@ module jsidea.geom {
 
         public dispose(): void {
         }
-        
+
         public qualifiedClassName(): string {
             return "jsidea.geom.Matrix";
         }
 
         public toString(): string {
-            return "[" + this.qualifiedClassName() + 
+            return "[" + this.qualifiedClassName() +
                 + " a=" + this.a
                 + " b=" + this.b
                 + " c=" + this.c

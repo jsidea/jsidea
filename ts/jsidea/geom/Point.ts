@@ -48,7 +48,6 @@ module jsidea.geom {
 
         public get length(): number {
             return Math.sqrt(this.x * this.x + this.y * this.y);
-            //            return parseFloat(Math.sqrt(this.x * this.x + this.y * this.y).toPrecision(10));
         }
 
         public dispose(): void {
@@ -60,7 +59,7 @@ module jsidea.geom {
 
         public toString(): string {
             return "[" + this.qualifiedClassName() + 
-                + " x=" + this.x
+                " x=" + this.x
                 + " y=" + this.y + "]";
         }
     }

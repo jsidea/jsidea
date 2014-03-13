@@ -6,9 +6,45 @@ module jsidea.test {
         }
 
         public create(): void {
+            this.testPosition();
+            //            this.testXMLConverter();
             //            this.testDialog();
-            this.testElement();
+            //            this.testElement();
             //            this.testPoint();
+        }
+
+        private testPosition(): void {
+        
+            var e = new jsidea.display.Element();
+            e.visual = $("<div>A</div>");
+            $("body").append(e.visual);
+            
+//            var p = new jsidea.layout.Position(e.visual);
+//            p.my.x = 0;
+//            p.my.y = 0;
+//            p.my.originX = "right";
+//            p.my.originY = "bottom";
+//            p.at.x = "right";
+//            p.at.y = "bottom";
+//            p.apply(e.transform);
+            
+            $("#content").css("transform-origin", "0 0");
+            $("#content").css("position", "fixed");
+            $("#content").css("transform", "scale(0.25, 0.5)");
+//            $("#content").css("transform", "scale(0.5, 0.5) skew(0, 25deg)");
+            
+            var p = new jsidea.layout.Position();
+            p.my.originX = "center";
+            p.my.originY = "top";
+            p.at.x = "center";
+            p.at.y = "center";
+            p.of = $("#content");
+            p.apply(e.visual);
+            //p.transform(e.transform);
+        }
+
+        private testXMLConverter(): void {
+            var x = new jsidea.model.conversion.XMLConverter();
         }
 
         private testPoint(): void {
@@ -53,11 +89,11 @@ module jsidea.test {
             var d = new jsidea.display.Element($("<div>D</div>"));
             d.visual.css("background-color", "#FFFF00");
             $("#content").append(d.visual);
-            
-//            console.log(d.presented);
-//            console.log(d.presented);
-//            d.visible = false;
-//            console.log(d.presented);
+
+            //            console.log(d.presented);
+            //            console.log(d.presented);
+            //            d.visible = false;
+            //            console.log(d.presented);
 
             //            console.log(d.visual.offset().left, d.visual.offset().top, d.visual[0].offsetLeft, d.visual[0].o            
             d.transform.x = gl.x - d.offsetX;
@@ -65,9 +101,9 @@ module jsidea.test {
 
             //this.bind("activate deactivate", (e: jsidea.events.IEvent) => console.log(e.eventType));
 
-//            console.log(gl);
-//            console.log(d.width, d.height);
-            
+            //            console.log(gl);
+            //            console.ld.height);
+
             d.opacity = 0.8;
             console.log(d.qualifiedClassName());
         }
@@ -96,7 +132,7 @@ module jsidea.test {
             var p = m.transform(0, 0);
             console.log(p.toString());
         }
-        
+
         public toString(): string {
             return "[" + this.qualifiedClassName() + "]";
         }

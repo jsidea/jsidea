@@ -1,6 +1,7 @@
 module jsidea.display {
     export interface IElement extends jsidea.events.IEventDispatcher {
         transform: jsidea.geom.ITransformElement;
+        visual: JQuery
         added: boolean;
         presented: boolean;
         visible: boolean;
@@ -66,14 +67,11 @@ module jsidea.display {
         }
 
         public globalToLocal(x: number, y: number): jsidea.geom.IPoint {
-            var wt = jsidea.geom.Transform.getWindowTransform(this._visual);
-            wt.invert();
-            return wt.transform(x, y);
+            return jsidea.geom.Transform.getGlobalToLocal(this._visual, x, y);
         }
 
         public localToGlobal(x: number, y: number): jsidea.geom.IPoint {
-            var wt = jsidea.geom.Transform.getWindowTransform(this._visual);
-            return wt.transform(x, y);
+            return jsidea.geom.Transform.getLocalToGlobal(this._visual, x, y);
         }
 
         public get width(): number {
@@ -105,7 +103,7 @@ module jsidea.display {
         }
 
         public set offsetX(value: number) {
-            if(!this._htmlElement)
+            if (!this._htmlElement)
                 return;
             if (this._htmlElement.offsetLeft == value)
                 return;
@@ -119,7 +117,7 @@ module jsidea.display {
         }
 
         public set offsetY(value: number) {
-            if(!this._htmlElement)
+            if (!this._htmlElement)
                 return;
             if (this._htmlElement.offsetTop == value)
                 return;
