@@ -5,5 +5,9 @@
 	height: 50px;
 	position: relative;
 	background-color: #FF00FF;
-	transform-origin:20% top;
+	transform-origin: 20% top;
+}
+
+.jsidea-display-element.hidden {
+	display: none;
 }

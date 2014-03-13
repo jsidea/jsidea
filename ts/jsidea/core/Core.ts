@@ -1,7 +1,8 @@
 //basic classes and interfaces
 module jsidea.core {
-    export interface IDisposable {
+    export interface ICore {
         dispose(): void;
+        qualifiedClassName(): string;
     }
 }
 

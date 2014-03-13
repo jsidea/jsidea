@@ -7,7 +7,7 @@ module jsidea.geom {
         tx: number;
         ty: number;
     }
-    export interface IMatrix extends IMatrixValue, jsidea.core.IDisposable {
+    export interface IMatrix extends IMatrixValue, jsidea.core.ICore {
         cssMatrix: string;
         clone(): IMatrix;
         copyFrom(matrix: IMatrixValue): void;
@@ -221,9 +221,13 @@ module jsidea.geom {
 
         public dispose(): void {
         }
+        
+        public qualifiedClassName(): string {
+            return "jsidea.geom.Matrix";
+        }
 
         public toString(): string {
-            return "[jsidea.geom.Matrix"
+            return "[" + this.qualifiedClassName() + 
                 + " a=" + this.a
                 + " b=" + this.b
                 + " c=" + this.c

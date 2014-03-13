@@ -3,9 +3,12 @@ module jsidea.geom {
         width: number;
         height: number;
     }
-    export interface IRectangle extends IRectangleValue, jsidea.core.IDisposable {
+    export interface IRectangle extends IRectangleValue, jsidea.core.ICore {
         clone(): IRectangle;
         copyFrom(rectangle: IRectangleValue): void;
+        contains(x: number, y: number): boolean;
+        containsRect(r: IRectangleValue): boolean;
+        intersects(r: IRectangleValue): boolean;
     }
     export class Rectangle implements IRectangle {
 
@@ -38,15 +41,35 @@ module jsidea.geom {
                 && y <= (this.y + this.height);
         }
 
-        public containsRect(rectangle: IRectangleValue): boolean {
+        public containsRect(r: IRectangleValue): boolean {
+            if (!this.contains(r.x, r.y)
+                || !this.contains(r.x + r.width, r.y + r.height)
+                || !this.contains(r.x + r.width, r.y)
+                || !this.contains(r.x, r.y + r.height)
+                )
+                return false;
+            return true;
+        }
+
+        public intersects(r: IRectangleValue): boolean {
+            if (this.contains(r.x, r.y)
+                || this.contains(r.x + r.width, r.y + r.height)
+                || this.contains(r.x + r.width, r.y)
+                || this.contains(r.x, r.y + r.height)
+                )
+                return true;
             return false;
         }
-        
+
         public dispose(): void {
         }
 
+        public qualifiedClassName(): string {
+            return "jsidea.geom.Rectangle";
+        }
+
         public toString(): string {
-            return "[jsidea.geom.Rectangle"
+            return "[" + this.qualifiedClassName() +
                 + " x=" + this.x
                 + " y=" + this.y
                 + " width=" + this.width

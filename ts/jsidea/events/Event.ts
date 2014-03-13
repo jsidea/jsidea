@@ -1,5 +1,5 @@
 module jsidea.events {
-    export interface IEvent extends jsidea.core.IDisposable {
+    export interface IEvent extends jsidea.core.ICore {
         eventType: string;
         eventKey: string;
         target: any;
@@ -22,9 +22,13 @@ module jsidea.events {
 
         public dispose(): void {
         }
+        
+        public qualifiedClassName(): string {
+            return "jsidea.events.Event";
+        }
 
         public toString(): string {
-            return "[jsidea.events.Event"
+            return "[" + this.qualifiedClassName() + 
                 + " eventType='" + this.eventType + "]";
         }
     }

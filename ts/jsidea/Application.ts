@@ -92,5 +92,17 @@ module jsidea {
             if (this._autoTick && this._frameRate > 0)
                 this._tickInterval = setInterval(() => this.tick(), 1000 / this._frameRate);
         }
+        
+        public dispose(): void {
+            super.dispose();
+        }
+        
+        public qualifiedClassName(): string {
+            return "jsidea.Application";
+        }
+        
+        public toString(): string {
+            return "[" + this.qualifiedClassName() + "]";
+        }
     }
 }

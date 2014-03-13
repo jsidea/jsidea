@@ -1,49 +1,36 @@
 module jsidea.display {
-    export interface IElement extends jsidea.events.IEventDispatcher, jsidea.geom.ITransformTarget {
-        transform: jsidea.geom.ITransform;
-        originX: number;
-        originY: number;
+    export interface IElement extends jsidea.events.IEventDispatcher {
+        transform: jsidea.geom.ITransformElement;
+        added: boolean;
+        presented: boolean;
+        visible: boolean;
+        width: number;
+        height: number;
         offsetX: number;
         offsetY: number;
         validate(): void;
+        localToGlobal(x: number, y: number): jsidea.geom.IPoint;
+        globalToLocal(x: number, y: number): jsidea.geom.IPoint;
     }
     export class Element extends jsidea.events.EventDispatcher implements IElement {
 
-        private _transform: jsidea.geom.ITransform;
+        private _transform: jsidea.geom.ITransformElement = null;
         private _visual: JQuery = null;
-        private _visualElement: HTMLElement;
-        private _originX: number = 0;
-        private _originY: number = 0;
-        private _originXAbsolute: boolean = true;
-        private _originYAbsolute: boolean = true;
-        private _x: number = 0;
-        private _y: number = 0;
-        private _scaleX: number = 1;
-        private _scaleY: number = 1;
-        private _skewX: number = 0;
-        private _skewY: number = 0;
-        private _rotation: number = 0;
-        private _isDirtyRotation: boolean = false;
-        private _isDirtyScale: boolean = false;
-        private _isDirtySkew: boolean = false;
-        private _isDirtyPosition: boolean = false;
-        private _isDirtyOrigin: boolean = false;
+        private _htmlElement: HTMLElement;
+
         private _isDirtyOffset: boolean = false;
-        private _isDirty: boolean = false;
+        private _isDirtySize: boolean = false;
         private _invalidated: boolean = false;
 
         constructor(visual: JQuery = null) {
             super();
 
-            this.create(visual);
-        }
-
-        private create(visual: JQuery): void {
-            this._transform = new jsidea.geom.Transform(this);
             this.visual = visual;
         }
 
-        public get transform(): jsidea.geom.ITransform {
+        public get transform(): jsidea.geom.ITransformElement {
+            if (!this._transform)
+                this._transform = new jsidea.geom.TransformElement(this._visual, this);
             return this._transform;
         }
 
@@ -56,180 +43,21 @@ module jsidea.display {
                 return;
             if (this._visual)
                 this.deconfigureVisual(this._visual);
-            
+
             this._visual = visual;
-            this._visualElement = this._visual ? this._visual[0] : null;
-            
+            this._htmlElement = this._visual ? this._visual.get(0) : null;
+
+            if (this._transform)
+                this._transform.visual = visual;
+
             if (this._visual)
                 this.configureVisual(this._visual);
-            this.invalidate();
-        }
-
-        public get offsetX(): number {
-            return this._visual[0].offsetLeft;
-        }
-
-        public set offsetX(value: number) {
-            if (this._visualElement.offsetLeft == value)
-                return;
-            this._visualElement.offsetLeft = value;
-            this._isDirtyOffset = true;
-            this.invalidate();
-        }
-
-        public get offsetY(): number {
-            return this._visualElement.offsetTop;
-        }
-
-        public set offsetY(value: number) {
-            if (this._visualElement.offsetTop == value)
-                return;
-            this._visualElement.offsetTop = value;
-            this._isDirtyOffset = true;
-            this.invalidate();
-        }
-
-        public get originX(): number {
-            return this._originX;
-        }
-
-        public set originX(value: number) {
-            if (this._originX == value)
-                return;
-            this._originX = value;
-            this._isDirtyOrigin = true;
-            this.invalidate();
-        }
-
-        public get originXAbsolute(): boolean {
-            return this._originXAbsolute;
-        }
-
-        public set originXAbsolute(value: boolean) {
-            if (this._originXAbsolute == value)
-                return;
-            this._originXAbsolute = value;
-            this._isDirtyOrigin = true;
-            this.invalidate();
-        }
-
-        public get originY(): number {
-            return this._originY;
-        }
-
-        public set originY(value: number) {
-            if (this._originY == value)
-                return;
-            this._originY = value;
-            this._isDirtyOrigin = true;
-            this.invalidate();
-        }
-
-        public get originYAbsolute(): boolean {
-            return this._originYAbsolute;
-        }
-
-        public set originYAbsolute(value: boolean) {
-            if (this._originYAbsolute == value)
-                return;
-            this._originYAbsolute = value;
-            this._isDirtyOrigin = true;
-            this.invalidate();
-        }
-
-        public get x(): number {
-            return this._x;
-        }
-
-        public set x(value: number) {
-            if (this._x == value)
-                return;
-            this._x = value;
-            this._isDirtyPosition = true;
-            this.invalidate();
-        }
-
-        public get y(): number {
-            return this._y;
-        }
-
-        public set y(value: number) {
-            if (this._y == value)
-                return;
-            this._y = value;
-            this._isDirtyPosition = true;
-            this.invalidate();
-        }
-
-        public get scaleX(): number {
-            return this._scaleX;
-        }
-
-        public set scaleX(value: number) {
-            if (this._scaleX == value)
-                return;
-            this._scaleX = value;
-            this._isDirtyScale = true;
-            this.invalidate();
-        }
-
-        public get scaleY(): number {
-            return this._scaleY;
-        }
-
-        public set scaleY(value: number) {
-            if (this._scaleY == value)
-                return;
-            this._scaleY = value;
-            this._isDirtyScale = true;
-            this.invalidate();
-        }
-
-        public get skewX(): number {
-            return this._skewX;
-        }
-
-        public set skewX(value: number) {
-            if (this._skewX == value)
-                return;
-            this._skewX = value;
-            this._isDirtyScale = true;
-            this.invalidate();
-        }
-
-        public get skewY(): number {
-            return this._skewY;
-        }
-
-        public set skewY(value: number) {
-            if (this._skewY == value)
-                return;
-            this._skewY = value;
-            this._isDirtyScale = true;
-            this.invalidate();
-        }
-
-        public get rotation(): number {
-            return this._rotation;
-        }
-
-        public set rotation(value: number) {
-            if (this._rotation == value)
-                return;
-            this._rotation = value;
-            this._isDirtyRotation = true;
             this.invalidate();
         }
 
         public configureVisual(visual: JQuery): void {
             visual.data("jsidea-display-element", this);
             visual.addClass("jsidea-display-element");
-            var origin = jsidea.geom.Transform.extractOrigin(visual);
-            this._originX = origin.valueX;
-            this._originXAbsolute = origin.xAbsolute;
-            this._originY = origin.valueY;
-            this._originYAbsolute = origin.yAbsolute;
-            this._transform.refresh();
         }
 
         public deconfigureVisual(visual: JQuery): void {
@@ -237,56 +65,123 @@ module jsidea.display {
             visual.removeClass("jsidea-display-element");
         }
 
+        public globalToLocal(x: number, y: number): jsidea.geom.IPoint {
+            var wt = jsidea.geom.Transform.getWindowTransform(this._visual);
+            wt.invert();
+            return wt.transform(x, y);
+        }
+
+        public localToGlobal(x: number, y: number): jsidea.geom.IPoint {
+            var wt = jsidea.geom.Transform.getWindowTransform(this._visual);
+            return wt.transform(x, y);
+        }
+
+        public get width(): number {
+            return this._visual.width();
+        }
+
+        public set width(value: number) {
+            if (this._visual.width() == value)
+                return;
+            this._visual.width(value);
+            this._isDirtySize = true;
+            this.invalidate();
+        }
+
+        public get height(): number {
+            return this._visual.height();
+        }
+
+        public set height(value: number) {
+            if (this._visual.height() == value)
+                return;
+            this._visual.height(value);
+            this._isDirtySize = true;
+            this.invalidate();
+        }
+
+        public get offsetX(): number {
+            return this._htmlElement ? this._htmlElement.offsetLeft : 0;
+        }
+
+        public set offsetX(value: number) {
+            if(!this._htmlElement)
+                return;
+            if (this._htmlElement.offsetLeft == value)
+                return;
+            this._htmlElement.offsetLeft = value;
+            this._isDirtyOffset = true;
+            this.invalidate();
+        }
+
+        public get offsetY(): number {
+            return this._htmlElement ? this._htmlElement.offsetTop : 0;
+        }
+
+        public set offsetY(value: number) {
+            if(!this._htmlElement)
+                return;
+            if (this._htmlElement.offsetTop == value)
+                return;
+            this._htmlElement.offsetTop = value;
+            this._isDirtyOffset = true;
+            this.invalidate();
+        }
+
+        public get opacity(): number {
+            return this._visual ? parseNumber(this._visual.css("opacity"), 1) : 1;
+        }
+
+        public set opacity(value: number) {
+            if (this._visual)
+                this._visual.css("opacity", value);
+        }
+
+        public get visible(): boolean {
+            return this._visual ? !this._visual.hasClass("hidden") : false;
+        }
+
+        public set visible(value: boolean) {
+            if (this._visual)
+                this._visual.toggleClass("hidden", !value);
+        }
+
+        public get added(): boolean {
+            return this._htmlElement ? jQuery.contains(document.body, this._htmlElement) : false;
+        }
+
+        public get presented(): boolean {
+            return this._visual ? this._visual.is(":visible") : false;
+        }
+
         public validate(): void {
-            if (this._isDirty && this._invalidated) {
+            if (this._invalidated) {
                 this.unbind("tick.display_object");
-                this._invalidated = false;
-            }
-            if (this._visual
-                && (this._isDirtyPosition
-                || this._isDirtyScale
-                || this._isDirtyRotation
-                || this._isDirtySkew
-                || this._isDirtyOrigin)) {
-
-                var m = this._transform.matrix;
-                this.visual.css("transform-origin",
-                    (this._originX) + (this._originXAbsolute ? "px " : "% ")
-                    + (this._originY) + (this._originYAbsolute ? "px " : "% "));
-                this.visual.css("transform", m.cssMatrix);
-
-                var evt = new jsidea.events.TransformEvent();
-                evt.translated = this._isDirtyPosition;
-                evt.scaled = this._isDirtyScale;
-                evt.rotated = this._isDirtyRotation;
-                evt.skewed = this._isDirtySkew;
-                evt.originChanged = this._isDirtyOrigin;
-                this.trigger(jsidea.events.TransformEvent.TRANSFORM, evt);
             }
 
             if (this._isDirtyOffset) {
 
             }
 
-            this._isDirtyPosition = false;
-            this._isDirtyScale = false;
-            this._isDirtyRotation = false;
-            this._isDirtySkew = false;
-            this._isDirtyOrigin = false;
+            if (this._isDirtySize) {
+
+            }
+
             this._isDirtyOffset = false;
-            this._isDirty = false;
+            this._isDirtySize = false;
+            this._invalidated = false;
         }
 
         public invalidate(): void {
-            if (this._isDirty)
+            if (this._invalidated)
                 return;
-            this._isDirty = true;
             this._invalidated = true;
             this.bind("tick.display_object", this.validate, this);
         }
 
         public dispose(): void {
-            this._transform.dispose();
+            if (this._transform)
+                this._transform.dispose();
             if (this._visual)
                 this._visual.remove();
             this.visual = null;
@@ -294,8 +189,12 @@ module jsidea.display {
             super.dispose();
         }
 
+        public qualifiedClassName(): string {
+            return "jsidea.display.Element";
+        }
+
         public toString(): string {
-            return "[jsidea.display.Element]";
+            return "[" + this.qualifiedClassName() + "]";
         }
     }
 }

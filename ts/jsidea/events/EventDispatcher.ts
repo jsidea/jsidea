@@ -11,7 +11,7 @@ module jsidea.events {
         key?: string;
         data?: any
     }
-    export interface IEventDispatcher extends jsidea.core.IDisposable {
+    export interface IEventDispatcher extends jsidea.core.ICore {
         bind(eventType: string, listener: (event: IEvent, data?: any) => void): void;
         bind(eventType: string, listener: (event: IEvent, data?: any) => void, context: any): void;
         bind(eventType: string, listener: (event: IEvent, data?: any) => void, context: any, data: any): void;
@@ -20,6 +20,7 @@ module jsidea.events {
         trigger(eventType: string, event: IEvent): void;
         broadcast(eventType: string): void;
         broadcast(eventType: string, event: IEvent): void;
+//        broadcast(eventType: string, event: IEvent, dispatcherClassNames: string): void;
         binded(eventType: string): boolean;
     }
     export class EventDispatcher implements IEventDispatcher {
@@ -110,13 +111,17 @@ module jsidea.events {
         }
 
         public dispose(): void {
-            EventDispatcher._dispatcher.splice(EventDispatcher._dispatcher.indexOf(this));
+            EventDispatcher._dispatcher.splice(EventDispatcher._dispatcher.indexOf(this), 1);
             this._listener = null;
             this._target = null;
         }
 
+        public qualifiedClassName(): string {
+            return "jsidea.events.EventDispatcher";
+        }
+
         public toString(): string {
-            return "[jsidea.events.EventDispatcher]";
+            return "[" + this.qualifiedClassName() + "]";
         }
 
         private static getMatches(dispatcher: EventDispatcher, entries: IEventDispatcherKey[]): IEventDispatcherSlot[] {

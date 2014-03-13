@@ -15,7 +15,7 @@ module jsidea.geom {
     export interface ITransformTarget extends ITransformValue {
         visual: JQuery;
     }
-    export interface ITransform extends jsidea.core.IDisposable {
+    export interface ITransform extends jsidea.core.ICore {
         target: ITransformTarget;
         matrix: IMatrix;
         sceneTransform: IMatrix;
@@ -26,9 +26,9 @@ module jsidea.geom {
         localToLocal(x: number, y: number, target: ITransform): IPoint;
     }
     export class Transform implements ITransform {
-        public target: jsidea.geom.ITransformTarget;
+        public target: ITransformTarget;
 
-        constructor(target: jsidea.geom.ITransformTarget = null) {
+        constructor(target: ITransformTarget = null) {
             this.target = target;
         }
 
@@ -54,13 +54,13 @@ module jsidea.geom {
         public get sceneTransform(): IMatrix {
             if (!this.target)
                 return null;
-            return Transform.getConcatenatedMatrix(this.target.visual, false);
+            return Transform.getSceneTransform(this.target.visual);
         }
 
         public get windowTransform(): IMatrix {
             if (!this.target)
                 return null;
-            return Transform.getConcatenatedMatrix(this.target.visual, true);
+            return Transform.getWindowTransform(this.target.visual);
         }
 
         public localToGlobal(x: number, y: number): IPoint {
@@ -89,8 +89,20 @@ module jsidea.geom {
             this.target = null;
         }
 
+        public qualifiedClassName(): string {
+            return "jsidea.geom.Transform";
+        }
+
         public toString(): string {
-            return "[jsidea.geom.Transform]";
+            return "[" + this.qualifiedClassName() + "]";
+        }
+
+        public static getWindowTransform(visual: JQuery): IMatrix {
+            return Transform.getConcatenatedMatrix(visual, true);
+        }
+
+        public static getSceneTransform(visual: JQuery): IMatrix {
+            return Transform.getConcatenatedMatrix(visual, false);
         }
 
         private static getConcatenatedMatrix(visual: JQuery, includeOrigin: boolean): IMatrix {
@@ -113,7 +125,7 @@ module jsidea.geom {
         }
 
         private static extractTransform(visual: JQuery, includeOrigin: boolean): IMatrix {
-            var cachedDisplayObject: jsidea.display.IElement = visual.data("jsidea-display-element");
+            var cachedDisplayObject: ITransformElement = visual.data("jsidea-display-elementtransform");
             if (cachedDisplayObject)
                 cachedDisplayObject.validate();
 
@@ -133,14 +145,14 @@ module jsidea.geom {
                 matrix.tx -= visual[0].parentElement.offsetLeft;
                 matrix.ty -= visual[0].parentElement.offsetTop;
 
-//                console.log(visual[0].offsetLeft - visual[0].parentElement.offsetLeft,
-//                    visual[0].offsetTop - visual[0].parentElement.offsetTop,
-//                     visual.css("position"), "A");
+                //                console.log(visual[0].offsetLeft - visual[0].parentElement.offsetLeft,
+                //                    visual[0].offsetTop - visual[0].parentElement.offsetTop,
+                //                     visual.css("position"), "A");
             }
-//            else
-//                console.log(visual.get(0).offsetLeft, visual.get(0).offsetTop, visual.css("position"), "B");
+            //            else
+            //                console.log(visual.get(0).offsetLeft, visual.get(0).offsetTop, visual.css("position"), "B");
             //console.log(visual[0].offsetParent.clientLeft, visual[0].offsetParent.clientTop);
-//            console.log(matrix.cssMatrix);
+            //            console.log(matrix.cssMatrix);
 
             return matrix;
         }

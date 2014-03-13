@@ -42,6 +42,7 @@
 		</concat>
 		<echo message="${PROJECT_NAME} : Compile TypeScript" />
 		<exec executable="${tsc}">
+			<!-- <arg value="-declaration" /> -->
 			<arg value="--out" />
 			<arg value="${TS_DIST}" />
 			<arg value="-target" />

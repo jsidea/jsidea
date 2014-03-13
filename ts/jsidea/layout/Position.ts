@@ -1,12 +1,12 @@
-module jsidea.model {
-    export interface IRessource {
+module jsidea.layout {
+    export interface IPosition {
     }
-    export class Ressource {
+    export class Position {
         constructor() {
         }
 
         public qualifiedClassName(): string {
-            return "jsidea.model.Ressource";
+            return "jsidea.layout.Position";
         }
 
         public toString(): string {

@@ -3,7 +3,7 @@ module jsidea.geom {
         x: number;
         y: number;
     }
-    export interface IPoint extends IPointValue, jsidea.core.IDisposable {
+    export interface IPoint extends IPointValue, jsidea.core.ICore {
         clone(): IPoint;
         copyFrom(matrix: IPointValue): void;
         translate(dx: number, dy: number): void;
@@ -53,9 +53,13 @@ module jsidea.geom {
 
         public dispose(): void {
         }
+        
+        public qualifiedClassName(): string {
+            return "jsidea.geom.Point";
+        }
 
         public toString(): string {
-            return "[jsidea.geom.Point"
+            return "[" + this.qualifiedClassName() + 
                 + " x=" + this.x
                 + " y=" + this.y + "]";
         }

@@ -6,8 +6,9 @@ module jsidea.test {
         }
 
         public create(): void {
-            this.testDisplayObject();
-//            this.testPoint();
+            //            this.testDialog();
+            this.testElement();
+            //            this.testPoint();
         }
 
         private testPoint(): void {
@@ -20,41 +21,55 @@ module jsidea.test {
             console.log(p.length);
         }
 
-        private testDisplayObject(): void {
+        private testDialog(): void {
+
+        }
+
+        private testElement(): void {
             var a = new jsidea.display.Element();
             a.visual = $("<div>A</div>");
-            a.x = 100;
-            a.y = 100;
-            a.rotation = 30;
+            a.transform.x = 100;
+            a.transform.y = 100;
+            a.transform.rotation = 30;
             a.visual.css("left", "70px");
             $("#content").append(a.visual);
 
             var b = new jsidea.display.Element();
             b.visual = $("<div>B</div>");
-            b.scaleX = 2;
-            b.scaleY = 2;
-            b.rotation = 45;
+            b.transform.scaleX = 2;
+            b.transform.scaleY = 2;
+            b.transform.rotation = 45;
             b.visual.css("left", "100px");
             b.visual.css("margin-left", "40px");
-//            b.visual.css("position", "absolute");
+            //            b.visual.css("position", "absolute");
             a.visual.append(b.visual);
 
             var c = new jsidea.display.Element($("<div>C</div>"));
             c.visual.css("margin", "40px");
-            c.rotation += 45;
+            c.transform.rotation += 45;
             b.visual.append(c.visual);
 
-            var gl = a.transform.localToGlobal(0, 0);
+            var gl = c.transform.localToGlobal(0, 0);
             var d = new jsidea.display.Element($("<div>D</div>"));
             d.visual.css("background-color", "#FFFF00");
             $("#content").append(d.visual);
             
-//            console.log(d.visual.offset().left, d.visual.offset().top, d.visual[0].offsetLeft, d.visual[0].offsetTop);
-            
-            d.x = gl.x - d.offsetX;
-            d.y = gl.y - d.offsetY;
+//            console.log(d.presented);
+//            console.log(d.presented);
+//            d.visible = false;
+//            console.log(d.presented);
+
+            //            console.log(d.visual.offset().left, d.visual.offset().top, d.visual[0].offsetLeft, d.visual[0].o            
+            d.transform.x = gl.x - d.offsetX;
+            d.transform.y = gl.y - d.offsetY;
 
             //this.bind("activate deactivate", (e: jsidea.events.IEvent) => console.log(e.eventType));
+
+//            console.log(gl);
+//            console.log(d.width, d.height);
+            
+            d.opacity = 0.8;
+            console.log(d.qualifiedClassName());
         }
 
         private testEventDispatcher(): void {
@@ -80,6 +95,10 @@ module jsidea.test {
             div.append($("<div style='top:50%; left:50%; position:absolute; width:10px; height:10px; background-color:#FF0000'></div>"));
             var p = m.transform(0, 0);
             console.log(p.toString());
+        }
+        
+        public toString(): string {
+            return "[" + this.qualifiedClassName() + "]";
         }
     }
 }

@@ -1,5 +1,5 @@
 module jsidea.core {
-    export interface IVersion extends jsidea.core.IDisposable {
+    export interface IVersion extends jsidea.core.ICore {
         state: string;
         major: number;
         build: number;
@@ -49,8 +49,13 @@ module jsidea.core {
         public dispose(): void {
         }
 
+        public qualifiedClassName(): string {
+            return "jsidea.core.Version";
+        }
+
         public toString(): string {
-            return "[jsidea.core.Version version='" + this.versionString + "']";
+            return "[" + this.qualifiedClassName() +
+                " version='" + this.versionString + "']";
         }
     }
 }
