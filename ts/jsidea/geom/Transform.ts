@@ -36,13 +36,7 @@ module jsidea.geom {
             var m = new Matrix();
             if (!this.target)
                 return m;
-            if (this.target.scaleX != 1 || this.target.scaleY != 1)
-                m.scale(this.target.scaleX, this.target.scaleY);
-            if (this.target.skewX || this.target.skewY)
-                m.skew(this.target.skewX, this.target.skewY);
-            if (this.target.rotation != 0)
-                m.rotateDegree(this.target.rotation);
-            m.translate(this.target.x, this.target.y);
+            m.compose(this.target);
             return m;
         }
 
@@ -135,9 +129,9 @@ module jsidea.geom {
         }
 
         private static extractTransform(visual: JQuery, includeOrigin: boolean): IMatrix {
-            var cachedDisplayObject: ITransformElement = visual.data("jsidea-display-elementtransform");
-            if (cachedDisplayObject)
-                cachedDisplayObject.validate();
+            var cachedTransform: ITransformElement = visual.data("jsidea-display-elementtransform");
+            if (cachedTransform)
+                cachedTransform.validate();
 
             var matrix = this.extractMatrix(visual);
 
@@ -148,22 +142,15 @@ module jsidea.geom {
                 matrix.ty += origin.y - k.y;
             }
 
-            matrix.tx += visual.get(0).offsetLeft;
-            matrix.ty += visual.get(0).offsetTop;
-            
-            var isFixed: boolean = visual.get(0).ownerDocument ? visual.css("position") == "fixed" : false;
-            if (isFixed && visual[0].parentElement && visual.children().length == 0) {
-                matrix.tx -= visual[0].parentElement.offsetLeft;
-                matrix.ty -= visual[0].parentElement.offsetTop;
+            var htmlElement = visual[0];
+            matrix.tx += htmlElement.offsetLeft;
+            matrix.ty += htmlElement.offsetTop;
 
-                //                console.log(visual[0].offsetLeft - visual[0].parentElement.offsetLeft,
-                //                    visual[0].offsetTop - visual[0].parentElement.offsetTop,
-                //                     visual.css("position"), "A");
+            var isFixed: boolean = htmlElement.ownerDocument ? visual.css("position") == "fixed" : false;
+            if (isFixed && htmlElement.parentElement && visual.children().length == 0) {
+                matrix.tx -= htmlElement.parentElement.offsetLeft;
+                matrix.ty -= htmlElement.parentElement.offsetTop;
             }
-            //            else
-            //                console.log(visual.get(0).offsetLeft, visual.get(0).offsetTop, visual.css("position"), "B");
-            //console.log(visual[0].offsetParent.clientLeft, visual[0].offsetParent.clientTop);
-            //            console.log(matrix.cssMatrix);
 
             return matrix;
         }
@@ -172,8 +159,8 @@ module jsidea.geom {
             var m = new Matrix();
             if (visual.get(0).ownerDocument)
                 m.cssMatrix = visual.css("transform");
-                else
-            console.log(visual);
+            else
+                console.log(visual);
             return m;
         }
 

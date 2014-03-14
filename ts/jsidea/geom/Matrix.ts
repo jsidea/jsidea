@@ -23,6 +23,7 @@ module jsidea.geom {
         invert(): void;
         concat(value: IMatrixValue): void;
         decompose(): ITransformValue;
+        compose(target: ITransformValue): void;
         decompose(target: ITransformValue): ITransformValue;
         isIdentity(): boolean;
     }
@@ -182,6 +183,18 @@ module jsidea.geom {
                 target.skewY = skewY * Matrix.RAD_TO_DEG;
             }
             return target;
+        }
+
+        public compose(target: ITransformValue): void {
+            this.identity();
+            if (target.scaleX != 1 || target.scaleY != 1)
+                this.scale(target.scaleX, target.scaleY);
+            if (target.skewX || target.skewY)
+                this.skew(target.skewX, target.skewY);
+            if (target.rotation != 0)
+                this.rotateDegree(target.rotation);
+            if (target.x || target.y)
+                this.translate(target.x, target.y);
         }
 
         public get cssMatrix(): string {

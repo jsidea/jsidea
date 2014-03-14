@@ -29,6 +29,10 @@ module jsidea.layout {
             if (!visual)
                 return null;
 
+            var cachedTransform: jsidea.geom.ITransformElement = visual.data("jsidea-display-elementtransform");
+            if (cachedTransform)
+                cachedTransform.validate();
+
             var myW = visual.width();
             var myH = visual.height();
             var myOffsetX: number = Position.parseValue(this.my.x, myW, 0);
@@ -49,6 +53,9 @@ module jsidea.layout {
             lc = jsidea.geom.Transform.getGlobalToLocal(visual, gl.x, gl.y);
             lc.x += myOffsetX - myOriginX;
             lc.y += myOffsetY - myOriginY;
+
+            var m = jsidea.geom.Transform.extractMatrix(visual);
+            lc = m.transform(lc.x, lc.y);
 
             return lc;
         }
