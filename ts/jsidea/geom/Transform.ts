@@ -129,7 +129,7 @@ module jsidea.geom {
         }
 
         private static extractTransform(visual: JQuery, includeOrigin: boolean): IMatrix {
-            var cachedTransform: ITransformElement = visual.data("jsidea-display-elementtransform");
+            var cachedTransform: ITransformElement = visual.data("jsidea-display-transformelement");
             if (cachedTransform)
                 cachedTransform.validate();
 

@@ -12,7 +12,7 @@ module jsidea.layout {
         clone(): IPosition;
         point(visual: JQuery): jsidea.geom.IPoint;
         apply(visual: JQuery): void;
-        transform(t: jsidea.geom.ITransformElement): void;
+        transform(visual: JQuery): void;
     }
     export class Position implements IPosition {
         constructor(
@@ -29,7 +29,7 @@ module jsidea.layout {
             if (!visual)
                 return null;
 
-            var cachedTransform: jsidea.geom.ITransformElement = visual.data("jsidea-display-elementtransform");
+            var cachedTransform: jsidea.geom.ITransformElement = visual.data("jsidea-display-transformelement");
             if (cachedTransform)
                 cachedTransform.validate();
 
@@ -61,16 +61,27 @@ module jsidea.layout {
         }
 
         public apply(visual: JQuery): void {
+            visual.css("left", "0px");
+            visual.css("top", "0px");
             var pt = this.point(visual);
             visual.css("left", Math.round(pt.x) + "px");
             visual.css("top", Math.round(pt.y) + "px");
         }
 
-        public transform(t: jsidea.geom.ITransformElement): void {
-            var pt = this.point(t.visual);
-            t.x = pt.x;
-            t.y = pt.y;
-            t.validate();
+        public transform(visual: JQuery): void {
+            var pt = this.point(visual);
+            var t: jsidea.geom.ITransformElement = visual.data("jsidea-display-transformelement");
+            if (t) {
+                t.x = pt.x;
+                t.y = pt.y;
+                t.validate();
+            }
+            else {
+                var m = jsidea.geom.Transform.extractMatrix(visual);
+                m.tx = pt.x;
+                m.ty = pt.y;
+                visual.css("transform", m.cssMatrix);
+            }
         }
 
         public qualifiedClassName(): string {

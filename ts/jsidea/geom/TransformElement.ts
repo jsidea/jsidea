@@ -53,7 +53,7 @@ module jsidea.geom {
         }
 
         public configureVisual(visual: JQuery): void {
-            visual.data("jsidea-display-elementtransform", this);
+            visual.data("jsidea-display-transformelement", this);
             var origin = Transform.extractOrigin(visual);
             this._originX = origin.valueX;
             this._originXAbsolute = origin.xAbsolute;
@@ -63,7 +63,7 @@ module jsidea.geom {
         }
 
         public deconfigureVisual(visual: JQuery): void {
-            visual.data("jsidea-display-elementtransform", null);
+            visual.data("jsidea-display-transformelement", null);
         }
 
         public get dispatcher(): jsidea.events.IEventDispatcher {
