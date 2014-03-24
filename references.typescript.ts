@@ -15,5 +15,5 @@
 /// <reference path='ts/jsidea/geom/TransformElement.ts' />
 /// <reference path='ts/jsidea/ui/UIElement.ts' />
 /// <reference path='ts/jsidea/ui/Dialog.ts' />
-/// <reference path='ts/jsidea/Application.ts' />
+/// <reference path='ts/jsidea/core/Application.ts' />
 /// <reference path='ts/jsidea/test/TestApplication.ts' />

@@ -1,5 +1,5 @@
 module jsidea.test {
-    export class TestApplication extends jsidea.Application {
+    export class TestApplication extends jsidea.core.Application {
 
         constructor() {
             super();
@@ -15,10 +15,11 @@ module jsidea.test {
 
         private testPosition(): void {
 
-            $("body").css("overflow", "hidden");
+            //            $("body").css("overflow", "hidden");
+            $("body").css("height", "200%");
             $("#content").css("transform-origin", "0px 0px");
-            $("#content").css("transform", "scale(0.5, 0.5) rotate(10deg)");
-            $("#content").css("position", "relative");
+            //            $("#content").css("transform", "scale(0.5, 0.5) rotate(10deg)");
+            //            $("#content").css("position", "relative");
 
             var a = new jsidea.display.Element();
             a.visual = $("<div>A</div>");
@@ -30,23 +31,31 @@ module jsidea.test {
 
             var e = new jsidea.display.Element();
             e.visual = $("<div></div>");
-            //            e.transform.x = 0;
+            e.visual.css("diplay", "fixed");
             $("#content").append(e.visual);
 
             var p = new jsidea.layout.Position();
-            p.my.originX = "right";
-            p.my.originY = "bottom";
-            p.of = $("body");//a.visual;//$("#content");
-
-
-            $("body").mousemove((evt) => {
-                p.at.x = evt.pageX;
-                p.at.y = evt.pageY;
-//                p.transform(e.visual);
-                p.transform(a.visual);
-                //p.transform($("#content"));
-                //                p.apply(e.visual);
+            p.my.px = "right";
+            p.my.py = "bottom";
+            p.of = $("body");
+            p.of = $(window);
+            $(document).bind("mousemove", (evt) => {
+                p.at.x = this.pageX;
+                p.at.y = this.pageY;
+                p.apply(e.visual);
             });
+            //            $(window).bind("scroll", (evt) => {
+            //                p.at.x = this.pageX;
+            //                p.at.y = this.pageY;
+            //                p.transform(e.visual);
+            //     console.log("SCROLL");
+            //            });
+            
+            //            this.bind("tick", (evt) => {
+            //                p.at.x = this.pageX;
+            //                p.at.y = this.pageY;
+            //                p.transform(e.visual);
+            //            });
         }
 
         private testXMLConverter(): void {

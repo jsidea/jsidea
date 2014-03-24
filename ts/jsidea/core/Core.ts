@@ -6,6 +6,10 @@ module jsidea.core {
     }
 }
 
+interface Window {
+    app: jsidea.core.Application;
+}
+
 //shortcut for console.log
 //var trace = console.log ? console.log : function(...args) { };
 
@@ -28,14 +32,33 @@ function parseNumber(value: any, defaultValue: number): number {
 
 //hook
 $(window).ready(() => {
-    var qualifiedClassName = $("body").attr("data-hook").split(".");
-    var hookTarget = window[qualifiedClassName[0]];
-    for (var i = 1; i < qualifiedClassName.length; ++i) {
-        hookTarget = hookTarget[qualifiedClassName[i]];
-        if (!hookTarget) {
-            alert("WRONG HOOK " + $("body").attr("data-hook"));
+    var qualifiedClassName = $("body").attr("data-application");
+    if (!qualifiedClassName) {
+        return;
+    }
+    var path = qualifiedClassName.split(".");
+    var hook = window[path[0]];
+    for (var i = 1; i < path.length; ++i) {
+        hook = hook[path[i]];
+        if (!hook) {
+            console.warn("Application '" + qualifiedClassName + "' is undefined.");
             return;
         }
     }
-    new hookTarget()
-    });
+    if (hook.prototype instanceof jsidea.core.Application) {
+    }
+    else {
+        console.warn("Application " + hook + " does not inherit from jsidea.core.Application");
+        return;
+    }
+    try {
+        var app = new hook();
+        window.app = app;
+    }
+    catch (e) {
+        window.app = null;
+        console.warn("Unable to instantiate application from " + qualifiedClassName);
+        return;
+    }
+});
+

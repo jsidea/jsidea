@@ -2,8 +2,8 @@ module jsidea.layout {
     export interface IPositionValue {
         x?: any;
         y?: any;
-        originX?: any;
-        originY?: any;
+        px?: any;
+        py?: any;
     }
     export interface IPosition extends jsidea.core.ICore {
         my: IPositionValue;
@@ -33,20 +33,23 @@ module jsidea.layout {
             if (cachedTransform)
                 cachedTransform.validate();
 
+            var target: JQuery = this.of ? this.of : visual.parent();
+            
             var myW = visual.width();
             var myH = visual.height();
             var myOffsetX: number = Position.parseValue(this.my.x, myW, 0);
             var myOffsetY: number = Position.parseValue(this.my.y, myH, 0);
-            var myOriginX: number = Position.parseValue(this.my.originX, myW, 0);
-            var myOriginY: number = Position.parseValue(this.my.originY, myH, 0);
+            var myOriginX: number = Position.parseValue(this.my.px, myW, 0);
+            var myOriginY: number = Position.parseValue(this.my.py, myH, 0);
 
-            var target: JQuery = this.of ? this.of : visual.parent();
             var atW = target.width();
             var atH = target.height();
             var atOffsetX: number = Position.parseValue(this.at.x, atW, 0);
             var atOffsetY: number = Position.parseValue(this.at.y, atH, 0);
-            var atOriginX: number = Position.parseValue(this.at.originX, atW, 0);
-            var atOriginY: number = Position.parseValue(this.at.originY, atH, 0);
+            var atOriginX: number = Position.parseValue(this.at.px, atW, 0);
+            var atOriginY: number = Position.parseValue(this.at.py, atH, 0);
+            
+//            console.log(atW, atH, atOffsetX, atOffsetY, atOriginX, atOriginY);
 
             var lc = new jsidea.geom.Point(atOffsetX - atOriginX, atOffsetY - atOriginY);
             var gl = jsidea.geom.Transform.getLocalToGlobal(target, lc.x, lc.y);

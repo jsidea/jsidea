@@ -20,7 +20,6 @@ module jsidea.events {
         trigger(eventType: string, event: IEvent): void;
         broadcast(eventType: string): void;
         broadcast(eventType: string, event: IEvent): void;
-//        broadcast(eventType: string, event: IEvent, dispatcherClassNames: string): void;
         binded(eventType: string): boolean;
     }
     export class EventDispatcher implements IEventDispatcher {
@@ -86,15 +85,19 @@ module jsidea.events {
 
             event = event ? event : new Event();
             event.target = this._target;
+            event.canceled = false;
+            
             var l = matches.length;
             for (var i = 0; i < l; ++i) {
-
                 event.eventType = matches[i].eventType;
                 event.eventKey = matches[i].key;
                 matches[i].listener.call(matches[i].context, event, matches[i].data);
 
                 if (matches[i].once)
                     this._listener.splice(this._listener.indexOf(matches[i]), 1);
+
+                if (event.canceled)
+                    return;
             }
         }
 
@@ -158,7 +161,6 @@ module jsidea.events {
             var l = entries.length;
             var result = [];
             for (var i = 0; i < l; ++i) {
-
                 var entry = entries[i];
                 var type = entry;
                 var key = null;

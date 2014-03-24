@@ -1,4 +1,4 @@
-module jsidea {
+module jsidea.core {
     export class Application extends jsidea.events.EventDispatcher {
 
         private _version: jsidea.core.IVersion;
@@ -7,19 +7,57 @@ module jsidea {
         private _autoTick: boolean = false;
         private _frameRate: number = 60;
         private _tickInterval: number = 0;
+        private _pageX: number = 0;
+        private _pageY: number = 0;
+        private _lastScrollLeft: number = 0;
+        private _lastScrollTop: number = 0;
+        
+        private _pageOffsetIncludesScroll: boolean = true;
 
         constructor() {
             super();
 
+            var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+            this._pageOffsetIncludesScroll = !isChrome;
+            
             this.autoActive = true;
             this.autoTick = true;
             //abstract create method
             this.create();
             //initial tick
             this.tick();
+
+            $(document).bind("mousemove.jsdea-application", (e) => this.onMouseMove(e));
+            $(window).bind("scroll.jsdea-application", (e) => this.onScroll(e));
+        }
+
+        private onMouseMove(e: JQueryEventObject): void {
+            this._pageX = e.pageX;
+            this._pageY = e.pageY;
+        }
+
+        private onScroll(e: JQueryEventObject): void {
+            if (this._lastScrollLeft != $(document).scrollLeft()) {
+                this._pageX -= this._lastScrollLeft;
+                this._lastScrollLeft = $(document).scrollLeft();
+                this._pageX += this._lastScrollLeft;
+            }
+            if (this._lastScrollTop != $(document).scrollTop()) {
+                this._pageY -= this._lastScrollTop;
+                this._lastScrollTop = $(document).scrollTop();
+                this._pageY += this._lastScrollTop;
+            }
         }
 
         public create(): void {
+        }
+
+        public get pageX(): number {
+            return this._pageOffsetIncludesScroll ? this._pageX : this._pageX - $(document).scrollLeft();
+        }
+
+        public get pageY(): number {
+            return this._pageOffsetIncludesScroll ? this._pageY : this._pageY - $(document).scrollTop();
         }
 
         public get active(): boolean {
@@ -92,15 +130,15 @@ module jsidea {
             if (this._autoTick && this._frameRate > 0)
                 this._tickInterval = setInterval(() => this.tick(), 1000 / this._frameRate);
         }
-        
+
         public dispose(): void {
             super.dispose();
         }
-        
+
         public qualifiedClassName(): string {
             return "jsidea.Application";
         }
-        
+
         public toString(): string {
             return "[" + this.qualifiedClassName() + "]";
         }

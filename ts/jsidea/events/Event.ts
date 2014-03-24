@@ -4,6 +4,7 @@ module jsidea.events {
         eventKey: string;
         target: any;
         broadcast: boolean;
+        canceled: boolean;
     }
     export class Event implements IEvent {
 
@@ -16,19 +17,20 @@ module jsidea.events {
         public broadcast: boolean = false;
         public eventKey: string = null;
         public target: any = null;
+        public canceled: boolean = false;
 
         constructor() {
         }
 
         public dispose(): void {
         }
-        
+
         public qualifiedClassName(): string {
             return "jsidea.events.Event";
         }
 
         public toString(): string {
-            return "[" + this.qualifiedClassName() + 
+            return "[" + this.qualifiedClassName() +
                 + " eventType='" + this.eventType + "]";
         }
     }

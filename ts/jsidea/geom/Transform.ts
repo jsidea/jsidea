@@ -143,14 +143,19 @@ module jsidea.geom {
             }
 
             var htmlElement = visual[0];
-            matrix.tx += htmlElement.offsetLeft;
-            matrix.ty += htmlElement.offsetTop;
+            if (<any>htmlElement != window) {
+                matrix.tx += htmlElement.offsetLeft;
+                matrix.ty += htmlElement.offsetTop;
+                matrix.tx -= htmlElement.scrollLeft;
+                matrix.ty -= htmlElement.scrollTop;
+            }
 
             var isFixed: boolean = htmlElement.ownerDocument ? visual.css("position") == "fixed" : false;
             if (isFixed && htmlElement.parentElement && visual.children().length == 0) {
                 matrix.tx -= htmlElement.parentElement.offsetLeft;
                 matrix.ty -= htmlElement.parentElement.offsetTop;
             }
+            //            console.log(matrix.cssMatrix, htmlElement.offsetLeft, htmlElement.offsetTop);
 
             return matrix;
         }
@@ -159,8 +164,13 @@ module jsidea.geom {
             var m = new Matrix();
             if (visual.get(0).ownerDocument)
                 m.cssMatrix = visual.css("transform");
-            else
-                console.log(visual);
+            else if (visual.get(0) == window) {
+//                var b = $("body");
+//                var b = $("body");
+//                m.cssMatrix = b.css("transform");
+//                m.tx += b.scrollLeft();
+//                m.ty += b.scrollTop();
+            }
             return m;
         }
 
