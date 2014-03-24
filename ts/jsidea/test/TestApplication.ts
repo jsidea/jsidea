@@ -42,7 +42,8 @@ module jsidea.test {
             $(document).bind("mousemove", (evt) => {
                 p.at.x = this.pageX;
                 p.at.y = this.pageY;
-                p.apply(e.visual);
+                p.transform(e.visual);
+//                var lc = e.visual.globalToLocal(0, 0).toString();
             });
             //            $(window).bind("scroll", (evt) => {
             //                p.at.x = this.pageX;
@@ -50,7 +51,7 @@ module jsidea.test {
             //                p.transform(e.visual);
             //     console.log("SCROLL");
             //            });
-            
+
             //            this.bind("tick", (evt) => {
             //                p.at.x = this.pageX;
             //                p.at.y = this.pageY;
@@ -153,3 +154,17 @@ module jsidea.test {
         }
     }
 }
+
+interface JQuery {
+    globalToLocal(x: number, y: number): jsidea.geom.IPoint;
+    localToGlobal(x: number, y: number): jsidea.geom.IPoint;
+}
+
+(function($) {
+    $.fn.globalToLocal = function(x: number, y: number) {
+        return jsidea.geom.Transform.getGlobalToLocal(this, x, y);
+    };
+    $.fn.localToGlobal = function(x: number, y: number) {
+        return jsidea.geom.Transform.getLocalToGlobal(this, x, y);
+    };
+} (jQuery));
