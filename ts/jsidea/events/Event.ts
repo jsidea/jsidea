@@ -5,6 +5,7 @@ module jsidea.events {
         target: any;
         broadcast: boolean;
         canceled: boolean;
+        data?: any;
     }
     export class Event implements IEvent {
 
@@ -18,6 +19,7 @@ module jsidea.events {
         public eventKey: string = null;
         public target: any = null;
         public canceled: boolean = false;
+        public data: any = null;
 
         constructor() {
         }

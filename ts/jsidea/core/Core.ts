@@ -10,6 +10,10 @@ interface Window {
     app: jsidea.core.Application;
 }
 
+interface Object {
+    observe(beingObserved: any, callback: (update: any) => any, types?: string[]): void;
+}
+
 //shortcut for console.log
 //var trace = console.log ? console.log : function(...args) { };
 
@@ -21,13 +25,6 @@ if (!Array.prototype.indexOf) {
         }
         return -1;
     }
-}
-
-function parseNumber(value: any, defaultValue: number): number {
-    value = parseFloat(value);
-    if (isNaN(value))
-        return defaultValue;
-    return value;
 }
 
 //hook
@@ -57,7 +54,7 @@ $(window).ready(() => {
     }
     catch (e) {
         window.app = null;
-        console.warn("Unable to instantiate application from " + qualifiedClassName);
+        console.warn("Unable to instantiate application from " + qualifiedClassName + ". " + e);
         return;
     }
 });

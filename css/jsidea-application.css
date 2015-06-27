@@ -3,11 +3,62 @@ html,body {
 	padding: 0;
 	width: 100%;
 	height: 100%;
+	transform-origin: 0px 0px;
+	perspective-origin: 0 0;
+}
+
+canvas {
+	position: absolute;
+	/* border: 1px solid #000; */
+	top: 0;
+	left: 0;
 }
 
 #content {
-	background-color: #EEEEEE;
-	width: 100%;
-	height: 100%;
-	/* transform:translate(50px, 50px); */
+	/* background-color: #EEEEEE; */
+	border: 1px solid #EEE;
+	width: 512px;
+	height: 512px;
+	position: absolute;
+	transform-origin: 0 0;
+	
+	perspective: 128px;
+	perspective-origin: center;
+	transform-style: preserve-3d;
+}
+
+#a-cont {
+	position: absolute;
+	background-color: rgba(255, 0, 255, 0.3);
+	width: 512px;
+	height: 512px;
+	
+	transform-origin: center;
+	transform: rotateY(70deg);
+	
+	perspective-origin: 0 0;
+	transform-style: preserve-3d;
+}
+
+#b-cont {
+	position: absolute;
+	background-color: #00FFFF;
+	transform-style: preserve-3d;
+	perspective-origin: 0 0;
+	width: 64px;
+	height: 64px;
+	transform-origin: 0px 0px;
+}
+
+#c-cont {
+	position: absolute;
+	background-color: #0000FF;
+	/* transform-style:preserve-3d; */
+	/* perspective-origin:0 0; */
+	width: 512px;
+	height: 512px;
+	transform-origin: center;
+	transform: translate(512px, 0) rotateY(-45deg);
+
+	/* transform: scale(2, 2); */
 }

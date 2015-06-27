@@ -79,14 +79,17 @@ module jsidea.events {
 
         public trigger(
             eventType: string,
-            event: IEvent = null): void {
+            event: IEvent = null,
+            data: any = null): void {
             var entries = EventDispatcher.parseEventType(eventType);
             var matches = EventDispatcher.getMatches(this, entries);
 
             event = event ? event : new Event();
             event.target = this._target;
             event.canceled = false;
-            
+            if (data)
+                event.data = data;
+
             var l = matches.length;
             for (var i = 0; i < l; ++i) {
                 event.eventType = matches[i].eventType;

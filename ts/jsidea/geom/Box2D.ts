@@ -1,16 +1,9 @@
 module jsidea.geom {
-    export interface IRectangleValue extends IPointValue {
+    export interface IRectangleValue extends IPoint2DValue {
         width: number;
         height: number;
     }
-    export interface IRectangle extends IRectangleValue, jsidea.core.ICore {
-        clone(): IRectangle;
-        copyFrom(rectangle: IRectangleValue): void;
-        contains(x: number, y: number): boolean;
-        containsRect(r: IRectangleValue): boolean;
-        intersects(r: IRectangleValue): boolean;
-    }
-    export class Rectangle implements IRectangle {
+    export class Box2D implements IRectangleValue {
 
         constructor(
             public x: number = 0,
@@ -19,8 +12,8 @@ module jsidea.geom {
             public height: number = 0) {
         }
 
-        public clone(): IRectangle {
-            return new Rectangle(
+        public clone(): Box2D {
+            return new Box2D(
                 this.x,
                 this.y,
                 this.width,
