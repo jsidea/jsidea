@@ -22,18 +22,13 @@ module jsidea.geom {
     * 
     */
     export class Matrix2D implements IMatrix2DValue {
-        public static TEMP: Matrix2D = new Matrix2D();
-        public static TEMP1: Matrix2D = new Matrix2D();
-        public static TEMP2: Matrix2D = new Matrix2D();
-        private static _TEMP: Point2D = new Point2D();
-
+        
         public m11: number = 1;
         public m12: number = 0;
         public m21: number = 0;
         public m22: number = 1;
         public m31: number = 0;
         public m32: number = 0;
-
 
         constructor(data: number[] = null) {
             if (data)
@@ -176,10 +171,10 @@ module jsidea.geom {
         * @param position The config object.
         * @return The new translation-matrix.
         */
-        public makePosition(offset: IPoint2DValue): Matrix2D {
-            var ret: Matrix2D = new Matrix2D();
-            ret.m31 += offset.x;
-            ret.m32 += offset.y;
+        public makePosition(offset: IPoint2DValue, ret: Matrix2D = new Matrix2D()): Matrix2D {
+            ret.identity();
+            ret.m31 = offset.x;
+            ret.m32 = offset.y;
             return ret;
         }
         
@@ -189,9 +184,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendPosition(offset: IPoint2DValue): Matrix2D {
-            this.m31 += offset.x;
-            this.m32 += offset.y;
-            return this;
+            return this.append(this.makePosition(offset, Buffer._APPEND_POSITION_2D));;
         }
         
         /**
@@ -201,7 +194,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendPositionRaw(x: number, y: number): Matrix2D {
-            return this.appendPosition(Matrix2D._TEMP.setTo(x, y));
+            return this.appendPosition(Buffer._APPEND_POSITON_RAW_2D.setTo(x, y));
         }
 
         /**
@@ -210,7 +203,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependPosition(offset: IPoint2DValue): Matrix2D {
-            return this.prepend(this.makePosition(offset));
+            return this.prepend(this.makePosition(offset, Buffer._PREPEND_POSITION_2D));
         }
         
         /**
@@ -220,7 +213,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependPositionRaw(x: number, y: number): Matrix2D {
-            return this.prependPosition(Matrix2D._TEMP.setTo(x, y));
+            return this.prependPosition(Buffer._PREPEND_POSITION_RAW_2D.setTo(x, y));
         }
 
         /**
@@ -250,8 +243,8 @@ module jsidea.geom {
         * @param scale The scaling-factor.
         * @return The new scaling-matrix.
         */
-        public makeScale(scale: IPoint2DValue): Matrix2D {
-            var ret: Matrix2D = new Matrix2D();
+        public makeScale(scale: IPoint2DValue, ret: Matrix2D = new Matrix2D()): Matrix2D {
+            ret.identity();
             ret.setScale(scale);
             return ret;
         }
@@ -262,7 +255,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendScale(scale: IPoint2DValue): Matrix2D {
-            this.append(this.makeSkew(scale));
+            this.append(this.makeScale(scale, Buffer._APPEND_SCALE_2D));
             return this;
         }
         
@@ -273,7 +266,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendScaleRaw(x: number, y: number): Matrix2D {
-            return this.appendScale(Matrix2D._TEMP.setTo(x, y));
+            return this.appendScale(Buffer._APPEND_SCALE_RAW_2D.setTo(x, y));
         }
 
         /**
@@ -282,7 +275,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependScale(scale: IPoint2DValue): Matrix2D {
-            return this.prepend(this.makeSkew(scale));
+            return this.prepend(this.makeScale(scale, Buffer._PREPEND_SCALE_2D));
         }
         
         /**
@@ -292,7 +285,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependScaleRaw(x: number, y: number): Matrix2D {
-            return this.prependScale(Matrix2D._TEMP.setTo(x, y));
+            return this.prependScale(Buffer._PREPEND_SCALE_RAW_2D.setTo(x, y));
         }
 
         /**
@@ -325,8 +318,8 @@ module jsidea.geom {
         * @param skew The skewing angles.
         * @return The skewing-matrix.
         */
-        public makeSkew(skew: IPoint2DValue): Matrix2D {
-            var ret: Matrix2D = new Matrix2D();
+        public makeSkew(skew: IPoint2DValue, ret: Matrix2D = new Matrix2D()): Matrix2D {
+            ret.identity();
             ret.setSkew(skew);
             return ret;
         }
@@ -337,7 +330,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendSkew(skew: IPoint2DValue): Matrix2D {
-            return this.append(this.makeSkew(skew));
+            return this.append(this.makeSkew(skew, Buffer._APPEND_SKEW_2D));
         }
         
         /**
@@ -347,7 +340,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendSkewRaw(x: number, y: number): Matrix2D {
-            return this.appendSkew(Matrix2D._TEMP.setTo(x, y));
+            return this.appendSkew(Buffer._APPEND_SKEW_RAW_2D.setTo(x, y));
         }
 
         /**
@@ -356,7 +349,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependSkew(skew: IPoint2DValue): Matrix2D {
-            return this.prepend(this.makeSkew(skew));
+            return this.prepend(this.makeSkew(skew, Buffer._PREPEND_SKEW_2D));
         }
         
         /**
@@ -366,7 +359,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependSkewRaw(x: number, y: number): Matrix2D {
-            return this.prependSkew(Matrix2D._TEMP.setTo(x, y));
+            return this.prependSkew(Buffer._PREPEND_SKEW_RAW_2D.setTo(x, y));
         }
         
         /**
@@ -398,8 +391,8 @@ module jsidea.geom {
         * @param angle The rotations angle in degree.
         * @return The rotation-matrix.
         */
-        public makeRotation(angle: number): Matrix2D {
-            var ret: Matrix2D = new Matrix2D();
+        public makeRotation(angle: number, ret: Matrix2D = new Matrix2D()): Matrix2D {
+            ret.identity();
             ret.setRotation(angle);
             return ret;
         }
@@ -433,7 +426,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependRotation(angle: number): Matrix2D {
-            return this.prepend(this.makeRotation(angle));
+            return this.prepend(this.makeRotation(angle, Buffer._PREPEND_ROTATION_RAW_2D));
         }
 
         public compose(target: IComposition2D): Matrix2D {
@@ -499,7 +492,7 @@ module jsidea.geom {
             }
 
             if (cssString.indexOf("matrix3d") >= 0)
-                return this.setMatrix3D(Matrix3D.TEMP.setCSS(cssString));
+                return this.setMatrix3D(Buffer._SET_CSS_2D.setCSS(cssString));
 
             var trans = cssString.replace("matrix(", "").replace(")", "").split(",");
             this.m11 = math.Number.parse(trans[0], 1);

@@ -1,5 +1,13 @@
 module jsidea.geom {
     export class Transform {
+        
+        private static _GET_SCENE_TRANSFORM_3D: Matrix3D = new Matrix3D();
+        
+        private static TEMP: Matrix2D = new Matrix2D();
+        private static TEMP1: Matrix2D = new Matrix2D();
+        private static TEMP2: Matrix2D = new Matrix2D();
+
+        
         private static TMP3: Point2D = new Point2D();
         private static TMP4: Point2D = new Point2D();
         private static TMP5: Point3D = new Point3D();
@@ -7,7 +15,7 @@ module jsidea.geom {
 
         public static getGlobalToLocal(visual: HTMLElement, x: number, y: number, ret: Point2D = new Point2D()): jsidea.geom.IPoint2DValue {
 //            console.log(Transform.getSceneTransform2D(visual, Matrix2D.TEMP2).invert().getCSS());
-            console.log(Transform.getSceneTransform2D(visual, Matrix2D.TEMP2).toString() + Transform.getSceneTransform3D(visual, Matrix3D.TEMP2).toString());
+            console.log(Transform.getSceneTransform2D(visual, Transform.TEMP2).toString() + Transform.getSceneTransform3D(visual, Matrix3D.TEMP2).toString());
             
 //                        console.log(Transform.getSceneTransform2D(visual, Matrix2D.TEMP2).toString());
 //                        console.log(Transform.getSceneTransform3D(visual, Matrix3D.TEMP2).toString());
@@ -29,7 +37,7 @@ module jsidea.geom {
             //            console.log(Transform.getSceneTransform2D(visual, Matrix2D.TEMP2).transformRaw(x, y));
             //            console.log(Transform.getSceneTransform3D(visual, Matrix3D.TEMP2).transformRaw(x, y, 0));
             
-            return Transform.getSceneTransform2D(visual, Matrix2D.TEMP2).transformRaw(x, y);
+            return Transform.getSceneTransform2D(visual, Transform.TEMP2).transformRaw(x, y);
             //            return Transform.getSceneTransform3D(visual, Matrix3D.TEMP2).transformRaw(x, y, 0);
         }
 
@@ -43,7 +51,7 @@ module jsidea.geom {
             var p: HTMLElement = visual.parentElement;
             while (p) {
                 cs = window.getComputedStyle(p);
-                mat.prepend(Transform.extractMatrix3D(cs, p, Matrix3D.TEMP));
+                mat.prepend(Transform.extractMatrix3D(cs, p, Transform._GET_SCENE_TRANSFORM_3D));
                 c++;
                 if (p == document.body)
                     break;
@@ -62,7 +70,7 @@ module jsidea.geom {
             var p: HTMLElement = visual.parentElement;
             while (p) {
                 cs = window.getComputedStyle(p);
-                mat.prepend(Transform.extractMatrix2D(cs, p, Matrix2D.TEMP));
+                mat.prepend(Transform.extractMatrix2D(cs, p, Transform.TEMP));
                 if (p == document.body)
                     break;
                 p = p.parentElement;

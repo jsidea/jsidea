@@ -7,107 +7,120 @@ module jsidea.test {
 
         //@override abstract
         public create(): void {
-
-            //var img: IsoImage = new IsoImage();
-
             this.testMatrix3D();
-            //this.testPosition();
-            //            this.testXMLConverter();
-            //            this.testDialog();
-            //            this.testPoint();
-            //            this.testObserver();
-            //                        this.testMatrix();
         }
 
         private testMatrix3D(): void {
+            var a = $("<div id='a-cont'></div>");
+            var b = $("<div id='b-cont'></div>");
+            var ac = $("<div id='ac-cont'></div>");
+            var bc = $("<div id='bc-cont'></div>");
 
+            $("#content").append(a);
+            a.append(b);
+            a.append(ac);
+            b.append(bc);
+            
+            console.log(geom.Matrix3D.extract(a[0]).toString());
+            return;
+
+            $(document).bind("mousemove",(evt) => {
+                var screen = new geom.Point3D(evt.pageX, evt.pageY, 0);
+                var loc = this.unp(screen, geom.Matrix3D.extract(a[0]));
+                this.applyPos(loc, ac[0]);
+                loc.z = 0;
+                loc = this.unp(screen, geom.Matrix3D.extract(a[0]).prepend(geom.Matrix3D.extract(b[0])));
+                this.applyPos(loc, bc[0]);
+            });
+        }
+
+        private applyPos(pos: geom.Point3D, visual: HTMLElement): void {
+            var x = math.Number.clamp(pos.x, -1024, 1024);
+            var y = math.Number.clamp(pos.y, -1024, 1024);
+            visual.style.transform = "translate(" + Math.round(x) + "px," + Math.round(y) + "px)";
+        }
+
+        private unp(screen: geom.Point3D, m: geom.Matrix3D): geom.Point3D {
+            var vp = new geom.Viewport();
+
+            vp.fromElement($("#content")[0]);//visual.parentElement);
+            //            console.log(vp.width, vp.height);
+//            console.log(vp.focalLength);
+//            console.log(vp.width, vp.height);
+            //            vp.width = 512;
+            //            vp.height = 512;
+            //            if(vp.focalLength == 100)
+            //                vp.focalLength = 60; 
+            //            console.log(vp.focalLength);
+
+            //create concatenated matrix
+//            var m: geom.Matrix3D = geom.Matrix3D.extract(visual);
+            //unproject
+            var dir = new geom.Point3D(screen.x, screen.y, 1);
+            dir.unproject(vp.focalLength, vp.origin);
+            //create plane
+            var pl = new geom.Plane3D();
+            pl.fromPoints(
+                m.transform(new geom.Point3D(0, 0, 0)),
+                m.transform(new geom.Point3D(1, 0, 0)),
+                m.transform(new geom.Point3D(0, 1, 0)));
+            //intersect plane -- extract z
+            var fin: geom.Point3D = pl.intersectLine(screen, dir);
+            fin.z *= -1;
+            fin.x = screen.x;
+            fin.y = screen.y;
+            //unproject intersection to get the final position in scene space
+            fin.unproject(vp.focalLength, vp.origin);
+            //transform from scene to local                
+            m.invert();
+            return m.transform(fin);
+        }
+
+        private testMatrix3DOLD(): void {
             var a = $("<div id='a-cont'></div>");
             $("#content").append(a);
             
-            var c = $("<div id='c-cont'></div>");
-            a.append(c);
-            
             var b = $("<div id='b-cont'></div>");
-            c.append(b);
+            a.append(b);
             
+            var ac = $("<div id='ac-cont'></div>");
+            a.append(ac);
+            
+            var bc = $("<div id='bc-cont'></div>");
+            b.append(bc);
 
             var vp = new geom.Viewport();
-            vp.width = $("#content").width();
-            vp.height = $("#content").height();
-            vp.originX = 256;
-            vp.originY = 256;
-            vp.focalLength = parseFloat($("#content").css("perspective").replace("px", ""));//vp.perspectiveToFocal(parseFloat($("#content").css("perspective").replace("px", "")));
-            console.log("FOC", vp.focalLength);
-
-            var pl = new geom.Plane3D();
+            vp.fromElement($("#content")[0]);
 
             $(document).bind("mousemove",(evt) => {
 
                 var screen = new geom.Point3D(evt.pageX, evt.pageY, 0);
-                var dir = new geom.Point3D(screen.x, screen.y, 1);
-                var focalLength: number = vp.focalLength;
 
+                //create concatenated matrix
                 var m: geom.Matrix3D = geom.Matrix3D.extract(a[0]);
-                //m.prependScale(new geom.Point3D(0, 0, -1));
-//                m.m31 *= -1;
-//                m.m13 *= -1;
-//                var zz = geom.Matrix3D.extract(c[0]);
-//                zz.m31 *= -1;
-//                zz.m13 *= -1;
-                m.prepend(geom.Matrix3D.extract(c[0]));
-                
-//                console.log(m.toString());
-//                return;
-                
-                
+                m.prepend(geom.Matrix3D.extract(b[0]));
+                //unproject
+                var dir = new geom.Point3D(screen.x, screen.y, 1);
+                dir.unproject(vp.focalLength, vp.origin);
+                //create plane
+                var pl = new geom.Plane3D();
                 pl.fromPoints(
                     m.transform(new geom.Point3D(0, 0, 0)),
                     m.transform(new geom.Point3D(1, 0, 0)),
                     m.transform(new geom.Point3D(0, 1, 0)));
-                
-                
-//                console.log(m.toString());
-//                return;
-                
-                //unproject
-                var sc: number = focalLength / (focalLength + dir.z);
-                dir.x -= vp.originX;
-                dir.y -= vp.originY;
-                dir.x /= sc;
-                dir.y /= sc;
-                dir.x += vp.originX;
-                dir.y += vp.originY;
-                
                 //intersect plane -- extract z
                 var fin: geom.Point3D = pl.intersectLine(screen, dir);
                 fin.z *= -1;
-//                console.log(fin.z);
-////                console.log("FOC", focalLength);
-//                return;
                 fin.x = screen.x;
                 fin.y = screen.y;
-                
-                
-                
-                //unproject intersection
-                sc = (focalLength) / (focalLength + fin.z);
-                fin.x -= vp.originX;
-                fin.y -= vp.originY;
-                fin.x /= sc;
-                fin.y /= sc;
-                fin.x += vp.originX;
-                fin.y += vp.originY;
-                
-                
-                
+                //unproject intersection to get the final position in scene space
+                fin.unproject(vp.focalLength, vp.origin);
+                //transform from scene to local                
                 m.invert();
-//                console.log(m.toString());
-//                return;
                 var loc: geom.Point3D = m.transform(fin);
-//                console.log(loc.x, loc.y);
                 loc.x = math.Number.clamp(loc.x, -1024, 1024);
                 loc.y = math.Number.clamp(loc.y, -1024, 1024);
-                b.css("transform", "translate(" +Math.round(loc.x)+ "px," +Math.round(loc.y)+"px)");
+                bc.css("transform", "translate(" +Math.round(loc.x)+ "px," +Math.round(loc.y)+"px)");
             });
         }
 

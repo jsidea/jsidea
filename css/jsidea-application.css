@@ -17,12 +17,10 @@ canvas {
 #content {
 	/* background-color: #EEEEEE; */
 	border: 1px solid #EEE;
-	width: 512px;
-	height: 512px;
+	width: 800px;
+	height: 800px;
 	position: absolute;
-	transform-origin: 0 0;
-	
-	perspective: 128px;
+	perspective: 600px;
 	perspective-origin: center;
 	transform-style: preserve-3d;
 }
@@ -32,33 +30,36 @@ canvas {
 	background-color: rgba(255, 0, 255, 0.3);
 	width: 512px;
 	height: 512px;
-	
-	transform-origin: center;
-	transform: rotateY(70deg);
-	
+	transform-origin: 0 0;
+	transform:   perspective(200px) translate3D(50px, 50px, -100px);
+	/* transform:   rotateY(20deg); */
+	/* perspective: 600px; */
+	/* perspective-origin: 0 0; */
 	perspective-origin: 0 0;
 	transform-style: preserve-3d;
 }
 
 #b-cont {
 	position: absolute;
+	background-color: #0000FF;
+	width: 512px;
+	height: 512px;
+	transform-origin: 0 0;
+	transform: translateX(512px) rotateY(-10deg);
+}
+
+#ac-cont {
+	position: absolute;
 	background-color: #00FFFF;
-	transform-style: preserve-3d;
-	perspective-origin: 0 0;
 	width: 64px;
 	height: 64px;
 	transform-origin: 0px 0px;
 }
 
-#c-cont {
+#bc-cont {
 	position: absolute;
-	background-color: #0000FF;
-	/* transform-style:preserve-3d; */
-	/* perspective-origin:0 0; */
-	width: 512px;
-	height: 512px;
-	transform-origin: center;
-	transform: translate(512px, 0) rotateY(-45deg);
-
-	/* transform: scale(2, 2); */
+	background-color: #FFFF00;
+	width: 64px;
+	height: 64px;
+	transform-origin: 0px 0px;
 }
