@@ -134,14 +134,14 @@ module jsidea.geom {
         }
 
         public project(focalLength: number, perspectiveOrigin: IPoint2DValue): Point3D {
-            var scale: number = focalLength / (focalLength + this.z);
+            var scale: number = focalLength / (focalLength - this.z);
             this.x = scale * (this.x - perspectiveOrigin.x) + perspectiveOrigin.x;
             this.y = scale * (this.y - perspectiveOrigin.y) + perspectiveOrigin.y;
             return this;
         }
         
         public unproject(focalLength: number, perspectiveOrigin: IPoint2DValue): Point3D {
-            var scale: number = (focalLength + this.z) / focalLength;
+            var scale: number = (focalLength - this.z) / focalLength;
             this.x = scale * (this.x - perspectiveOrigin.x) + perspectiveOrigin.x;
             this.y = scale * (this.y - perspectiveOrigin.y) + perspectiveOrigin.y;
             return this;

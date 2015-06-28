@@ -36,8 +36,8 @@ module jsidea.geom {
         private static tempAxeY: Point3D = new Point3D();
         private static tempAxeZ: Point3D = new Point3D();
 
-        
-        
+
+
         public static TEMP1: Matrix3D = new Matrix3D();
         public static TEMP2: Matrix3D = new Matrix3D();
 
@@ -216,7 +216,7 @@ module jsidea.geom {
             return ret;
         }
 
-        
+
         public deltaTransformRaw(x: number, y: number, z: number, ret: Point3D = new Point3D()): Point3D {
             return this.deltaTransform(Buffer._DELTA_TRANSFORM_RAW_3D.setTo(x, y, z), ret);
         }
@@ -313,9 +313,9 @@ module jsidea.geom {
         * @param y The z-offset.
         * @return this-chained.
         */
-                
+
         public prependPositionRaw(x: number, y: number, z: number): Matrix3D {
-            return this.prependPosition(Buffer._PREPEND_POSITION_RAW_3D.setTo(x, y, z));
+            return this.prependPosition(Buffer._PREPEND_POSITION_RAW_3D.setTo(x, y, z, 0));
         }
         
         /**
@@ -361,6 +361,15 @@ module jsidea.geom {
         public appendScale(scale: IPoint3DValue): Matrix3D {
             return this.append(this.makeScale(scale, Buffer._APPEND_SCALE_3D));
         }
+        
+        /**
+        * Appends scaling-factors.
+        * @param scale The scaling-factor.
+        * @return this-chained.
+        */
+        public appendScaleRaw(x: number, y: number, z: number): Matrix3D {
+            return this.appendScale(Buffer._APPEND_SCALE_RAW_3D.setTo(x, y, z));
+        }
 
         /**
         * Prepends scaling-factors.
@@ -369,6 +378,17 @@ module jsidea.geom {
         */
         public prependScale(scale: IPoint3DValue): Matrix3D {
             return this.prepend(this.makeScale(scale, Buffer._PREPEND_SCALE_3D));
+        }
+        
+        /**
+        * Prepends scaling-factors.
+        * @param x The x scaling-factor.
+        * @param y The y scaling-factor.
+        * @param z The z scaling-factor.
+        * @return this-chained.
+        */
+        public prependScaleRaw(x: number, y: number, z: number): Matrix3D {
+            return this.prependScale(Buffer._APPEND_SCALE_RAW_3D.setTo(x, y, z));
         }
         
         /**
@@ -404,7 +424,7 @@ module jsidea.geom {
         * @param z The z-skewing angle.
         * @return this-chained.
         */
-                
+
         public setSkewRaw(x: number, y: number, z: number): Matrix3D {
             return this.setSkew(Buffer._SET_SKEW_RAW_3D.setTo(x, y, z));
         }
@@ -520,6 +540,44 @@ module jsidea.geom {
             ret.m32 = this.m32 * scaleZ;
             ret.m33 = this.m33 * scaleZ;
             return ret;
+        }
+        
+        /**
+       * Creates a new perspective-matrix.
+       * @param perspective The perspective.
+       * @return The new perspective-matrix.
+       */
+        public makePerspective(perspective: number, ret = new Matrix3D()): Matrix3D {
+            ret.identity();
+            ret.m34 = perspective ? -(1 / perspective) : 0;
+            return ret;
+        }
+
+        /**
+        * Appends perspective.
+        * @param perspective The perspective (focal length).
+        * @return this-chained.
+        */
+        public appendPerspective(perspective: number): Matrix3D {
+            return this.append(this.makePerspective(perspective, Buffer._APPEND_PERSPECTIVE_3D));
+        }
+
+        /**
+        * Prepends perspective.
+        * @param perspective The perspective (focal length).
+        * @return this-chained.
+        */
+        public prependPerspective(perspective: number): Matrix3D {
+            return this.prepend(this.makePerspective(perspective, Buffer._PREPEND_PERSPECTIVE_3D));
+        }
+
+        public getPerspective(): number {
+            return this.m34 ? - (1 / this.m34) : 0;
+        }
+
+        public setPerspective(perspective: number): Matrix3D {
+            this.m34 = perspective ? -(1 / perspective) : 0;
+            return this;
         }
 
         public compose(trans: IComposition3D): Matrix3D {
@@ -832,24 +890,30 @@ module jsidea.geom {
             if (visual.ownerDocument) {
                 var style = window.getComputedStyle(visual);
                 var m = ret.setCSS(style.transform);
-
-                m.m13 *= -1;
-                m.m31 *= -1;
-                m.m43 *= -1;
+//                if(m.getPerspective())
+//                    m.appendPerspective(m.getPerspective());
+                
+                //                m.m13 *= -1;
+                //                m.m31 *= -1;
+                //                m.m43 *= -1;
+                
+                //                m.m34 *= -1;
+                
+                //                m.prependScaleRaw(1, 1, -1);
 
                 var origin = Matrix3D.extractOrigin3D(visual, style);
                
-//                var dec = m.decompose();
-//                m.identity();
-//                m.appendPositionRaw(-origin.x, -origin.y, 0);
-//                m.appendRotation(dec.scale);
-//                m.appendRotation(dec.rotation);
-//                m.appendPosition(dec.position);
-//                m.appendPositionRaw(origin.x, origin.y, 0);
+                //                var dec = m.decompose();
+                //                m.identity();
+                //                m.appendPositionRaw(-origin.x, -origin.y, 0);
+                //                m.appendRotation(dec.scale);
+                //                m.appendRotation(dec.rotation);
+                //                m.appendPosition(dec.position);
+                //                m.appendPositionRaw(origin.x, origin.y, 0);
                 
                 m.prependPositionRaw(-origin.x, -origin.y, 0);
                 m.appendPositionRaw(origin.x, origin.y, 0);
-                
+
                 return m;
             }
             ret.identity();

@@ -21,32 +21,58 @@ module jsidea.test {
             a.append(ac);
             b.append(bc);
             
-            console.log(geom.Matrix3D.extract(a[0]).toString());
-            return;
+            //transform: perspective(200px) translate3D(100px, 0, -100px<);
+//                        var mt = new geom.Matrix3D();
+//                        mt.prependPerspective(600);
+//                        mt.prependPerspective(200);
+            //            mt.prependPositionRaw(100, 0, -100);
+            //            mt.prependPerspective(133);
+            //            console.log(mt.getPerspective());
+            
+            //            var ma = geom.Matrix3D.extract(a[0]);
+            //            var mb = geom.Matrix3D.extract(b[0]);
+            //            console.log(mt.toString());
+            //            console.log(ma.toString());
+            //            console.log(mb.toString());
+            //            return;
 
             $(document).bind("mousemove",(evt) => {
                 var screen = new geom.Point3D(evt.pageX, evt.pageY, 0);
                 var loc = this.unp(screen, geom.Matrix3D.extract(a[0]));
                 this.applyPos(loc, ac[0]);
-                loc.z = 0;
                 loc = this.unp(screen, geom.Matrix3D.extract(a[0]).prepend(geom.Matrix3D.extract(b[0])));
+                //                loc = this.unp(loc, geom.Matrix3D.extract(b[0]));
                 this.applyPos(loc, bc[0]);
             });
         }
 
         private applyPos(pos: geom.Point3D, visual: HTMLElement): void {
-            var x = math.Number.clamp(pos.x, -1024, 1024);
-            var y = math.Number.clamp(pos.y, -1024, 1024);
+            var x = math.Number.clamp(pos.x, -2048, 2048);
+            var y = math.Number.clamp(pos.y, -2048, 2048);
             visual.style.transform = "translate(" + Math.round(x) + "px," + Math.round(y) + "px)";
         }
 
+        private static count = 0;
         private unp(screen: geom.Point3D, m: geom.Matrix3D): geom.Point3D {
             var vp = new geom.Viewport();
-
             vp.fromElement($("#content")[0]);//visual.parentElement);
+            
+            var per = m.getPerspective();
+            if (per) {
+                m.appendPerspective(-per);
+//                m.setPerspective(0);
+                var mt = new geom.Matrix3D();
+                mt.prependPerspective(vp.focalLength);
+                mt.prependPerspective(per);
+                vp.focalLength = mt.getPerspective();
+            }
+
             //            console.log(vp.width, vp.height);
-//            console.log(vp.focalLength);
-//            console.log(vp.width, vp.height);
+            //            vp.focalLength = 170;
+            //            if(++TestApplication.count % 2 == 0)
+            //                vp.focalLength = m.getPerspective() ? m.getPerspective() : vp.focalLength;
+            //            console.log(vp.focalLength);
+            //            console.log(vp.width, vp.height);
             //            vp.width = 512;
             //            vp.height = 512;
             //            if(vp.focalLength == 100)
@@ -54,16 +80,17 @@ module jsidea.test {
             //            console.log(vp.focalLength);
 
             //create concatenated matrix
-//            var m: geom.Matrix3D = geom.Matrix3D.extract(visual);
+            //            var m: geom.Matrix3D = geom.Matrix3D.extract(visual);
             //unproject
-            var dir = new geom.Point3D(screen.x, screen.y, 1);
+            var dir = new geom.Point3D(screen.x, screen.y, -1);
             dir.unproject(vp.focalLength, vp.origin);
             //create plane
             var pl = new geom.Plane3D();
             pl.fromPoints(
                 m.transform(new geom.Point3D(0, 0, 0)),
                 m.transform(new geom.Point3D(1, 0, 0)),
-                m.transform(new geom.Point3D(0, 1, 0)));
+                m.transform(new geom.Point3D(0, 1, 0))
+                );
             //intersect plane -- extract z
             var fin: geom.Point3D = pl.intersectLine(screen, dir);
             fin.z *= -1;
@@ -79,13 +106,13 @@ module jsidea.test {
         private testMatrix3DOLD(): void {
             var a = $("<div id='a-cont'></div>");
             $("#content").append(a);
-            
+
             var b = $("<div id='b-cont'></div>");
             a.append(b);
-            
+
             var ac = $("<div id='ac-cont'></div>");
             a.append(ac);
-            
+
             var bc = $("<div id='bc-cont'></div>");
             b.append(bc);
 
@@ -120,7 +147,7 @@ module jsidea.test {
                 var loc: geom.Point3D = m.transform(fin);
                 loc.x = math.Number.clamp(loc.x, -1024, 1024);
                 loc.y = math.Number.clamp(loc.y, -1024, 1024);
-                bc.css("transform", "translate(" +Math.round(loc.x)+ "px," +Math.round(loc.y)+"px)");
+                bc.css("transform", "translate(" + Math.round(loc.x) + "px," + Math.round(loc.y) + "px)");
             });
         }
 

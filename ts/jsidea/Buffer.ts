@@ -10,8 +10,12 @@ module jsidea {
         //jsidea.geom.Matrix3D
         public static _APPEND_POSITION_3D = new geom.Matrix3D();
         public static _PREPEND_POSITION_3D = new geom.Matrix3D();
+        public static _APPEND_PERSPECTIVE_3D = new geom.Matrix3D();
+        public static _PREPEND_PERSPECTIVE_3D = new geom.Matrix3D();
         public static _APPEND_SCALE_3D = new geom.Matrix3D();
         public static _PREPEND_SCALE_3D = new geom.Matrix3D();
+        public static _APPEND_SCALE_RAW_3D = new geom.Point3D();
+        public static _PREPEND_SCALE_RAW_3D = new geom.Point3D();
         public static _APPEND_SKEW_3D = new geom.Matrix3D();
         public static _PREPEND_SKEW_3D = new geom.Matrix3D();
         public static _GET_ROTATION_3D = new geom.Matrix3D();

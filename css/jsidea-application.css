@@ -21,7 +21,7 @@ canvas {
 	height: 800px;
 	position: absolute;
 	perspective: 600px;
-	perspective-origin: center;
+	perspective-origin: 0 0;
 	transform-style: preserve-3d;
 }
 
@@ -31,9 +31,10 @@ canvas {
 	width: 512px;
 	height: 512px;
 	transform-origin: 0 0;
-	transform:   perspective(200px) translate3D(50px, 50px, -100px);
+	/* transform: perspective(200px) translate3D(100px, 0px, -100px); */
+	transform: perspective(200px) translate3D(100px, 0px, -100px);
 	/* transform:   rotateY(20deg); */
-	/* perspective: 600px; */
+	/* perspective: 300px; */
 	/* perspective-origin: 0 0; */
 	perspective-origin: 0 0;
 	transform-style: preserve-3d;
@@ -45,7 +46,7 @@ canvas {
 	width: 512px;
 	height: 512px;
 	transform-origin: 0 0;
-	transform: translateX(512px) rotateY(-10deg);
+	transform: translateX(512px) rotateY(-5deg);
 }
 
 #ac-cont {

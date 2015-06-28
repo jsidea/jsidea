@@ -65,7 +65,7 @@ module jsidea.geom {
 //            visual = this.getPar(visual);
             var style = window.getComputedStyle(visual);
             var perspective = style.perspective;
-            if(perspective)
+            if(!perspective)
             perspective = "600px";
             this.width = visual.clientWidth;
             this.height = visual.clientHeight;
