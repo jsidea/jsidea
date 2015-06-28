@@ -9,13 +9,11 @@ html,body {
 
 canvas {
 	position: absolute;
-	/* border: 1px solid #000; */
 	top: 0;
 	left: 0;
 }
 
 #content {
-	/* background-color: #EEEEEE; */
 	border: 1px solid #EEE;
 	width: 800px;
 	height: 800px;
@@ -32,11 +30,11 @@ canvas {
 	height: 512px;
 	transform-origin: 0 0;
 	/* transform: perspective(200px) translate3D(100px, 0px, -100px); */
-	transform: perspective(200px) translate3D(100px, 0px, -100px);
-	/* transform:   rotateY(20deg); */
+	/* transform: translate3D(100px, 0px, -100px); */
 	/* perspective: 300px; */
-	/* perspective-origin: 0 0; */
+	/* perspective: 300px; 
 	perspective-origin: 0 0;
+	*/
 	transform-style: preserve-3d;
 }
 
@@ -46,7 +44,7 @@ canvas {
 	width: 512px;
 	height: 512px;
 	transform-origin: 0 0;
-	transform: translateX(512px) rotateY(-5deg);
+	transform: translate3D(512px, 0px, -100px) rotateY(-20deg);
 }
 
 #ac-cont {

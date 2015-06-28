@@ -903,16 +903,18 @@ module jsidea.geom {
 
                 var origin = Matrix3D.extractOrigin3D(visual, style);
                
-                //                var dec = m.decompose();
-                //                m.identity();
-                //                m.appendPositionRaw(-origin.x, -origin.y, 0);
-                //                m.appendRotation(dec.scale);
-                //                m.appendRotation(dec.rotation);
-                //                m.appendPosition(dec.position);
-                //                m.appendPositionRaw(origin.x, origin.y, 0);
+//                var dec = m.decompose();
+//                m.identity();
+//                m.appendPositionRaw(-origin.x, -origin.y, 0);
+//                m.appendScale(dec.scale);
+//                m.appendRotation(dec.rotation);
+//                m.appendPosition(dec.position);
+//                m.appendPositionRaw(origin.x, origin.y, 0);
                 
                 m.prependPositionRaw(-origin.x, -origin.y, 0);
                 m.appendPositionRaw(origin.x, origin.y, 0);
+                
+                
 
                 return m;
             }

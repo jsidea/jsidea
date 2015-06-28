@@ -62,19 +62,24 @@ module jsidea.geom {
             //                    return this;
             //            }
             
-//            visual = this.getPar(visual);
+            //            visual = this.getPar(visual);
             var style = window.getComputedStyle(visual);
             var perspective = style.perspective;
-            if(!perspective)
-            perspective = "600px";
+            if (!perspective) {
+                console.warn("SET DEFAULT PERSPECTIVE: 600px");
+                perspective = "600px";
+            }
             this.width = visual.clientWidth;
             this.height = visual.clientHeight;
             //            this.focalLength = parseFloat(style.perspective.replace("px", ""));
-            this.focalLength = parseFloat(perspective.replace("px", ""));
+            this.focalLength = math.Number.parse(perspective, 0);//parseFloat(perspective.replace("px", ""));
+
+//            console.log(perspective, this.focalLength);
+            
             this.origin.copyFrom(Viewport.extractPerspectiveOrigin(visual, style.perspectiveOrigin));
             return this;
         }
-        
+
         private getPar(visual: HTMLElement): HTMLElement {
             if (!visual)
                 return null;
@@ -94,7 +99,7 @@ module jsidea.geom {
             }
             return st.perspective;
         }
-        
+
         private getOri(visual: HTMLElement): string {
             if (!visual)
                 return "";
