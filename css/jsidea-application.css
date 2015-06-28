@@ -14,10 +14,11 @@ canvas {
 }
 
 #content {
-	border: 1px solid #EEE;
-	width: 800px;
-	height: 800px;
+	border: 1px solid #FF00FF;
+	width: 512px;
+	height: 512px;
 	position: absolute;
+	
 	perspective: 600px;
 	perspective-origin: 0 0;
 	transform-style: preserve-3d;
@@ -30,11 +31,10 @@ canvas {
 	height: 512px;
 	transform-origin: 0 0;
 	/* transform: perspective(200px) translate3D(100px, 0px, -100px); */
-	/* transform: translate3D(100px, 0px, -100px); */
-	/* perspective: 300px; */
-	/* perspective: 300px; 
+	/* transform: rotateY(15deg); */
+	
+	perspective: 500px; 
 	perspective-origin: 0 0;
-	*/
 	transform-style: preserve-3d;
 }
 
