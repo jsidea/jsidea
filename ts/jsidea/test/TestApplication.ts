@@ -11,35 +11,45 @@ module jsidea.test {
         }
 
         private testMatrix3D(): void {
-            var a = $("<div id='a-cont'></div>");
-            var b = $("<div id='b-cont'></div>");
-            var ac = $("<div id='ac-cont'></div>");
-            var bc = $("<div id='bc-cont'></div>");
+            var con = document.getElementById("content");
 
-            $("#content").append(a);
-            a.append(b);
-            a.append(ac);
-            b.append(bc);
-            
-            var mt = new geom.Matrix3D();
-            mt.prependPerspective(600);
-            mt.prependPerspective(500);
-            var newPer = mt.getPerspective();
-            
+            var a = document.createElement("div");
+            a.id = "a-cont";
+            var b = document.createElement("div");
+            b.id = "b-cont";
+            var ac = document.createElement("div");
+            ac.id = "ac-cont";
+            var bc = document.createElement("div");
+            bc.id = "bc-cont";
+
+            con.appendChild(a);
+            a.appendChild(b);
+            a.appendChild(ac);
+            b.appendChild(bc);
+
             $(document).bind("mousemove",(evt) => {
                 var screen = new geom.Point3D(evt.pageX, evt.pageY, 0);
-                var ma = geom.Matrix3D.extract(a[0]);
-                var mb = geom.Matrix3D.extract(b[0]);
-
-                mb.append(ma);
 
                 var vp = new geom.Viewport();
-                vp.fromElement($("#content")[0]);
-                
-                this.applyPos(this.unp(vp, screen, ma), ac[0]);
-                vp.fromElement($("#a-cont")[0]);
-                vp.focalLength = newPer;
-                this.applyPos(this.unp(vp, screen, mb), bc[0]);
+                var focalMatrix = new geom.Matrix3D();
+
+                var ma = geom.Matrix3D.extract(a);
+                vp.fromElement(con);
+                vp.focalLength = focalMatrix.prependPerspective(vp.focalLength).getPerspective();
+                this.applyPos(this.unp(false, screen, vp, ma), ac);
+
+                var mb = geom.Matrix3D.extract(b);
+                //                mb.append(ma);
+                ma.append(mb);
+                var fl = vp.focalLength;
+                vp.fromElement(a);
+
+                var ps = window.getComputedStyle(b.parentElement);
+                if (ps.transformStyle == "preserve-3d")
+                    vp.focalLength = focalMatrix.prependPerspective(vp.focalLength).getPerspective();
+                else
+                    vp.focalLength = math.Number.parse(ps.perspective, 0);
+                this.applyPos(this.unp(false, screen, vp, ma), bc);
             });
         }
 
@@ -49,8 +59,13 @@ module jsidea.test {
             visual.style.transform = "translate(" + Math.round(x) + "px," + Math.round(y) + "px)";
         }
 
-        private unp(vp: geom.Viewport, screen: geom.Point3D, m: geom.Matrix3D): geom.Point3D {
+        private unp(flattened: boolean, screen: geom.Point3D, vp: geom.Viewport, m: geom.Matrix3D): geom.Point3D {
             m = m.clone();
+            if (flattened) {
+                //                m.invert();
+                //                return m.transform(screen);
+            }
+            
 
             //unproject
             var dir = new geom.Point3D(screen.x, screen.y, -1);
