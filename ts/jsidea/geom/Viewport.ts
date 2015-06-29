@@ -27,31 +27,7 @@ module jsidea.geom {
             this.origin.copyFrom(value.origin);
         }
 
-        public focalToFieldOfView(focalLength: number): number {
-            return Math.atan(this.origin.x / focalLength) * 360 / Math.PI;
-        }
-
-        public fieldOfViewToFocal(fieldOfView: number): number {
-            return 1 / (Math.tan(fieldOfView / (360 / Math.PI)) / this.origin.x);
-        }
-
-        public fieldOfViewToPerspective(fieldOfView: number): number {
-            return Math.sqrt(this.origin.x * this.origin.x + this.origin.y * this.origin.y) / Math.tan((fieldOfView * 0.5) * Math.PI / 180);
-        }
-
-        public perspectiveToFieldOfView(perspective: number): number {
-            return Math.atan(Math.sqrt(this.origin.x * this.origin.x + this.origin.y * this.origin.y) / perspective) / (Math.PI / 360);
-        }
-
-        public perspectiveToFocal(perspective: number): number {
-            var fov: number = this.perspectiveToFieldOfView(perspective);
-            return this.fieldOfViewToFocal(fov);
-        }
-
-        public focalToPerspective(focalLength: number): number {
-            var fov: number = this.focalToFieldOfView(focalLength);
-            return this.fieldOfViewToPerspective(fov);
-        }
+        
 
         public fromElement(visual: HTMLElement): Viewport {
             //            while (!visual.style.perspective) {
@@ -74,7 +50,7 @@ module jsidea.geom {
             //            this.focalLength = parseFloat(style.perspective.replace("px", ""));
             this.focalLength = math.Number.parse(perspective, 0);//parseFloat(perspective.replace("px", ""));
 
-//            console.log(perspective, this.focalLength);
+            //            console.log(perspective, this.focalLength);
             
             this.origin.copyFrom(Viewport.extractPerspectiveOrigin(visual, style.perspectiveOrigin));
             return this;
@@ -133,6 +109,32 @@ module jsidea.geom {
                 math.Number.parseRelation(vals[0], visual.offsetWidth, 0),
                 math.Number.parseRelation(vals[1], visual.offsetHeight, 0),
                 math.Number.parseRelation(vals[3], 0, 0));//2nd parama "focalLength" ?
+        }
+        
+        public static focalToFieldOfView(focalLength: number, origin: IPoint2DValue): number {
+            return Math.atan(origin.x / focalLength) * 360 / Math.PI;
+        }
+
+        public static fieldOfViewToFocal(fieldOfView: number, origin: IPoint2DValue): number {
+            return 1 / (Math.tan(fieldOfView / (360 / Math.PI)) / origin.x);
+        }
+
+        public static fieldOfViewToPerspective(fieldOfView: number, origin: IPoint2DValue): number {
+            return Math.sqrt(origin.x * origin.x + origin.y * origin.y) / Math.tan((fieldOfView * 0.5) * Math.PI / 180);
+        }
+
+        public static perspectiveToFieldOfView(perspective: number, origin: IPoint2DValue): number {
+            return Math.atan(Math.sqrt(origin.x * origin.x + origin.y * origin.y) / perspective) / (Math.PI / 360);
+        }
+
+        public static perspectiveToFocal(perspective: number, origin: IPoint2DValue): number {
+            var fov: number = this.perspectiveToFieldOfView(perspective, origin);
+            return this.fieldOfViewToFocal(fov, origin);
+        }
+
+        public static focalToPerspective(focalLength: number, origin: IPoint2DValue): number {
+            var fov: number = this.focalToFieldOfView(focalLength, origin);
+            return this.fieldOfViewToPerspective(fov, origin);
         }
     }
 }

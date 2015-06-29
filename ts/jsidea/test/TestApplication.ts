@@ -35,21 +35,71 @@ module jsidea.test {
 
                 var ma = geom.Matrix3D.extract(a);
                 vp.fromElement(con);
+                
+                
+                
                 vp.focalLength = focalMatrix.prependPerspective(vp.focalLength).getPerspective();
-                this.applyPos(this.unp(false, screen, vp, ma), ac);
+                this.applyPos(this.unp(screen, vp, ma), ac);
 
                 var mb = geom.Matrix3D.extract(b);
-                //                mb.append(ma);
                 ma.append(mb);
-                var fl = vp.focalLength;
-                vp.fromElement(a);
-
+                vp.fromElement(b.parentElement);
+                
+                var tes = new geom.Matrix3D();
+                
+//                var val = (1 / 800) + (1 / 300);
+//                console.log(1 / val);
+//                
+//                tes.prependPerspective(800);
+//                tes.prependPerspective(300);
+//                console.log(tes.getPerspective());
+                
+                //calc new focal length
+//                var val = (1 / 600) + (1 / 300);
+//                val = (1 / val);
+//                console.log(val);
+                
+//                tes.prependPerspective(800);
+//                tes.prependPerspective(300);
+//                console.log(tes.getPerspective());
+                
+                //A -> perspective-origin: 256px 256px; PERS: 600
+                //B -> perspective-origin: 0px 0px; PERS: 300
+                //FOC -> 200
+                //PERS-> 85px 85px
+                
+//                var te = new geom.Point3D(128, 128, 1);
+//                te.unproject(vp.focalLength, new geom.Point2D(0, 0));
+//                console.log(te.toString());
+                
+                var t1 = new geom.Matrix3D();
+                t1.appendPositionRaw(256, 256, 0);
+                t1.appendPerspective(600);
+                t1.appendPositionRaw(-256, -256, 0);
+                var t2 = new geom.Matrix3D();
+                t2.appendPositionRaw(128, 0, 0);
+                t2.appendPerspective(300);
+                t2.appendPositionRaw(-128, 0, 0);
+                var t3 = geom.Matrix3D.multiply(t1, t2);
+                
+                vp.origin.x = (1 / -t3.m34) * t3.m31;
+                vp.origin.y = (1 / -t3.m34) * t3.m32;
+                
+//                vp.origin.x = 170.7;
+//                vp.origin.y = 85;
+                
+//                console.log((1 / -t3.m34) * t3.m31);
+//                console.log((1 / -t3.m34) * t3.m32);
+                
                 var ps = window.getComputedStyle(b.parentElement);
                 if (ps.transformStyle == "preserve-3d")
                     vp.focalLength = focalMatrix.prependPerspective(vp.focalLength).getPerspective();
                 else
                     vp.focalLength = math.Number.parse(ps.perspective, 0);
-                this.applyPos(this.unp(false, screen, vp, ma), bc);
+//                console.log(vp.origin);
+//                console.log(vp.focalLength);
+                
+                this.applyPos(this.unp(screen, vp, ma), bc);
             });
         }
 
@@ -59,13 +109,8 @@ module jsidea.test {
             visual.style.transform = "translate(" + Math.round(x) + "px," + Math.round(y) + "px)";
         }
 
-        private unp(flattened: boolean, screen: geom.Point3D, vp: geom.Viewport, m: geom.Matrix3D): geom.Point3D {
+        private unp(screen: geom.Point3D, vp: geom.Viewport, m: geom.Matrix3D): geom.Point3D {
             m = m.clone();
-            if (flattened) {
-                //                m.invert();
-                //                return m.transform(screen);
-            }
-            
 
             //unproject
             var dir = new geom.Point3D(screen.x, screen.y, -1);

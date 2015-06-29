@@ -890,31 +890,22 @@ module jsidea.geom {
             if (visual.ownerDocument) {
                 var style = window.getComputedStyle(visual);
                 var m = ret.setCSS(style.transform);
-//                if(m.getPerspective())
-//                    m.appendPerspective(m.getPerspective());
-                
-                //                m.m13 *= -1;
-                //                m.m31 *= -1;
-                //                m.m43 *= -1;
-                
-                //                m.m34 *= -1;
-                
-                //                m.prependScaleRaw(1, 1, -1);
 
                 var origin = Matrix3D.extractOrigin3D(visual, style);
                
-//                var dec = m.decompose();
-//                m.identity();
-//                m.appendPositionRaw(-origin.x, -origin.y, 0);
-//                m.appendScale(dec.scale);
-//                m.appendRotation(dec.rotation);
-//                m.appendPosition(dec.position);
-//                m.appendPositionRaw(origin.x, origin.y, 0);
+                //                var dec = m.decompose();
+                //                m.identity();
+                //                m.appendPositionRaw(-origin.x, -origin.y, 0);
+                //                m.appendScale(dec.scale);
+                //                m.appendRotation(dec.rotation);
+                //                m.appendPosition(dec.position);
+                //                m.appendPositionRaw(origin.x, origin.y, 0);
                 
-                m.prependPositionRaw(-origin.x, -origin.y, 0);
-                m.appendPositionRaw(origin.x, origin.y, 0);
+                //                m.prependPositionRaw(-origin.x, -origin.y, 0);
+                //                m.appendPositionRaw(origin.x, origin.y, 0);
                 
-                
+                m.prependPositionRaw(origin.x, origin.y, 0);
+                m.appendPositionRaw(-origin.x, -origin.y, 0);
 
                 return m;
             }
