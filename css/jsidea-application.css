@@ -20,7 +20,7 @@ canvas {
 	position: absolute;
 	
 	perspective: 600px;
-	perspective-origin: 256px 256px;
+	perspective-origin: 100px 200px;
 	transform-style: preserve-3d;
 }
 
@@ -31,21 +31,25 @@ canvas {
 	height: 512px;
 	transform-origin: 0 0;
 	/* transform: perspective(200px) translate3D(100px, 0px, -100px); */
-	/* transform: translate3D(200px, 0px, -200px); */
+	/* transform: translate3D(512px, 0px, 0px) rotateY(30deg); */
+	/* transform: rotateY(15deg); */
+	transform: translate3D(64px, 96px, -256px);
+	/* transform: translateX(256px); */
 	
-	perspective: 300px;
-	perspective-origin: 128px 0;
-	transform-style: preserve-3d;
+	/* perspective: 400px;
+	perspective-origin: 256px 128px;
+	transform-style: preserve-3d; */
 }
 
 #b-cont {
 	position: absolute;
 	background-color: #0000FF;
 	opacity: 0.3;
-	width: 256px;
+	width: 512px;
 	height: 512px;
 	transform-origin: 0 0;
-	transform: translate3D(256px, 256px, -256px) rotateY(15deg);
+	/* transform: translate3D(256px, 256px, -256px) rotateY(15deg); */
+	transform: translate3D(256px, 256px, -256px) rotateY(20deg);
 	transform-style: preserve-3d;
 }
 
@@ -64,4 +68,5 @@ canvas {
 	width: 64px;
 	height: 64px;
 	transform-origin: 0px 0px;
+	transform: translateX(512px);
 }

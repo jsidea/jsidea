@@ -7,7 +7,366 @@ module jsidea.test {
 
         //@override abstract
         public create(): void {
-            this.testMatrix3D();
+            this.testMatrix3D4();
+        }
+        
+         private testMatrix3D4(): void {
+            var con = document.getElementById("content");
+
+            var a = document.createElement("div");
+            a.id = "a-cont";
+            var b = document.createElement("div");
+            b.id = "b-cont";
+            var ac = document.createElement("div");
+            ac.id = "ac-cont";
+            var bc = document.createElement("div");
+            bc.id = "bc-cont";
+
+            con.appendChild(a);
+            a.appendChild(b);
+            con.appendChild(ac);
+            b.appendChild(bc);
+
+            $(document).bind("mousemove",(evt) => {
+
+                var fin = new geom.Matrix3D();
+                fin.appendPositionRaw(64, 96, -256);//transform
+                fin.appendPositionRaw(64, 96, -256);//transform
+                fin.appendPositionRaw(-100, -200, 0);//perspective-origin
+                fin.appendPerspective(600);//perspective
+                fin.appendPositionRaw(100, 200, 0);//perspective-origin
+                
+                var pt = new geom.Point3D();
+                var tl = fin.transform3D(pt);
+                this.applyPos(tl, ac);
+                
+                console.log(fin.toString(), tl.toString(), fin.getPerspective(), (1 / fin.m34) * fin.m31);
+            }
+                );
+            $(document).trigger("mousemove");
+            
+            //            console.log(this.getOffestToCrossDoc(b, con));
+        }
+
+        private testMatrix3D3(): void {
+            var con = document.getElementById("content");
+
+            var a = document.createElement("div");
+            a.id = "a-cont";
+            var b = document.createElement("div");
+            b.id = "b-cont";
+            var ac = document.createElement("div");
+            ac.id = "ac-cont";
+            var bc = document.createElement("div");
+            bc.id = "bc-cont";
+
+            con.appendChild(a);
+            a.appendChild(b);
+            con.appendChild(ac);
+            b.appendChild(bc);
+
+            $(document).bind("mousemove",(evt) => {
+                var fin = this.getResMat(a, new geom.Point2D());
+//                var pt = new geom.Point3D(64, 96, -256);
+                var pt = new geom.Point3D();
+                var tl = fin.transform3D(pt);
+                this.applyPos(tl, ac);
+                
+                console.log(fin.toString(), tl.toString(), fin.getPerspective(), (1 / fin.m34) * fin.m31);
+            }
+                );
+            $(document).trigger("mousemove");
+            
+            //            console.log(this.getOffestToCrossDoc(b, con));
+        }
+
+        //http://code.metager.de/source/xref/mozilla/B2G/gecko/layout/base/nsDisplayList.cpp#perspective
+        private getResMat(aFrame: HTMLElement, aOrigin: geom.Point2D): geom.Matrix3D {
+
+
+            if (!aFrame)
+                return new geom.Matrix3D();
+
+            var parentDisp = aFrame.parentElement;
+
+            var toMozOrigin = geom.Point3D.extractOrigin(aFrame);
+            var newOrigin = new geom.Point3D(aOrigin.x, aOrigin.y, 0);
+            //            var bounds = geom.Box2D.extract(aFrame);
+
+            var result = geom.Matrix3D.extract(aFrame);
+
+            var p = parentDisp ? math.Number.parse(window.getComputedStyle(parentDisp).perspective, 0) : 0;
+            if (parentDisp && p > 0) {
+                var perspective = new geom.Matrix3D();
+                perspective.m34 = -1 / p;
+//                perspective.m33 = 0;
+                
+//                var toPerspectiveOrigin = geom.Point2D.extractPerspectiveOrigin(aFrame);
+                var toPerspectiveOrigin = geom.Point2D.extractPerspectiveOrigin(parentDisp);
+                perspective.changeBasis(toPerspectiveOrigin.clone().sub(toMozOrigin));
+                result.append(perspective);
+            }
+
+            //            if (window.getComputedStyle(aFrame).transformStyle != "none") {
+            //                if (parentDisp && window.getComputedStyle(parentDisp).transformStyle != "none") {
+            if (parentDisp && window.getComputedStyle(parentDisp).transformStyle == "preserve-3d") {
+                var pos = geom.Point2D.extractPosition(aFrame);
+                var parent = this.getResMat(parentDisp, aOrigin.clone().sub(pos));
+                result.changeBasis(newOrigin.clone().add(toMozOrigin));
+                return result.append(parent);
+            }
+            
+            //            result.app
+            
+            return result.changeBasis(newOrigin.clone().add(toMozOrigin));
+        }
+
+        private getOffestToCrossDoc(f: HTMLElement, aOther: HTMLElement | Window): geom.Point2D {
+            var top: number = 0;
+            var left: number = 0;
+            while (f && f != aOther) {
+                left += f.offsetLeft;
+                top += f.offsetTop;
+                var par = f.parentElement;
+                if (par) {
+                    f = par;
+                }
+                else {
+
+                }
+            }
+
+            return new geom.Point2D(left, top);
+        }
+
+        private projectVector(m: geom.Matrix3D, v: geom.Point3D): geom.Point3D {
+
+            var r: geom.Point3D = new geom.Point3D();
+            var x: number = v.x;
+            var y: number = v.y;
+            var z: number = v.z;
+
+            if (z == 0)
+                z = 0.00001;
+
+            var e: number[] = m.getData();
+            var d: number = 1 / (e[3] * x + e[7] * y + e[11] * z + e[15]); // perspective divide
+            
+            r.x = (e[0] * x + e[4] * y + e[8] * z + e[12]) * d;
+            r.y = (e[1] * x + e[5] * y + e[9] * z + e[13]) * d;
+            r.z = (e[2] * x + e[6] * y + e[10] * z + e[14]) * d;
+            return r;
+        }
+
+        //        public GetResultingTransformMatrix(aFrame, aOrigin): void {
+        //            //            NS_PRECONDITION(aFrame, "Cannot get transform matrix for a null frame!");
+        //
+        //            //            if (aOutAncestor) {
+        //            //      var aOutAncestor = nsLayoutUtils::GetCrossDocParentFrame(aFrame);
+        //            //            }
+        //
+        //            /* Account for the -moz-transform-origin property by translating the
+        //             * coordinate space to the new origin.
+        //             */
+        //            var toMozOrigin = GetDeltaToMozTransformOrigin(aFrame, aAppUnitsPerPixel, aBoundsOverride);
+        //            var newOrigin = new Point3D(aOrigin.x, aOrigin.y, 0.0);
+        //
+        //            /* Get the underlying transform matrix.  This requires us to get the
+        //             * bounds of the frame.
+        //             */
+        //            var disp = aFrame.GetStyleDisplay();
+        //            var bounds = (aBoundsOverride ? aBoundsOverride :
+        //                nsDisplayTransform::GetFrameBoundsForTransform(aFrame));
+        //
+        //            /* Get the matrix, then change its basis to factor in the origin. */
+        //            var dummy;
+        //            var result;
+        //            /* Transformed frames always have a transform, or are preserving 3d (and might still have perspective!) */
+        //            if (disp .mSpecifiedTransform) {
+        //                result = nsStyleTransformMatrix::ReadTransforms(disp ->mSpecifiedTransform,
+        //                    aFrame.GetStyleContext(),
+        //                    aFrame.PresContext(),
+        //                    dummy, bounds, aAppUnitsPerPixel);
+        //            } else {
+        //                NS_ASSERTION(aFrame.GetStyleDisplay().mTransformStyle == NS_STYLE_TRANSFORM_STYLE_PRESERVE_3D ||
+        //                    aFrame.GetStyleDisplay().mBackfaceVisibility == NS_STYLE_BACKFACE_VISIBILITY_HIDDEN,
+        //                    "If we don't have a transform, then we must have another reason to have an nsDisplayTransform created");
+        //            }
+        //
+        //            var nsStyleDisplay parentDisp = nsnull;
+        //            nsStyleContext * parentStyleContext = aFrame ->GetStyleContext() ->GetParent();
+        //            if (parentStyleContext) {
+        //                parentDisp = parentStyleContext ->GetStyleDisplay();
+        //            }
+        //            if (nsLayoutUtils::Are3DTransformsEnabled() &&
+        //            parentDisp && parentDisp ->mChildPerspective.GetUnit() == eStyleUnit_Coord &&
+        //            parentDisp ->mChildPerspective.GetCoordValue() > 0.0) {
+        //                gfx3DMatrix perspective;
+        //                perspective._34 =
+        //                -1.0 / NSAppUnitsToFloatPixels(parentDisp ->mChildPerspective.GetCoordValue(),
+        //                    aAppUnitsPerPixel);
+        //                /* At the point when perspective is applied, we have been translated to the transform origin.
+        //                 * The translation to the perspective origin is the difference between these values.
+        //                 */
+        //                gfxPoint3D toPerspectiveOrigin = GetDeltaToMozPerspectiveOrigin(aFrame, aAppUnitsPerPixel);
+        //                result = result * nsLayoutUtils::ChangeMatrixBasis(toPerspectiveOrigin - toMozOrigin, perspective);
+        //            }
+        //
+        //            if (aFrame ->Preserves3D() && nsLayoutUtils::Are3DTransformsEnabled()) {
+        //                // Include the transform set on our parent
+        //                NS_ASSERTION(aFrame ->GetParent() &&
+        //                    aFrame ->GetParent() ->IsTransformed() &&
+        //                    aFrame ->GetParent() ->Preserves3DChildren(),
+        //                    "Preserve3D mismatch!");
+        //                gfx3DMatrix parent = GetResultingTransformMatrix(aFrame ->GetParent(), aOrigin - aFrame ->GetPosition(),
+        //                    aAppUnitsPerPixel, nsnull, aOutAncestor);
+        //                return nsLayoutUtils::ChangeMatrixBasis(newOrigin + toMozOrigin, result) * parent;
+        //            }
+        //
+        //            return nsLayoutUtils::ChangeMatrixBasis
+        //                (newOrigin + toMozOrigin, result);
+        //        }
+        //    }
+
+        private testMatrix3D2(): void {
+            var con = document.getElementById("content");
+
+            var a = document.createElement("div");
+            a.id = "a-cont";
+            var b = document.createElement("div");
+            b.id = "b-cont";
+            var ac = document.createElement("div");
+            ac.id = "ac-cont";
+            var bc = document.createElement("div");
+            bc.id = "bc-cont";
+
+            con.appendChild(a);
+            a.appendChild(b);
+            con.appendChild(ac);
+            b.appendChild(bc);
+
+            console.log(this.getOffestToCrossDoc(a, con));
+
+            $(document).bind("mousemove",(evt) => {
+
+
+//                var fin = this.getResMat(a, new geom.Point2D());
+//                //                fin.invert();
+//                //                console.log(fin.toString());
+//
+//                var pt = new geom.Point3D();//256, 256, -256);
+//                //                var tl = this.projectVector(fin, pt);
+//                var tl = fin.transform3D(pt);
+//                //                                tl.x /= tl.w;
+//                //                                tl.y /= tl.w;
+//                //                                tl.z /= tl.w;
+//                console.log(tl.toString());
+//                this.applyPos(tl, ac);
+//
+//                return;
+                
+                //                var screen = new geom.Point3D(evt.pageX, evt.pageY, 0);
+
+                //                //A
+                //                var cam = new geom.Matrix3D();
+                //                cam.appendPositionRaw(256, 256, 0);
+                //                
+                //                var obj = new geom.Matrix3D();
+                //                obj.append(geom.Matrix3D.extract(a));
+                //                
+                //                var mod = new geom.Matrix3D();
+                //                mod.append(obj);
+                //                mod.append(cam.clone().invert());
+                //                
+                //                var per = new geom.Matrix3D();
+                //                per.appendPerspective(600);
+                //                
+                //                
+                //                //B
+                //                cam.appendPositionRaw(64, 0, 0);
+                //                
+                //                obj.append(geom.Matrix3D.extract(b));
+                //                
+                //                mod.identity();
+                //                mod.append(obj);
+                //                mod.append(cam.clone().invert());
+                
+                //A
+                var cam = new geom.Matrix3D();
+                //                cam.appendPositionRaw(256, 256, 0);
+                //                cam.appendPositionRaw(64, 0, 0);
+                
+                var per = new geom.Matrix3D();
+
+                var ma = geom.Matrix3D.extract(a);
+                var mb = geom.Matrix3D.extract(b);
+
+
+                cam.identity();
+                //                cam.appendPositionRaw(0, 0, 0);
+                //                per.append(cam.clone().invert());
+                //                per.appendPerspective(600);
+                //                per.append(cam);
+                
+                //                cam.identity();
+                //                cam.appendPositionRaw(256, 0, 0);
+                //                per.append(cam.clone().invert());
+                //                per.appendPerspective(600);
+                //                per.append(cam);
+
+                //                console.log((1 / per.m34) * per.m31);
+                //                console.log((1 / per.m34) * per.m32);
+
+                //                var val = (1 / 600) + (1 / 300);
+                
+                //                console.log(1 / val);
+                
+                cam.identity();
+                cam.appendPositionRaw(128, 0, 0);
+                per.append(cam.clone().invert());
+                per.appendPerspective(300);
+                per.append(cam);
+
+                //                console.log((1 / per.m34) * per.m31);
+                //                console.log((1 / per.m34) * per.m32);
+                
+                //                console.log(per.getPerspective());
+                //                console.log(per.toString());
+
+                var obj = new geom.Matrix3D();
+                //                obj.append(ma);
+                obj.append(mb);
+                
+                //                var mod = new geom.Matrix3D();
+                //                mod.append(obj);
+                //                mod.append(cam.clone().invert());
+                
+                var fin = new geom.Matrix3D();
+                fin.append(obj);
+                fin.append(per);
+                
+                //                var vp = new geom.Viewport();
+                //                vp.focalLength = fin.getPerspective();
+                //                vp.width = 512;
+                //                vp.height = 512;
+                //                vp.origin.x = (1 / -fin.m34) * fin.m31;
+                //                vp.origin.y = (1 / -fin.m34) * fin.m32; 
+                //                var un = this.unp(screen, vp, fin);
+                //                console.log(un);
+                
+                var tl = fin.transformRaw(512, 0, 0);
+                tl.x /= tl.w;
+                tl.y /= tl.w;
+                tl.z /= tl.w;
+                
+                //                tl.x += 128;
+                //                tl = cam.transform(tl);
+                
+                //                console.log(tl);
+                
+                this.applyPos(tl, ac);
+            }
+                );
         }
 
         private testMatrix3D(): void {
@@ -35,78 +394,106 @@ module jsidea.test {
 
                 var ma = geom.Matrix3D.extract(a);
                 vp.fromElement(con);
-                
-                
-                
+
                 vp.focalLength = focalMatrix.prependPerspective(vp.focalLength).getPerspective();
-                this.applyPos(this.unp(screen, vp, ma), ac);
+                var locA = this.applyPos(this.unp(screen, vp, ma), ac);
 
                 var mb = geom.Matrix3D.extract(b);
-                ma.append(mb);
+
+                var accm = new geom.Matrix3D();
+                accm.append(ma);
+                accm.append(mb);
+
                 vp.fromElement(b.parentElement);
-                
+
                 var tes = new geom.Matrix3D();
                 
-//                var val = (1 / 800) + (1 / 300);
-//                console.log(1 / val);
-//                
-//                tes.prependPerspective(800);
-//                tes.prependPerspective(300);
-//                console.log(tes.getPerspective());
+                //                var val = (1 / 800) + (1 / 300);
+                //                console.log(1 / val);
+                //                
+                //                tes.prependPerspective(800);
+                //                tes.prependPerspective(300);
+                //                console.log(tes.getPerspective());
                 
                 //calc new focal length
-//                var val = (1 / 600) + (1 / 300);
-//                val = (1 / val);
-//                console.log(val);
+                //                var val = (1 / 600) + (1 / 300);
+                //                val = (1 / val);
+                //                console.log(val);
                 
-//                tes.prependPerspective(800);
-//                tes.prependPerspective(300);
-//                console.log(tes.getPerspective());
+                //                tes.prependPerspective(800);
+                //                tes.prependPerspective(300);
+                //                console.log(tes.getPerspective());
                 
                 //A -> perspective-origin: 256px 256px; PERS: 600
                 //B -> perspective-origin: 0px 0px; PERS: 300
                 //FOC -> 200
                 //PERS-> 85px 85px
                 
-//                var te = new geom.Point3D(128, 128, 1);
-//                te.unproject(vp.focalLength, new geom.Point2D(0, 0));
-//                console.log(te.toString());
+                //                var te = new geom.Point3D(128, 128, 1);
+                //                te.unproject(vp.focalLength, new geom.Point2D(0, 0));
+                //                console.log(te.toString());
                 
                 var t1 = new geom.Matrix3D();
+                
+                //                var pos = new geom.Point3D(256, 128, 64);
+                var pos = ma.transform(new geom.Point3D());
+                var sco = new geom.Point2D(256, 256);
+                pos.project(600, sco);
+                pos.z = 0;
+                console.log(pos);
+                //                var test = ma.transformRaw(0, 0, 0);
+                
+                //                t1.appendPosition(pos);
                 t1.appendPositionRaw(256, 256, 0);
                 t1.appendPerspective(600);
                 t1.appendPositionRaw(-256, -256, 0);
-                var t2 = new geom.Matrix3D();
-                t2.appendPositionRaw(128, 0, 0);
-                t2.appendPerspective(300);
-                t2.appendPositionRaw(-128, 0, 0);
-                var t3 = geom.Matrix3D.multiply(t1, t2);
+                //                pos.scaleBy(-1);
+                //                t1.appendPosition(pos);
                 
+                var t2 = new geom.Matrix3D();
+                t2.appendPositionRaw(64, 0, 0);
+                t2.appendPerspective(300);
+                t2.appendPositionRaw(-64, 0, 0);
+                var t3 = geom.Matrix3D.multiply(t1, t2);
+                //                t3.prepend(accm);
+                
+                //                var t1 = geom.Matrix3D.extractPerspective(con);
+                //                var t2 = geom.Matrix3D.extractPerspective(a);
+                //                var t3 = geom.Matrix3D.multiply(t1, t2);
+               
+                //                t3.append(ma);
+                
+                //                console.log(vp.width);
+                //                console.log(t3.toString());
+                vp.focalLength = t3.getPerspective();
                 vp.origin.x = (1 / -t3.m34) * t3.m31;
                 vp.origin.y = (1 / -t3.m34) * t3.m32;
+                //                console.log(vp.toString());
                 
-//                vp.origin.x = 170.7;
-//                vp.origin.y = 85;
+                //                vp.origin.x += 200;
                 
-//                console.log((1 / -t3.m34) * t3.m31);
-//                console.log((1 / -t3.m34) * t3.m32);
+                //                vp.origin.x = mb.transform(new geom.Point3D(vp.origin.x, vp.origin.y, 0)).x;
+                //                vp.origin.y = mb.transform(new geom.Point3D(vp.origin.x, vp.origin.y, 0)).y;
                 
-                var ps = window.getComputedStyle(b.parentElement);
-                if (ps.transformStyle == "preserve-3d")
-                    vp.focalLength = focalMatrix.prependPerspective(vp.focalLength).getPerspective();
-                else
-                    vp.focalLength = math.Number.parse(ps.perspective, 0);
-//                console.log(vp.origin);
-//                console.log(vp.focalLength);
+                //                vp.origin.x += 200;
+                //                vp.origin.x += 3
                 
-                this.applyPos(this.unp(screen, vp, ma), bc);
+                //                screen.x -= 200;
+                //                vp.origin.x += 200;
+                
+                //                screen.x -= 256;
+                //                this.applyPos(this.unp(screen, vp, accm), bc);
+                
+                //                locA = t1.transform(locA);
+                this.applyPos(this.unp(locA, vp, mb), bc);
             });
         }
 
-        private applyPos(pos: geom.Point3D, visual: HTMLElement): void {
+        private applyPos(pos: geom.Point3D, visual: HTMLElement): geom.Point3D {
             var x = math.Number.clamp(pos.x, -2048, 2048);
             var y = math.Number.clamp(pos.y, -2048, 2048);
             visual.style.transform = "translate(" + Math.round(x) + "px," + Math.round(y) + "px)";
+            return pos;
         }
 
         private unp(screen: geom.Point3D, vp: geom.Viewport, m: geom.Matrix3D): geom.Point3D {

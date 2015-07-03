@@ -95,9 +95,9 @@ module jsidea.geom {
         }
 
         public toString(): string {
-            return "[" + this.qualifiedClassName() +
-                + " origin.x=" + this.origin.x
-                + " origin.y=" + this.origin.y
+            return "[" + this.qualifiedClassName()
+                + " originX=" + this.origin.x
+                + " originY=" + this.origin.y
                 + " width=" + this.width
                 + " height=" + this.height
                 + "]";

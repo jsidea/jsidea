@@ -54,15 +54,26 @@ module jsidea.geom {
             return false;
         }
 
+        public static extract(visual: HTMLElement, ret: Point3D = new Point3D()): Box2D {
+            //            
+            return new Box2D(0, 0,
+                visual.offsetWidth,
+                visual.offsetHeight);
+//            var bnds = visual.getClientRects()[0];
+//            return new Box2D(bnds.left, bnds.top,
+//                bnds.width,
+//                bnds.height);
+        }
+
         public dispose(): void {
         }
 
         public qualifiedClassName(): string {
-            return "jsidea.geom.Rectangle";
+            return "jsidea.geom.Box2D";
         }
 
         public toString(): string {
-            return "[" + this.qualifiedClassName() +
+            return "[" + this.qualifiedClassName()
                 + " x=" + this.x
                 + " y=" + this.y
                 + " width=" + this.width

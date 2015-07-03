@@ -139,7 +139,7 @@ module jsidea.geom {
             this.y = scale * (this.y - perspectiveOrigin.y) + perspectiveOrigin.y;
             return this;
         }
-        
+
         public unproject(focalLength: number, perspectiveOrigin: IPoint2DValue): Point3D {
             var scale: number = (focalLength - this.z) / focalLength;
             this.x = scale * (this.x - perspectiveOrigin.x) + perspectiveOrigin.x;
@@ -219,7 +219,8 @@ module jsidea.geom {
             return "[" + this.qualifiedClassName() +
                 " x=" + this.x +
                 " y=" + this.y +
-                " z=" + this.z + "]";
+                " z=" + this.z +
+                " w=" + this.w + "]";
         }
 
         public static interpolate(v0: IPoint3DValue, v1: IPoint3DValue, f: number): Point3D {
@@ -247,6 +248,15 @@ module jsidea.geom {
         public static reflect(vector: IPoint3DValue, normal: IPoint3DValue): Point3D {
             var dp: number = vector.x * normal.x + vector.y * normal.y + vector.z * normal.z;
             return new Point3D(vector.x - 2 * dp * normal.x, vector.y - 2 * dp * normal.y, vector.z - 2 * dp * normal.z);
+        }
+
+        public static extractOrigin(visual: HTMLElement, bounds: Box2D = Box2D.extract(visual), ret: Point3D = new Point3D()): Point3D {
+            var style: CSSStyleDeclaration = window.getComputedStyle(visual);
+            var vals = style.transformOrigin.split(" ");
+            return ret.setTo(
+                math.Number.parseRelation(vals[0], bounds.width, 0),
+                math.Number.parseRelation(vals[1], bounds.height, 0),
+                math.Number.parseRelation(vals[3], 0, 0));//2nd parama "focalLength" ?
         }
     }
 }
