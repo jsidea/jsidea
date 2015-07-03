@@ -29,11 +29,13 @@ canvas {
 	background-color: rgba(255, 0, 255, 0.3);
 	width: 512px;
 	height: 512px;
-	transform-origin: 0 0;
+	transform-origin: 256px 256px;
+	top: 200px;
+	left: 300px;
 	/* transform: perspective(200px) translate3D(100px, 0px, -100px); */
 	/* transform: translate3D(512px, 0px, 0px) rotateY(30deg); */
 	/* transform: rotateY(15deg); */
-	transform: translate3D(64px, 96px, -256px);
+	transform: translate3D(64px, 96px, -256px) rotateY(15deg);
 	/* transform: translateX(256px); */
 	
 	perspective: 300px;

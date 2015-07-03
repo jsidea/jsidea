@@ -31,7 +31,13 @@ module jsidea.test {
 
                 var fin = new geom.Matrix3D();                
                 
-                fin.appendPositionRaw(64, 96, -256);//transform
+                var ma = geom.Matrix3D.extract(a);
+                
+                fin.appendPositionRaw(-256, -256, 0);//transform-origin
+//                fin.appendPositionRaw(64, 96, -256);//transform
+                fin.append(ma);
+                fin.appendPositionRaw(256, 256, 0);//transform-origin
+                fin.appendPositionRaw(300, 200, 0);//left, top
                 fin.appendPositionRaw(-100, -200, 0);//perspective-origin
                 fin.appendPerspective(600);//perspective
                 fin.appendPositionRaw(100, 200, 0);//perspective-origin                
@@ -44,7 +50,7 @@ module jsidea.test {
                 
                 fin.prepend(par);
                 
-                var pt = new geom.Point3D();
+                var pt = new geom.Point3D(512);
                 var tl = fin.transform3D(pt);
                 this.applyPos(tl, ac);
                 
