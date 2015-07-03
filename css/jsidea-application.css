@@ -36,9 +36,9 @@ canvas {
 	transform: translate3D(64px, 96px, -256px);
 	/* transform: translateX(256px); */
 	
-	/* perspective: 400px;
+	perspective: 300px;
 	perspective-origin: 256px 128px;
-	transform-style: preserve-3d; */
+	transform-style: preserve-3d;
 }
 
 #b-cont {
@@ -49,7 +49,7 @@ canvas {
 	height: 512px;
 	transform-origin: 0 0;
 	/* transform: translate3D(256px, 256px, -256px) rotateY(15deg); */
-	transform: translate3D(256px, 256px, -256px) rotateY(20deg);
+	transform: translate3D(256px, 256px, -256px);
 	transform-style: preserve-3d;
 }
 

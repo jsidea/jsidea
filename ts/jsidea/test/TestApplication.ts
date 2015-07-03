@@ -29,12 +29,20 @@ module jsidea.test {
 
             $(document).bind("mousemove",(evt) => {
 
-                var fin = new geom.Matrix3D();
-                fin.appendPositionRaw(64, 96, -256);//transform
+                var fin = new geom.Matrix3D();                
+                
                 fin.appendPositionRaw(64, 96, -256);//transform
                 fin.appendPositionRaw(-100, -200, 0);//perspective-origin
                 fin.appendPerspective(600);//perspective
-                fin.appendPositionRaw(100, 200, 0);//perspective-origin
+                fin.appendPositionRaw(100, 200, 0);//perspective-origin                
+                
+                var par = new geom.Matrix3D();
+                par.appendPositionRaw(256, 256, -256);//transform
+                par.appendPositionRaw(-256, -128, 0);//perspective-origin
+                par.appendPerspective(300);//perspective
+                par.appendPositionRaw(256, 128, 0);//perspective-origin              
+                
+                fin.prepend(par);
                 
                 var pt = new geom.Point3D();
                 var tl = fin.transform3D(pt);
