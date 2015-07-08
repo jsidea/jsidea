@@ -64,11 +64,17 @@ module jsidea.test {
 
                 ctx.clearRect(0, 0, can.width, can.height);
 
-                var fin = this.extractP(a);
+                var fin = new geom.Matrix3D();//
+                
+                var parent = this.extractP(a);
+                fin.prepend(parent);
                 this.drawBoundingBox(ctx, fin, a);
-                var par = this.extractP(b);
-                fin.prepend(par);
-                this.drawBoundingBox(ctx, fin, b);
+                
+                var child = this.extractP(b);
+                fin.prepend(child);
+//                this.drawBoundingBox(ctx, fin, child);
+                
+                this.drawBoundingBox2(ctx, child, parent, b);
 
                 //                var pt = new geom.Point3D();
                 //                var tl = fin.transform3D(pt);
@@ -111,7 +117,56 @@ module jsidea.test {
             ctx.arc(orp.x, orp.y, 5, 0, 360);
             ctx.stroke();
 
-            ctx.fillText("(" + or.x.toFixed(2) + ", " + or.y.toFixed(2) + ") " + pm.getPerspective().toFixed(2), orp.x + 5, orp.y - 5);
+            ctx.fillText("(" + orp.x.toFixed(2) + ", " + orp.y.toFixed(2) + ") " + pm.getPerspective().toFixed(2), orp.x + 5, orp.y - 5);
+        }
+        
+        private drawBoundingBox2(ctx: CanvasRenderingContext2D, child: geom.Matrix3D, par: geom.Matrix3D, e: HTMLElement): void {
+            var or: geom.Point2D = geom.Point2D.extractPerspectiveOrigin(e);
+            //            e.textContent = "HELLO WORLD";
+            //            console.log(or);
+            
+            var a = new geom.Point3D(0, 0, 0);
+            var b = new geom.Point3D(e.offsetWidth, 0, 0);
+            var c = new geom.Point3D(e.offsetWidth, e.offsetHeight, 0);
+            var d = new geom.Point3D(0, e.offsetHeight, 0);
+            var orp = new geom.Point3D(or.x, or.y, 0);
+
+            a = child.transform3D(a);
+            b = child.transform3D(b);
+            c = child.transform3D(c);
+            d = child.transform3D(d);
+            orp = child.transform3D(orp);
+            
+            a.z = 0;
+            b.z = 0;
+            c.z = 0;
+            d.z = 0;
+            orp.z = 0;
+            a.w = 1;
+            b.w = 1;
+            c.w = 1;
+            d.w = 1;
+            orp.w = 1;
+            console.log(a.toString());
+            
+            a = par.transform3D(a);
+            b = par.transform3D(b);
+            c = par.transform3D(c);
+            d = par.transform3D(d);
+            orp = par.transform3D(orp);
+
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.lineTo(c.x, c.y);
+            ctx.lineTo(d.x, d.y);
+            ctx.lineTo(a.x, a.y);
+            //x: number, y: number, radius: number, startAngle: number, endAngle: number, anticlockwise?: boolean
+            ctx.moveTo(orp.x + 5, orp.y);
+            ctx.arc(orp.x, orp.y, 5, 0, 360);
+            ctx.stroke();
+
+            ctx.fillText("(" + orp.x.toFixed(2) + ", " + orp.y.toFixed(2) + ") " + child.getPerspective().toFixed(2), orp.x + 5, orp.y - 5);
         }
 
         private extractP(a: HTMLElement): geom.Matrix3D {
@@ -145,7 +200,26 @@ module jsidea.test {
 //                pers = 470;
                 
 //                fin.append(geom.Matrix3D.extractW(a.parentElement).invert());
-                fin.appendPositionRaw(0, 0, 45);
+//                fin.appendPositionRaw(0, 0, 45);
+                
+//                por.x
+//                fin.appendPerspective(700);
+                
+//                var pm = geom.Matrix3D.extract(a.parentElement);
+//                pm.invert();
+//                ma.append(pm);
+                
+//                ma.appendPositionRaw(0, 0, 100);
+//                ma.appendPositionRaw(0, 0, 270);
+                
+//                por.x = -100;
+//                por.y = -100;
+//                console.log(por.toString());
+//                por.x -= 85;
+//                por.y -= 85;
+//                ma.appendPositionRaw(0, 0, 200);
+//                pers = 0;
+                
                 
                 //transform
                 fin.appendPositionRaw(-or.x, -or.y, -or.z);
@@ -155,6 +229,8 @@ module jsidea.test {
                 //offset
                 fin.appendPositionRaw(po.x, po.y, 0);
                 
+//                pers = 500;
+                
                 //perspective
                 fin.appendPositionRaw(-por.x, -por.y, 0);
                 if (pers)
@@ -162,6 +238,8 @@ module jsidea.test {
                 fin.appendPositionRaw(por.x, por.y, 0);
                 
 //                fin.m34 = 0;
+                
+//                fin.setMatrix2D(fin.getMatrix2D());
 
                 return fin;
             }
