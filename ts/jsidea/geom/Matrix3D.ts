@@ -968,6 +968,21 @@ module jsidea.geom {
             ret.identity();
             return ret;
         }
+        
+        public static extractW(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
+            if (visual.ownerDocument) {
+                var style = window.getComputedStyle(visual);
+                var m = ret.setCSS(style.transform);
+
+                var origin = Point3D.extractOrigin(visual);
+                m.prependPositionRaw(origin.x, origin.y, 0);
+                m.appendPositionRaw(-origin.x, -origin.y, 0);
+
+                return m;
+            }
+            ret.identity();
+            return ret;
+        }
 
         public static extractPerspective(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
             if (visual.ownerDocument) {
