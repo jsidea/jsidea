@@ -31,11 +31,11 @@ canvas {
 	/* top: 100px;
 	left: 100px; */
 	transform-origin: 256px 256px;
-	transform:  translate3D(0px, 0px, -600px);
-	perspective: 800px;
-	perspective-origin: 256px 0px;
+	transform:  translate3D(0px, 0px, -600px) rotateY(15deg);
+	perspective: 400px;
+	perspective-origin: 256px 128px;
 	/* perspective-origin: 256px 0px; */
-	transform-style: flat; 
+	transform-style: flat;
 	/* transform-style: preserve-3d; */
 }
 

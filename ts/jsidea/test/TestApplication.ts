@@ -72,7 +72,7 @@ module jsidea.test {
                 
                 var child = this.extractP(b);
                 fin.prepend(child);
-//                this.drawBoundingBox(ctx, fin, child);
+                this.drawBoundingBox(ctx, fin, b);
                 
                 this.drawBoundingBox2(ctx, child, parent, b);
 
@@ -131,22 +131,22 @@ module jsidea.test {
             var d = new geom.Point3D(0, e.offsetHeight, 0);
             var orp = new geom.Point3D(or.x, or.y, 0);
 
-            a = child.transform3D(a);
-            b = child.transform3D(b);
-            c = child.transform3D(c);
-            d = child.transform3D(d);
-            orp = child.transform3D(orp);
+            a = child.transform2D(a);
+            b = child.transform2D(b);
+            c = child.transform2D(c);
+            d = child.transform2D(d);
+            orp = child.transform2D(orp);
             
-            a.z = 0;
-            b.z = 0;
-            c.z = 0;
-            d.z = 0;
-            orp.z = 0;
-            a.w = 1;
-            b.w = 1;
-            c.w = 1;
-            d.w = 1;
-            orp.w = 1;
+//            a.z = 0;
+//            b.z = 0;
+//            c.z = 0;
+//            d.z = 0;
+//            orp.z = 0;
+//            a.w = 1;
+//            b.w = 1;
+//            c.w = 1;
+//            d.w = 1;
+//            orp.w = 1;
             console.log(a.toString());
             
             a = par.transform3D(a);
@@ -154,6 +154,18 @@ module jsidea.test {
             c = par.transform3D(c);
             d = par.transform3D(d);
             orp = par.transform3D(orp);
+            
+            
+//            a.z = 0;
+//            b.z = 0;
+//            c.z = 0;
+//            d.z = 0;
+//            orp.z = 0;
+//            a.w = 1;
+//            b.w = 1;
+//            c.w = 1;
+//            d.w = 1;
+//            orp.w = 1;
 
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
@@ -181,67 +193,6 @@ module jsidea.test {
 
             //if there is set perspective but the transformStyle is not set to preserve-3d
             if (!preserve && pers) {
-
-//                por.x += 40;
-//                por.y += -50;
-                
-//                var pp = 600;
-//                var tp = 300;
-//                var ms = 1 / ((1 / pp) + (1 / tp));
-//                ms += (pp - ms) * 0.5;
-//                console.log(ms);
-                
-                //                var parm = geom.Matrix3D.extract(a.parentElement);
-                
-                //600 x 600 = 1750 -> 300
-                //600 x 400 = 750 -> 240
-                //600 x 300 = 450 -> 200
-                //600 x 200 = 250 -> 150
-//                pers = 470;
-                
-//                fin.append(geom.Matrix3D.extractW(a.parentElement).invert());
-//                fin.appendPositionRaw(0, 0, 45);
-                
-//                por.x
-//                fin.appendPerspective(700);
-                
-//                var pm = geom.Matrix3D.extract(a.parentElement);
-//                pm.invert();
-//                ma.append(pm);
-                
-//                ma.appendPositionRaw(0, 0, 100);
-//                ma.appendPositionRaw(0, 0, 270);
-                
-//                por.x = -100;
-//                por.y = -100;
-//                console.log(por.toString());
-//                por.x -= 85;
-//                por.y -= 85;
-//                ma.appendPositionRaw(0, 0, 200);
-//                pers = 0;
-                
-                
-                //transform
-                fin.appendPositionRaw(-or.x, -or.y, -or.z);
-                fin.append(ma);
-                fin.appendPositionRaw(or.x, or.y, or.z);
-            
-                //offset
-                fin.appendPositionRaw(po.x, po.y, 0);
-                
-//                pers = 500;
-                
-                //perspective
-                fin.appendPositionRaw(-por.x, -por.y, 0);
-                if (pers)
-                    fin.appendPerspective(pers);
-                fin.appendPositionRaw(por.x, por.y, 0);
-                
-//                fin.m34 = 0;
-                
-//                fin.setMatrix2D(fin.getMatrix2D());
-
-                return fin;
             }
 
             //if no perspective and disabled 3d (no preserve-3d)

@@ -239,6 +239,15 @@ module jsidea.geom {
 
             return ret;
         }
+        
+        public transform2D(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
+            var w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + this.m44;
+            ret.x = (point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41) / w;
+            ret.y = (point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + this.m42) / w;
+            ret.z = 0;
+            ret.w = 0;
+            return ret;
+        }
 
         public transform4D(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
             ret.x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + point.w * this.m41;
