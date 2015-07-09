@@ -7,7 +7,33 @@ module jsidea.test {
 
         //@override abstract
         public create(): void {
-            this.testMatrix3D4();
+            this.testMatrix3D5();
+        }
+
+        private testMatrix3D5(): void {
+            var con = document.getElementById("content");
+
+            var a = document.createElement("div");
+            a.id = "a-cont";
+            var b = document.createElement("div");
+            b.id = "b-cont";
+            var bc = document.createElement("div");
+            bc.id = "bc-cont";
+
+            var can = document.createElement("canvas");
+            can.id = "can";
+            can.width = 1024;
+            can.height = 1024;
+            var ctx = can.getContext("2d");
+
+            a.appendChild(b);
+            b.appendChild(bc);
+            con.appendChild(a);
+            document.body.appendChild(can);
+            
+            this.drawBoundingBox3(ctx, a);
+            this.drawBoundingBox3(ctx, b);
+            this.drawBoundingBox3(ctx, bc);
         }
 
         private testMatrix3D4(): void {
@@ -37,56 +63,59 @@ module jsidea.test {
 
             $(document).bind("mousemove",(evt) => {
 
-                //                var fin = new geom.Matrix3D();
-                //
-                //                var ma = geom.Matrix3D.extract(a);
-                //                var or = geom.Point3D.extractOrigin(a);
-                //                var po = geom.Point2D.extractPosition(a);
-                //                var por = geom.Point2D.extractPerspectiveOrigin(a.parentElement);
-                //                
-                //                //                fin.appendPositionRaw(-256, -256, 0);//transform-origin
-                //                //                fin.appendPositionRaw(64, 96, -256);//transform
-                //                //                fin.appendPositionRaw(256, 256, 0);//transform-origin
-                //                //                fin.appendPositionRaw(300, 200, 0);//left, top
-                //                //                fin.appendPositionRaw(-100, -200, 0);//perspective-origin
-                //                //                fin.appendPerspective(600);//perspective
-                //                //                fin.appendPositionRaw(100, 200, 0);//perspective-origin
-                //                                
-                //                fin.appendPositionRaw(-or.x, -or.y, -or.z);
-                //                fin.append(ma);
-                //                fin.appendPositionRaw(or.x, or.y, or.z);
-                //                fin.appendPositionRaw(po.x, po.y, 0);
-                //                fin.appendPositionRaw(-por.x, -por.y, 0);
-                //                fin.appendPerspective(600);
-                //                fin.appendPositionRaw(por.x, por.y, 0);
-
-                
-
                 ctx.clearRect(0, 0, can.width, can.height);
 
                 var fin = new geom.Matrix3D();//
                 
-                var parent = this.extractP(a);
+                //                var parent = this.extractP(a);
+                //                fin.prepend(parent);
+                //                this.drawBoundingBox(ctx, fin, a);
+                //
+                //                var child = this.extractP(b);
+                //                fin.prepend(child);
+                //                this.drawBoundingBox(ctx, fin, b);
+                
+                var parent = geom.Transform.extract(a).matrix;
                 fin.prepend(parent);
                 this.drawBoundingBox(ctx, fin, a);
-                
-                var child = this.extractP(b);
+
+                var child = geom.Transform.extract(b).matrix;
                 fin.prepend(child);
                 this.drawBoundingBox(ctx, fin, b);
-                
+
                 this.drawBoundingBox2(ctx, child, parent, b);
-
-                //                var pt = new geom.Point3D();
-                //                var tl = fin.transform3D(pt);
-                //                this.applyPos(tl, ac);
-
-
-                //                console.log(fin.toString(), tl.toString(), fin.getPerspective(),(1 / fin.m34) * fin.m31);
             }
                 );
             $(document).trigger("mousemove");
+        }
+        
+        private drawBoundingBox3(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
+            var or: geom.Point2D = geom.Point2D.extractPerspectiveOrigin(e);
             
-            //            console.log(this.getOffestToCrossDoc(b, con));
+            var a = new geom.Point3D(0, 0, 0);
+            var b = new geom.Point3D(e.offsetWidth, 0, 0);
+            var c = new geom.Point3D(e.offsetWidth, e.offsetHeight, 0);
+            var d = new geom.Point3D(0, e.offsetHeight, 0);
+            var orp = new geom.Point3D(or.x, or.y, 0);
+
+            a = geom.Transform.getLocalToGlobal(e, a);
+            b = geom.Transform.getLocalToGlobal(e, b);
+            c = geom.Transform.getLocalToGlobal(e, c);
+            d = geom.Transform.getLocalToGlobal(e, d);
+            orp = geom.Transform.getLocalToGlobal(e, orp);
+
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.lineTo(c.x, c.y);
+            ctx.lineTo(d.x, d.y);
+            ctx.lineTo(a.x, a.y);
+            //x: number, y: number, radius: number, startAngle: number, endAngle: number, anticlockwise?: boolean
+            ctx.moveTo(orp.x + 5, orp.y);
+            ctx.arc(orp.x, orp.y, 5, 0, 360);
+            ctx.stroke();
+
+            ctx.fillText("(" + orp.x.toFixed(2) + ", " + orp.y.toFixed(2) + ") ", orp.x + 5, orp.y - 5);
         }
 
         private drawBoundingBox(ctx: CanvasRenderingContext2D, pm: geom.Matrix3D, e: HTMLElement): void {
@@ -119,7 +148,7 @@ module jsidea.test {
 
             ctx.fillText("(" + orp.x.toFixed(2) + ", " + orp.y.toFixed(2) + ") " + pm.getPerspective().toFixed(2), orp.x + 5, orp.y - 5);
         }
-        
+
         private drawBoundingBox2(ctx: CanvasRenderingContext2D, child: geom.Matrix3D, par: geom.Matrix3D, e: HTMLElement): void {
             var or: geom.Point2D = geom.Point2D.extractPerspectiveOrigin(e);
             //            e.textContent = "HELLO WORLD";
@@ -137,18 +166,18 @@ module jsidea.test {
             d = child.transform2D(d);
             orp = child.transform2D(orp);
             
-//            a.z = 0;
-//            b.z = 0;
-//            c.z = 0;
-//            d.z = 0;
-//            orp.z = 0;
-//            a.w = 1;
-//            b.w = 1;
-//            c.w = 1;
-//            d.w = 1;
-//            orp.w = 1;
-            console.log(a.toString());
-            
+            //            a.z = 0;
+            //            b.z = 0;
+            //            c.z = 0;
+            //            d.z = 0;
+            //            orp.z = 0;
+            //            a.w = 1;
+            //            b.w = 1;
+            //            c.w = 1;
+            //            d.w = 1;
+            //            orp.w = 1;
+            //            console.log(a.toString());
+
             a = par.transform3D(a);
             b = par.transform3D(b);
             c = par.transform3D(c);
@@ -156,16 +185,16 @@ module jsidea.test {
             orp = par.transform3D(orp);
             
             
-//            a.z = 0;
-//            b.z = 0;
-//            c.z = 0;
-//            d.z = 0;
-//            orp.z = 0;
-//            a.w = 1;
-//            b.w = 1;
-//            c.w = 1;
-//            d.w = 1;
-//            orp.w = 1;
+            //            a.z = 0;
+            //            b.z = 0;
+            //            c.z = 0;
+            //            d.z = 0;
+            //            orp.z = 0;
+            //            a.w = 1;
+            //            b.w = 1;
+            //            c.w = 1;
+            //            d.w = 1;
+            //            orp.w = 1;
 
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);

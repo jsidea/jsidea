@@ -226,6 +226,16 @@ module jsidea.geom {
             return this.deltaTransform(Buffer._DELTA_TRANSFORM_RAW_3D.setTo(x, y, z), ret);
         }
 
+        //from homegeneous (euclid) to cartesian FLATTENED!!!! like a projection
+        public transform2D(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
+            var w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + this.m44;
+            ret.x = (point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41) / w;
+            ret.y = (point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + this.m42) / w;
+            ret.z = 0;
+            ret.w = 0;
+            return ret;
+        }
+        
         //from homegeneous (euclid) to cartesian
         public transform3D(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
             ret.x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41;
@@ -238,30 +248,19 @@ module jsidea.geom {
             ret.z /= ret.w;
 
             return ret;
-        }
-        
-        public transform2D(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
-            var w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + this.m44;
-            ret.x = (point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41) / w;
-            ret.y = (point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + this.m42) / w;
-            ret.z = 0;
-            ret.w = 0;
-            return ret;
-        }
+        }        
 
-        public transform4D(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
+        public transform(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
             ret.x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + point.w * this.m41;
             ret.y = point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + point.w * this.m42;
             ret.z = point.x * this.m13 + point.y * this.m23 + point.z * this.m33 + point.w * this.m43;
             ret.w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + point.w * this.m44;
-            return ret;
-        }
-
-        public transform(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
-            ret.x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41;
-            ret.y = point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + this.m42;
-            ret.z = point.x * this.m13 + point.y * this.m23 + point.z * this.m33 + this.m43;
-            ret.w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + this.m44;
+            
+//            ret.x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41;
+//            ret.y = point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + this.m42;
+//            ret.z = point.x * this.m13 + point.y * this.m23 + point.z * this.m33 + this.m43;
+//            ret.w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + this.m44;
+            
             return ret;
         }
 
@@ -772,9 +771,17 @@ module jsidea.geom {
             this.m41 = target.m31;
             this.m42 = target.m32;
 
-
-
             return this;
+        }
+
+        public is2D(): boolean {
+            if (this.isIdentity())
+                return true;
+            return (this.m31 == 0 && this.m32 == 0 && this.m33 == 1 && this.m34 == 0 && this.m43 == 0 && this.m44 == 1);
+        }
+
+        public is3D(): boolean {
+            return !this.is2D();
         }
         
         //SOURCE: http://code.metager.de/source/xref/mozilla/B2G/gecko/gfx/thebes/gfx3DMatrix.cpp#651
@@ -795,14 +802,14 @@ module jsidea.geom {
             var z = -(point.x * this.m13 + point.y * this.m23 + this.m43) / this.m33;
 
             // Compute the transformed point
-            return this.transform4D(new Point3D(point.x, point.y, z, 1));
+            return this.transform(new Point3D(point.x, point.y, z, 1));
         }
 
         public changeBasis(origin: IPoint2DValue): Matrix3D {
             this.prependPositionRaw(-origin.x, -origin.y, 0);
             return this.appendPositionRaw(origin.x, origin.y, 0);
-//            this.prependPositionRaw(origin.x, origin.y, 0);
-//            return this.appendPositionRaw(-origin.x, -origin.y, 0);
+            //            this.prependPositionRaw(origin.x, origin.y, 0);
+            //            return this.appendPositionRaw(-origin.x, -origin.y, 0);
         }
 
         public getNormalVector(): Point3D {
@@ -968,16 +975,16 @@ module jsidea.geom {
                 var style = window.getComputedStyle(visual);
                 var m = ret.setCSS(style.transform);
 
-//                var origin = Point3D.extractOrigin(visual);
-//                m.prependPositionRaw(origin.x, origin.y, 0);
-//                m.appendPositionRaw(-origin.x, -origin.y, 0);
+                //                var origin = Point3D.extractOrigin(visual);
+                //                m.prependPositionRaw(origin.x, origin.y, 0);
+                //                m.appendPositionRaw(-origin.x, -origin.y, 0);
 
                 return m;
             }
             ret.identity();
             return ret;
         }
-        
+
         public static extractW(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
             if (visual.ownerDocument) {
                 var style = window.getComputedStyle(visual);
@@ -1010,7 +1017,7 @@ module jsidea.geom {
             return ret;
         }
 
-        
+
 
         private static extractPerspectiveOrigin(visual: HTMLElement, style: CSSStyleDeclaration, ret: Point2D = new Point2D()): Point2D {
             var vals = style.perspectiveOrigin.split(" ");
