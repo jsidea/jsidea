@@ -15,31 +15,33 @@ canvas {
 }
 
 #content {
-	border: 1px solid #FF00FF;
-	width: 512px;
-	height: 512px;
+	border: 100px solid #00FF00;
+	width: 900px;
+	height: 600px;
 	position: absolute;
-	perspective: 600px;
-	left: 200px;
-	transform: rotateY(20deg);
+	/* perspective: 600px; */
+	/* left: 200px; */
+	/* transform: rotateY(20deg); */
 	perspective-origin: 256px 256px;
-	transform-style: preserve-3d;
+	/* box-sizing: border-box; */
+	/* transform-style: preserve-3d; */
 }
 
 #a-cont {
 	position: absolute;
-	background-color: rgba(255, 0, 255, 0.3);
+	background-color: rgba(0, 0, 0, 0.3);
 	width: 512px;
 	height: 512px;
 	/* top: 100px;
 	left: 100px; */
 	transform-origin: 256px 256px;
-	transform:  translate3D(0px, 0px, -600px) rotateY(15deg);
-	perspective: 400px;
-	perspective-origin: 256px 128px;
+	/* transform:  translate3D(0px, 0px, -600px) rotateY(15deg); */
+	perspective: 700px;
+	perspective-origin: 0px 128px;
 	/* perspective-origin: 256px 0px; */
-	transform-style: flat;
+	transform-style: preserve-3d;
 	/* transform-style: preserve-3d; */
+	border: 40px solid #00FFFF;
 }
 
 #b-cont {
@@ -48,7 +50,7 @@ canvas {
 	opacity: 0.3;
 	width: 512px;
 	height: 512px;
-	transform-origin: 256 0;
+	transform-origin: 256px 0;
 	transform: translate3D(400px, 0px, -800px) rotateY(-15deg);
 	/* transform: rotate(15deg); */
 	/* transform: translate3D(256px, 256px, -256px) rotateY(15deg); */

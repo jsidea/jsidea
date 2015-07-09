@@ -54,16 +54,16 @@ module jsidea.geom {
             return false;
         }
 
-        public static extract(visual: HTMLElement, ret: Point3D = new Point3D()): Box2D {
-            //            
-            return new Box2D(0, 0,
-                visual.offsetWidth,
-                visual.offsetHeight);
-//            var bnds = visual.getClientRects()[0];
-//            return new Box2D(bnds.left, bnds.top,
-//                bnds.width,
-//                bnds.height);
-        }
+//        public static extract(visual: HTMLElement, ret: Point3D = new Point3D()): Box2D {
+//            //            
+//            return new Box2D(0, 0,
+//                visual.offsetWidth,
+//                visual.offsetHeight);
+////            var bnds = visual.getClientRects()[0];
+////            return new Box2D(bnds.left, bnds.top,
+////                bnds.width,
+////                bnds.height);
+//        }
 
         public dispose(): void {
         }

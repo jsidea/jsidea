@@ -30,10 +30,11 @@ module jsidea.test {
             b.appendChild(bc);
             con.appendChild(a);
             document.body.appendChild(can);
-            
+
             this.drawBoundingBox3(ctx, a);
             this.drawBoundingBox3(ctx, b);
-            this.drawBoundingBox3(ctx, bc);
+//            this.drawBoundingBox3(ctx, bc);
+            this.drawBoundingBox3(ctx, con);
         }
 
         private testMatrix3D4(): void {
@@ -75,11 +76,11 @@ module jsidea.test {
                 //                fin.prepend(child);
                 //                this.drawBoundingBox(ctx, fin, b);
                 
-                var parent = geom.Transform.extract(a).matrix;
+                var parent = geom.Transform.extractTransform(a).matrix;
                 fin.prepend(parent);
                 this.drawBoundingBox(ctx, fin, a);
 
-                var child = geom.Transform.extract(b).matrix;
+                var child = geom.Transform.extractTransform(b).matrix;
                 fin.prepend(child);
                 this.drawBoundingBox(ctx, fin, b);
 
@@ -88,10 +89,10 @@ module jsidea.test {
                 );
             $(document).trigger("mousemove");
         }
-        
+
         private drawBoundingBox3(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
-            var or: geom.Point2D = geom.Point2D.extractPerspectiveOrigin(e);
-            
+            var or: geom.Point2D = geom.Transform.extractPerspectiveOrigin(e);
+
             var a = new geom.Point3D(0, 0, 0);
             var b = new geom.Point3D(e.offsetWidth, 0, 0);
             var c = new geom.Point3D(e.offsetWidth, e.offsetHeight, 0);
@@ -119,7 +120,7 @@ module jsidea.test {
         }
 
         private drawBoundingBox(ctx: CanvasRenderingContext2D, pm: geom.Matrix3D, e: HTMLElement): void {
-            var or: geom.Point2D = geom.Point2D.extractPerspectiveOrigin(e);
+            var or: geom.Point2D = geom.Transform.extractPerspectiveOrigin(e);
             //            e.textContent = "HELLO WORLD";
             //            console.log(or);
             
@@ -150,7 +151,7 @@ module jsidea.test {
         }
 
         private drawBoundingBox2(ctx: CanvasRenderingContext2D, child: geom.Matrix3D, par: geom.Matrix3D, e: HTMLElement): void {
-            var or: geom.Point2D = geom.Point2D.extractPerspectiveOrigin(e);
+            var or: geom.Point2D = geom.Transform.extractPerspectiveOrigin(e);
             //            e.textContent = "HELLO WORLD";
             //            console.log(or);
             
@@ -214,9 +215,9 @@ module jsidea.test {
             var fin = new geom.Matrix3D();
 
             var ma = geom.Matrix3D.extract(a);
-            var or = geom.Point3D.extractOrigin(a);
-            var po = geom.Point2D.extractPosition(a);
-            var por = geom.Point2D.extractPerspectiveOrigin(a.parentElement);
+            var or = geom.Transform.extractOrigin(a);
+            var po = geom.Transform.extractPosition(a);
+            var por = geom.Transform.extractPerspectiveOrigin(a.parentElement);
             var pers = math.Number.parse(window.getComputedStyle(a.parentElement).perspective, 0);
             var preserve = window.getComputedStyle(a.parentElement).transformStyle == "preserve-3d";
 
@@ -287,7 +288,7 @@ module jsidea.test {
 
             var parentDisp = aFrame.parentElement;
 
-            var toMozOrigin = geom.Point3D.extractOrigin(aFrame);
+            var toMozOrigin = geom.Transform.extractOrigin(aFrame);
             var newOrigin = new geom.Point3D(aOrigin.x, aOrigin.y, 0);
             //            var bounds = geom.Box2D.extract(aFrame);
 
@@ -300,7 +301,7 @@ module jsidea.test {
                 //                perspective.m33 = 0;
                 
                 //                var toPerspectiveOrigin = geom.Point2D.extractPerspectiveOrigin(aFrame);
-                var toPerspectiveOrigin = geom.Point2D.extractPerspectiveOrigin(parentDisp);
+                var toPerspectiveOrigin = geom.Transform.extractPerspectiveOrigin(parentDisp);
                 perspective.changeBasis(toPerspectiveOrigin.clone().sub(toMozOrigin));
                 result.append(perspective);
             }
@@ -308,7 +309,7 @@ module jsidea.test {
             //            if (window.getComputedStyle(aFrame).transformStyle != "none") {
             //                if (parentDisp && window.getComputedStyle(parentDisp).transformStyle != "none") {
             if (parentDisp && window.getComputedStyle(parentDisp).transformStyle == "preserve-3d") {
-                var pos = geom.Point2D.extractPosition(aFrame);
+                var pos = geom.Transform.extractPosition(aFrame);
                 var parent = this.getResMat(parentDisp, aOrigin.clone().sub(pos));
                 result.changeBasis(newOrigin.clone().add(toMozOrigin));
                 return result.append(parent);
