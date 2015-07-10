@@ -33,7 +33,7 @@ module jsidea.test {
 
             this.drawBoundingBox3(ctx, a);
             this.drawBoundingBox3(ctx, b);
-//            this.drawBoundingBox3(ctx, bc);
+            this.drawBoundingBox3(ctx, bc);
             this.drawBoundingBox3(ctx, con);
         }
 

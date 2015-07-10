@@ -17,25 +17,27 @@ module jsidea.geom {
             var chain: ITransformElement[] = [];
             while (visual && visual != document.body) {
                 var ma = this.extractTransform(visual);
-                if (!ma.matrix.isIdentity())
+//                console.log(visual, ma.matrix.isIdentity());
+//                if (!ma.matrix.isIdentity())
                     chain.push(ma);
                 visual = visual.parentElement;
             }
 
             //accumulate
             var l = chain.length;
-            for (var i = 0; i < l; ++i) {
-                if (i < (l - 1)
-                    && (chain[i].is2D || chain[i].preserve3D)) {
-                    chain[i + 1].matrix.prepend(chain[i].matrix);
-                    l--;
-                    chain.splice(i, 1);
-                }
-            }
+//            for (var i = 0; i < l; ++i) {
+//                if (i < (l - 1)
+//                    && (chain[i].is2D || chain[i].preserve3D)) {
+//                    chain[i + 1].matrix.prepend(chain[i].matrix);
+//                    l--;
+//                    chain.splice(i, 1);
+//                }
+//            }
 
             //transform
             var pt = new geom.Point3D(lpt.x, lpt.y, 0);
             for (var i = 0; i < l; ++i) {
+//                console.log(chain[i].element);
                 if (chain[i].preserve3D)
                     pt = chain[i].matrix.transform3D(pt);
                 else
@@ -89,35 +91,26 @@ module jsidea.geom {
             //tricky stuff (if parent has border-box add parents border here)
             if (!isWebkit) {
 
+                //                var borderParent = this.extractBorder(a.parentElement);
+                //                if (parentStyle.boxSizing != "border-box")
+                //                    matrix.appendPositionRaw(-borderParent.x, -borderParent.y, 0);
+
+
+                //                var border = this.extractBorder(a);
+                //                if (style.boxSizing != "border-box")
+                //                    matrix.appendPositionRaw(-border.x, -border.y, 0);
+                //                
                 var borderParent = this.extractBorder(a.parentElement);
-                if (parentStyle.boxSizing != "border-box")
-                    matrix.appendPositionRaw(-borderParent.x, -borderParent.y, 0);
+                if (parentStyle.boxSizing != "border-box") {
+                    offset.x += borderParent.x;
+                    offset.y += borderParent.y;
+                }
+
             }
             else {
-                                var borderParent = this.extractBorder(a.parentElement);
-                //                var border = this.extractBorder(a);
-                //                if (parentStyle.boxSizing == "border-box")
-                //                    matrix.appendPositionRaw(borderParent.x, borderParent.y, 0);
-                //                else if (style.boxSizing != "border-box") {
-                //
-                //                    matrix.appendPositionRaw(-border.x, -border.y, 0);
-                //                    console.log("AHH", border, a);
-                //                }
-                
-                //                else
-                //                    matrix.appendPositionRaw(-borderParent.x, -borderParent.y, 0);
-                
+                var borderParent = this.extractBorder(a.parentElement);
                 offset.x += borderParent.x;
                 offset.y += borderParent.y;
-                
-                //do not include (directly) the border for elements which box-sizing is set to border-box
-                //                var border = this.extractBorder(a);
-                ////                if (parentStyle.boxSizing != "border-box")
-                //                    matrix.appendPositionRaw(border.x, border.y, 0);
-                
-//                var border = this.extractBorder(a);
-//                if (style.boxSizing == "border-box")
-//                    matrix.appendPositionRaw(border.x, border.y, 0);
             }
             
             //do not include (directly) the border for elements which box-sizing is set to border-box

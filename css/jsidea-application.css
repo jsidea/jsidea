@@ -15,19 +15,22 @@ canvas {
 }
 
 #content {
-	border: 100px solid #00FF00;
+	/* border: 100px solid #00FF00; */
 	width: 900px;
 	height: 600px;
 	position: absolute;
+	background-color: #EEAAEE;
 	/* perspective: 600px; */
 	/* left: 200px; */
-	/* transform: rotateY(20deg); */
+	transform: rotateY(-45deg);
 	perspective-origin: 256px 256px;
 	/* box-sizing: border-box; */
 	/* transform-style: preserve-3d; */
+	transform-style: flat;
 }
 
 #a-cont {
+	/* border: 40px solid #00FFFF; */
 	position: absolute;
 	background-color: rgba(0, 0, 0, 0.3);
 	width: 512px;
@@ -41,7 +44,6 @@ canvas {
 	/* perspective-origin: 256px 0px; */
 	transform-style: preserve-3d;
 	/* transform-style: preserve-3d; */
-	border: 40px solid #00FFFF;
 }
 
 #b-cont {
