@@ -3,9 +3,9 @@ html,body {
 	padding: 0;
 	width: 100%;
 	height: 100%;
-	transform-origin: 0px 0px;
+	/* transform-origin: 0px 0px;
 	perspective-origin: 0 0;
-	transform-style: flat;
+	transform-style: flat; */
 }
 
 canvas {
@@ -38,7 +38,7 @@ canvas {
 	/* top: 100px;
 	left: 100px; */
 	transform-origin: 256px 256px;
-	/* transform:  translate3D(0px, 0px, -600px) rotateY(15deg); */
+	transform: translate3D(0px, 0px, -600px) rotateY(15deg);
 	perspective: 700px;
 	perspective-origin: 0px 128px;
 	/* perspective-origin: 256px 0px; */
@@ -53,10 +53,43 @@ canvas {
 	width: 512px;
 	height: 512px;
 	transform-origin: 256px 0;
-	transform: translate3D(400px, 0px, -800px) rotateY(-15deg);
+	transform: translate3D(300px, 0px, -800px) rotateY(-15deg);
 	/* transform: rotate(15deg); */
 	/* transform: translate3D(256px, 256px, -256px) rotateY(15deg); */
-	transform-style: flat;
+	transform-style: preserve-3d;
+}
+
+#content:after {
+	content: "CON";
+	position: absolute;
+	width: 64px;
+	height: 64px;
+	right: 0;
+	background-color: rgba(0, 0, 0, 0.2);
+	line-height: 64px;
+	text-align: center;
+}
+
+#a-cont:after {
+	content: "A";
+	position: absolute;
+	width: 64px;
+	height: 64px;
+	right: 0;
+	background-color: rgba(0, 0, 0, 0.2);
+	line-height: 64px;
+	text-align: center;
+}
+
+#b-cont:after {
+	content: "B";
+	position: absolute;
+	width: 64px;
+	height: 64px;
+	right: 0;
+	background-color: #FFF;
+	line-height: 64px;
+	text-align: center;
 }
 
 #bc-cont {

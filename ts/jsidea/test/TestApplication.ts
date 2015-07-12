@@ -31,10 +31,10 @@ module jsidea.test {
             con.appendChild(a);
             document.body.appendChild(can);
 
-            this.drawBoundingBox3(ctx, a);
+//            this.drawBoundingBox3(ctx, con);
+//            this.drawBoundingBox3(ctx, a);
             this.drawBoundingBox3(ctx, b);
             this.drawBoundingBox3(ctx, bc);
-            this.drawBoundingBox3(ctx, con);
         }
 
         private testMatrix3D4(): void {

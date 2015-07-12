@@ -36,8 +36,12 @@ module jsidea.geom {
 
             //transform
             var pt = new geom.Point3D(lpt.x, lpt.y, 0);
+            console.log("----");
+//            chain[0].preserve3D = false;
+//            chain[1].preserve3D = false;
+//            chain[2].preserve3D = false;
             for (var i = 0; i < l; ++i) {
-//                console.log(chain[i].element);
+                console.log(chain[i]);
                 if (chain[i].preserve3D)
                     pt = chain[i].matrix.transform3D(pt);
                 else
@@ -78,7 +82,7 @@ module jsidea.geom {
             
             //if no perspective and disabled 3d (no preserve-3d)
             if (!preserve3d && !perspective) {
-                matrix.setMatrix2D(matrix.getMatrix2D());
+//                matrix.setMatrix2D(matrix.getMatrix2D());
             }
 
             var isWebkit = true;
