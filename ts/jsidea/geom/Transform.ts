@@ -17,46 +17,49 @@ module jsidea.geom {
             //transform
             var pt = new geom.Point3D(x, y, 0);
             var l = chain.length;
+            //            console.log(chain.length);
             for (var i = l - 1; i >= 0; --i) {
                 chain[i].matrix.invert();
-                if (chain[i].preserve3D)
-                    pt = chain[i].matrix.transform3D(pt);
+                //                console.log(chain[i].preserve3D, pt);
+                if (chain[i].preserve3D) {
+                    pt = chain[i].matrix.project(pt);
+                }
                 else
                     pt = chain[i].matrix.transform2D(pt);
             }
-            
+
             return pt;
         }
         
-//        private static unp(screen: geom.Point3D, vp: geom.Viewport, m: geom.Matrix3D): geom.Point3D {
-//            m = m.clone();
-//            
-//            m.project
-//
-//            //unproject
-//            var dir = new geom.Point3D(screen.x, screen.y, -1);
-//            dir.unproject(vp.focalLength, vp.origin);
-//            //create plane
-//            var pl = new geom.Plane3D();
-//            pl.fromPoints(
-//                m.transform(new geom.Point3D(0, 0, 0)),
-//                m.transform(new geom.Point3D(1, 0, 0)),
-//                m.transform(new geom.Point3D(0, 1, 0))
-//                );
-//            
-//            //intersect plane -- extract z
-//            var fin: geom.Point3D = pl.intersectLine(screen, dir);
-//            fin.z *= -1;
-//            fin.x = screen.x;
-//            fin.y = screen.y;
-//            
-//            //unproject intersection to get the final position in scene space
-//            fin.unproject(vp.focalLength, vp.origin);
-//            
-//            //transform from scene to local
-//            m.invert();
-//            return m.transform(fin);
-//        }
+        //        private static unp(screen: geom.Point3D, vp: geom.Viewport, m: geom.Matrix3D): geom.Point3D {
+        //            m = m.clone();
+        //            
+        //            m.project
+        //
+        //            //unproject
+        //            var dir = new geom.Point3D(screen.x, screen.y, -1);
+        //            dir.unproject(vp.focalLength, vp.origin);
+        //            //create plane
+        //            var pl = new geom.Plane3D();
+        //            pl.fromPoints(
+        //                m.transform(new geom.Point3D(0, 0, 0)),
+        //                m.transform(new geom.Point3D(1, 0, 0)),
+        //                m.transform(new geom.Point3D(0, 1, 0))
+        //                );
+        //            
+        //            //intersect plane -- extract z
+        //            var fin: geom.Point3D = pl.intersectLine(screen, dir);
+        //            fin.z *= -1;
+        //            fin.x = screen.x;
+        //            fin.y = screen.y;
+        //            
+        //            //unproject intersection to get the final position in scene space
+        //            fin.unproject(vp.focalLength, vp.origin);
+        //            
+        //            //transform from scene to local
+        //            m.invert();
+        //            return m.transform(fin);
+        //        }
 
         public static getLocalToGlobal(visual: HTMLElement, lpt: geom.IPoint2DValue, ret: Point2D = new Point2D()): jsidea.geom.Point3D {
             //collect

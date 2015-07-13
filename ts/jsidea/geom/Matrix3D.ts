@@ -793,25 +793,25 @@ module jsidea.geom {
         }
         
         //SOURCE: http://code.metager.de/source/xref/mozilla/B2G/gecko/gfx/thebes/gfx3DMatrix.cpp#651
-        //        public project(point: IPoint2DValue): Point2D {
-        //            var p = new Point3D(point.x, point.y, 0);
-        //            var q = new Point3D(point.x, point.y, 1);
-        //
-        //            var pBack = this.transform3D(p);
-        //            var qBack = this.transform3D(q);
-        //            var uBack = qBack.clone().sub(pBack);
-        //            var t = -pBack.z / uBack.z;
-        //            return new Point2D(pBack.x + t * uBack.x, pBack.y + t * uBack.y);
-        //        }
+        public project(point: IPoint2DValue): Point3D {
+            var p = new Point3D(point.x, point.y, 0);
+            var q = new Point3D(point.x, point.y, 1);
+
+            var pBack = this.transform3D(p);
+            var qBack = this.transform3D(q);
+            var uBack = qBack.clone().sub(pBack);
+            var t = -pBack.z / uBack.z;
+            return new Point3D(pBack.x + t * uBack.x, pBack.y + t * uBack.y, 0, 1);
+        }
         
         //source: http://code.metager.de/source/xref/mozilla/firefox/gfx/thebes/gfx3DMatrix.cpp#Transform4D
-        public project(point: IPoint2DValue): Point3D {
-            // Solving for z when z' = 0 gives us:
-            var z = -(point.x * this.m13 + point.y * this.m23 + this.m43) / this.m33;
-
-            // Compute the transformed point
-            return this.transform(new Point3D(point.x, point.y, z, 1));
-        }
+//        public project(point: IPoint2DValue): Point3D {
+//            // Solving for z when z' = 0 gives us:
+//            var z = -(point.x * this.m13 + point.y * this.m23 + this.m43) / this.m33;
+//
+//            // Compute the transformed point
+//            return this.transform(new Point3D(point.x, point.y, z, 1));
+//        }
 
         public changeBasis(origin: IPoint2DValue): Matrix3D {
             this.prependPositionRaw(-origin.x, -origin.y, 0);
