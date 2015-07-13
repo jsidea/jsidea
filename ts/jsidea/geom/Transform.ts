@@ -10,7 +10,6 @@ module jsidea.geom {
     }
     export class Transform {
 
-        //        private static root = null;
         private static isWebkit = /chrome/.test(navigator.userAgent.toLowerCase());
         private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
 
@@ -18,8 +17,6 @@ module jsidea.geom {
             //get chain
             var chain: ITransformElement[] = this.extractChain(element);
 
-            ////            chain.unshift(this.extractTransform(document.body, window.getComputedStyle(document.body), window.getComputedStyle(document.body.parentElement)));
-  
             //invert and transform/project from parent to child
             var pt = new geom.Point3D(x, y, 0);
             var l = chain.length;
@@ -56,8 +53,6 @@ module jsidea.geom {
         }
 
         private static extractChain(element: HTMLElement): geom.ITransformElement[] {
-            //            this.root = document.body.parentElement;
-            
             //collect computed styles up to body.parent ==> html-container
             var styles: CSSStyleDeclaration[] = [];
             var visual = element;
@@ -140,6 +135,11 @@ module jsidea.geom {
 //            var preserve3d = parentStyle.transformStyle == "preserve-3d";
 //            if(element.parentElement == document.body)
 //                preserve3d = false;
+            
+            //http://dev.w3.org/csswg/css-transforms/#grouping-property-values
+            if(this.isWebkit && parentStyle.overflow != "visible")
+                perspective = 0;
+            
             if (!perspective)// || preserve3d)
                 return result;
 
