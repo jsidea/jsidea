@@ -4,112 +4,102 @@ module jsidea.geom {
         matrix: geom.Matrix3D;
         preserve3D: boolean;
         is2D: boolean;
+        perspective: number;
+        style: CSSStyleDeclaration;
+        parentStyle: CSSStyleDeclaration;
     }
     export class Transform {
 
+        //        private static root = null;
         private static isWebkit = /chrome/.test(navigator.userAgent.toLowerCase());
         private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
 
-        public static getGlobalToLocal(visual: HTMLElement, x: number, y: number, ret: Point2D = new Point2D()): jsidea.geom.IPoint2DValue {
-            //collect
-            var chain: ITransformElement[] = this.extractChain(visual);
+        public static getGlobalToLocal(element: HTMLElement, x: number, y: number, z: number = 0): jsidea.geom.Point3D {
+            //get chain
+            var chain: ITransformElement[] = this.extractChain(element);
 
-            //transform
+            ////            chain.unshift(this.extractTransform(document.body, window.getComputedStyle(document.body), window.getComputedStyle(document.body.parentElement)));
+  
+            //invert and transform/project from parent to child
             var pt = new geom.Point3D(x, y, 0);
             var l = chain.length;
-            //            console.log(chain.length);
             for (var i = l - 1; i >= 0; --i) {
                 chain[i].matrix.invert();
-                //                console.log(chain[i].preserve3D, pt);
-                if (chain[i].preserve3D) {
+                if (chain[i].preserve3D)// || chain[i].perspective > 0)
                     pt = chain[i].matrix.project(pt);
-                }
                 else
                     pt = chain[i].matrix.transform2D(pt);
             }
 
+            //            var paddingX = math.Number.parse(chain[0].style.paddingLeft, 0);
+            //            var paddingY = math.Number.parse(chain[0].style.paddingTop, 0);
+            //            pt.x -= paddingX;
+            //            pt.y -= paddingY;
+
             return pt;
         }
-        
-        //        private static unp(screen: geom.Point3D, vp: geom.Viewport, m: geom.Matrix3D): geom.Point3D {
-        //            m = m.clone();
-        //            
-        //            m.project
-        //
-        //            //unproject
-        //            var dir = new geom.Point3D(screen.x, screen.y, -1);
-        //            dir.unproject(vp.focalLength, vp.origin);
-        //            //create plane
-        //            var pl = new geom.Plane3D();
-        //            pl.fromPoints(
-        //                m.transform(new geom.Point3D(0, 0, 0)),
-        //                m.transform(new geom.Point3D(1, 0, 0)),
-        //                m.transform(new geom.Point3D(0, 1, 0))
-        //                );
-        //            
-        //            //intersect plane -- extract z
-        //            var fin: geom.Point3D = pl.intersectLine(screen, dir);
-        //            fin.z *= -1;
-        //            fin.x = screen.x;
-        //            fin.y = screen.y;
-        //            
-        //            //unproject intersection to get the final position in scene space
-        //            fin.unproject(vp.focalLength, vp.origin);
-        //            
-        //            //transform from scene to local
-        //            m.invert();
-        //            return m.transform(fin);
-        //        }
 
-        public static getLocalToGlobal(visual: HTMLElement, lpt: geom.IPoint2DValue, ret: Point2D = new Point2D()): jsidea.geom.Point3D {
-            //collect
-            var chain: ITransformElement[] = this.extractChain(visual);
+        public static getLocalToGlobal(element: HTMLElement, x: number, y: number, z: number = 0): jsidea.geom.Point3D {
+            //get chain
+            var chain: ITransformElement[] = this.extractChain(element);
 
-            //transform
-            var pt = new geom.Point3D(lpt.x, lpt.y, 0);
+            //transform from child to parent
+            var pt = new geom.Point3D(x, y, 0);
             var l = chain.length;
             for (var i = 0; i < l; ++i) {
-                if (chain[i].preserve3D)
-                    pt = chain[i].matrix.transform3D(pt);
+                if (chain[i].preserve3D)// || chain[i].perspective > 0)
+                    pt = chain[i].matrix.transform3D(pt, pt);
                 else
                     pt = chain[i].matrix.transform2D(pt);
             }
             return pt;
         }
 
-        private static extractChain(visual: HTMLElement): geom.ITransformElement[] {
-            //collect
-            var chain: ITransformElement[] = [];
-            while (visual && visual != document.body) {
-                chain.push(this.extractTransform(visual));
+        private static extractChain(element: HTMLElement): geom.ITransformElement[] {
+            //            this.root = document.body.parentElement;
+            
+            //collect computed styles up to body.parent ==> html-container
+            var styles: CSSStyleDeclaration[] = [];
+            var visual = element;
+            while (visual && visual != document.body.parentElement) {
+                styles.push(window.getComputedStyle(visual));
                 visual = visual.parentElement;
             }
 
-            //accumulate
-            var l = chain.length;
-            var b = l;
-            for (var i = 0; i < l; ++i) {
-                if (i < (l - 1)
-                    && (chain[i].is2D || chain[i].preserve3D)) {
-                    chain[i + 1].matrix.prepend(chain[i].matrix);
-                    l--;
-                    chain.splice(i, 1);
-                }
+            //collect transforms up to body
+            var stylesIndex: number = 0;
+            var chain: ITransformElement[] = [];
+            visual = element;
+            while (visual && visual != document.body) {
+                chain.push(this.extractTransform(visual, styles[stylesIndex++], styles[stylesIndex]));
+                visual = visual.parentElement;
             }
+
+            //accumulate if possible
+            //TODO: do it whenever possible?
+            //            var l = chain.length;
+            //            var b = l;
+            //            for (var i = 0; i < l; ++i) {
+            //                if (i < (l - 1) && (chain[i].is2D || chain[i].preserve3D)) {
+            //                    chain[i + 1].matrix.prepend(chain[i].matrix);
+            //                    l--;
+            //                    chain.splice(i, 1);
+            //                }
+            //            }
             return chain;
         }
 
-        private static extractTransformMatrix(style: CSSStyleDeclaration, parentStyle: CSSStyleDeclaration, a: HTMLElement): geom.Matrix3D {
+        private static extractTransformMatrix(element: HTMLElement, style: CSSStyleDeclaration, parentStyle: CSSStyleDeclaration): geom.Matrix3D {
             var result = new geom.Matrix3D();
-            if (!a)
+            if (!element)
                 return result;
 
             //------
             //transform
             //------
             var origin = style.transformOrigin.split(" ");
-            var originX = math.Number.parseRelation(origin[0], a.offsetWidth, 0);
-            var originY = math.Number.parseRelation(origin[1], a.offsetHeight, 0);
+            var originX = math.Number.parseRelation(origin[0], element.offsetWidth, 0);
+            var originY = math.Number.parseRelation(origin[1], element.offsetHeight, 0);
             var originZ = math.Number.parseRelation(origin[2], 0, 0);
 
             result.appendPositionRaw(-originX, -originY, -originZ);
@@ -119,14 +109,24 @@ module jsidea.geom {
             //------
             //offset
             //------
-            result.appendPositionRaw(a.offsetLeft, a.offsetTop, 0);
+            var offsetX = element.offsetLeft;
+            var offsetY = element.offsetTop;
+            if (element.parentElement && this.isWebkit && style.position == "fixed") {
+                offsetX -= element.parentElement.clientLeft;
+                offsetY -= element.parentElement.clientTop;
+            }
+            result.appendPositionRaw(offsetX, offsetY, 0);
+
+            //skip if its the body
+            if (!parentStyle)
+                return result;
 
             //------
             //parent borders
             //------
             var borderParentX = math.Number.parse(parentStyle.borderLeftWidth, 0);
             var borderParentY = math.Number.parse(parentStyle.borderTopWidth, 0);
-            //tricky stuff (if parent has border-box add parents border NOT here if you are in firefox)
+            //tricky stuff (if parent has border-box and you are in firefox then add parents border NOT)
             //hmmmm firefox integrates the border into the offset????? just check it
             if (!this.isFirefox || parentStyle.boxSizing != "border-box") {
                 result.appendPositionRaw(borderParentX, borderParentY, 0);
@@ -136,12 +136,16 @@ module jsidea.geom {
             //perspective
             //-------
             var perspective = math.Number.parse(parentStyle.perspective, 0);
-            if (!perspective)
+//            var preserve3d = element.parentElement == document.body || (parentStyle.transformStyle == "preserve-3d");
+//            var preserve3d = parentStyle.transformStyle == "preserve-3d";
+//            if(element.parentElement == document.body)
+//                preserve3d = false;
+            if (!perspective)// || preserve3d)
                 return result;
 
             var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
-            var perspectiveOriginX = math.Number.parseRelation(perspectiveOrigin[0], a.parentElement.offsetWidth, 0);
-            var perspectiveOriginY = math.Number.parseRelation(perspectiveOrigin[1], a.parentElement.offsetHeight, 0);
+            var perspectiveOriginX = math.Number.parseRelation(perspectiveOrigin[0], element.parentElement.offsetWidth, 0);
+            var perspectiveOriginY = math.Number.parseRelation(perspectiveOrigin[1], element.parentElement.offsetHeight, 0);
 
             result.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
             result.appendPerspective(perspective);
@@ -150,19 +154,21 @@ module jsidea.geom {
             return result;
         }
 
-        private static extractTransform(a: HTMLElement): geom.ITransformElement {
-            var style = window.getComputedStyle(a);
-            var parentStyle = window.getComputedStyle(a.parentElement);
-
-            var preserve3d = a.parentElement == document.body || (parentStyle.transformStyle == "preserve-3d");
+        private static extractTransform(a: HTMLElement, style: CSSStyleDeclaration, parentStyle: CSSStyleDeclaration): geom.ITransformElement {
+//            var preserve3d = a.parentElement == document.body || (parentStyle.transformStyle == "preserve-3d");
+            var preserve3d = parentStyle.transformStyle == "preserve-3d";
             var is2D = style.transform.indexOf("matrix3d") < 0;
-            var matrix = this.extractTransformMatrix(style, parentStyle, a);
+            var matrix = this.extractTransformMatrix(a, style, parentStyle);
+            var perspective = math.Number.parse(parentStyle.perspective, 0);
 
             return {
                 element: a,
                 matrix: matrix,
                 preserve3D: preserve3d,
                 is2D: is2D,
+                perspective: perspective,
+                style: style,
+                parentStyle: parentStyle
             };
         }
     }

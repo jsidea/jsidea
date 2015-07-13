@@ -16,7 +16,6 @@
 /// <reference path='ts/jsidea/geom/AffineFit.ts' />
 /// <reference path='ts/jsidea/geom/Box2D.ts' />
 /// <reference path='ts/jsidea/geom/Transform.ts' />
-/// <reference path='ts/jsidea/geom/Viewport.ts' />
 /// <reference path='ts/jsidea/Buffer.ts' />
 /// <reference path='ts/jsidea/layout/Position.ts' />
 /// <reference path='ts/jsidea/action/BaseInteractor.ts' />

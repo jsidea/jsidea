@@ -40,8 +40,8 @@ module jsidea.layout {
             var atOriginY: number = math.Number.parseRelation(this.at.py, atH, 0);
 
             var lc: geom.IPoint2DValue = Position.TMP3.setTo(atOffsetX - atOriginX, atOffsetY - atOriginY);
-            var gl = of == window ? lc : geom.Transform.getLocalToGlobal(of, lc.x, lc.y, Position.TMP4);
-            lc = geom.Transform.getGlobalToLocal(visual, gl.x, gl.y, Position.TMP3);
+            var gl = of == window ? lc : geom.Transform.getLocalToGlobal(of, lc.x, lc.y);//, Position.TMP4);
+            lc = geom.Transform.getGlobalToLocal(visual, gl.x, gl.y);//, Position.TMP3);
             lc.x += myOffsetX - myOriginX;
             lc.y += myOffsetY - myOriginY;
 

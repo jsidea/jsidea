@@ -48,14 +48,19 @@ $(window).ready(() => {
         console.warn("Application " + hook + " does not inherit from jsidea.core.Application");
         return;
     }
-    try {
+//    try {
         var app = new hook();
         window.app = app;
-    }
-    catch (e) {
-        window.app = null;
-        console.warn("Unable to instantiate application from " + qualifiedClassName + ". " + e);
-        return;
-    }
+//    }
+//    catch (e) {
+//        window.app = null;
+//        var err = new Error("Unable to instantiate application from " + qualifiedClassName + ".");
+//        err.name = "ApplicationError";
+//        err.lineNumber = e.lineNumber;
+//        err.fileName = e.fileName;
+//        throw err;
+////        console.warn("Unable to instantiate application from " + qualifiedClassName + ". view-source:" + e.fileName + "  :" + e.lineNumber);
+////        return;
+//    }
 });
 

@@ -3,9 +3,19 @@ html,body {
 	padding: 0;
 	width: 100%;
 	height: 100%;
+}
+
+body
+{
 	/* transform-origin: 0px 0px;
 	perspective-origin: 0 0;
 	transform-style: flat; */
+	/* transform-style: flat; */
+	/* perspective: 600px;
+	overflow: hidden;
+	perspective-origin: 0px 0px; */
+	
+	transform-style: preserve-3d; */
 }
 
 canvas {
@@ -14,15 +24,30 @@ canvas {
 	left: 0;
 }
 
+#view {
+	position: absolute;
+	width: 1024px;
+	height: 1024px;
+	perspective: 600px;
+	overflow: hidden;
+	transform: rotateY(-45deg);
+	transform-style: flat;
+	perspective-origin: 256px 0px;
+}
+
 #content {
-	/* border: 100px solid #00FF00; */
+	/* border: 64px solid #00FF00; */
 	width: 256px;
-	height: 256px;
+	height: 512px;
 	position: absolute;
 	background-color: #EEAAEE;
+	left: 64px;
 	perspective-origin: 256px 256px;
-	box-sizing: border-box;
-	transform-style: preserve-3d;
+	/* box-sizing: border-box; */
+	margin: 25px;
+	transform: rotateY(45deg);
+	transform-style: flat;
+	/* padding: 20px; */
 	perspective: 600px;
 }
 
@@ -34,8 +59,13 @@ canvas {
 	height: 512px;
 	left: 100px;
 	top: 25px;
+	margin: 25px;
+	/* padding: 80px; */
 	transform-origin: 256px 256px;
-	transform: translate3D(200px, 0px, -600px) rotate(25deg);
+	transform-style: flat;
+	perspective: 600px;
+	perspective-origin: 256px 256px;
+	transform: translate3D(400px, 0px, -300px) rotate(-45deg);
 }
 
 #b-cont {
@@ -44,40 +74,9 @@ canvas {
 	opacity: 0.3;
 	width: 128px;
 	height: 128px;
-	transform: translate3D(200px, 0px, -600px) rotate(25deg);
-}
-
-#content:after {
-	content: "CON";
-	position: absolute;
-	width: 64px;
-	height: 64px;
-	right: 0;
-	background-color: rgba(0, 0, 0, 0.2);
-	line-height: 64px;
-	text-align: center;
-}
-
-#a-cont:after {
-	content: "A";
-	position: absolute;
-	width: 64px;
-	height: 64px;
-	right: 0;
-	background-color: rgba(0, 0, 0, 0.2);
-	line-height: 64px;
-	text-align: center;
-}
-
-#b-cont:after {
-	content: "B";
-	position: absolute;
-	width: 64px;
-	height: 64px;
-	right: 0;
-	background-color: #FFF;
-	line-height: 64px;
-	text-align: center;
+	/* padding: 30px 60px; */
+	transform-style: flat;
+	transform: translate3D(400px, 0px, 0px) rotate(25deg);
 }
 
 #bc-cont {
