@@ -248,7 +248,7 @@ module jsidea.geom {
             ret.z /= ret.w;
 
             return ret;
-        }        
+        }
 
         public transform(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
             ret.x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + point.w * this.m41;
@@ -256,10 +256,10 @@ module jsidea.geom {
             ret.z = point.x * this.m13 + point.y * this.m23 + point.z * this.m33 + point.w * this.m43;
             ret.w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + point.w * this.m44;
             
-//            ret.x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41;
-//            ret.y = point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + this.m42;
-//            ret.z = point.x * this.m13 + point.y * this.m23 + point.z * this.m33 + this.m43;
-//            ret.w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + this.m44;
+            //            ret.x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41;
+            //            ret.y = point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + this.m42;
+            //            ret.z = point.x * this.m13 + point.y * this.m23 + point.z * this.m33 + this.m43;
+            //            ret.w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + this.m44;
             
             return ret;
         }
@@ -751,6 +751,14 @@ module jsidea.geom {
             return this;
         }
 
+        public appendCSS(cssString: string): Matrix3D {
+            return this.append(Buffer._APPEND_CSS_3D.setCSS(cssString));
+        }
+        
+        public prependCSS(cssString: string): Matrix3D {
+            return this.prepend(Buffer._PREPEND_CSS_3D.setCSS(cssString));
+        }
+
         public getMatrix2D(ret: Matrix2D = new Matrix2D()): Matrix2D {
             ret.identity();
             ret.m11 = this.m11;//a = 0
@@ -985,20 +993,20 @@ module jsidea.geom {
             return ret;
         }
 
-//        public static extractW(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
-//            if (visual.ownerDocument) {
-//                var style = window.getComputedStyle(visual);
-//                var m = ret.setCSS(style.transform);
-//
-//                var origin = Point3D.extractOrigin(visual);
-//                m.prependPositionRaw(origin.x, origin.y, 0);
-//                m.appendPositionRaw(-origin.x, -origin.y, 0);
-//
-//                return m;
-//            }
-//            ret.identity();
-//            return ret;
-//        }
+        //        public static extractW(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
+        //            if (visual.ownerDocument) {
+        //                var style = window.getComputedStyle(visual);
+        //                var m = ret.setCSS(style.transform);
+        //
+        //                var origin = Point3D.extractOrigin(visual);
+        //                m.prependPositionRaw(origin.x, origin.y, 0);
+        //                m.appendPositionRaw(-origin.x, -origin.y, 0);
+        //
+        //                return m;
+        //            }
+        //            ret.identity();
+        //            return ret;
+        //        }
 
         public static extractPerspective(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
             if (visual.ownerDocument) {

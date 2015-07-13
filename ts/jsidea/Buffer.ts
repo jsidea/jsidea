@@ -25,6 +25,8 @@ module jsidea {
         public static _PREPEND_POSITION_RAW_3D = new geom.Point3D();
         public static _SET_SKEW_RAW_3D: geom.Point3D = new geom.Point3D();        
         public static _SET_CSS_3D = new geom.Matrix2D();
+        public static _APPEND_CSS_3D = new geom.Matrix3D();
+        public static _PREPEND_CSS_3D = new geom.Matrix3D();
         
         //jsidea.geom.Matrix2D
         public static _SET_CSS_2D = new geom.Matrix3D();

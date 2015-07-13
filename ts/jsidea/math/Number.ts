@@ -18,7 +18,7 @@ module jsidea.math {
                 }
                 else if (value == "top" || value == "left")
                     return 0;
-                else if (value == "center")
+                else if (value == "center" || value == "middle")
                     return relativeSize * 0.5;
                 else if (value == "bottom" || value == "right")
                     return relativeSize;
