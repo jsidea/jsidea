@@ -22,7 +22,7 @@ module jsidea.geom {
             var l = chain.length;
             for (var i = l - 1; i >= 0; --i) {
                 chain[i].matrix.invert();
-                if (chain[i].preserve3D)// || chain[i].perspective > 0)
+                if (chain[i].preserve3D || chain[i].perspective > 0)
                     pt = chain[i].matrix.project(pt);
                 else
                     pt = chain[i].matrix.transform2D(pt);
@@ -42,8 +42,17 @@ module jsidea.geom {
 
             //transform from child to parent
             var pt = new geom.Point3D(x, y, 0);
+            console.log("----");
             var l = chain.length;
             for (var i = 0; i < l; ++i) {
+                console.log(
+                    chain[i].element.offsetLeft,
+                    chain[i].element.offsetTop,
+                    chain[i].style.perspective,
+                    chain[i].element.id,
+                    chain[i].style.transformStyle,
+                    this.extractPreserve(chain[i].parentStyle)
+                    );//chain[i].parentStyle.transformStyle
                 if (chain[i].preserve3D)// || chain[i].perspective > 0)
                     pt = chain[i].matrix.transform3D(pt, pt);
                 else
@@ -131,14 +140,9 @@ module jsidea.geom {
             //perspective
             //-------
             var perspective = math.Number.parse(parentStyle.perspective, 0);
-//            var preserve3d = element.parentElement == document.body || (parentStyle.transformStyle == "preserve-3d");
-//            var preserve3d = parentStyle.transformStyle == "preserve-3d";
-//            if(element.parentElement == document.body)
-//                preserve3d = false;
-            
             //http://dev.w3.org/csswg/css-transforms/#grouping-property-values
-            if(this.isWebkit && parentStyle.overflow != "visible")
-                perspective = 0;
+            //            if(this.isWebkit && parentStyle.overflow != "visible")
+            //                perspective = 0;
             
             if (!perspective)// || preserve3d)
                 return result;
@@ -153,14 +157,24 @@ module jsidea.geom {
 
             return result;
         }
+        
+        private static extractPreserve(style: CSSStyleDeclaration):boolean
+        {
+            var preserve3d = style.transformStyle == "preserve-3d";
+            if(this.isFirefox && style.overflow != "visible")
+                preserve3d = false; 
+            
+            return preserve3d;    
+        }
 
         private static extractTransform(a: HTMLElement, style: CSSStyleDeclaration, parentStyle: CSSStyleDeclaration): geom.ITransformElement {
-//            var preserve3d = a.parentElement == document.body || (parentStyle.transformStyle == "preserve-3d");
-            var preserve3d = parentStyle.transformStyle == "preserve-3d";
+            //            var preserve3d = a.parentElement == document.body || (parentStyle.transformStyle == "preserve-3d");
+//            var preserve3d = parentStyle.transformStyle == "preserve-3d";
+            var preserve3d = this.extractPreserve(parentStyle);
             var is2D = style.transform.indexOf("matrix3d") < 0;
             var matrix = this.extractTransformMatrix(a, style, parentStyle);
             var perspective = math.Number.parse(parentStyle.perspective, 0);
-
+            
             return {
                 element: a,
                 matrix: matrix,
