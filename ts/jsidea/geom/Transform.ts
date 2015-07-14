@@ -22,32 +22,20 @@ module jsidea.geom {
             var l = chain.length;
             for (var i = l - 1; i >= 0; --i) {
                 chain[i].matrix.invert();
-                
                 pt = chain[i].matrix.project(pt);
-                
-//                if (chain[i].preserve3D)
-//                    pt = chain[i].matrix.transform3D(pt);
-//                else if (chain[i].perspective > 0)
-//                    pt = chain[i].matrix.project(pt);
-//                else
-//                    pt = chain[i].matrix.transform3D(pt);
-                
-//                if (chain[i].preserve3D || chain[i].perspective > 0)
-//                    pt = chain[i].matrix.project(pt);
-//                else
-//                    pt = chain[i].matrix.transform3D(pt);
             }
+
+            var style = window.getComputedStyle(element);
+            var paddingX = math.Number.parse(style.paddingLeft, 0);
+            var paddingY = math.Number.parse(style.paddingTop, 0);
+            pt.x -= paddingX;
+            pt.y -= paddingY;
             
             var parentStyle = window.getComputedStyle(element.parentElement);
-            var borderX = math.Number.parse(parentStyle.borderLeftWidth, 0);
-            var borderY = math.Number.parse(parentStyle.borderTopWidth, 0);
-            pt.x -= borderX;
-            pt.y -= borderY;
-
-            //            var paddingX = math.Number.parse(chain[0].style.paddingLeft, 0);
-            //            var paddingY = math.Number.parse(chain[0].style.paddingTop, 0);
-            //            pt.x -= paddingX;
-            //            pt.y -= paddingY;
+            var parentBorderX = math.Number.parse(parentStyle.borderLeftWidth, 0);
+            var parentBorderY = math.Number.parse(parentStyle.borderTopWidth, 0);
+            pt.x -= parentBorderX;
+            pt.y -= parentBorderY;
 
             return pt;
         }
@@ -72,8 +60,8 @@ module jsidea.geom {
                         "   \tPRESERVED", this.extractPreserve(chain[i].parentStyle),
                         "   \tPERSPECTIVE", chain[i].style.perspective
                         );
-                if (chain[i].preserve3D)// || chain[i].perspective > 0)
-                    pt = chain[i].matrix.transform3D(pt, pt);
+                if (chain[i].preserve3D)
+                    pt = chain[i].matrix.transform2D(pt, pt);//transform3D
                 else
                     pt = chain[i].matrix.transform2D(pt);
             }
@@ -200,8 +188,8 @@ module jsidea.geom {
 
         private static extractTransform(a: HTMLElement, style: CSSStyleDeclaration, parentStyle: CSSStyleDeclaration): geom.ITransformElement {
             var preserve3d = this.extractPreserve(parentStyle);
-//            if(a.parentElement == document.body)
-//                preserve3d = false;
+            //            if(a.parentElement == document.body)
+            //                preserve3d = false;
             
             var is2D = style.transform.indexOf("matrix3d") < 0;
             var matrix = this.extractTransformMatrix(a, style, parentStyle);

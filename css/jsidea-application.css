@@ -29,8 +29,9 @@ body * {
 	left: -2px;
 	top: -2px; */
 	/* box-sizing: border-box; */
-	transform-style: preserve-3d;
-	perspective: 600px;
+	/* transform-style: flat;
+	perspective: 600px; */
+	transform-style: flat;
 }
 
 #view {
@@ -40,9 +41,9 @@ body * {
 	left: 100px;
 	top: 100px;
 	border: 10px solid #FF00FF;
-	transform: translateZ(-20px);
+	transform: translateZ(-20px) rotateY(30deg);
 	transform-style: flat;
-	perspective: 200px;
+	/* perspective: 200px; */
 	/* overflow: hidden; */
 }
 
@@ -51,11 +52,11 @@ body * {
 	width: 512px;
 	height: 512px;
 	border: 60px solid #FFFF00;
-	transform: translateZ(-20px);
-	transform-style: preserve-3d;
+	transform: translateZ(-20px) rotateY(30deg);
+	transform-style: flat;
 	perspective: 200px;
 	/* opacity: 0.5; */
-	/* overflow: hidden; */
+	overflow: hidden;
 }
 
 #a-cont {
@@ -64,7 +65,7 @@ body * {
 	width: 512px;
 	height: 512px;
 	transform-style: preserve-3d;
-	transform: translateZ(-20px);
+	transform: translateZ(-20px) rotateY(30deg);
 	perspective: 200px;
 }
 
@@ -74,7 +75,7 @@ body * {
 	border: 10px solid #0000FF;
 	width: 512px;
 	height: 512px;
-	transform-style: preserve-3d;
+	transform-style: flat;
 	transform: translateZ(-20px) rotateY(15deg);
 	perspective: 300px;
 }
