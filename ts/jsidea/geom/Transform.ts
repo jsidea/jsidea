@@ -27,6 +27,9 @@ module jsidea.geom {
                 else
                     pt = chain[i].matrix.transform2D(pt);
             }
+            
+            pt.x -= 10;
+            pt.y -= 10;
 
             //            var paddingX = math.Number.parse(chain[0].style.paddingLeft, 0);
             //            var paddingY = math.Number.parse(chain[0].style.paddingTop, 0);
@@ -84,15 +87,16 @@ module jsidea.geom {
 
             //accumulate if possible
             //TODO: do it whenever possible?
-            //            var l = chain.length;
-            //            var b = l;
-            //            for (var i = 0; i < l; ++i) {
-            //                if (i < (l - 1) && (chain[i].is2D || chain[i].preserve3D)) {
-            //                    chain[i + 1].matrix.prepend(chain[i].matrix);
-            //                    l--;
-            //                    chain.splice(i, 1);
-            //                }
-            //            }
+            var l = chain.length;
+            var b = l;
+            for (var i = 0; i < l; ++i) {
+                if (i < (l - 1) && (chain[i].is2D || chain[i].preserve3D)) {
+                    chain[i + 1].matrix.prepend(chain[i].matrix);
+                    l--;
+                    chain.splice(i, 1);
+                    i--;
+                }
+            }
             return chain;
         }
 
@@ -154,14 +158,7 @@ module jsidea.geom {
             //perspective
             //-------
             var perspective = math.Number.parse(parentStyle.perspective, 0);
-            //tricky stuff webkit ignores perspective without preserve-3d
-            //            if (!perspective)// || (this.isWebkit && !this.extractPreserve(parentStyle)))
-            
-            //            var isStrange = this.isWebkit && parentStyle.overflow != "visible";
-            //            if(!isStrange)
-            //                isStrange = this.isWebkit && parentStyle.transformStyle != "preserve-3d";
-            
-            if (!perspective)// || isStrange)
+            if (!perspective)
                 return result;
 
             var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
@@ -182,7 +179,6 @@ module jsidea.geom {
             //Firefox does NOT reflect the "grouping"-overrides and this is how its concepted.
             //But what about the "opacity"-property. Opacity does not override the preserve-3d (not always, webkit does under some conditions).
             //http://dev.w3.org/csswg/css-transforms/#grouping-property-values
-            //            if(preserve3d && this.isFirefox && style.overflow != "visible")
             if (preserve3d && style.overflow != "visible")
                 preserve3d = false;
 
