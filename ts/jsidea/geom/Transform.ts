@@ -4,9 +4,74 @@ module jsidea.geom {
         matrix: geom.Matrix3D;
         preserve3D: boolean;
         is2D: boolean;
-        perspective: number;
+        //        perspective: number;
         style: CSSStyleDeclaration;
         parentStyle: CSSStyleDeclaration;
+    }
+
+    export class TransformChain {
+        public chain: ITransformElement[] = [];
+        public chainRaw: ITransformElement[] = [];
+
+        public collect(element: HTMLElement): void {
+            
+            //clear chaing
+            this.chain.splice(0, this.chain.length);
+            this.chainRaw.splice(0, this.chainRaw.length);
+            
+            //collect computed styles up to body.parent ==> html-container
+            var styles: CSSStyleDeclaration[] = [];
+            var visual = element;
+            while (visual && visual != document.body.parentElement) {
+                styles.push(window.getComputedStyle(visual));
+                visual = visual.parentElement;
+            }
+
+            //collect transforms up to body
+            var stylesIndex: number = 0;
+            var chainRaw: ITransformElement[] = [];
+            visual = element;
+            while (visual && visual != document.body) {
+                chainRaw.push(Transform.extractTransform(visual, styles[stylesIndex++], styles[stylesIndex]));
+                visual = visual.parentElement;
+            }
+
+            //accumulate if possible
+            //TODO: do it whenever possible?
+            var chain = chainRaw.slice(0, chainRaw.length);
+            var l = chain.length;
+            var b = l;
+            for (var i = 0; i < l; ++i) {
+                if (i < (l - 1) && (chain[i].is2D || chain[i].preserve3D)) {
+                    chain[i + 1].matrix.prepend(chain[i].matrix);
+                    l--;
+                    chain.splice(i, 1);
+                    i--;
+                }
+            }            
+            
+            //set the finals
+            this.chain = chain;
+            this.chainRaw = chainRaw;
+        }
+
+        public toString(): void {
+            var chain = this.chainRaw;
+            var l = chain.length;
+            for (var i = 0; i < l; ++i) {
+                console.log(
+                    chain[i].element.id,
+                    "   \tOFFSET", chain[i].element.offsetLeft,
+                    chain[i].element.offsetTop,
+                    "   \tSIZE", chain[i].element.offsetWidth,
+                    chain[i].element.offsetHeight,
+                    "   \tBORDER", chain[i].style.borderLeftWidth,
+                    chain[i].style.borderTopWidth,
+                    "   \tPRESERVED", Transform.extractPreserve(chain[i].parentStyle),
+                    "   \tPERSPECTIVE", chain[i].style.perspective
+                    );
+            }
+        }
     }
     export class Transform {
 
@@ -15,7 +80,7 @@ module jsidea.geom {
 
         public static getGlobalToLocal(element: HTMLElement, x: number, y: number, z: number = 0): jsidea.geom.Point3D {
             //get chain
-            var chain: ITransformElement[] = this.extractChain(element);
+            var chain: ITransformElement[] = this.extractChain(element).chain;
 
             //invert and transform/project from parent to child
             var pt = new geom.Point3D(x, y, 0);
@@ -30,7 +95,7 @@ module jsidea.geom {
             var paddingY = math.Number.parse(style.paddingTop, 0);
             pt.x -= paddingX;
             pt.y -= paddingY;
-            
+
             var parentStyle = window.getComputedStyle(element.parentElement);
             var parentBorderX = math.Number.parse(parentStyle.borderLeftWidth, 0);
             var parentBorderY = math.Number.parse(parentStyle.borderTopWidth, 0);
@@ -42,62 +107,26 @@ module jsidea.geom {
 
         public static getLocalToGlobal(element: HTMLElement, x: number, y: number, z: number = 0, out: boolean = false): jsidea.geom.Point3D {
             //get chain
-            var chain: ITransformElement[] = this.extractChain(element);
+            var tr = this.extractChain(element);
+            var chain: ITransformElement[] = tr.chain;
 
             //transform from child to parent
             var pt = new geom.Point3D(x, y, 0);
             var l = chain.length;
             for (var i = 0; i < l; ++i) {
-                if (out)
-                    console.log(
-                        chain[i].element.id,
-                        "   \tOFFSET", chain[i].element.offsetLeft,
-                        chain[i].element.offsetTop,
-                        "   \tSIZE", chain[i].element.offsetWidth,
-                        chain[i].element.offsetHeight,
-                        "   \tBORDER", chain[i].style.borderLeftWidth,
-                        chain[i].style.borderTopWidth,
-                        "   \tPRESERVED", this.extractPreserve(chain[i].parentStyle),
-                        "   \tPERSPECTIVE", chain[i].style.perspective
-                        );
-                if (chain[i].preserve3D)
-                    pt = chain[i].matrix.transform2D(pt, pt);//transform3D
-                else
-                    pt = chain[i].matrix.transform2D(pt);
+                pt = chain[i].matrix.unproject(pt, pt);
             }
+
+
+            if (out)
+                tr.toString();
+
             return pt;
         }
 
-        private static extractChain(element: HTMLElement): geom.ITransformElement[] {
-            //collect computed styles up to body.parent ==> html-container
-            var styles: CSSStyleDeclaration[] = [];
-            var visual = element;
-            while (visual && visual != document.body.parentElement) {
-                styles.push(window.getComputedStyle(visual));
-                visual = visual.parentElement;
-            }
-
-            //collect transforms up to body
-            var stylesIndex: number = 0;
-            var chain: ITransformElement[] = [];
-            visual = element;
-            while (visual && visual != document.body) {
-                chain.push(this.extractTransform(visual, styles[stylesIndex++], styles[stylesIndex]));
-                visual = visual.parentElement;
-            }
-
-            //accumulate if possible
-            //TODO: do it whenever possible?
-            var l = chain.length;
-            var b = l;
-            for (var i = 0; i < l; ++i) {
-                if (i < (l - 1) && (chain[i].is2D || chain[i].preserve3D)) {
-                    chain[i + 1].matrix.prepend(chain[i].matrix);
-                    l--;
-                    chain.splice(i, 1);
-                    i--;
-                }
-            }
+        private static extractChain(element: HTMLElement): geom.TransformChain {
+            var chain = new TransformChain();
+            chain.collect(element);
             return chain;
         }
 
@@ -146,7 +175,7 @@ module jsidea.geom {
                     offsetX += borderParentX;
                     offsetY += borderParentY;
                 }
-                //WORK-A-ROUND: FF-Bug -> DOUBLE BORDER?
+                //WORK-A-ROUND: FF-Bug -> DOUBLE BORDER? in offset and border
                 if (parentStyle.overflow != "visible") {
                     offsetX += borderParentX;
                     offsetY += borderParentY;
@@ -173,7 +202,7 @@ module jsidea.geom {
             return result;
         }
 
-        private static extractPreserve(style: CSSStyleDeclaration): boolean {
+        public static extractPreserve(style: CSSStyleDeclaration): boolean {
             var preserve3d = style.transformStyle == "preserve-3d";
             
             //tricky stuff: only firefox does reflect/compute the "correct" transformStyle value.
@@ -186,11 +215,18 @@ module jsidea.geom {
             return preserve3d;
         }
 
-        private static extractTransform(a: HTMLElement, style: CSSStyleDeclaration, parentStyle: CSSStyleDeclaration): geom.ITransformElement {
+        public static extractTransform(a: HTMLElement, style: CSSStyleDeclaration, parentStyle: CSSStyleDeclaration): geom.ITransformElement {
             var preserve3d = this.extractPreserve(parentStyle);
-            //            if(a.parentElement == document.body)
-            //                preserve3d = false;
             
+            //there is this case where webkit ignores transform-style: none. 
+            //So when the elements parent has preserve3d and the element itself has no transform set.
+            if (this.isWebkit && !preserve3d && parentStyle.transform == "none" && a.parentElement.parentElement) {
+                var app = window.getComputedStyle(a.parentElement.parentElement);
+                var p = this.extractPreserve(app);
+                if (app)
+                    preserve3d = true;
+            }
+
             var is2D = style.transform.indexOf("matrix3d") < 0;
             var matrix = this.extractTransformMatrix(a, style, parentStyle);
             var perspective = math.Number.parse(parentStyle.perspective, 0);

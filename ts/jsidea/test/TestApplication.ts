@@ -41,13 +41,7 @@ module jsidea.test {
             geom.Transform.getLocalToGlobal(bc, 0, 0, 0, true);
 
             $(document).bind("mousemove",(evt) => {
-                
-                //                ctx.fillRect(0, 0, can.width, can.height);
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
-                
-                //                pt = geom.Transform.getGlobalToLocal(a, pt.x, pt.y);
-                //                this.applyPos(pt, b);
-                
                 pt = geom.Transform.getGlobalToLocal(b, pt.x, pt.y);
                 this.applyPos(pt, bc);
 

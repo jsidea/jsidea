@@ -36,11 +36,6 @@ module jsidea.geom {
         private static tempAxeY: Point3D = new Point3D();
         private static tempAxeZ: Point3D = new Point3D();
 
-
-
-        public static TEMP1: Matrix3D = new Matrix3D();
-        public static TEMP2: Matrix3D = new Matrix3D();
-
         public m11: number = 1;
         public m12: number = 0;
         public m13: number = 0;
@@ -226,7 +221,7 @@ module jsidea.geom {
         }
 
         //from homegeneous (euclid) to cartesian FLATTENED!!!! like a projection
-        public transform2D(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
+        public unproject(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
             var x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41;
             var y = point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + this.m42;
             var w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + this.m44;
