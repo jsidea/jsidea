@@ -22,14 +22,27 @@ module jsidea.geom {
             var l = chain.length;
             for (var i = l - 1; i >= 0; --i) {
                 chain[i].matrix.invert();
-                if (chain[i].preserve3D || chain[i].perspective > 0)
-                    pt = chain[i].matrix.project(pt);
-                else
-                    pt = chain[i].matrix.transform2D(pt);
+                
+                pt = chain[i].matrix.project(pt);
+                
+//                if (chain[i].preserve3D)
+//                    pt = chain[i].matrix.transform3D(pt);
+//                else if (chain[i].perspective > 0)
+//                    pt = chain[i].matrix.project(pt);
+//                else
+//                    pt = chain[i].matrix.transform3D(pt);
+                
+//                if (chain[i].preserve3D || chain[i].perspective > 0)
+//                    pt = chain[i].matrix.project(pt);
+//                else
+//                    pt = chain[i].matrix.transform3D(pt);
             }
             
-            pt.x -= 10;
-            pt.y -= 10;
+            var parentStyle = window.getComputedStyle(element.parentElement);
+            var borderX = math.Number.parse(parentStyle.borderLeftWidth, 0);
+            var borderY = math.Number.parse(parentStyle.borderTopWidth, 0);
+            pt.x -= borderX;
+            pt.y -= borderY;
 
             //            var paddingX = math.Number.parse(chain[0].style.paddingLeft, 0);
             //            var paddingY = math.Number.parse(chain[0].style.paddingTop, 0);
@@ -187,6 +200,9 @@ module jsidea.geom {
 
         private static extractTransform(a: HTMLElement, style: CSSStyleDeclaration, parentStyle: CSSStyleDeclaration): geom.ITransformElement {
             var preserve3d = this.extractPreserve(parentStyle);
+//            if(a.parentElement == document.body)
+//                preserve3d = false;
+            
             var is2D = style.transform.indexOf("matrix3d") < 0;
             var matrix = this.extractTransformMatrix(a, style, parentStyle);
             var perspective = math.Number.parse(parentStyle.perspective, 0);

@@ -29,7 +29,8 @@ body * {
 	left: -2px;
 	top: -2px; */
 	/* box-sizing: border-box; */
-	transform-style: flat;
+	transform-style: preserve-3d;
+	perspective: 600px;
 }
 
 #view {
@@ -39,6 +40,7 @@ body * {
 	left: 100px;
 	top: 100px;
 	border: 10px solid #FF00FF;
+	transform: translateZ(-20px);
 	transform-style: flat;
 	perspective: 200px;
 	/* overflow: hidden; */
@@ -61,7 +63,7 @@ body * {
 	border: 10px solid #00FFFF;
 	width: 512px;
 	height: 512px;
-	/* transform-style: preserve-3d; */
+	transform-style: preserve-3d;
 	transform: translateZ(-20px);
 	perspective: 200px;
 }
