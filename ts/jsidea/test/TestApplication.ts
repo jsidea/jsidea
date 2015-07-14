@@ -32,10 +32,12 @@ module jsidea.test {
             con.appendChild(a);
             document.body.appendChild(can);
 
-//            this.drawBoundingBox3(ctx, con);
+            this.drawBoundingBox3(ctx, con);
             this.drawBoundingBox3(ctx, a);
-//            this.drawBoundingBox3(ctx, b);
-//            this.drawBoundingBox3(ctx, bc);
+            this.drawBoundingBox3(ctx, b);
+            this.drawBoundingBox3(ctx, bc);
+            
+            geom.Transform.getLocalToGlobal(bc, 0, 0, 0, true);
 
 //            $(document).bind("mousemove",(evt) => {
 //                
@@ -68,9 +70,12 @@ module jsidea.test {
             d = geom.Transform.getLocalToGlobal(e, d.x, d.y);
             //            orp = geom.Transform.getLocalToGlobal(e, orp);
             var tim2 = (new Date()).getTime();
-            console.log(tim2 - tim);
+//            console.log("TIME TO CALC 4 POINTS", tim2 - tim);
 
             ctx.beginPath();
+            ctx.setLineDash([4,4]);
+//            ctx.strokeStyle = "#00FFFF";
+            ctx.lineWidth = 2;
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
             ctx.lineTo(c.x, c.y);

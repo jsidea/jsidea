@@ -13,7 +13,8 @@ body {
 	/* perspective: 600px;
 	overflow: hidden;
 	perspective-origin: 0px 0px; */
-	transform-style: flat;
+	/* transform-style: preserve-3d; */
+	
 }
 
 canvas {
@@ -22,75 +23,60 @@ canvas {
 	left: 0;
 }
 
+body * {
+	/* box-sizing: border-box;
+	left: -2px;
+	top: -2px; */
+	/* box-sizing: border-box; */
+}
+
 #view {
 	position: absolute;
-	width: 1024px;
-	height: 1024px;
-	
-	/* opacity: 0.5; */
-	overflow: hidden;
-	transform: rotateY(-45deg);
-	transform-style: preserve-3d;
-	perspective: 300px;
-	perspective-origin: 256px 0px;
-}
-
-#content {
-	/* border: 64px solid #00FF00; */
-	/* box-sizing: border-box; */
-	/* padding: 20px; */
-	/* left: 64px; */
-	/* margin: 25px; */
-	
-	position: absolute;
-	width: 256px;
-	height: 512px;
-	background-color: #EEAAEE;
-	
-	/* opacity: 0.5; */
-	overflow: hidden;
-	transform: rotateY(45deg);
-	transform-style: preserve-3d;
-	perspective: 600px;
-	perspective-origin: 256px 0px;
-}
-
-#a-cont {
-	/* border: 40px solid #00FFFF; */
-	position: absolute;
-	background-color: rgba(0, 0, 0, 0.3);
 	width: 512px;
 	height: 512px;
 	left: 100px;
-	top: 25px;
-	margin: 25px;
-	/* padding: 80px; */
-	
-	/* overflow: hidden; */
-	transform: translate3D(100px, 0px, -300px) rotate(45deg);
-	transform-origin: 256px 256px;
+	top: 100px;
+	border: 10px solid #FF00FF;
 	transform-style: preserve-3d;
-	perspective: 600px;
-	perspective-origin: 256px 256px;
+	perspective: 200px;
+}
+
+#content {
+	position: absolute;
+	width: 512px;
+	height: 512px;
+	border: 60px solid #FFFF00;
+	transform: translateZ(-20px);
+	transform-style: preserve-3d;
+	perspective: 200px;
+	opacity: 0.5;
+	/* overflow: hidden; */
+}
+
+#a-cont {
+	position: absolute;
+	border: 10px solid #00FFFF;
+	width: 512px;
+	height: 512px;
+	transform-style: preserve-3d;
+	transform: translateZ(-20px);
+	perspective: 200px;
 }
 
 #b-cont {
 	position: absolute;
-	background-color: #0000FF;
-	opacity: 0.3;
-	width: 128px;
-	height: 128px;
-	/* padding: 30px 60px; */
+	border: 10px solid #0000FF;
+	width: 512px;
+	height: 512px;
 	transform-style: preserve-3d;
-	transform: translate3D(100px, 0px, -300px) rotate(45deg);
+	transform: translateZ(-20px);
+	perspective: 200px;
 }
 
 #bc-cont {
 	position: absolute;
-	background-color: #00FFFF;
-	width: 64px;
-	height: 64px;
-	transform-origin: 0px 0px;
-	/* transform: translateX(512px) rotateY(45deg) rotateX(45deg) scale(4); */
-	transform: translateX(512px) scale(4);
+	border: 10px solid #FF0000;
+	width: 512px;
+	height: 512px;
+	transform: translateZ(-20px);
 }

@@ -36,23 +36,26 @@ module jsidea.geom {
             return pt;
         }
 
-        public static getLocalToGlobal(element: HTMLElement, x: number, y: number, z: number = 0): jsidea.geom.Point3D {
+        public static getLocalToGlobal(element: HTMLElement, x: number, y: number, z: number = 0, out: boolean = false): jsidea.geom.Point3D {
             //get chain
             var chain: ITransformElement[] = this.extractChain(element);
 
             //transform from child to parent
             var pt = new geom.Point3D(x, y, 0);
-            console.log("----");
             var l = chain.length;
             for (var i = 0; i < l; ++i) {
-                console.log(
-                    chain[i].element.offsetLeft,
-                    chain[i].element.offsetTop,
-                    chain[i].style.perspective,
-                    chain[i].element.id,
-                    chain[i].style.transformStyle,
-                    this.extractPreserve(chain[i].parentStyle)
-                    );//chain[i].parentStyle.transformStyle
+                if (out)
+                    console.log(
+                        chain[i].element.id,
+                        "   \tOFFSET", chain[i].element.offsetLeft,
+                        chain[i].element.offsetTop,
+                        "   \tSIZE", chain[i].element.offsetWidth,
+                        chain[i].element.offsetHeight,
+                        "   \tBORDER", chain[i].style.borderLeftWidth,
+                        chain[i].style.borderTopWidth,
+                        "   \tPRESERVED", this.extractPreserve(chain[i].parentStyle),
+                        "   \tPERSPECTIVE", chain[i].style.perspective
+                        );
                 if (chain[i].preserve3D)// || chain[i].perspective > 0)
                     pt = chain[i].matrix.transform3D(pt, pt);
                 else
@@ -115,36 +118,50 @@ module jsidea.geom {
             //------
             var offsetX = element.offsetLeft;
             var offsetY = element.offsetTop;
+
+            //handle fixed elements (look what ie11 is doing???? very strange or consequent)
             if (element.parentElement && this.isWebkit && style.position == "fixed") {
                 offsetX -= element.parentElement.clientLeft;
                 offsetY -= element.parentElement.clientTop;
             }
-            result.appendPositionRaw(offsetX, offsetY, 0);
 
-            //skip if its the body
-            if (!parentStyle)
-                return result;
-
-            //------
-            //parent borders
-            //------
+            //integrate parent borders
             var borderParentX = math.Number.parse(parentStyle.borderLeftWidth, 0);
             var borderParentY = math.Number.parse(parentStyle.borderTopWidth, 0);
-            //tricky stuff (if parent has border-box and you are in firefox then add parents border NOT)
-            //hmmmm firefox integrates the border into the offset????? just check it
-            if (!this.isFirefox || parentStyle.boxSizing != "border-box") {
-                result.appendPositionRaw(borderParentX, borderParentY, 0);
+
+            if (!this.isFirefox) {
+                offsetX += borderParentX;
+                offsetY += borderParentY;
             }
+            
+            //tricky stuff: if parent has border-box and you are NOT in firefox then add parents border.
+            //Firefox integrates the border to the offsetLeft and offsetTop values.
+            else if (this.isFirefox) {
+                if (parentStyle.boxSizing != "border-box") {
+                    offsetX += borderParentX;
+                    offsetY += borderParentY;
+                }
+                //WORK-A-ROUND: FF-Bug -> DOUBLE BORDER?
+                if (parentStyle.overflow != "visible") {
+                    offsetX += borderParentX;
+                    offsetY += borderParentY;
+                }
+            }
+
+            result.appendPositionRaw(offsetX, offsetY, 0);
             
             //-------
             //perspective
             //-------
             var perspective = math.Number.parse(parentStyle.perspective, 0);
-            //http://dev.w3.org/csswg/css-transforms/#grouping-property-values
-            //            if(this.isWebkit && parentStyle.overflow != "visible")
-            //                perspective = 0;
+            //tricky stuff webkit ignores perspective without preserve-3d
+            //            if (!perspective)// || (this.isWebkit && !this.extractPreserve(parentStyle)))
             
-            if (!perspective)// || preserve3d)
+            //            var isStrange = this.isWebkit && parentStyle.overflow != "visible";
+            //            if(!isStrange)
+            //                isStrange = this.isWebkit && parentStyle.transformStyle != "preserve-3d";
+            
+            if (!perspective)// || isStrange)
                 return result;
 
             var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
@@ -157,24 +174,27 @@ module jsidea.geom {
 
             return result;
         }
-        
-        private static extractPreserve(style: CSSStyleDeclaration):boolean
-        {
+
+        private static extractPreserve(style: CSSStyleDeclaration): boolean {
             var preserve3d = style.transformStyle == "preserve-3d";
-            if(this.isFirefox && style.overflow != "visible")
-                preserve3d = false; 
             
-            return preserve3d;    
+            //tricky stuff: only firefox does reflect/compute the "correct" transformStyle value.
+            //Firefox does NOT reflect the "grouping"-overrides and this is how its concepted.
+            //But what about the "opacity"-property. Opacity does not override the preserve-3d (not always, webkit does under some conditions).
+            //http://dev.w3.org/csswg/css-transforms/#grouping-property-values
+            //            if(preserve3d && this.isFirefox && style.overflow != "visible")
+            if (preserve3d && style.overflow != "visible")
+                preserve3d = false;
+
+            return preserve3d;
         }
 
         private static extractTransform(a: HTMLElement, style: CSSStyleDeclaration, parentStyle: CSSStyleDeclaration): geom.ITransformElement {
-            //            var preserve3d = a.parentElement == document.body || (parentStyle.transformStyle == "preserve-3d");
-//            var preserve3d = parentStyle.transformStyle == "preserve-3d";
             var preserve3d = this.extractPreserve(parentStyle);
             var is2D = style.transform.indexOf("matrix3d") < 0;
             var matrix = this.extractTransformMatrix(a, style, parentStyle);
             var perspective = math.Number.parse(parentStyle.perspective, 0);
-            
+
             return {
                 element: a,
                 matrix: matrix,
