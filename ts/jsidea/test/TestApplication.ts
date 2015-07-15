@@ -13,7 +13,7 @@ module jsidea.test {
         private testMatrix3D5(): void {
             var con = document.getElementById("content");
             var vie = document.getElementById("view");
-            
+
             var a = document.createElement("div");
             a.id = "a-cont";
             var b = document.createElement("div");
@@ -35,8 +35,10 @@ module jsidea.test {
             this.drawBoundingBox3(can, ctx, con);
             this.drawBoundingBox3(can, ctx, a);
             this.drawBoundingBox3(can, ctx, b);
-//            this.drawBoundingBox3(can, ctx, bc);
+            this.drawBoundingBox3(can, ctx, bc);
             this.drawBoundingBox3(can, ctx, vie);
+            //            this.drawBoundingBox3(can, ctx, b);
+            //            this.drawBoundingBox4(can, ctx, a);
 
             $(document).bind("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
@@ -46,36 +48,75 @@ module jsidea.test {
             });
         }
 
-        private drawBoundingBox3(can: HTMLElement, ctx: CanvasRenderingContext2D, e: HTMLElement): void {
-            //            var or: geom.Point2D = geom.Transform.extractPerspectiveOrigin(e);
+        private drawBoundingBox4(can: HTMLElement, ctx: CanvasRenderingContext2D, e: HTMLElement): void {
+            var size = 100;
+            var cenX = e.offsetWidth * 0.5;
+            var cenY = e.offsetHeight * 0.5;
 
+            var a = new geom.Point3D(cenX, cenY, 0);
+            var b = new geom.Point3D(cenX + size, cenY, 0);
+            var c = new geom.Point3D(cenX, cenY, size);
+            var d = new geom.Point3D(cenX, cenY + size, 0);
+
+            var locToGlo = geom.Transform.getTransform(e);
+            a = locToGlo.localToGlobal(a.x, a.y);
+            b = locToGlo.localToGlobal(b.x, b.y);
+            c = locToGlo.localToGlobal(c.x, c.y, c.z);
+            d = locToGlo.localToGlobal(d.x, d.y);
+
+            var gloToLoc = geom.Transform.getTransform(can);
+            a = gloToLoc.globalToLocal(a.x, a.y);
+            b = gloToLoc.globalToLocal(b.x, b.y);
+            c = gloToLoc.globalToLocal(c.x, c.y);
+            d = gloToLoc.globalToLocal(d.x, d.y);
+
+            ctx.beginPath();
+
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(d.x, d.y);
+
+            ctx.setLineDash([]);
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(c.x, c.y);
+
+            ctx.setLineDash([2, 2]);
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        private drawBoundingBox3(can: HTMLElement, ctx: CanvasRenderingContext2D, e: HTMLElement): void {
             var a = new geom.Point3D(0, 0, 0);
             var b = new geom.Point3D(e.offsetWidth, 0, 0);
             var c = new geom.Point3D(e.offsetWidth, e.offsetHeight, 0);
             var d = new geom.Point3D(0, e.offsetHeight, 0);
-            //            var orp = new geom.Point3D(or.x, or.y, 0);
 
             var tim = (new Date()).getTime();
 
-            a = geom.Transform.getLocalToGlobal(e, a.x, a.y);
-            b = geom.Transform.getLocalToGlobal(e, b.x, b.y);
-            c = geom.Transform.getLocalToGlobal(e, c.x, c.y);
-            d = geom.Transform.getLocalToGlobal(e, d.x, d.y);
-            
-            
-            
-            a = geom.Transform.getGlobalToLocal(can, a.x, a.y);
-            b = geom.Transform.getGlobalToLocal(can, b.x, b.y);
-            c = geom.Transform.getGlobalToLocal(can, c.x, c.y);
-            d = geom.Transform.getGlobalToLocal(can, d.x, d.y);
+            var locToGlo = geom.Transform.getTransform(e);
+            a = locToGlo.localToGlobal(a.x, a.y);
+            b = locToGlo.localToGlobal(b.x, b.y);
+            c = locToGlo.localToGlobal(c.x, c.y);
+            d = locToGlo.localToGlobal(d.x, d.y);
+
+            var gloToLoc = geom.Transform.getTransform(can);
+            a = gloToLoc.globalToLocal(a.x, a.y);
+            b = gloToLoc.globalToLocal(b.x, b.y);
+            c = gloToLoc.globalToLocal(c.x, c.y);
+            d = gloToLoc.globalToLocal(d.x, d.y);
             
             //            orp = geom.Transform.getLocalToGlobal(e, orp);
             var tim2 = (new Date()).getTime();
-//            console.log("TIME TO CALC 4 POINTS", tim2 - tim);
+            console.log("TIME TO CALC 4 POINTS", tim2 - tim);
 
             ctx.beginPath();
-            ctx.setLineDash([4,4]);
-//            ctx.strokeStyle = "#00FFFF";
+            ctx.setLineDash([4, 4]);
+            //            ctx.strokeStyle = "#00FFFF";
             ctx.lineWidth = 2;
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);

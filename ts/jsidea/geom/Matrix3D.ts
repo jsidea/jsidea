@@ -261,7 +261,8 @@ module jsidea.geom {
             x /= w;
             y /= w;
 
-            return ret.setTo(x, y, 0, 0);
+            return ret.setTo(x, y, point.z, w);
+//            return ret.setTo(x, y, 0, 0);
         }
         
         //from homegeneous (euclid) to cartesian
@@ -686,6 +687,13 @@ module jsidea.geom {
             data[1] = n14 * n33 * n42 - n13 * n34 * n42 - n14 * n32 * n43 + n12 * n34 * n43 + n13 * n32 * n44 - n12 * n33 * n44;
             data[2] = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 * n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44;
             data[3] = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
+            
+            var det = n11 * data[0] + n21 * data[1] + n31 * data[2] + n41 * data[3];
+            if (det == 0) {
+                console.warn("Can't invert matrix, determinant is 0");
+                return this;
+            }
+            
             data[4] = n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 * n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44;
             data[5] = n13 * n34 * n41 - n14 * n33 * n41 + n14 * n31 * n43 - n11 * n34 * n43 - n13 * n31 * n44 + n11 * n33 * n44;
             data[6] = n14 * n23 * n41 - n13 * n24 * n41 - n14 * n21 * n43 + n11 * n24 * n43 + n13 * n21 * n44 - n11 * n23 * n44;
@@ -698,12 +706,6 @@ module jsidea.geom {
             data[13] = n12 * n33 * n41 - n13 * n32 * n41 + n13 * n31 * n42 - n11 * n33 * n42 - n12 * n31 * n43 + n11 * n32 * n43;
             data[14] = n13 * n22 * n41 - n12 * n23 * n41 - n13 * n21 * n42 + n11 * n23 * n42 + n12 * n21 * n43 - n11 * n22 * n43;
             data[15] = n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33;
-
-            var det = n11 * data[0] + n21 * data[1] + n31 * data[2] + n41 * data[3];
-            if (det == 0) {
-                console.warn("Can't invert matrix, determinant is 0");
-                return this;
-            }
 
             this.setData(data);
             this.scalar(1 / det);
@@ -737,7 +739,7 @@ module jsidea.geom {
 
             if (cssString.indexOf("matrix3d") < 0)
                 return this.setMatrix2D(Buffer._SET_CSS_3D.setCSS(cssString));
-            //console.log("AHH");
+
             var trans = cssString.replace("matrix3d(", "").replace(")", "").split(",");
             this.m11 = math.Number.parse(trans[0], 1);
             this.m12 = math.Number.parse(trans[1], 0);
@@ -966,40 +968,66 @@ module jsidea.geom {
         //
         //            return ret;
         //        }
-        
-        public static extract(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
-            if (visual.ownerDocument) {
-                var style = window.getComputedStyle(visual);
-                var m = ret.setCSS(style.transform);
-                return m;
-            }
-            ret.identity();
-            return ret;
-        }
 
         public static parse(cssStr: string, ret = new Matrix3D()): Matrix3D {
             return ret.setCSS(cssStr);
         }
 
         public static multiply(a: IMatrix3DValue, b: IMatrix3DValue, ret: Matrix3D = new Matrix3D()): Matrix3D {
-            var data: number[] = [];
-            data[0] = b.m11 * a.m11 + b.m12 * a.m21 + b.m13 * a.m31 + b.m14 * a.m41;
-            data[1] = b.m11 * a.m12 + b.m12 * a.m22 + b.m13 * a.m32 + b.m14 * a.m42;
-            data[2] = b.m11 * a.m13 + b.m12 * a.m23 + b.m13 * a.m33 + b.m14 * a.m43;
-            data[3] = b.m11 * a.m14 + b.m12 * a.m24 + b.m13 * a.m34 + b.m14 * a.m44;
-            data[4] = b.m21 * a.m11 + b.m22 * a.m21 + b.m23 * a.m31 + b.m24 * a.m41;
-            data[5] = b.m21 * a.m12 + b.m22 * a.m22 + b.m23 * a.m32 + b.m24 * a.m42;
-            data[6] = b.m21 * a.m13 + b.m22 * a.m23 + b.m23 * a.m33 + b.m24 * a.m43;
-            data[7] = b.m21 * a.m14 + b.m22 * a.m24 + b.m23 * a.m34 + b.m24 * a.m44;
-            data[8] = b.m31 * a.m11 + b.m32 * a.m21 + b.m33 * a.m31 + b.m34 * a.m41;
-            data[9] = b.m31 * a.m12 + b.m32 * a.m22 + b.m33 * a.m32 + b.m34 * a.m42;
-            data[10] = b.m31 * a.m13 + b.m32 * a.m23 + b.m33 * a.m33 + b.m34 * a.m43;
-            data[11] = b.m31 * a.m14 + b.m32 * a.m24 + b.m33 * a.m34 + b.m34 * a.m44;
-            data[12] = b.m41 * a.m11 + b.m42 * a.m21 + b.m43 * a.m31 + b.m44 * a.m41;
-            data[13] = b.m41 * a.m12 + b.m42 * a.m22 + b.m43 * a.m32 + b.m44 * a.m42;
-            data[14] = b.m41 * a.m13 + b.m42 * a.m23 + b.m43 * a.m33 + b.m44 * a.m43;
-            data[15] = b.m41 * a.m14 + b.m42 * a.m24 + b.m43 * a.m34 + b.m44 * a.m44;
-            return ret.setData(data);
+//            var data: number[] = [];
+//            data[0] = b.m11 * a.m11 + b.m12 * a.m21 + b.m13 * a.m31 + b.m14 * a.m41;
+//            data[1] = b.m11 * a.m12 + b.m12 * a.m22 + b.m13 * a.m32 + b.m14 * a.m42;
+//            data[2] = b.m11 * a.m13 + b.m12 * a.m23 + b.m13 * a.m33 + b.m14 * a.m43;
+//            data[3] = b.m11 * a.m14 + b.m12 * a.m24 + b.m13 * a.m34 + b.m14 * a.m44;
+//            data[4] = b.m21 * a.m11 + b.m22 * a.m21 + b.m23 * a.m31 + b.m24 * a.m41;
+//            data[5] = b.m21 * a.m12 + b.m22 * a.m22 + b.m23 * a.m32 + b.m24 * a.m42;
+//            data[6] = b.m21 * a.m13 + b.m22 * a.m23 + b.m23 * a.m33 + b.m24 * a.m43;
+//            data[7] = b.m21 * a.m14 + b.m22 * a.m24 + b.m23 * a.m34 + b.m24 * a.m44;
+//            data[8] = b.m31 * a.m11 + b.m32 * a.m21 + b.m33 * a.m31 + b.m34 * a.m41;
+//            data[9] = b.m31 * a.m12 + b.m32 * a.m22 + b.m33 * a.m32 + b.m34 * a.m42;
+//            data[10] = b.m31 * a.m13 + b.m32 * a.m23 + b.m33 * a.m33 + b.m34 * a.m43;
+//            data[11] = b.m31 * a.m14 + b.m32 * a.m24 + b.m33 * a.m34 + b.m34 * a.m44;
+//            data[12] = b.m41 * a.m11 + b.m42 * a.m21 + b.m43 * a.m31 + b.m44 * a.m41;
+//            data[13] = b.m41 * a.m12 + b.m42 * a.m22 + b.m43 * a.m32 + b.m44 * a.m42;
+//            data[14] = b.m41 * a.m13 + b.m42 * a.m23 + b.m43 * a.m33 + b.m44 * a.m43;
+//            data[15] = b.m41 * a.m14 + b.m42 * a.m24 + b.m43 * a.m34 + b.m44 * a.m44;
+//            return ret.setData(data);
+            
+            var m11 = b.m11 * a.m11 + b.m12 * a.m21 + b.m13 * a.m31 + b.m14 * a.m41;
+            var m12 = b.m11 * a.m12 + b.m12 * a.m22 + b.m13 * a.m32 + b.m14 * a.m42;
+            var m13 = b.m11 * a.m13 + b.m12 * a.m23 + b.m13 * a.m33 + b.m14 * a.m43;
+            var m14 = b.m11 * a.m14 + b.m12 * a.m24 + b.m13 * a.m34 + b.m14 * a.m44;
+            var m21 = b.m21 * a.m11 + b.m22 * a.m21 + b.m23 * a.m31 + b.m24 * a.m41;
+            var m22 = b.m21 * a.m12 + b.m22 * a.m22 + b.m23 * a.m32 + b.m24 * a.m42;
+            var m23 = b.m21 * a.m13 + b.m22 * a.m23 + b.m23 * a.m33 + b.m24 * a.m43;
+            var m24 = b.m21 * a.m14 + b.m22 * a.m24 + b.m23 * a.m34 + b.m24 * a.m44;
+            var m31 = b.m31 * a.m11 + b.m32 * a.m21 + b.m33 * a.m31 + b.m34 * a.m41;
+            var m32 = b.m31 * a.m12 + b.m32 * a.m22 + b.m33 * a.m32 + b.m34 * a.m42;
+            var m33 = b.m31 * a.m13 + b.m32 * a.m23 + b.m33 * a.m33 + b.m34 * a.m43;
+            var m34 = b.m31 * a.m14 + b.m32 * a.m24 + b.m33 * a.m34 + b.m34 * a.m44;
+            var m41 = b.m41 * a.m11 + b.m42 * a.m21 + b.m43 * a.m31 + b.m44 * a.m41;
+            var m42 = b.m41 * a.m12 + b.m42 * a.m22 + b.m43 * a.m32 + b.m44 * a.m42;
+            var m43 = b.m41 * a.m13 + b.m42 * a.m23 + b.m43 * a.m33 + b.m44 * a.m43;
+            var m44 = b.m41 * a.m14 + b.m42 * a.m24 + b.m43 * a.m34 + b.m44 * a.m44;
+            
+            ret.m11 = m11;
+            ret.m12 = m12;
+            ret.m13 = m13;
+            ret.m14 = m14;
+            ret.m21 = m21;
+            ret.m22 = m22;
+            ret.m23 = m23;
+            ret.m24 = m24;
+            ret.m31 = m31;
+            ret.m32 = m32;
+            ret.m33 = m33;
+            ret.m34 = m34;
+            ret.m41 = m41;
+            ret.m42 = m42;
+            ret.m43 = m43;
+            ret.m44 = m44;
+            
+            return ret;
         }
     }
 }

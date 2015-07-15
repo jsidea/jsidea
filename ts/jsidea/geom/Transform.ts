@@ -13,12 +13,34 @@ module jsidea.geom {
 
         constructor(element: HTMLElement) {
             this._element = element;
-            this._matrices = Transform.extractAccumulatedMatrices(element);
+            this.update();
+        }
+
+        private update(): void {
+            this._matrices = Transform.extractAccumulatedMatrices(this._element);
             this._style = window.getComputedStyle(this._element);
             this._parentStyle = window.getComputedStyle(this._element.parentElement);
         }
 
-        public globalToLocal(x: number, y: number, z: number = 0): jsidea.geom.Point3D {
+        private applyBoxModel(pt: Point3D, boxModel: string): void {
+            //padding
+            if (boxModel == "content-box" || boxModel == "border-box") {
+                pt.x -= math.Number.parse(this._style.paddingLeft, 0);
+                pt.y -= math.Number.parse(this._style.paddingTop, 0);
+            }
+            
+            //parent border
+            if (boxModel == "content-box" || boxModel == "padding-box") {
+                pt.x -= math.Number.parse(this._parentStyle.borderLeftWidth, 0);
+                pt.y -= math.Number.parse(this._parentStyle.borderTopWidth, 0);
+            }
+        }
+
+        public globalToLocalPoint(pt: geom.Point3D): jsidea.geom.Point3D {
+            return this.globalToLocal(pt.x, pt.x, pt.z);
+        }
+        
+        public globalToLocal(x: number, y: number, z: number = 0, boxModel: string = "content-box"): jsidea.geom.Point3D {
             //invert and transform/project from parent to child
             var nodes: geom.Matrix3D[] = this._matrices;
             var pt = new geom.Point3D(x, y, z);
@@ -26,15 +48,13 @@ module jsidea.geom {
             for (var i = l - 1; i >= 0; --i)
                 pt = nodes[i].invertProject(pt, pt);
 
-            //padding
-            pt.x -= math.Number.parse(this._style.paddingLeft, 0);
-            pt.y -= math.Number.parse(this._style.paddingTop, 0);
-
-            //parent border
-            pt.x -= math.Number.parse(this._parentStyle.borderLeftWidth, 0);
-            pt.y -= math.Number.parse(this._parentStyle.borderTopWidth, 0);
+            this.applyBoxModel(pt, boxModel);
 
             return pt;
+        }
+
+        public localToGlobalPoint(pt: geom.Point3D): jsidea.geom.Point3D {
+            return this.localToGlobal(pt.x, pt.x, pt.z);
         }
 
         public localToGlobal(x: number, y: number, z: number = 0): jsidea.geom.Point3D {
@@ -60,6 +80,10 @@ module jsidea.geom {
 
         public static getLocalToGlobal(element: HTMLElement, x: number, y: number, z: number = 0): jsidea.geom.Point3D {
             return new TransformChain(element).localToGlobal(x, y, z);
+        }
+
+        public static getTransform(element: HTMLElement): geom.TransformChain {
+            return new TransformChain(element);
         }
 
         public static extractMatrix(node: INodeStyle): geom.Matrix3D {
@@ -186,19 +210,15 @@ module jsidea.geom {
             //                return false;
             //            }
 
-            
-//            if (node.element.id == "a-cont")
-//            {
-//                console.log(node.parent.style.transformStyle, node.style.transform.indexOf("matrix3d"));
-//                return false;
-//                }
-
             if (!node.parent)// || node.style.transform.indexOf("matrix3d") < 0)
                 return true;
 
-
-
             var parent = node.parent;
+
+            if (parent.style.transformStyle == "flat") {
+                return false;
+            }
+
             var preserve3d = parent.style.transformStyle == "preserve-3d";
             
             //tricky stuff: only firefox does reflect/compute the "correct" transformStyle value.
