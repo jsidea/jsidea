@@ -249,14 +249,5 @@ module jsidea.geom {
             var dp: number = vector.x * normal.x + vector.y * normal.y + vector.z * normal.z;
             return new Point3D(vector.x - 2 * dp * normal.x, vector.y - 2 * dp * normal.y, vector.z - 2 * dp * normal.z);
         }
-
-//        public static extractOrigin(visual: HTMLElement, bounds: Box2D = Box2D.extract(visual), ret: Point3D = new Point3D()): Point3D {
-//            var style: CSSStyleDeclaration = window.getComputedStyle(visual);
-//            var vals = style.transformOrigin.split(" ");
-//            return ret.setTo(
-//                math.Number.parseRelation(vals[0], bounds.width, 0),
-//                math.Number.parseRelation(vals[1], bounds.height, 0),
-//                math.Number.parseRelation(vals[3], 0, 0));//2nd parama "focalLength" ?
-//        }
     }
 }

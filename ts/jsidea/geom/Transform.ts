@@ -1,102 +1,36 @@
 module jsidea.geom {
-    export interface ITransformElement {
+    export interface INode {
         element: HTMLElement;
-        matrix: geom.Matrix3D;
-        preserve3D: boolean;
-        is2D: boolean;
-        //        perspective: number;
         style: CSSStyleDeclaration;
-        parentStyle: CSSStyleDeclaration;
+        parent: INode;
+        matrix: geom.Matrix3D;
+        accumulatable: boolean;
     }
 
     export class TransformChain {
-        public chain: ITransformElement[] = [];
-        public chainRaw: ITransformElement[] = [];
+        private _matrices: geom.Matrix3D[] = [];
+        private _element: HTMLElement;
 
-        public collect(element: HTMLElement): void {
-            
-            //clear chaing
-            this.chain.splice(0, this.chain.length);
-            this.chainRaw.splice(0, this.chainRaw.length);
-            
-            //collect computed styles up to body.parent ==> html-container
-            var styles: CSSStyleDeclaration[] = [];
-            var visual = element;
-            while (visual && visual != document.body.parentElement) {
-                styles.push(window.getComputedStyle(visual));
-                visual = visual.parentElement;
-            }
-
-            //collect transforms up to body
-            var stylesIndex: number = 0;
-            var chainRaw: ITransformElement[] = [];
-            visual = element;
-            while (visual && visual != document.body) {
-                chainRaw.push(Transform.extractTransform(visual, styles[stylesIndex++], styles[stylesIndex]));
-                visual = visual.parentElement;
-            }
-
-            //accumulate if possible
-            //TODO: do it whenever possible?
-            var chain = chainRaw.slice(0, chainRaw.length);
-            var l = chain.length;
-            var b = l;
-            for (var i = 0; i < l; ++i) {
-                if (i < (l - 1) && (chain[i].is2D || chain[i].preserve3D)) {
-                    chain[i + 1].matrix.prepend(chain[i].matrix);
-                    l--;
-                    chain.splice(i, 1);
-                    i--;
-                }
-            }            
-            
-            //set the finals
-            this.chain = chain;
-            this.chainRaw = chainRaw;
+        constructor(element: HTMLElement) {
+            this._element = element;
+            this._matrices = Transform.extractAccumulatedMatrices(element);
         }
 
-        public toString(): void {
-            var chain = this.chainRaw;
-            var l = chain.length;
-            for (var i = 0; i < l; ++i) {
-                console.log(
-                    chain[i].element.id,
-                    "   \tOFFSET", chain[i].element.offsetLeft,
-                    chain[i].element.offsetTop,
-                    "   \tSIZE", chain[i].element.offsetWidth,
-                    chain[i].element.offsetHeight,
-                    "   \tBORDER", chain[i].style.borderLeftWidth,
-                    chain[i].style.borderTopWidth,
-                    "   \tPRESERVED", Transform.extractPreserve(chain[i].parentStyle),
-                    "   \tPERSPECTIVE", chain[i].style.perspective
-                    );
-            }
-        }
-    }
-    export class Transform {
-
-        private static isWebkit = /chrome/.test(navigator.userAgent.toLowerCase());
-        private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
-
-        public static getGlobalToLocal(element: HTMLElement, x: number, y: number, z: number = 0): jsidea.geom.Point3D {
-            //get chain
-            var chain: ITransformElement[] = this.extractChain(element).chain;
-
+        public globalToLocal(x: number, y: number, z: number = 0): jsidea.geom.Point3D {
             //invert and transform/project from parent to child
-            var pt = new geom.Point3D(x, y, 0);
-            var l = chain.length;
-            for (var i = l - 1; i >= 0; --i) {
-                chain[i].matrix.invert();
-                pt = chain[i].matrix.project(pt);
-            }
+            var nodes: geom.Matrix3D[] = this._matrices;
+            var pt = new geom.Point3D(x, y, z);
+            var l = nodes.length;
+            for (var i = l - 1; i >= 0; --i)
+                pt = nodes[i].invertProject(pt, pt);
 
-            var style = window.getComputedStyle(element);
+            var style = window.getComputedStyle(this._element);
             var paddingX = math.Number.parse(style.paddingLeft, 0);
             var paddingY = math.Number.parse(style.paddingTop, 0);
             pt.x -= paddingX;
             pt.y -= paddingY;
 
-            var parentStyle = window.getComputedStyle(element.parentElement);
+            var parentStyle = window.getComputedStyle(this._element.parentElement);
             var parentBorderX = math.Number.parse(parentStyle.borderLeftWidth, 0);
             var parentBorderY = math.Number.parse(parentStyle.borderTopWidth, 0);
             pt.x -= parentBorderX;
@@ -105,36 +39,38 @@ module jsidea.geom {
             return pt;
         }
 
-        public static getLocalToGlobal(element: HTMLElement, x: number, y: number, z: number = 0, out: boolean = false): jsidea.geom.Point3D {
-            //get chain
-            var tr = this.extractChain(element);
-            var chain: ITransformElement[] = tr.chain;
-
+        public localToGlobal(x: number, y: number, z: number = 0): jsidea.geom.Point3D {
             //transform from child to parent
-            var pt = new geom.Point3D(x, y, 0);
-            var l = chain.length;
-            for (var i = 0; i < l; ++i) {
-                pt = chain[i].matrix.unproject(pt, pt);
-            }
-
-
-            if (out)
-                tr.toString();
+            var nodes: geom.Matrix3D[] = this._matrices;
+            var pt = new geom.Point3D(x, y, z);
+            var l = nodes.length;
+            for (var i = 0; i < l; ++i)
+                pt = nodes[i].unproject(pt, pt);
 
             return pt;
         }
+    }
+    export class Transform {
 
-        private static extractChain(element: HTMLElement): geom.TransformChain {
-            var chain = new TransformChain();
-            chain.collect(element);
-            return chain;
+        private static isWebkit = /chrome/.test(navigator.userAgent.toLowerCase());
+        private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
+
+        public static getGlobalToLocal(element: HTMLElement, x: number, y: number, z: number = 0): jsidea.geom.Point3D {
+            return new TransformChain(element).globalToLocal(x, y, z);
         }
 
-        private static extractTransformMatrix(element: HTMLElement, style: CSSStyleDeclaration, parentStyle: CSSStyleDeclaration): geom.Matrix3D {
+        public static getLocalToGlobal(element: HTMLElement, x: number, y: number, z: number = 0): jsidea.geom.Point3D {
+            return new TransformChain(element).localToGlobal(x, y, z);
+        }
+        
+        public static extractMatrix(node: INode): geom.Matrix3D {
             var result = new geom.Matrix3D();
-            if (!element)
+            if (!node)
                 return result;
 
+            var element: HTMLElement = node.element;
+            var style: CSSStyleDeclaration = node.style;
+            
             //------
             //transform
             //------
@@ -159,6 +95,8 @@ module jsidea.geom {
                 offsetY -= element.parentElement.clientTop;
             }
 
+            var parentStyle: CSSStyleDeclaration = node.parent.style;
+
             //integrate parent borders
             var borderParentX = math.Number.parse(parentStyle.borderLeftWidth, 0);
             var borderParentY = math.Number.parse(parentStyle.borderTopWidth, 0);
@@ -167,7 +105,6 @@ module jsidea.geom {
                 offsetX += borderParentX;
                 offsetY += borderParentY;
             }
-            
             //tricky stuff: if parent has border-box and you are NOT in firefox then add parents border.
             //Firefox integrates the border to the offsetLeft and offsetTop values.
             else if (this.isFirefox) {
@@ -202,44 +139,75 @@ module jsidea.geom {
             return result;
         }
 
-        public static extractPreserve(style: CSSStyleDeclaration): boolean {
-            var preserve3d = style.transformStyle == "preserve-3d";
+        public static extractAccumulatedMatrices(element: HTMLElement): geom.Matrix3D[] {
+            //collect computed styles/nodes up to html/root (including html/root)
+            var root = document.body.parentElement;
+            var nodes: INode[] = [];
+            var visual = element;
+            var lastNode: INode = null;
+            while (visual && visual != root.parentElement) {
+                var node = {
+                    element: visual,
+                    style: window.getComputedStyle(visual),
+                    parent: null,
+                    matrix: null,
+                    accumulatable: false
+                };
+                if (visual != root)
+                    nodes.push(node);
+                if (lastNode)
+                    lastNode.parent = node;
+                lastNode = node;
+                visual = visual.parentElement;
+            }
+
+            //collect transforms up to body
+            var l = nodes.length;
+            for (var i = 0; i < l; ++i) {
+                node = nodes[i];
+                node.matrix = this.extractMatrix(node);
+                node.accumulatable = this.isAccumulatable(node);
+            }
+
+            //accumulate if possible
+            for (var i = 0; i < l; ++i) {
+                if (i < (l - 1) && nodes[i].accumulatable) {
+                    nodes[i + 1].matrix.prepend(nodes[i].matrix);
+                    l--;
+                    nodes.splice(i, 1);
+                    i--;
+                }
+            }
+
+            var matrices: geom.Matrix3D[] = [];
+            var l = nodes.length;
+            for (var i = 0; i < l; ++i)
+                matrices.push(nodes[i].matrix);
+
+            return matrices;
+        }
+
+        private static isAccumulatable(node: INode): boolean {
+            if (!node.parent || node.style.transform.indexOf("matrix3d") < 0)
+                return true;
+
+            var parent = node.parent;
+            var preserve3d = parent.style.transformStyle == "preserve-3d";
             
             //tricky stuff: only firefox does reflect/compute the "correct" transformStyle value.
             //Firefox does NOT reflect the "grouping"-overrides and this is how its concepted.
             //But what about the "opacity"-property. Opacity does not override the preserve-3d (not always, webkit does under some conditions).
             //http://dev.w3.org/csswg/css-transforms/#grouping-property-values
-            if (preserve3d && style.overflow != "visible")
+            if (preserve3d && parent.style.overflow != "visible")
                 preserve3d = false;
-
-            return preserve3d;
-        }
-
-        public static extractTransform(a: HTMLElement, style: CSSStyleDeclaration, parentStyle: CSSStyleDeclaration): geom.ITransformElement {
-            var preserve3d = this.extractPreserve(parentStyle);
             
-            //there is this case where webkit ignores transform-style: none. 
-            //So when the elements parent has preserve3d and the element itself has no transform set.
-            if (this.isWebkit && !preserve3d && parentStyle.transform == "none" && a.parentElement.parentElement) {
-                var app = window.getComputedStyle(a.parentElement.parentElement);
-                var p = this.extractPreserve(app);
-                if (app)
-                    preserve3d = true;
+            //there is this case where webkit ignores transform-style: flat. 
+            //So when the elements parent has preserve-3d and the element itself has no transform set.
+            if (!preserve3d && this.isWebkit && parent.style.transform == "none" && parent.parent) {
+                preserve3d = this.isAccumulatable(parent.parent);
             }
 
-            var is2D = style.transform.indexOf("matrix3d") < 0;
-            var matrix = this.extractTransformMatrix(a, style, parentStyle);
-            var perspective = math.Number.parse(parentStyle.perspective, 0);
-
-            return {
-                element: a,
-                matrix: matrix,
-                preserve3D: preserve3d,
-                is2D: is2D,
-                perspective: perspective,
-                style: style,
-                parentStyle: parentStyle
-            };
+            return preserve3d;
         }
     }
 }

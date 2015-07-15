@@ -220,6 +220,38 @@ module jsidea.geom {
             return this.deltaTransform(Buffer._DELTA_TRANSFORM_RAW_3D.setTo(x, y, z), ret);
         }
 
+        public invertProject(point: IPoint2DValue, ret: Point3D = new Point3D()): Point3D {
+            return Buffer._INVERT_PROJECT_3D.copyFrom(this).invert().project(point, ret);
+        }
+        
+        //SOURCE: http://code.metager.de/source/xref/mozilla/B2G/gecko/gfx/thebes/gfx3DMatrix.cpp#651
+        public project(point: IPoint2DValue, ret: Point3D = new Point3D()): Point3D {
+            var x = point.x * this.m11 + point.y * this.m21 + this.m41;
+            var y = point.x * this.m12 + point.y * this.m22 + this.m42;
+            var z = point.x * this.m13 + point.y * this.m23 + this.m43;
+            var w = point.x * this.m14 + point.y * this.m24 + this.m44;
+
+            var qx = x + this.m31;
+            var qy = y + this.m32;
+            var qz = z + this.m33;
+            var qw = w + this.m34;
+
+            x /= w;
+            y /= w;
+            z /= w;
+
+            qx /= qw;
+            qy /= qw;
+            qz /= qw;
+
+            var t = -z / (qz - z);
+            return ret.setTo(
+                x + t * (qx - x),
+                y + t * (qy - y),
+                0,
+                1);
+        }
+
         //from homegeneous (euclid) to cartesian FLATTENED!!!! like a projection
         public unproject(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
             var x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41;
@@ -641,7 +673,6 @@ module jsidea.geom {
         }
 
         public invert(): Matrix3D {
-
             // based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
             // based on https://github.com/mrdoob/three.js/blob/master/src/math/Matrix4.js
             var data = [];
@@ -669,26 +700,6 @@ module jsidea.geom {
             data[15] = n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33;
 
             var det = n11 * data[0] + n21 * data[1] + n31 * data[2] + n41 * data[3];
-            
-            //            data[0] = n23 * n34 * n42 - n24 * n33 * n42 + n24 * n32 * n43 - n22 * n34 * n43 - n23 * n32 * n44 + n22 * n33 * n44;
-            //            data[4] = n14 * n33 * n42 - n13 * n34 * n42 - n14 * n32 * n43 + n12 * n34 * n43 + n13 * n32 * n44 - n12 * n33 * n44;
-            //            data[8] = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 * n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44;
-            //            data[12] = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
-            //            data[1] = n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 * n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44;
-            //            data[5] = n13 * n34 * n41 - n14 * n33 * n41 + n14 * n31 * n43 - n11 * n34 * n43 - n13 * n31 * n44 + n11 * n33 * n44;
-            //            data[9] = n14 * n23 * n41 - n13 * n24 * n41 - n14 * n21 * n43 + n11 * n24 * n43 + n13 * n21 * n44 - n11 * n23 * n44;
-            //            data[13] = n13 * n24 * n31 - n14 * n23 * n31 + n14 * n21 * n33 - n11 * n24 * n33 - n13 * n21 * n34 + n11 * n23 * n34;
-            //            data[2] = n22 * n34 * n41 - n24 * n32 * n41 + n24 * n31 * n42 - n21 * n34 * n42 - n22 * n31 * n44 + n21 * n32 * n44;
-            //            data[6] = n14 * n32 * n41 - n12 * n34 * n41 - n14 * n31 * n42 + n11 * n34 * n42 + n12 * n31 * n44 - n11 * n32 * n44;
-            //            data[10] = n12 * n24 * n41 - n14 * n22 * n41 + n14 * n21 * n42 - n11 * n24 * n42 - n12 * n21 * n44 + n11 * n22 * n44;
-            //            data[14] = n14 * n22 * n31 - n12 * n24 * n31 - n14 * n21 * n32 + n11 * n24 * n32 + n12 * n21 * n34 - n11 * n22 * n34;
-            //            data[3] = n23 * n32 * n41 - n22 * n33 * n41 - n23 * n31 * n42 + n21 * n33 * n42 + n22 * n31 * n43 - n21 * n32 * n43;
-            //            data[7] = n12 * n33 * n41 - n13 * n32 * n41 + n13 * n31 * n42 - n11 * n33 * n42 - n12 * n31 * n43 + n11 * n32 * n43;
-            //            data[11] = n13 * n22 * n41 - n12 * n23 * n41 - n13 * n21 * n42 + n11 * n23 * n42 + n12 * n21 * n43 - n11 * n22 * n43;
-            //            data[15] = n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33;
-            //
-            //            var det = n11 * data[0] + n21 * data[4] + n31 * data[8] + n41 * data[12];
-
             if (det == 0) {
                 console.warn("Can't invert matrix, determinant is 0");
                 return this;
@@ -788,17 +799,19 @@ module jsidea.geom {
             return !this.is2D();
         }
         
-        //SOURCE: http://code.metager.de/source/xref/mozilla/B2G/gecko/gfx/thebes/gfx3DMatrix.cpp#651
-        public project(point: IPoint2DValue): Point3D {
-            var p = new Point3D(point.x, point.y, 0);
-            var q = new Point3D(point.x, point.y, 1);
-
-            var pBack = this.transform3D(p);
-            var qBack = this.transform3D(q);
-            var uBack = qBack.sub(pBack);
-            var t = -pBack.z / uBack.z;
-            return new Point3D(pBack.x + t * uBack.x, pBack.y + t * uBack.y, 0, 1);
-        }
+        
+        
+        //        //SOURCE: http://code.metager.de/source/xref/mozilla/B2G/gecko/gfx/thebes/gfx3DMatrix.cpp#651
+        //        public project(point: IPoint2DValue): Point3D {
+        //            var p = new Point3D(point.x, point.y, 0);
+        //            var q = new Point3D(point.x, point.y, 1);
+        //
+        //            var pBack = this.transform3D(p);
+        //            var qBack = this.transform3D(q);
+        //            var uBack = qBack.sub(pBack);
+        //            var t = -pBack.z / uBack.z;
+        //            return new Point3D(pBack.x + t * uBack.x, pBack.y + t * uBack.y, 0, 1);
+        //        }
         
         //source: http://code.metager.de/source/xref/mozilla/firefox/gfx/thebes/gfx3DMatrix.cpp#Transform4D
         //        public project(point: IPoint2DValue): Point3D {
@@ -816,18 +829,18 @@ module jsidea.geom {
         //            //            return this.appendPositionRaw(-origin.x, -origin.y, 0);
         //        }
 
-        public getNormalVector(): Point3D {
-            // Define a plane in transformed space as the transformations
-            // of 3 points on the z=0 screen plane.
-            var a = this.transform3D(new Point3D(0, 0, 0));
-            var b = this.transform3D(new Point3D(0, 1, 0));
-            var c = this.transform3D(new Point3D(1, 0, 0));
-
-            // Convert to two vectors on the surface of the plane.
-            var ab = b.sub(a);
-            var ac = c.sub(a);
-            return ac.cross(ab);
-        }
+        //        public getNormalVector(): Point3D {
+        //            // Define a plane in transformed space as the transformations
+        //            // of 3 points on the z=0 screen plane.
+        //            var a = this.transform3D(new Point3D(0, 0, 0));
+        //            var b = this.transform3D(new Point3D(0, 1, 0));
+        //            var c = this.transform3D(new Point3D(1, 0, 0));
+        //
+        //            // Convert to two vectors on the surface of the plane.
+        //            var ab = b.sub(a);
+        //            var ac = c.sub(a);
+        //            return ac.cross(ab);
+        //        }
 
         public qualifiedClassName(): string {
             return "jsidea.geom.Matrix3D";
@@ -958,56 +971,10 @@ module jsidea.geom {
             if (visual.ownerDocument) {
                 var style = window.getComputedStyle(visual);
                 var m = ret.setCSS(style.transform);
-
-                //                var origin = Point3D.extractOrigin(visual);
-                //                m.prependPositionRaw(origin.x, origin.y, 0);
-                //                m.appendPositionRaw(-origin.x, -origin.y, 0);
-
                 return m;
             }
             ret.identity();
             return ret;
-        }
-
-        //        public static extractW(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
-        //            if (visual.ownerDocument) {
-        //                var style = window.getComputedStyle(visual);
-        //                var m = ret.setCSS(style.transform);
-        //
-        //                var origin = Point3D.extractOrigin(visual);
-        //                m.prependPositionRaw(origin.x, origin.y, 0);
-        //                m.appendPositionRaw(-origin.x, -origin.y, 0);
-        //
-        //                return m;
-        //            }
-        //            ret.identity();
-        //            return ret;
-        //        }
-
-        public static extractPerspective(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
-            if (visual.ownerDocument) {
-                var style = window.getComputedStyle(visual);
-                var m = ret.identity();
-
-                var p = math.Number.parse(style.perspective, 0);
-                var origin = Matrix3D.extractPerspectiveOrigin(visual, style);
-                m.appendPositionRaw(origin.x, origin.y, 0);
-                m.appendPerspective(p);
-                m.appendPositionRaw(-origin.x, -origin.y, 0);
-
-                return m;
-            }
-            ret.identity();
-            return ret;
-        }
-
-
-
-        private static extractPerspectiveOrigin(visual: HTMLElement, style: CSSStyleDeclaration, ret: Point2D = new Point2D()): Point2D {
-            var vals = style.perspectiveOrigin.split(" ");
-            return ret.setTo(
-                math.Number.parseRelation(vals[0], visual.offsetWidth, 0),
-                math.Number.parseRelation(vals[1], visual.offsetHeight, 0));
         }
 
         public static parse(cssStr: string, ret = new Matrix3D()): Matrix3D {

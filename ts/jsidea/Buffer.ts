@@ -27,6 +27,7 @@ module jsidea {
         public static _SET_CSS_3D = new geom.Matrix2D();
         public static _APPEND_CSS_3D = new geom.Matrix3D();
         public static _PREPEND_CSS_3D = new geom.Matrix3D();
+        public static _INVERT_PROJECT_3D = new geom.Matrix3D();
         
         //jsidea.geom.Matrix2D
         public static _SET_CSS_2D = new geom.Matrix3D();

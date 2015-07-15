@@ -14,11 +14,11 @@ body {
 	overflow: hidden;
 	perspective-origin: 0px 0px; */
 	/* transform-style: preserve-3d; */
-	
+	transform: translateZ(-20px) rotate(30deg);
 }
 
 canvas {
-	position: absolute;
+	position: fixed;
 	top: 0;
 	left: 0;
 	pointer-events: none;

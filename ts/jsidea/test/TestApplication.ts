@@ -37,8 +37,6 @@ module jsidea.test {
             this.drawBoundingBox3(ctx, b);
             this.drawBoundingBox3(ctx, bc);
             this.drawBoundingBox3(ctx, vie);
-            
-            geom.Transform.getLocalToGlobal(bc, 0, 0, 0, true);
 
             $(document).bind("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
