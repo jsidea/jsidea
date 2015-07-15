@@ -59,9 +59,10 @@ canvas {
 	height: 512px;
 	border: 60px solid #FFFF00;
 	/* transform: translateZ(-20px) rotateY(30deg);
-	transform-style: preserve-3d; */
+	transform-style: preserve-3d;
 	/* perspective: 200px; */
 	/* opacity: 0.5; */
+	transform-style: preserve-3d;
 	overflow: hidden;
 }
 
@@ -73,7 +74,9 @@ canvas {
 	/* transform-style: preserve-3d;
 	perspective: 600px; */
 	/* perspective-origin: 128px 128px; */
-	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
+	transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg);
+	transform-style: preserve-3d;
+	perspective: 600px;
 	margin: 20px;
 	padding: 20px;
 }

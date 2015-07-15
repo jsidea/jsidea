@@ -81,8 +81,18 @@ module jsidea.geom {
             this.w = w;
             return this;
         }
+        
+        public cross(x:number, y:number, z:number): Point3D {
+            var px = this.x;
+            var py = this.y;
+            var pz = this.z;
+            this.x = py * z - pz * y;
+            this.y = pz * x - px * z;
+            this.z = px * y - py * x;
+            return this;
+        }
 
-        public cross(pt: IPoint3DValue): Point3D {
+        public crossPoint(pt: IPoint3DValue): Point3D {
             var x = this.x;
             var y = this.y;
             var z = this.z;
@@ -90,9 +100,9 @@ module jsidea.geom {
             this.y = z * pt.x - x * pt.z;
             this.z = x * pt.y - y * pt.x;
             return this;
-        }
+        }        
 
-        public setCross(a: IPoint3DValue, b: IPoint3DValue): Point3D {
+        public crossSet(a: IPoint3DValue, b: IPoint3DValue): Point3D {
             var ax = a.x;
             var ay = a.y;
             var az = a.z;
@@ -104,32 +114,46 @@ module jsidea.geom {
             this.z = ax * by - ay * bx;
             return this;
         }
-
-        public mul(pt: IPoint3DValue): Point3D {
-            this.x *= pt.x;
-            this.y *= pt.y;
-            this.z *= pt.z;
-            return this;
-        }
-
-        public mulRaw(x: number, y: number, z: number): Point3D {
+        
+        public mul(x: number, y: number, z: number): Point3D {
             this.x *= x;
             this.y *= y;
             this.z *= z;
             return this;
         }
 
-        public setMul(factorA: IPoint3DValue, factorB: IPoint3DValue): Point3D {
+        public mulPoint(pt: IPoint3DValue): Point3D {
+            this.x *= pt.x;
+            this.y *= pt.y;
+            this.z *= pt.z;
+            return this;
+        }        
+
+        public mulSet(factorA: IPoint3DValue, factorB: IPoint3DValue): Point3D {
             this.x = factorA.x * factorB.x;
             this.y = factorA.y * factorB.y;
             this.z = factorA.z * factorB.z;
             return this;
         }
+        
+        public div(x: number, y: number, z: number): Point3D {
+            this.x /= x;
+            this.y /= y;
+            this.z /= z;
+            return this;
+        }
 
-        public div(divisor: IPoint3DValue): Point3D {
+        public divPoint(divisor: IPoint3DValue): Point3D {
             this.x /= divisor.x;
             this.y /= divisor.y;
             this.z /= divisor.z;
+            return this;
+        }
+
+        public divSet(divident: IPoint3DValue, divisor: IPoint3DValue): Point3D {
+            this.x = divident.x / divisor.x;
+            this.y = divident.y / divisor.y;
+            this.z = divident.z / divisor.z;
             return this;
         }
 
@@ -145,62 +169,52 @@ module jsidea.geom {
             this.x = scale * (this.x - perspectiveOrigin.x) + perspectiveOrigin.x;
             this.y = scale * (this.y - perspectiveOrigin.y) + perspectiveOrigin.y;
             return this;
-        }
+        }        
 
-        public divRaw(x: number, y: number, z: number): Point3D {
-            this.x /= x;
-            this.y /= y;
-            this.z /= z;
-            return this;
+        public dot(x: number, y: number, z: number): number {
+            return this.x * x + this.y * y + this.z * z;
         }
-
-        public setDiv(divident: IPoint3DValue, divisor: IPoint3DValue): Point3D {
-            this.x = divident.x / divisor.x;
-            this.y = divident.y / divisor.y;
-            this.z = divident.z / divisor.z;
-            return this;
-        }
-
-        public dot(pt: IPoint3DValue): number {
+        
+        public dotPoint(pt: IPoint3DValue): number {
             return this.x * pt.x + this.y * pt.y + this.z * pt.z;
         }
 
-        public add(pt: IPoint3DValue): Point3D {
+        public add(x: number, y: number, z: number): Point3D {
+            this.x += x;
+            this.y += y;
+            this.z += z;
+            return this;
+        }
+        
+        public addPoint(pt: IPoint3DValue): Point3D {
             this.x += pt.x;
             this.y += pt.y;
             this.z += pt.z;
             return this;
         }
 
-        public addRaw(x: number, y: number, z: number): Point3D {
-            this.x += x;
-            this.y += y;
-            this.z += z;
-            return this;
-        }
-
-        public setAdd(sumA: IPoint3DValue, sumB: IPoint3DValue): Point3D {
+        public addSet(sumA: IPoint3DValue, sumB: IPoint3DValue): Point3D {
             this.x = sumA.x + sumB.x;
             this.y = sumA.y + sumB.y;
             this.z = sumA.z + sumB.z;
             return this;
         }
-
-        public sub(subtrahend: IPoint3DValue): Point3D {
-            this.x -= subtrahend.x;
-            this.y -= subtrahend.y;
-            this.z -= subtrahend.z;
-            return this;
-        }
-
-        public subRaw(x: number, y: number, z: number): Point3D {
+        
+        public sub(x: number, y: number, z: number): Point3D {
             this.x -= x;
             this.y -= y;
             this.z -= z;
             return this;
         }
 
-        public setSub(minuend: IPoint3DValue, subtrahend: IPoint3DValue): Point3D {
+        public subPoint(subtrahend: IPoint3DValue): Point3D {
+            this.x -= subtrahend.x;
+            this.y -= subtrahend.y;
+            this.z -= subtrahend.z;
+            return this;
+        }        
+
+        public subSet(minuend: IPoint3DValue, subtrahend: IPoint3DValue): Point3D {
             this.x = minuend.x - subtrahend.x;
             this.y = minuend.y - subtrahend.y;
             this.z = minuend.z - subtrahend.z;

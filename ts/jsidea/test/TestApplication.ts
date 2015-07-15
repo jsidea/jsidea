@@ -51,7 +51,7 @@ module jsidea.test {
             $(document).bind("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
 //                console.log(pt.x, pt.y);
-                pt = geom.Transform.getGlobalToLocal(b, pt.x, pt.y);
+                pt = geom.Transform.extract(b).globalToLocal(pt.x, pt.y);
                 this.applyPos(pt, bc);
 
             });
@@ -290,15 +290,15 @@ module jsidea.test {
 }
 
 interface JQuery {
-    globalToLocal(x: number, y: number): jsidea.geom.IPoint2DValue;
-    localToGlobal(x: number, y: number): jsidea.geom.IPoint2DValue;
+    globalToLocal(x: number, y: number, z?: number): jsidea.geom.IPoint3DValue;
+    localToGlobal(x: number, y: number, z?: number): jsidea.geom.IPoint3DValue;
 }
 
 (function($) {
     $.fn.globalToLocal = function(x: number, y: number, z: number = 0) {
-        return jsidea.geom.Transform.getGlobalToLocal(this[0], x, y, z);
+        return jsidea.geom.Transform.extract(this[0]).globalToLocal(x, y, z);
     };
     $.fn.localToGlobal = function(x: number, y: number, z: number = 0) {
-        return jsidea.geom.Transform.getLocalToGlobal(this[0], x, y, z);
+        return jsidea.geom.Transform.extract(this[0]).localToGlobal(x, y, z);
     };
 } (jQuery));

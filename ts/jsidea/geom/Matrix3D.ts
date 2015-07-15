@@ -224,7 +224,7 @@ module jsidea.geom {
             return Buffer._INVERT_PROJECT_3D.copyFrom(this).invert().project(point, ret);
         }
         
-        //SOURCE: http://code.metager.de/source/xref/mozilla/B2G/gecko/gfx/thebes/gfx3DMatrix.cpp#651
+        //based on http://code.metager.de/source/xref/mozilla/B2G/gecko/gfx/thebes/gfx3DMatrix.cpp#651
         public project(point: IPoint2DValue, ret: Point3D = new Point3D()): Point3D {
             var x = point.x * this.m11 + point.y * this.m21 + this.m41;
             var y = point.x * this.m12 + point.y * this.m22 + this.m42;
@@ -245,11 +245,10 @@ module jsidea.geom {
             qz /= qw;
 
             var t = -z / (qz - z);
-            return ret.setTo(
-                x + t * (qx - x),
-                y + t * (qy - y),
-                0,
-                1);
+            x += t * (qx - x);
+            y += t * (qy - y);
+
+            return ret.setTo(x, y, z, w);
         }
 
         //from homegeneous (euclid) to cartesian FLATTENED!!!! like a projection
@@ -262,7 +261,6 @@ module jsidea.geom {
             y /= w;
 
             return ret.setTo(x, y, point.z, w);
-//            return ret.setTo(x, y, 0, 0);
         }
         
         //from homegeneous (euclid) to cartesian
@@ -334,7 +332,7 @@ module jsidea.geom {
         * @param position The config object.
         * @return The new translation-matrix.
         */
-        public makePosition(position: IPoint3DValue, ret = new Matrix3D()): Matrix3D {
+        public static makePosition(position: IPoint3DValue, ret = new Matrix3D()): Matrix3D {
             ret.identity();
             ret.setPosition(position);
             return ret;
@@ -347,7 +345,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendPosition(position: IPoint3DValue): Matrix3D {
-            return this.append(this.makePosition(position, Buffer._APPEND_POSITION_3D));
+            return this.append(Matrix3D.makePosition(position, Buffer._APPEND_POSITION_3D));
         }
         
         /**
@@ -367,7 +365,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependPosition(position: IPoint3DValue): Matrix3D {
-            return this.prepend(this.makePosition(position, Buffer._PREPEND_POSITION_3D));
+            return this.prepend(Matrix3D.makePosition(position, Buffer._PREPEND_POSITION_3D));
         }   
         
         /**
@@ -411,7 +409,7 @@ module jsidea.geom {
         * @param scale The scaling-factor.
         * @return The new scaling-matrix.
         */
-        public makeScale(scale: IPoint3DValue, ret = new Matrix3D()): Matrix3D {
+        public static makeScale(scale: IPoint3DValue, ret = new Matrix3D()): Matrix3D {
             ret.identity();
             ret.setScale(scale);
             return ret;
@@ -423,7 +421,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendScale(scale: IPoint3DValue): Matrix3D {
-            return this.append(this.makeScale(scale, Buffer._APPEND_SCALE_3D));
+            return this.append(Matrix3D.makeScale(scale, Buffer._APPEND_SCALE_3D));
         }
         
         /**
@@ -441,7 +439,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependScale(scale: IPoint3DValue): Matrix3D {
-            return this.prepend(this.makeScale(scale, Buffer._PREPEND_SCALE_3D));
+            return this.prepend(Matrix3D.makeScale(scale, Buffer._PREPEND_SCALE_3D));
         }
         
         /**
@@ -498,7 +496,7 @@ module jsidea.geom {
         * @param skew The skewing angles.
         * @return The skewing-matrix.
         */
-        public makeSkew(skew: IPoint3DValue, ret: Matrix3D = new Matrix3D()): Matrix3D {
+        public static makeSkew(skew: IPoint3DValue, ret: Matrix3D = new Matrix3D()): Matrix3D {
             ret.identity();
             ret.setSkew(skew);
             return ret;
@@ -510,7 +508,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendSkew(skew: IPoint3DValue): Matrix3D {
-            return this.append(this.makeSkew(skew, Buffer._APPEND_SCALE_3D));
+            return this.append(Matrix3D.makeSkew(skew, Buffer._APPEND_SCALE_3D));
         }
 
         /**
@@ -519,7 +517,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependSkew(skew: IPoint3DValue): Matrix3D {
-            return this.prepend(this.makeSkew(skew, Buffer._PREPEND_SKEW_3D));
+            return this.prepend(Matrix3D.makeSkew(skew, Buffer._PREPEND_SKEW_3D));
         }
         
         /**
@@ -550,9 +548,12 @@ module jsidea.geom {
             var x = euler.x * math.Number.DEG_TO_RAD;
             var y = euler.y * math.Number.DEG_TO_RAD;
             var z = euler.z * math.Number.DEG_TO_RAD;
-            var a = Math.cos(x), b = Math.sin(x);
-            var c = Math.cos(y), d = Math.sin(y);
-            var e = Math.cos(z), f = Math.sin(z);
+            var a = Math.cos(x);
+            var b = Math.sin(x);
+            var c = Math.cos(y);
+            var d = Math.sin(y);
+            var e = Math.cos(z);
+            var f = Math.sin(z);
 
             var ae = a * e;
             var af = a * f;
@@ -560,11 +561,11 @@ module jsidea.geom {
             var bf = b * f;
 
             this.m11 = c * e;
-            this.m21 = - c * f;
+            this.m21 = -c * f;
             this.m31 = d;
             this.m12 = af + be * d;
             this.m22 = ae - bf * d;
-            this.m32 = - b * c;
+            this.m32 = -b * c;
             this.m13 = bf - ae * d;
             this.m23 = be + af * d;
             this.m33 = a * c;
@@ -572,18 +573,18 @@ module jsidea.geom {
             return this;
         }
 
-        public makeRotation(euler: IPoint3DValue): Matrix3D {
+        public static makeRotation(euler: IPoint3DValue): Matrix3D {
             var ret = new Matrix3D();
             ret.setRotation(euler);
             return ret;
         }
 
         public appendRotation(euler: IPoint3DValue): Matrix3D {
-            return this.append(this.makeRotation(euler));
+            return this.append(Matrix3D.makeRotation(euler));
         }
 
         public prependRotation(euler: IPoint3DValue): Matrix3D {
-            return this.prepend(this.makeRotation(euler));
+            return this.prepend(Matrix3D.makeRotation(euler));
         }
 
         public getRotationMatrix(ret: Matrix3D = new Matrix3D()): Matrix3D {
@@ -611,7 +612,7 @@ module jsidea.geom {
        * @param perspective The perspective.
        * @return The new perspective-matrix.
        */
-        public makePerspective(perspective: number, ret = new Matrix3D()): Matrix3D {
+        public static makePerspective(perspective: number, ret = new Matrix3D()): Matrix3D {
             ret.identity();
             ret.m34 = perspective ? -(1 / perspective) : 0;
             return ret;
@@ -623,7 +624,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendPerspective(perspective: number): Matrix3D {
-            return this.append(this.makePerspective(perspective, Buffer._APPEND_PERSPECTIVE_3D));
+            return this.append(Matrix3D.makePerspective(perspective, Buffer._APPEND_PERSPECTIVE_3D));
         }
 
         /**
@@ -632,7 +633,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependPerspective(perspective: number): Matrix3D {
-            return this.prepend(this.makePerspective(perspective, Buffer._PREPEND_PERSPECTIVE_3D));
+            return this.prepend(Matrix3D.makePerspective(perspective, Buffer._PREPEND_PERSPECTIVE_3D));
         }
 
         public getPerspective(): number {
@@ -673,9 +674,13 @@ module jsidea.geom {
             };
         }
 
+        /**
+        * Inverts the matrix.
+        * -> based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
+        * -> based on https://github.com/mrdoob/three.js/blob/master/src/math/Matrix4.js
+        * @return this-chained.
+        */
         public invert(): Matrix3D {
-            // based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
-            // based on https://github.com/mrdoob/three.js/blob/master/src/math/Matrix4.js
             var data = [];
 
             var n11 = this.m11, n12 = this.m12, n13 = this.m13, n14 = this.m14;
@@ -687,13 +692,13 @@ module jsidea.geom {
             data[1] = n14 * n33 * n42 - n13 * n34 * n42 - n14 * n32 * n43 + n12 * n34 * n43 + n13 * n32 * n44 - n12 * n33 * n44;
             data[2] = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 * n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44;
             data[3] = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
-            
+
             var det = n11 * data[0] + n21 * data[1] + n31 * data[2] + n41 * data[3];
             if (det == 0) {
                 console.warn("Can't invert matrix, determinant is 0");
                 return this;
             }
-            
+
             data[4] = n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 * n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44;
             data[5] = n13 * n34 * n41 - n14 * n33 * n41 + n14 * n31 * n43 - n11 * n34 * n43 - n13 * n31 * n44 + n11 * n33 * n44;
             data[6] = n14 * n23 * n41 - n13 * n24 * n41 - n14 * n21 * n43 + n11 * n24 * n43 + n13 * n21 * n44 - n11 * n23 * n44;
@@ -801,8 +806,6 @@ module jsidea.geom {
             return !this.is2D();
         }
         
-        
-        
         //        //SOURCE: http://code.metager.de/source/xref/mozilla/B2G/gecko/gfx/thebes/gfx3DMatrix.cpp#651
         //        public project(point: IPoint2DValue): Point3D {
         //            var p = new Point3D(point.x, point.y, 0);
@@ -878,16 +881,16 @@ module jsidea.geom {
             var y: Point3D = Matrix3D.tempAxeY;
             var z: Point3D = Matrix3D.tempAxeZ;
 
-            z.setSub(eye, target).normalize();
+            z.subSet(eye, target).normalize();
             if (z.length() === 0) {
                 z.z = 1;
             }
-            x.setCross(up, z).normalize();
+            x.crossSet(up, z).normalize();
             if (x.length() === 0) {
                 z.x += 0.0001;
-                x.setCross(up, z).normalize();
+                x.crossSet(up, z).normalize();
             }
-            y.setCross(z, x);
+            y.crossSet(z, x);
 
             this.m11 = x.x;
             this.m12 = x.y;
@@ -969,30 +972,7 @@ module jsidea.geom {
         //            return ret;
         //        }
 
-        public static parse(cssStr: string, ret = new Matrix3D()): Matrix3D {
-            return ret.setCSS(cssStr);
-        }
-
         public static multiply(a: IMatrix3DValue, b: IMatrix3DValue, ret: Matrix3D = new Matrix3D()): Matrix3D {
-//            var data: number[] = [];
-//            data[0] = b.m11 * a.m11 + b.m12 * a.m21 + b.m13 * a.m31 + b.m14 * a.m41;
-//            data[1] = b.m11 * a.m12 + b.m12 * a.m22 + b.m13 * a.m32 + b.m14 * a.m42;
-//            data[2] = b.m11 * a.m13 + b.m12 * a.m23 + b.m13 * a.m33 + b.m14 * a.m43;
-//            data[3] = b.m11 * a.m14 + b.m12 * a.m24 + b.m13 * a.m34 + b.m14 * a.m44;
-//            data[4] = b.m21 * a.m11 + b.m22 * a.m21 + b.m23 * a.m31 + b.m24 * a.m41;
-//            data[5] = b.m21 * a.m12 + b.m22 * a.m22 + b.m23 * a.m32 + b.m24 * a.m42;
-//            data[6] = b.m21 * a.m13 + b.m22 * a.m23 + b.m23 * a.m33 + b.m24 * a.m43;
-//            data[7] = b.m21 * a.m14 + b.m22 * a.m24 + b.m23 * a.m34 + b.m24 * a.m44;
-//            data[8] = b.m31 * a.m11 + b.m32 * a.m21 + b.m33 * a.m31 + b.m34 * a.m41;
-//            data[9] = b.m31 * a.m12 + b.m32 * a.m22 + b.m33 * a.m32 + b.m34 * a.m42;
-//            data[10] = b.m31 * a.m13 + b.m32 * a.m23 + b.m33 * a.m33 + b.m34 * a.m43;
-//            data[11] = b.m31 * a.m14 + b.m32 * a.m24 + b.m33 * a.m34 + b.m34 * a.m44;
-//            data[12] = b.m41 * a.m11 + b.m42 * a.m21 + b.m43 * a.m31 + b.m44 * a.m41;
-//            data[13] = b.m41 * a.m12 + b.m42 * a.m22 + b.m43 * a.m32 + b.m44 * a.m42;
-//            data[14] = b.m41 * a.m13 + b.m42 * a.m23 + b.m43 * a.m33 + b.m44 * a.m43;
-//            data[15] = b.m41 * a.m14 + b.m42 * a.m24 + b.m43 * a.m34 + b.m44 * a.m44;
-//            return ret.setData(data);
-            
             var m11 = b.m11 * a.m11 + b.m12 * a.m21 + b.m13 * a.m31 + b.m14 * a.m41;
             var m12 = b.m11 * a.m12 + b.m12 * a.m22 + b.m13 * a.m32 + b.m14 * a.m42;
             var m13 = b.m11 * a.m13 + b.m12 * a.m23 + b.m13 * a.m33 + b.m14 * a.m43;
@@ -1009,7 +989,7 @@ module jsidea.geom {
             var m42 = b.m41 * a.m12 + b.m42 * a.m22 + b.m43 * a.m32 + b.m44 * a.m42;
             var m43 = b.m41 * a.m13 + b.m42 * a.m23 + b.m43 * a.m33 + b.m44 * a.m43;
             var m44 = b.m41 * a.m14 + b.m42 * a.m24 + b.m43 * a.m34 + b.m44 * a.m44;
-            
+
             ret.m11 = m11;
             ret.m12 = m12;
             ret.m13 = m13;
@@ -1026,7 +1006,7 @@ module jsidea.geom {
             ret.m42 = m42;
             ret.m43 = m43;
             ret.m44 = m44;
-            
+
             return ret;
         }
     }

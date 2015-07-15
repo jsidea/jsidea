@@ -22,10 +22,10 @@ module jsidea.geom {
         }
 
         private update(): void {
-            var nodeAndMatrices = Transform.extractAccumulatedMatrices(this._element);
-            this._matrices = nodeAndMatrices.matrices;
-            this._style = nodeAndMatrices.node.style;
-            this._parentStyle = nodeAndMatrices.node.parent.style;
+            var chain = Transform.extractStyleChain(this._element); 
+            this._matrices = Transform.extractAccumulatedMatrices(chain);
+            this._style = chain.style;
+            this._parentStyle = chain.parent.style;
             this._inverted = false;
         }
 
@@ -91,22 +91,15 @@ module jsidea.geom {
             return pt;
         }
 
-        public static getGlobalToLocal(element: HTMLElement, x: number, y: number, z: number = 0): jsidea.geom.Point3D {
-            return new Transform(element).globalToLocal(x, y, z);
-        }
-
-        public static getLocalToGlobal(element: HTMLElement, x: number, y: number, z: number = 0): jsidea.geom.Point3D {
-            return new Transform(element).localToGlobal(x, y, z);
-        }
-
         public static extract(element: HTMLElement): geom.Transform {
             return new Transform(element);
         }
 
-        private static extractMatrix(node: INodeStyle): geom.Matrix3D {
-            var result = new geom.Matrix3D();
+        private static extractMatrix(node: INodeStyle, matrix: geom.Matrix3D = null): geom.Matrix3D {
+            if (!matrix)
+                matrix = new geom.Matrix3D();
             if (!node)
-                return result;
+                return matrix;
 
             var element: HTMLElement = node.element;
             var style: CSSStyleDeclaration = node.style;
@@ -119,9 +112,9 @@ module jsidea.geom {
             var originY = math.Number.parseRelation(origin[1], element.offsetHeight, 0);
             var originZ = math.Number.parseRelation(origin[2], 0, 0);
 
-            result.appendPositionRaw(-originX, -originY, -originZ);
-            result.appendCSS(style.transform);
-            result.appendPositionRaw(originX, originY, originZ);
+            matrix.appendPositionRaw(-originX, -originY, -originZ);
+            matrix.appendCSS(style.transform);
+            matrix.appendPositionRaw(originX, originY, originZ);
             
             //------
             //offset
@@ -173,72 +166,71 @@ module jsidea.geom {
             }
 
             //append the offset to the transform-matrix
-            result.appendPositionRaw(offsetX, offsetY, 0);
+            matrix.appendPositionRaw(offsetX, offsetY, 0);
             
             //-------
             //perspective
             //-------
             var perspective = math.Number.parse(parentStyle.perspective, 0);
             if (!perspective)
-                return result;
+                return matrix;
 
             var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
             var perspectiveOriginX = math.Number.parseRelation(perspectiveOrigin[0], element.parentElement.offsetWidth, 0);
             var perspectiveOriginY = math.Number.parseRelation(perspectiveOrigin[1], element.parentElement.offsetHeight, 0);
 
-            result.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
-            result.appendPerspective(perspective);
-            result.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
+            matrix.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
+            matrix.appendPerspective(perspective);
+            matrix.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
 
-            return result;
+            return matrix;
         }
 
-        private static extractAccumulatedMatrices(element: HTMLElement): {matrices:geom.Matrix3D[]; node:INodeStyle} {
+        private static extractStyleChain(element: HTMLElement): INodeStyle {
             //collect computed styles/nodes up to html/root (including html/root)
-            var root = document.body.parentElement;
-            var nodes: INodeStyle[] = [];
-            var visual = element;
+            var root: HTMLElement = document.body.parentElement;
             var lastNode: INodeStyle = null;
-            //if root == html then root.parentElement == null
-            while (visual && visual != root.parentElement) {
+            var leaf: INodeStyle = null;
+            while (element && element != root.parentElement) {
                 var node = {
-                    element: visual,
-                    style: window.getComputedStyle(visual),
+                    element: element,
+                    style: window.getComputedStyle(element),
                     parent: null
                 };
-                if (visual != root)
-                    nodes.push(node);
+                if (!leaf)
+                    leaf = node;
                 if (lastNode)
                     lastNode.parent = node;
                 lastNode = node;
-                visual = visual.parentElement;
+                element = element.parentElement;
             }
+            return leaf;
+        }
 
-            //collect transforms up to body
-            var l = nodes.length;
-            var matrices: geom.Matrix3D[] = [];
-            var isAcc: boolean[] = [];
-            for (var i = 0; i < l; ++i) {
-                node = nodes[i];
-                isAcc.push(this.isAccumulatable(node));
-                matrices.push(this.extractMatrix(node));
-            }
-
+        private static extractAccumulatedMatrices(node: INodeStyle): geom.Matrix3D[] {
+            //collect matrices up to root
             //accumulate if possible
-            var b = l;
-            for (var i = 0; i < l; ++i) {
-                if (i < (l - 1) && isAcc[i]) {
-                    matrices[i + 1].prepend(matrices[i]);
-                    matrices.splice(i, 1);
-                    isAcc.splice(i, 1);
-                    l--;
-                    i--;
+            var matrices: geom.Matrix3D[] = [];
+            var last: geom.Matrix3D = null;
+            while (node.parent) {
+                //if last is not null, last becomes the base for the transformation
+                //its like appending the current node.transform to the last transform (child-transform)
+                var m: geom.Matrix3D = this.extractMatrix(node, last);
+                if (node.parent && this.isAccumulatable(node)) {
+                    last = m;
                 }
+                else {
+                    last = null;
+                    matrices.push(m);
+                }
+                node = node.parent;
             }
-            return {matrices:matrices, node:nodes[0]};
+            return matrices;
         }
 
         private static isAccumulatable(node: INodeStyle): boolean {
+            //in any case, if an element has only 2d-transforms or its the document-root item
+            //the transform can be accumulated to the parent transform
             if (!node.parent || node.style.transform.indexOf("matrix3d") < 0)
                 return true;
 
@@ -246,6 +238,7 @@ module jsidea.geom {
             if (parent.style.transformStyle == "flat")
                 return false;
 
+            //if the parent is preserve-3d than it normally should be accumlatable, but ...
             var preserve3d = parent.style.transformStyle == "preserve-3d";
             
             //tricky stuff: only firefox does reflect/compute the "correct" transformStyle value.

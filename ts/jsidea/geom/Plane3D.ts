@@ -59,11 +59,11 @@ module jsidea.geom {
         public intersectLine(a: Point3D, b: Point3D): Point3D {
             var normal: Point3D = new Point3D(this.x, this.y, this.z);
             var d: number = this.w;
-            var ba: Point3D = b.clone().sub(a);
-            var nDotA: number = normal.dot(a);
-            var nDotBA: number = normal.dot(ba);
+            var ba: Point3D = b.clone().subPoint(a);
+            var nDotA: number = normal.dotPoint(a);
+            var nDotBA: number = normal.dotPoint(ba);
             ba.scaleBy((d - nDotA) / nDotBA);
-            return a.clone().sub(ba);
+            return a.clone().subPoint(ba);
         }
 
         public dispose(): void {
