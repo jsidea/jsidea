@@ -25,8 +25,8 @@ body {
 	overflow: hidden;
 	perspective-origin: 0px 0px; */
 	/* transform-style: preserve-3d; */
-	transform-style: preserve-3d;
-	transform: translateX(128px) rotate(30deg);
+	/* transform-style: preserve-3d;
+	transform: translateX(128px) rotate(30deg); */
 }
 
 canvas {
@@ -49,6 +49,8 @@ canvas {
 	transform-style: flat;
 	perspective: 200px;
 	overflow: hidden; */
+	transform: translateZ(-20px) rotateY(30deg);
+	overflow: scroll;
 }
 
 #content {

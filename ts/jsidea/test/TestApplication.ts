@@ -20,6 +20,8 @@ module jsidea.test {
             b.id = "b-cont";
             var bc = document.createElement("div");
             bc.id = "bc-cont";
+            
+            //            console.log(window.convertPointFromNode);
 
             var can = document.createElement("canvas");
             can.id = "can";
@@ -32,16 +34,23 @@ module jsidea.test {
             con.appendChild(a);
             document.body.appendChild(can);
 
-            this.drawBoundingBox3(can, ctx, con);
-            this.drawBoundingBox3(can, ctx, a);
-            this.drawBoundingBox3(can, ctx, b);
-            this.drawBoundingBox3(can, ctx, bc);
-            this.drawBoundingBox3(can, ctx, vie);
+            
             //            this.drawBoundingBox3(can, ctx, b);
             //            this.drawBoundingBox4(can, ctx, a);
+            
+            $(document).bind("click",(evt) => {
+                ctx.clearRect(0, 0, can.width, can.height);
+                this.drawBoundingBox3(can, ctx, con);
+                this.drawBoundingBox3(can, ctx, a);
+                this.drawBoundingBox3(can, ctx, b);
+                this.drawBoundingBox3(can, ctx, bc);
+                this.drawBoundingBox3(can, ctx, vie);
+
+            });
 
             $(document).bind("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
+//                console.log(pt.x, pt.y);
                 pt = geom.Transform.getGlobalToLocal(b, pt.x, pt.y);
                 this.applyPos(pt, bc);
 

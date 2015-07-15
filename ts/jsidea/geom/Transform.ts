@@ -27,9 +27,8 @@ module jsidea.geom {
             this._style = window.getComputedStyle(this._element);
             this._parentStyle = window.getComputedStyle(this._element.parentElement);
         }
-        
-        private invert():void
-        {
+
+        private invert(): void {
             this._inverted = !this._inverted;
             this._matrices.reverse();
             var l = this._matrices.length;
@@ -57,7 +56,7 @@ module jsidea.geom {
 
         public globalToLocal(x: number, y: number, z: number = 0, boxModel: string = "content-box"): jsidea.geom.Point3D {
             //we need the globalToLocal matrices
-            if(!this._inverted)
+            if (!this._inverted)
                 this.invert();
             
             //project from parent to child
@@ -78,7 +77,7 @@ module jsidea.geom {
 
         public localToGlobal(x: number, y: number, z: number = 0): jsidea.geom.Point3D {
             //we need the localToGlobal matrices
-            if(this._inverted)
+            if (this._inverted)
                 this.invert();
             
             //unproject from child to parent
@@ -158,7 +157,21 @@ module jsidea.geom {
                     offsetY += borderParentY;
                 }
             }
+            
+            //add scrolling offsets
+            //webkit has the scroll-values set on html not on the body?
+            if (this.isWebkit) {
+                if (node.parent.element != document.body) {
+                    offsetX -= node.parent.element.scrollLeft;
+                    offsetY -= node.parent.element.scrollTop;
+                }
+            }
+            else if (node.element != document.body) {
+                offsetX -= node.parent.element.scrollLeft;
+                offsetY -= node.parent.element.scrollTop;
+            }
 
+            //append the offset to the transform-matrix
             result.appendPositionRaw(offsetX, offsetY, 0);
             
             //-------
@@ -185,6 +198,7 @@ module jsidea.geom {
             var nodes: INodeStyle[] = [];
             var visual = element;
             var lastNode: INodeStyle = null;
+            //if root == html then root.parentElement == null
             while (visual && visual != root.parentElement) {
                 var node = {
                     element: visual,
@@ -210,7 +224,7 @@ module jsidea.geom {
             }
 
             //accumulate if possible
-//            var b = l;
+            var b = l;
             for (var i = 0; i < l; ++i) {
                 if (i < (l - 1) && isAcc[i]) {
                     matrices[i + 1].prepend(matrices[i]);
@@ -220,7 +234,7 @@ module jsidea.geom {
                     i--;
                 }
             }
-//            console.log("BEF", b, "AFT", l);
+            //            console.log("BEF", b, "AFT", l);
             return matrices;
         }
 
