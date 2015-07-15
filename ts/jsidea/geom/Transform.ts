@@ -1,15 +1,20 @@
 module jsidea.geom {
-    export interface INodeStyle {
+    interface INodeStyle {
         parent: INodeStyle;
         element: HTMLElement;
         style: CSSStyleDeclaration;
     }
+    export class Transform {
 
-    export class TransformChain {
+        private static isWebkit = /chrome/.test(navigator.userAgent.toLowerCase());
+        private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
+        private static isIE = (navigator.userAgent.indexOf("MSIE") != -1) || !!navigator.userAgent.match(/Trident.*rv[ :]*11\./);
+
         private _matrices: geom.Matrix3D[] = [];
         private _element: HTMLElement;
         private _style: CSSStyleDeclaration;
         private _parentStyle: CSSStyleDeclaration;
+        private _inverted: boolean = false;
 
         constructor(element: HTMLElement) {
             this._element = element;
@@ -17,9 +22,19 @@ module jsidea.geom {
         }
 
         private update(): void {
+            this._inverted = false;
             this._matrices = Transform.extractAccumulatedMatrices(this._element);
             this._style = window.getComputedStyle(this._element);
             this._parentStyle = window.getComputedStyle(this._element.parentElement);
+        }
+        
+        private invert():void
+        {
+            this._inverted = !this._inverted;
+            this._matrices.reverse();
+            var l = this._matrices.length;
+            for (var i = 0; i < l; ++i)
+                this._matrices[i].invert();
         }
 
         private applyBoxModel(pt: Point3D, boxModel: string): void {
@@ -39,14 +54,18 @@ module jsidea.geom {
         public globalToLocalPoint(pt: geom.Point3D): jsidea.geom.Point3D {
             return this.globalToLocal(pt.x, pt.x, pt.z);
         }
-        
+
         public globalToLocal(x: number, y: number, z: number = 0, boxModel: string = "content-box"): jsidea.geom.Point3D {
-            //invert and transform/project from parent to child
+            //we need the globalToLocal matrices
+            if(!this._inverted)
+                this.invert();
+            
+            //project from parent to child
             var nodes: geom.Matrix3D[] = this._matrices;
             var pt = new geom.Point3D(x, y, z);
             var l = nodes.length;
-            for (var i = l - 1; i >= 0; --i)
-                pt = nodes[i].invertProject(pt, pt);
+            for (var i = 0; i < l; ++i)
+                pt = nodes[i].project(pt, pt);
 
             this.applyBoxModel(pt, boxModel);
 
@@ -58,7 +77,11 @@ module jsidea.geom {
         }
 
         public localToGlobal(x: number, y: number, z: number = 0): jsidea.geom.Point3D {
-            //transform from child to parent
+            //we need the localToGlobal matrices
+            if(this._inverted)
+                this.invert();
+            
+            //unproject from child to parent
             var nodes: geom.Matrix3D[] = this._matrices;
             var pt = new geom.Point3D(x, y, z);
             var l = nodes.length;
@@ -67,26 +90,20 @@ module jsidea.geom {
 
             return pt;
         }
-    }
-    export class Transform {
-
-        private static isWebkit = /chrome/.test(navigator.userAgent.toLowerCase());
-        private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
-        private static isIE = (navigator.userAgent.indexOf("MSIE") != -1) || !!navigator.userAgent.match(/Trident.*rv[ :]*11\./);
 
         public static getGlobalToLocal(element: HTMLElement, x: number, y: number, z: number = 0): jsidea.geom.Point3D {
-            return new TransformChain(element).globalToLocal(x, y, z);
+            return new Transform(element).globalToLocal(x, y, z);
         }
 
         public static getLocalToGlobal(element: HTMLElement, x: number, y: number, z: number = 0): jsidea.geom.Point3D {
-            return new TransformChain(element).localToGlobal(x, y, z);
+            return new Transform(element).localToGlobal(x, y, z);
         }
 
-        public static getTransform(element: HTMLElement): geom.TransformChain {
-            return new TransformChain(element);
+        public static extract(element: HTMLElement): geom.Transform {
+            return new Transform(element);
         }
 
-        public static extractMatrix(node: INodeStyle): geom.Matrix3D {
+        private static extractMatrix(node: INodeStyle): geom.Matrix3D {
             var result = new geom.Matrix3D();
             if (!node)
                 return result;
@@ -162,7 +179,7 @@ module jsidea.geom {
             return result;
         }
 
-        public static extractAccumulatedMatrices(element: HTMLElement): geom.Matrix3D[] {
+        private static extractAccumulatedMatrices(element: HTMLElement): geom.Matrix3D[] {
             //collect computed styles/nodes up to html/root (including html/root)
             var root = document.body.parentElement;
             var nodes: INodeStyle[] = [];
@@ -193,6 +210,7 @@ module jsidea.geom {
             }
 
             //accumulate if possible
+//            var b = l;
             for (var i = 0; i < l; ++i) {
                 if (i < (l - 1) && isAcc[i]) {
                     matrices[i + 1].prepend(matrices[i]);
@@ -202,22 +220,17 @@ module jsidea.geom {
                     i--;
                 }
             }
+//            console.log("BEF", b, "AFT", l);
             return matrices;
         }
 
         private static isAccumulatable(node: INodeStyle): boolean {
-            //            if (this.isIE) {
-            //                return false;
-            //            }
-
-            if (!node.parent)// || node.style.transform.indexOf("matrix3d") < 0)
+            if (!node.parent || node.style.transform.indexOf("matrix3d") < 0)
                 return true;
 
             var parent = node.parent;
-
-            if (parent.style.transformStyle == "flat") {
+            if (parent.style.transformStyle == "flat")
                 return false;
-            }
 
             var preserve3d = parent.style.transformStyle == "preserve-3d";
             
@@ -230,9 +243,8 @@ module jsidea.geom {
             
             //there is this case where webkit ignores transform-style: flat. 
             //So when the elements parent has preserve-3d and the element itself has no transform set.
-            if (!preserve3d && this.isWebkit && parent.style.transform == "none" && parent.parent) {
+            if (!preserve3d && this.isWebkit && parent.style.transform == "none" && parent.parent)
                 preserve3d = this.isAccumulatable(parent.parent);
-            }
 
             return preserve3d;
         }

@@ -58,13 +58,13 @@ module jsidea.test {
             var c = new geom.Point3D(cenX, cenY, size);
             var d = new geom.Point3D(cenX, cenY + size, 0);
 
-            var locToGlo = geom.Transform.getTransform(e);
+            var locToGlo = geom.Transform.extract(e);
             a = locToGlo.localToGlobal(a.x, a.y);
             b = locToGlo.localToGlobal(b.x, b.y);
             c = locToGlo.localToGlobal(c.x, c.y, c.z);
             d = locToGlo.localToGlobal(d.x, d.y);
 
-            var gloToLoc = geom.Transform.getTransform(can);
+            var gloToLoc = geom.Transform.extract(can);
             a = gloToLoc.globalToLocal(a.x, a.y);
             b = gloToLoc.globalToLocal(b.x, b.y);
             c = gloToLoc.globalToLocal(c.x, c.y);
@@ -98,13 +98,13 @@ module jsidea.test {
 
             var tim = (new Date()).getTime();
 
-            var locToGlo = geom.Transform.getTransform(e);
+            var locToGlo = geom.Transform.extract(e);
             a = locToGlo.localToGlobal(a.x, a.y);
             b = locToGlo.localToGlobal(b.x, b.y);
             c = locToGlo.localToGlobal(c.x, c.y);
             d = locToGlo.localToGlobal(d.x, d.y);
 
-            var gloToLoc = geom.Transform.getTransform(can);
+            var gloToLoc = geom.Transform.extract(can);
             a = gloToLoc.globalToLocal(a.x, a.y);
             b = gloToLoc.globalToLocal(b.x, b.y);
             c = gloToLoc.globalToLocal(c.x, c.y);
