@@ -35,7 +35,7 @@ module jsidea.test {
             this.drawBoundingBox3(can, ctx, con);
             this.drawBoundingBox3(can, ctx, a);
             this.drawBoundingBox3(can, ctx, b);
-            this.drawBoundingBox3(can, ctx, bc);
+//            this.drawBoundingBox3(can, ctx, bc);
             this.drawBoundingBox3(can, ctx, vie);
 
             $(document).bind("mousemove",(evt) => {

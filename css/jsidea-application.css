@@ -5,6 +5,17 @@ html,body {
 	height: 100%;
 }
 
+body * {
+	/* box-sizing: border-box;
+	left: -2px;
+	top: -2px; */
+	/* box-sizing: border-box; */
+	/* transform-style: flat; */
+	/* perspective: 600px; */
+	/* transform-style: flat; */
+	
+}
+
 body {
 	/* transform-origin: 0px 0px;
 	perspective-origin: 0 0;
@@ -14,26 +25,18 @@ body {
 	overflow: hidden;
 	perspective-origin: 0px 0px; */
 	/* transform-style: preserve-3d; */
-	transform: translateZ(-20px) rotate(30deg);
+	transform-style: preserve-3d;
+	transform: translateX(128px) rotate(30deg);
 }
 
 canvas {
-	position: fixed;
+	position: absolute;
 	top: 0;
 	left: 0;
 	pointer-events: none;
 }
 
-body * {
-	/* box-sizing: border-box;
-	left: -2px;
-	top: -2px; */
-	/* box-sizing: border-box; */
-	/* transform-style: flat; */
-	/* perspective: 600px; */
-	transform-style: flat;
-	
-}
+
 
 #view {
 	position: absolute;
@@ -43,7 +46,7 @@ body * {
 	top: 100px;
 	border: 10px solid #FF00FF;
 	transform: translateZ(-20px) rotateY(30deg);
-	transform-style: preserve-3d;
+	transform-style: flat;
 	/* perspective: 200px; */
 	/* overflow: hidden; */
 }
@@ -67,7 +70,7 @@ body * {
 	height: 512px;
 	
 	/* transform-style: preserve-3d; */
-	transform-style: flat;
+	transform-style: preserve-3d;
 	/* perspective: 600px; */
 	/* perspective-origin: 128px 128px; */
 	/* transform: rotate(5deg); */
@@ -83,6 +86,8 @@ body * {
 	border: 10px solid #0000FF;
 	width: 512px;
 	height: 512px;
+	padding: 50px;
+	transform-style: preserve-3d;
 	/* transform-style: flat; */
 	/* transform-style: flat;
 	transform: translateZ(-20px) rotateY(15deg);

@@ -52,6 +52,7 @@ module jsidea.geom {
 
         private static isWebkit = /chrome/.test(navigator.userAgent.toLowerCase());
         private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
+        private static isIE = (navigator.userAgent.indexOf("MSIE") != -1) || !!navigator.userAgent.match(/Trident.*rv[ :]*11\./);
 
         public static getGlobalToLocal(element: HTMLElement, x: number, y: number, z: number = 0): jsidea.geom.Point3D {
             return new TransformChain(element).globalToLocal(x, y, z);
@@ -160,7 +161,7 @@ module jsidea.geom {
             //collect transforms up to body
             var l = nodes.length;
             var matrices: geom.Matrix3D[] = [];
-            var isAcc:boolean[] = [];
+            var isAcc: boolean[] = [];
             for (var i = 0; i < l; ++i) {
                 node = nodes[i];
                 isAcc.push(this.isAccumulatable(node));
@@ -173,6 +174,7 @@ module jsidea.geom {
                     matrices[i + 1].prepend(matrices[i]);
                     l--;
                     matrices.splice(i, 1);
+                    isAcc.splice(i, 1);
                     i--;
                 }
             }
@@ -180,6 +182,10 @@ module jsidea.geom {
         }
 
         private static isAccumulatable(node: INodeStyle): boolean {
+//            if (this.isIE) {
+//                return false;
+//            }
+
             if (!node.parent || node.style.transform.indexOf("matrix3d") < 0)
                 return true;
 
