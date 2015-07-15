@@ -22,10 +22,11 @@ module jsidea.geom {
         }
 
         private update(): void {
+            var nodeAndMatrices = Transform.extractAccumulatedMatrices(this._element);
+            this._matrices = nodeAndMatrices.matrices;
+            this._style = nodeAndMatrices.node.style;
+            this._parentStyle = nodeAndMatrices.node.parent.style;
             this._inverted = false;
-            this._matrices = Transform.extractAccumulatedMatrices(this._element);
-            this._style = window.getComputedStyle(this._element);
-            this._parentStyle = window.getComputedStyle(this._element.parentElement);
         }
 
         private invert(): void {
@@ -192,7 +193,7 @@ module jsidea.geom {
             return result;
         }
 
-        private static extractAccumulatedMatrices(element: HTMLElement): geom.Matrix3D[] {
+        private static extractAccumulatedMatrices(element: HTMLElement): {matrices:geom.Matrix3D[]; node:INodeStyle} {
             //collect computed styles/nodes up to html/root (including html/root)
             var root = document.body.parentElement;
             var nodes: INodeStyle[] = [];
@@ -234,8 +235,7 @@ module jsidea.geom {
                     i--;
                 }
             }
-            //            console.log("BEF", b, "AFT", l);
-            return matrices;
+            return {matrices:matrices, node:nodes[0]};
         }
 
         private static isAccumulatable(node: INodeStyle): boolean {

@@ -49,7 +49,7 @@ canvas {
 	transform-style: flat;
 	perspective: 200px;
 	overflow: hidden; */
-	transform: translateZ(-20px) rotateY(30deg);
+	transform: translateZ(-20px) rotate(30deg);
 	overflow: scroll;
 }
 
