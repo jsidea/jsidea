@@ -32,11 +32,11 @@ module jsidea.test {
             con.appendChild(a);
             document.body.appendChild(can);
 
-            this.drawBoundingBox3(ctx, con);
-            this.drawBoundingBox3(ctx, a);
-            this.drawBoundingBox3(ctx, b);
-            this.drawBoundingBox3(ctx, bc);
-            this.drawBoundingBox3(ctx, vie);
+            this.drawBoundingBox3(can, ctx, con);
+            this.drawBoundingBox3(can, ctx, a);
+            this.drawBoundingBox3(can, ctx, b);
+            this.drawBoundingBox3(can, ctx, bc);
+            this.drawBoundingBox3(can, ctx, vie);
 
             $(document).bind("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
@@ -46,7 +46,7 @@ module jsidea.test {
             });
         }
 
-        private drawBoundingBox3(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
+        private drawBoundingBox3(can: HTMLElement, ctx: CanvasRenderingContext2D, e: HTMLElement): void {
             //            var or: geom.Point2D = geom.Transform.extractPerspectiveOrigin(e);
 
             var a = new geom.Point3D(0, 0, 0);
@@ -61,6 +61,14 @@ module jsidea.test {
             b = geom.Transform.getLocalToGlobal(e, b.x, b.y);
             c = geom.Transform.getLocalToGlobal(e, c.x, c.y);
             d = geom.Transform.getLocalToGlobal(e, d.x, d.y);
+            
+            
+            
+            a = geom.Transform.getGlobalToLocal(can, a.x, a.y);
+            b = geom.Transform.getGlobalToLocal(can, b.x, b.y);
+            c = geom.Transform.getGlobalToLocal(can, c.x, c.y);
+            d = geom.Transform.getGlobalToLocal(can, d.x, d.y);
+            
             //            orp = geom.Transform.getLocalToGlobal(e, orp);
             var tim2 = (new Date()).getTime();
 //            console.log("TIME TO CALC 4 POINTS", tim2 - tim);

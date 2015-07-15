@@ -1,19 +1,21 @@
 module jsidea.geom {
-    export interface INode {
+    export interface INodeStyle {
+        parent: INodeStyle;
         element: HTMLElement;
         style: CSSStyleDeclaration;
-        parent: INode;
-        matrix: geom.Matrix3D;
-        accumulatable: boolean;
     }
 
     export class TransformChain {
         private _matrices: geom.Matrix3D[] = [];
         private _element: HTMLElement;
+        private _style: CSSStyleDeclaration;
+        private _parentStyle: CSSStyleDeclaration;
 
         constructor(element: HTMLElement) {
             this._element = element;
             this._matrices = Transform.extractAccumulatedMatrices(element);
+            this._style = window.getComputedStyle(this._element);
+            this._parentStyle = window.getComputedStyle(this._element.parentElement);
         }
 
         public globalToLocal(x: number, y: number, z: number = 0): jsidea.geom.Point3D {
@@ -24,17 +26,13 @@ module jsidea.geom {
             for (var i = l - 1; i >= 0; --i)
                 pt = nodes[i].invertProject(pt, pt);
 
-            var style = window.getComputedStyle(this._element);
-            var paddingX = math.Number.parse(style.paddingLeft, 0);
-            var paddingY = math.Number.parse(style.paddingTop, 0);
-            pt.x -= paddingX;
-            pt.y -= paddingY;
+            //padding
+            pt.x -= math.Number.parse(this._style.paddingLeft, 0);
+            pt.y -= math.Number.parse(this._style.paddingTop, 0);
 
-            var parentStyle = window.getComputedStyle(this._element.parentElement);
-            var parentBorderX = math.Number.parse(parentStyle.borderLeftWidth, 0);
-            var parentBorderY = math.Number.parse(parentStyle.borderTopWidth, 0);
-            pt.x -= parentBorderX;
-            pt.y -= parentBorderY;
+            //parent border
+            pt.x -= math.Number.parse(this._parentStyle.borderLeftWidth, 0);
+            pt.y -= math.Number.parse(this._parentStyle.borderTopWidth, 0);
 
             return pt;
         }
@@ -62,8 +60,8 @@ module jsidea.geom {
         public static getLocalToGlobal(element: HTMLElement, x: number, y: number, z: number = 0): jsidea.geom.Point3D {
             return new TransformChain(element).localToGlobal(x, y, z);
         }
-        
-        public static extractMatrix(node: INode): geom.Matrix3D {
+
+        public static extractMatrix(node: INodeStyle): geom.Matrix3D {
             var result = new geom.Matrix3D();
             if (!node)
                 return result;
@@ -142,16 +140,14 @@ module jsidea.geom {
         public static extractAccumulatedMatrices(element: HTMLElement): geom.Matrix3D[] {
             //collect computed styles/nodes up to html/root (including html/root)
             var root = document.body.parentElement;
-            var nodes: INode[] = [];
+            var nodes: INodeStyle[] = [];
             var visual = element;
-            var lastNode: INode = null;
+            var lastNode: INodeStyle = null;
             while (visual && visual != root.parentElement) {
                 var node = {
                     element: visual,
                     style: window.getComputedStyle(visual),
-                    parent: null,
-                    matrix: null,
-                    accumulatable: false
+                    parent: null
                 };
                 if (visual != root)
                     nodes.push(node);
@@ -163,31 +159,27 @@ module jsidea.geom {
 
             //collect transforms up to body
             var l = nodes.length;
+            var matrices: geom.Matrix3D[] = [];
+            var isAcc:boolean[] = [];
             for (var i = 0; i < l; ++i) {
                 node = nodes[i];
-                node.matrix = this.extractMatrix(node);
-                node.accumulatable = this.isAccumulatable(node);
+                isAcc.push(this.isAccumulatable(node));
+                matrices.push(this.extractMatrix(node));
             }
 
             //accumulate if possible
             for (var i = 0; i < l; ++i) {
-                if (i < (l - 1) && nodes[i].accumulatable) {
-                    nodes[i + 1].matrix.prepend(nodes[i].matrix);
+                if (i < (l - 1) && isAcc[i]) {
+                    matrices[i + 1].prepend(matrices[i]);
                     l--;
-                    nodes.splice(i, 1);
+                    matrices.splice(i, 1);
                     i--;
                 }
             }
-
-            var matrices: geom.Matrix3D[] = [];
-            var l = nodes.length;
-            for (var i = 0; i < l; ++i)
-                matrices.push(nodes[i].matrix);
-
             return matrices;
         }
 
-        private static isAccumulatable(node: INode): boolean {
+        private static isAccumulatable(node: INodeStyle): boolean {
             if (!node.parent || node.style.transform.indexOf("matrix3d") < 0)
                 return true;
 
