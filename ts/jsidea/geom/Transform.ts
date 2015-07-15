@@ -172,9 +172,9 @@ module jsidea.geom {
             for (var i = 0; i < l; ++i) {
                 if (i < (l - 1) && isAcc[i]) {
                     matrices[i + 1].prepend(matrices[i]);
-                    l--;
                     matrices.splice(i, 1);
                     isAcc.splice(i, 1);
+                    l--;
                     i--;
                 }
             }
@@ -182,12 +182,21 @@ module jsidea.geom {
         }
 
         private static isAccumulatable(node: INodeStyle): boolean {
-//            if (this.isIE) {
-//                return false;
-//            }
+            //            if (this.isIE) {
+            //                return false;
+            //            }
 
-            if (!node.parent || node.style.transform.indexOf("matrix3d") < 0)
+            
+//            if (node.element.id == "a-cont")
+//            {
+//                console.log(node.parent.style.transformStyle, node.style.transform.indexOf("matrix3d"));
+//                return false;
+//                }
+
+            if (!node.parent)// || node.style.transform.indexOf("matrix3d") < 0)
                 return true;
+
+
 
             var parent = node.parent;
             var preserve3d = parent.style.transformStyle == "preserve-3d";

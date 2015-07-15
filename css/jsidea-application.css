@@ -46,7 +46,7 @@ canvas {
 	top: 100px;
 	border: 10px solid #FF00FF;
 	transform: translateZ(-20px) rotateY(30deg);
-	transform-style: flat;
+	transform-style: preserve-3d;
 	/* perspective: 200px; */
 	/* overflow: hidden; */
 }
