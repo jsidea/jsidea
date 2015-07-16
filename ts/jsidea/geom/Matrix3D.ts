@@ -1009,5 +1009,12 @@ module jsidea.geom {
 
             return ret;
         }
+        
+        public static extract(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
+            if (visual.ownerDocument)
+                return ret.setCSS(window.getComputedStyle(visual).transform);
+            ret.identity();
+            return ret;
+        }
     }
 }

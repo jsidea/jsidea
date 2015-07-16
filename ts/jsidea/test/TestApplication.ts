@@ -48,11 +48,25 @@ module jsidea.test {
 
             });
 
+            
+            var pos = new layout.Position();
+            pos.my.x = "-100%";
+            pos.my.y = "-50%";
+            pos.at.x = 0;
+            pos.at.y = 0;
+            pos.of = document.body;
+            
+            
             $(document).bind("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
-//                console.log(pt.x, pt.y);
-                pt = geom.Transform.extract(b).globalToLocal(pt.x, pt.y);
-                this.applyPos(pt, bc);
+
+//                pt = geom.Transform.extract(b).globalToLocal(pt.x, pt.y);
+//                this.applyPos(pt, bc);
+                
+                pos.at.x = pt.x;
+                pos.at.y = pt.y;
+                pos.transform(bc);
+//                pos.apply(bc);
 
             });
         }

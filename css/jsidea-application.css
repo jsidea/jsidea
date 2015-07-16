@@ -9,7 +9,7 @@ body * {
 	/* box-sizing: border-box;
 	left: -2px;
 	top: -2px; */
-	box-sizing: border-box;
+	/* box-sizing: border-box; */
 	/* transform-style: flat; */
 	/* perspective: 600px; */
 	/* transform-style: flat; */
@@ -100,9 +100,23 @@ canvas {
 
 #bc-cont {
 	/* overflow: hidden; */
+	margin: 30px;
+	padding: 10px;
 	position: absolute;
-	border: 10px solid #FF0000;
-	width: 512px;
-	height: 512px;
-	transform: translateZ(-20px);
+	border: 30px solid #FF0000;
+	width: 128px;
+	height: 128px;
+	transform: translateZ(-800px) rotate(70deg);
+}
+
+#bc-cont:after {
+	/* overflow: hidden; */
+	content: " CONTENT-BOX ";
+	position: relative;
+	position: absolute;
+	background-color: #EE4587;
+	width: 128px;
+	height: 128px;
+	line-height: 128px;
+	text-align: center;
 }

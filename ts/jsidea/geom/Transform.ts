@@ -15,14 +15,16 @@ module jsidea.geom {
         private _style: CSSStyleDeclaration;
         private _parentStyle: CSSStyleDeclaration;
         private _inverted: boolean = false;
+        private _root: HTMLElement;
 
-        constructor(element: HTMLElement) {
+        constructor(element: HTMLElement, root: HTMLElement = null) {
             this._element = element;
+            this._root = root;
             this.update();
         }
 
         private update(): void {
-            var chain = Transform.extractStyleChain(this._element); 
+            var chain = Transform.extractStyleChain(this._element, this._root);
             this._matrices = Transform.extractAccumulatedMatrices(chain);
             this._style = chain.style;
             this._parentStyle = chain.parent.style;
@@ -39,20 +41,38 @@ module jsidea.geom {
 
         private applyBoxModel(pt: Point3D, boxModel: string): void {
             //padding
-            if (boxModel == "content-box" || boxModel == "border-box") {
+            if (boxModel == "content-box") {
                 pt.x -= math.Number.parse(this._style.paddingLeft, 0);
                 pt.y -= math.Number.parse(this._style.paddingTop, 0);
             }
             
-            //parent border
             if (boxModel == "content-box" || boxModel == "padding-box") {
-                pt.x -= math.Number.parse(this._parentStyle.borderLeftWidth, 0);
-                pt.y -= math.Number.parse(this._parentStyle.borderTopWidth, 0);
+                pt.x -= math.Number.parse(this._style.borderLeftWidth, 0);
+                pt.y -= math.Number.parse(this._style.borderTopWidth, 0);
+            }
+            
+            if (boxModel == "margin-box") {
+                pt.x += math.Number.parse(this._style.marginLeft, 0);
+                pt.y += math.Number.parse(this._style.marginTop, 0);
             }
         }
 
-        public globalToLocalPoint(pt: geom.Point3D): jsidea.geom.Point3D {
-            return this.globalToLocal(pt.x, pt.x, pt.z);
+        public localToLocalPoint(to: HTMLElement, pt: geom.Point3D, boxModel: string = "content-box"): jsidea.geom.Point3D {
+            return this.localToLocal(to, pt.x, pt.y, pt.z, boxModel);
+        }
+
+        public localToLocal(to: HTMLElement, x: number, y: number, z: number = 0, boxModel: string = "content-box"): jsidea.geom.Point3D {
+            //check if to contains element
+            //check if element contains to
+            //if so shorten the way here
+            var gl = this.localToGlobal(x, y, z);
+//            gl.z = 0;
+//            gl.w = 1;
+            return Transform.extract(to).globalToLocalPoint(gl, boxModel);
+        }
+
+        public globalToLocalPoint(pt: geom.Point3D, boxModel: string = "content-box"): jsidea.geom.Point3D {
+            return this.globalToLocal(pt.x, pt.y, pt.z, boxModel);
         }
 
         public globalToLocal(x: number, y: number, z: number = 0, boxModel: string = "content-box"): jsidea.geom.Point3D {
@@ -73,7 +93,7 @@ module jsidea.geom {
         }
 
         public localToGlobalPoint(pt: geom.Point3D): jsidea.geom.Point3D {
-            return this.localToGlobal(pt.x, pt.x, pt.z);
+            return this.localToGlobal(pt.x, pt.y, pt.z);
         }
 
         public localToGlobal(x: number, y: number, z: number = 0): jsidea.geom.Point3D {
@@ -91,8 +111,8 @@ module jsidea.geom {
             return pt;
         }
 
-        public static extract(element: HTMLElement): geom.Transform {
-            return new Transform(element);
+        public static extract(element: HTMLElement, root: HTMLElement = null): geom.Transform {
+            return new Transform(element, root);
         }
 
         private static extractMatrix(node: INodeStyle, matrix: geom.Matrix3D = null): geom.Matrix3D {
@@ -186,9 +206,9 @@ module jsidea.geom {
             return matrix;
         }
 
-        private static extractStyleChain(element: HTMLElement): INodeStyle {
+        private static extractStyleChain(element: HTMLElement, root: HTMLElement = null): INodeStyle {
             //collect computed styles/nodes up to html/root (including html/root)
-            var root: HTMLElement = document.body.parentElement;
+            root = root ? root : document.body.parentElement;
             var lastNode: INodeStyle = null;
             var leaf: INodeStyle = null;
             while (element && element != root.parentElement) {
