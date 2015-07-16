@@ -7,10 +7,10 @@ module jsidea.test {
 
         //@override abstract
         public create(): void {
-            this.testMatrix3D5();
+            this.testGeometryUtils();
         }
 
-        private testMatrix3D5(): void {
+        private testGeometryUtils(): void {
             var con = document.getElementById("content");
             var vie = document.getElementById("view");
 
@@ -20,12 +20,10 @@ module jsidea.test {
             b.id = "b-cont";
             var bc = document.createElement("div");
             bc.id = "bc-cont";
-            
-            //            console.log(window.convertPointFromNode);
 
             var can = document.createElement("canvas");
             can.id = "can";
-            can.width = 2048;
+            can.width = 1024;
             can.height = 1024;
             var ctx = can.getContext("2d");
 
@@ -33,10 +31,6 @@ module jsidea.test {
             b.appendChild(bc);
             con.appendChild(a);
             document.body.appendChild(can);
-
-            
-            //            this.drawBoundingBox3(can, ctx, b);
-            //            this.drawBoundingBox4(can, ctx, a);
             
             $(document).bind("click",(evt) => {
                 ctx.clearRect(0, 0, can.width, can.height);
@@ -45,29 +39,23 @@ module jsidea.test {
                 this.drawBoundingBox3(can, ctx, b);
                 this.drawBoundingBox3(can, ctx, bc);
                 this.drawBoundingBox3(can, ctx, vie);
-
+//                this.drawBoundingBox3(can, ctx, can);
             });
 
-            
             var pos = new layout.Position();
             pos.my.x = "-100%";
             pos.my.y = "-50%";
             pos.at.x = 0;
             pos.at.y = 0;
             pos.of = document.body;
-            
+            pos.useTransform = true;    
+            pos.boxModel = "border-box";        
             
             $(document).bind("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
-
-//                pt = geom.Transform.extract(b).globalToLocal(pt.x, pt.y);
-//                this.applyPos(pt, bc);
-                
                 pos.at.x = pt.x;
                 pos.at.y = pt.y;
-                pos.transform(bc);
-//                pos.apply(bc);
-
+                pos.apply(bc);
             });
         }
 
@@ -168,19 +156,10 @@ module jsidea.test {
 
                 }
             }
-
             return new geom.Point2D(left, top);
         }
 
-        private applyPos(pos: geom.Point3D, visual: HTMLElement): geom.Point3D {
-            var x = math.Number.clamp(pos.x, -2048, 2048);
-            var y = math.Number.clamp(pos.y, -2048, 2048);
-            visual.style.transform = "translate(" + Math.round(x) + "px," + Math.round(y) + "px)";
-            return pos;
-        }
-
         private testObserver(): void {
-
             var d = $("<div>A</div>");
             $("body").append(d);
             var o = d[0];
@@ -193,108 +172,14 @@ module jsidea.test {
             //ARRGHHH funzt nit
         }
 
-        private testPosition(): void {
-            //            //$("body").css("overflow", "hidden");
-            //            $("body").css("height", "200%");
-            //
-            //            var a = $("<div id='a-cont'>A</div>");
-            //            $("#content").append(a);
-            //
-            //            var e = $("<div id='b-cont'>B</div>");
-            //            e.css("position", "absolute");
-            //            a.append(e);
-            //            //$("#content").append(e);
-            //
-            //            var p = new jsidea.layout.Position();
-            //            p.my.px = "left";
-            //            p.my.py = "top";
-            ////            p.my.x = "-50%";
-            ////            p.my.y = "-50%";
-            //            p.of = window;
-            //            $(document).bind("mousemove",(evt) => {
-            //                p.at.x = this.pageX;
-            //                p.at.y = this.pageY;
-            //                //p.apply(e[0]);
-            //                p.transform(e[0]);
-            //            });
-            //$("body").css("overflow", "hidden");
-
-            var a = $("<div id='a-cont'></div>");
-            $("#content").append(a);
-            var e = $("<div id='b-cont'></div>");
-            e.css("position", "absolute");
-            a.append(e);
-            
-            //            var mt = geom.Matrix3D.extract(a[0]);
-            //            mt.invert();
-            
-            $(document).bind("mousemove",(evt) => {
-                var pt = a.globalToLocal(this.pageX, this.pageY);
-                //                var pt = mt.transformRaw(this.pageX, this.pageY, 0);
-                e.css("transform", "translate(" + Math.round(pt.x) + "px, " + Math.round(pt.y) + "px)");
-                //                e.css("top", Math.round(pt.y) + "px");
-                //                e.css("left", Math.round(pt.x) + "px");
-            });
-
-            //https://gist.github.com/turbodrive/dede2748fadb7e8dfb13
-            var viewportWidth = 1280;
-            var focalLength = 28;
-            var filmWidth = 36;
-            //var cssPerspective = viewportWidth / (filmWidth / focalLength);
-            var cssPerspective = viewportWidth / (2 * Math.tan(Math.atan(filmWidth / (2 * focalLength))));
-        }
-
         private testXMLConverter(): void {
             var x = new jsidea.model.conversion.XMLConverter();
-        }
-
-        private testPoint(): void {
-            var p = new jsidea.geom.Point2D(5, 5);
-            p.x = 5;
-            p.y = 5;
-            console.log(p.toString());
-            console.log(p.length());
-            p.normalize();
-            console.log(p.length());
         }
 
         private testEventDispatcher(): void {
             var d = new jsidea.events.EventDispatcher();
             d.bind("click.setup",(e: jsidea.events.IEvent) => console.log(e.eventType));
             d.trigger(".setup");
-        }
-
-        private testMatrix(): void {
-            //            var m = new jsidea.geom.Matrix2D();
-            //            m.appendPositionRaw(-100, -100);
-            //            m.appendScaleRaw(2, 2);
-            //            m.appendRotation(45);
-            //            m.appendPositionRaw(100, 100);
-            //            console.log(m.decompose());
-            //
-            //            var div = $("<div></div>");
-            //            div.css({ backgroundColor: "#FF00FF", width: "200px", height: "200px", top: "0", left: "0", position: "absolute", transformOrigin: "0% 0%", transition: "all 1s" });
-            //            $("#content").append(div);
-            //            console.log(m.getCSS());
-            //            div.delay(500).queue(() => div.css({ transform: m.getCSS() }));
-            //
-            //            div.append($("<div style='top:50%; left:50%; position:absolute; width:10px; height:10px; background-color:#FF0000'></div>"));
-            //            var p = m.transform(0, 0);
-            //            console.log(p.toString());
-            
-            var m = new geom.Matrix2D();
-            m.appendPositionRaw(100, 80);
-            m.appendScaleRaw(2, 4);
-            m.appendRotation(45);
-            var ma = m.getMatrix3D();
-            var mat = ma.getMatrix2D();
-
-            var p = new geom.Point2D(1, 1);
-            var pt = new geom.Point3D(1, 1);
-
-            console.log(m.transformRaw(p.x, p.y));
-            console.log(ma.transform(pt));
-            console.log(mat.transformRaw(p.x, p.y));
         }
 
         public toString(): string {

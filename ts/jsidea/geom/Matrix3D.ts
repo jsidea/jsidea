@@ -716,6 +716,16 @@ module jsidea.geom {
             this.scalar(1 / det);
             return this;
         }
+        
+        public getCSS2D(fractionalDigits: number = 6): string {
+            return "matrix("
+                + this.m11.toFixed(fractionalDigits) + ","
+                + this.m12.toFixed(fractionalDigits) + ","
+                + this.m21.toFixed(fractionalDigits) + ","
+                + this.m22.toFixed(fractionalDigits) + ","
+                + this.m41.toFixed(fractionalDigits) + ","
+                + this.m42.toFixed(fractionalDigits) + ")";
+        }
 
         public getCSS(fractionalDigits: number = 6): string {
             return "matrix3d("

@@ -13,7 +13,7 @@ body * {
 	/* transform-style: flat; */
 	/* perspective: 600px; */
 	/* transform-style: flat; */
-	
+	box-sizing: border-box;
 }
 
 body {
@@ -32,8 +32,10 @@ body {
 canvas {
 	position: absolute;
 	top: 0;
-	left: 0;
+	left: 256px;
 	pointer-events: none;
+	/* width: 512px;
+	height: 512px; */
 }
 
 
@@ -105,7 +107,7 @@ canvas {
 	position: absolute;
 	border: 30px solid #FF0000;
 	width: 128px;
-	height: 128px;
+	/* height: 128px; */
 	transform: translateZ(-800px) rotate(70deg);
 }
 

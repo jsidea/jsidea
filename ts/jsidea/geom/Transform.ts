@@ -66,8 +66,6 @@ module jsidea.geom {
             //check if element contains to
             //if so shorten the way here
             var gl = this.localToGlobal(x, y, z);
-//            gl.z = 0;
-//            gl.w = 1;
             return Transform.extract(to).globalToLocalPoint(gl, boxModel);
         }
 
@@ -123,6 +121,9 @@ module jsidea.geom {
 
             var element: HTMLElement = node.element;
             var style: CSSStyleDeclaration = node.style;
+            
+            
+            
             
             //------
             //transform
@@ -188,6 +189,15 @@ module jsidea.geom {
             //append the offset to the transform-matrix
             matrix.appendPositionRaw(offsetX, offsetY, 0);
             
+            
+            if(element instanceof  HTMLCanvasElement)
+            {
+                var can = <HTMLCanvasElement> element;
+//                matrix.appendPositionRaw(offsetX, offsetY, 0);
+//                matrix.appendPositionRaw(400, 400, 0);
+                console.log(matrix.toString());
+            }
+            
             //-------
             //perspective
             //-------
@@ -245,6 +255,8 @@ module jsidea.geom {
                 }
                 node = node.parent;
             }
+            if(last)
+                matrices.push(last);
             return matrices;
         }
 

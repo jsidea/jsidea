@@ -6,24 +6,21 @@ module jsidea.layout {
         py?: any;
     }
     export class Position {
-        private static TMP: geom.Matrix2D = new geom.Matrix2D();
-        private static TMP3: geom.Point2D = new geom.Point2D();
-        private static TMP4: geom.Point2D = new geom.Point2D();
-
         private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
 
         constructor(
             public my: IPositionValue = {},
             public at: IPositionValue = {},
             public of: HTMLElement = null,
-            public boxModel: string = "border-box") {
+            public boxModel: string = "border-box",
+            public useTransform: boolean = true) {
         }
 
         public clone(): Position {
             return new Position(this.my, this.at, this.of);
         }
 
-        public point(visual: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.IPoint3DValue {
+        public apply(visual: HTMLElement): void {
             if (!visual)
                 return null;
 
@@ -66,31 +63,21 @@ module jsidea.layout {
             lc.x += myOffsetX - myOriginX;
             lc.y += myOffsetY - myOriginY;
 
-            return geom.Matrix3D.extract(visual).project(lc);
-        }
+            var m = geom.Matrix3D.extract(visual);
+            var pt = m.project(lc);
 
-        public apply(visual: HTMLElement): void {
-            visual.style.left = "0px";
-            visual.style.top = "0px";
-            var pt = this.point(visual, Position.TMP3);
-            visual.style.left = Math.round(pt.x) + "px";
-            visual.style.top = Math.round(pt.y) + "px";
-        }
-
-        public transform(visual: HTMLElement): void {
-            var pt = this.point(visual);
-
-            if (Position.isFirefox) {
-                var m = geom.Matrix3D.extract(visual);
+            if (this.useTransform) {
                 m.m41 = pt.x;
                 m.m42 = pt.y;
-                visual.style.transform = m.getCSS();
+                //in firefox you can grab the matrix3D and change its position
+                //and than just re-apply. But webkit and ie11 kills it.
+                visual.style.transform = Position.isFirefox ? m.getCSS() : m.getCSS2D();
             }
             else {
-                var m2D = geom.Matrix2D.extract(visual, Position.TMP);
-                m2D.m31 = pt.x;
-                m2D.m32 = pt.y;
-                visual.style.transform = m2D.getCSS();
+                var oldLeft = math.Number.parse(visual.style.left, 0);//visual.offsetLeft;
+                var oldTop = math.Number.parse(visual.style.top, 0);//visual.offsetTop;
+                visual.style.left = Math.round(oldLeft + pt.x) + "px";
+                visual.style.top = Math.round(oldTop + pt.y) + "px";
             }
         }
 
