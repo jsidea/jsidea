@@ -33,7 +33,7 @@ canvas {
 	position: absolute;
 	top: 64px;
 	left: 128px;
-	pointer-events: none;
+	/* pointer-events: none; */
 	width: 512px;
 	height: 512px;
 	transform: rotateY(45deg) rotate(45deg);
@@ -41,6 +41,14 @@ canvas {
 	padding: 40px;
 	border: 40px solid #000;
 	background-color: rgba(0, 0, 0, 0.2);
+	transition: all 1s;
+}
+
+canvas:hover {
+	transform: rotateY(5deg) rotate(0deg);
+	background-color: rgba(0, 0, 0, 0.5);
+	padding: 0px;
+	border: 2px solid #FFF;
 }
 
 #view {

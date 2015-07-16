@@ -130,13 +130,6 @@ module jsidea.geom {
             var element: HTMLElement = node.element;
             var style: CSSStyleDeclaration = node.style;
             
-            //TODO: this handling of canvas-size should/MUST be optional
-//            if(element instanceof HTMLCanvasElement)
-//            {
-//                var can = <HTMLCanvasElement> element;
-//                matrix.appendScaleRaw(can.offsetWidth / can.width, can.offsetHeight / can.height, 1);
-//            }
-            
             //------
             //transform
             //------

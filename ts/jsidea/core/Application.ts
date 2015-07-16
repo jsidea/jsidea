@@ -104,6 +104,9 @@ module jsidea.core {
 
         public tick(): void {
             this.broadcast(jsidea.events.Event.TICK);
+            var evt = document.createEvent("Event");       
+            evt.initEvent("enterframe", true, true);
+            document.dispatchEvent(evt);
         }
 
         public get autoTick(): boolean {

@@ -24,23 +24,13 @@ module jsidea.test {
             var can = document.createElement("canvas");
             can.id = "can";
             can.width = 256;
-            can.height = 256;
+            can.height = 512;
             var ctx = can.getContext("2d");
 
             a.appendChild(b);
             b.appendChild(bc);
             con.appendChild(a);
             document.body.appendChild(can);
-
-            $(document).bind("click",(evt) => {
-                ctx.clearRect(0, 0, can.width, can.height);
-                this.drawBoundingBox(can, ctx, con);
-                this.drawBoundingBox(can, ctx, a);
-                this.drawBoundingBox(can, ctx, b);
-                this.drawBoundingBox(can, ctx, bc);
-                this.drawBoundingBox(can, ctx, vie);
-                this.drawBoundingBox(can, ctx, can);
-            });
 
             var pos = new layout.Position();
             pos.my.x = "-100%";
@@ -50,8 +40,18 @@ module jsidea.test {
             pos.of = document.body;
             pos.useTransform = false;
             pos.boxModel = "padding";
+            
+            document.addEventListener("enterframe", (evt) => {
+                ctx.clearRect(0, 0, can.width, can.height);
+                this.drawBoundingBox(ctx, con);
+                this.drawBoundingBox(ctx, a);
+                this.drawBoundingBox(ctx, b);
+                this.drawBoundingBox(ctx, bc);
+                this.drawBoundingBox(ctx, vie);
+                this.drawBoundingBox(ctx, can);
+            });           
 
-            $(document).bind("mousemove",(evt) => {
+            document.addEventListener("mousemove", (evt) => {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
                 pos.at.x = pt.x;
                 pos.at.y = pt.y;
@@ -59,7 +59,10 @@ module jsidea.test {
             });
         }
 
-        private drawBoundingBox(can: HTMLElement, ctx: CanvasRenderingContext2D, e: HTMLElement): void {
+        private drawBoundingBox(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
+            
+            var can: HTMLElement = ctx.canvas;
+            
             var a = new geom.Point3D(0, 0, 0);
             var b = new geom.Point3D(e.offsetWidth, 0, 0);
             var c = new geom.Point3D(e.offsetWidth, e.offsetHeight, 0);
@@ -79,8 +82,7 @@ module jsidea.test {
             c = gloToLoc.globalToLocal(c.x, c.y, 0, "canvas");
             d = gloToLoc.globalToLocal(d.x, d.y, 0, "canvas");
 
-            var tim2 = (new Date()).getTime();
-            //            console.log("TIME TO CALC 4 POINTS", tim2 - tim);
+            //console.log("TIME TO CALC 4 POINTS", (new Date()).getTime() - tim);
 
             ctx.beginPath();
             ctx.setLineDash([4, 4]);
