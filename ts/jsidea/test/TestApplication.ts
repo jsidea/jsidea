@@ -23,23 +23,23 @@ module jsidea.test {
 
             var can = document.createElement("canvas");
             can.id = "can";
-            can.width = 1024;
-            can.height = 1024;
+            can.width = 256;
+            can.height = 256;
             var ctx = can.getContext("2d");
 
             a.appendChild(b);
             b.appendChild(bc);
             con.appendChild(a);
             document.body.appendChild(can);
-            
+
             $(document).bind("click",(evt) => {
                 ctx.clearRect(0, 0, can.width, can.height);
-                this.drawBoundingBox3(can, ctx, con);
-                this.drawBoundingBox3(can, ctx, a);
-                this.drawBoundingBox3(can, ctx, b);
-                this.drawBoundingBox3(can, ctx, bc);
-                this.drawBoundingBox3(can, ctx, vie);
-//                this.drawBoundingBox3(can, ctx, can);
+                this.drawBoundingBox(can, ctx, con);
+                this.drawBoundingBox(can, ctx, a);
+                this.drawBoundingBox(can, ctx, b);
+                this.drawBoundingBox(can, ctx, bc);
+                this.drawBoundingBox(can, ctx, vie);
+                this.drawBoundingBox(can, ctx, can);
             });
 
             var pos = new layout.Position();
@@ -48,9 +48,9 @@ module jsidea.test {
             pos.at.x = 0;
             pos.at.y = 0;
             pos.of = document.body;
-            pos.useTransform = true;    
-            pos.boxModel = "border-box";        
-            
+            pos.useTransform = false;
+            pos.boxModel = "padding";
+
             $(document).bind("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
                 pos.at.x = pt.x;
@@ -59,49 +59,7 @@ module jsidea.test {
             });
         }
 
-        private drawBoundingBox4(can: HTMLElement, ctx: CanvasRenderingContext2D, e: HTMLElement): void {
-            var size = 100;
-            var cenX = e.offsetWidth * 0.5;
-            var cenY = e.offsetHeight * 0.5;
-
-            var a = new geom.Point3D(cenX, cenY, 0);
-            var b = new geom.Point3D(cenX + size, cenY, 0);
-            var c = new geom.Point3D(cenX, cenY, size);
-            var d = new geom.Point3D(cenX, cenY + size, 0);
-
-            var locToGlo = geom.Transform.extract(e);
-            a = locToGlo.localToGlobal(a.x, a.y);
-            b = locToGlo.localToGlobal(b.x, b.y);
-            c = locToGlo.localToGlobal(c.x, c.y, c.z);
-            d = locToGlo.localToGlobal(d.x, d.y);
-
-            var gloToLoc = geom.Transform.extract(can);
-            a = gloToLoc.globalToLocal(a.x, a.y);
-            b = gloToLoc.globalToLocal(b.x, b.y);
-            c = gloToLoc.globalToLocal(c.x, c.y);
-            d = gloToLoc.globalToLocal(d.x, d.y);
-
-            ctx.beginPath();
-
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(d.x, d.y);
-
-            ctx.setLineDash([]);
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(c.x, c.y);
-
-            ctx.setLineDash([2, 2]);
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-
-        private drawBoundingBox3(can: HTMLElement, ctx: CanvasRenderingContext2D, e: HTMLElement): void {
+        private drawBoundingBox(can: HTMLElement, ctx: CanvasRenderingContext2D, e: HTMLElement): void {
             var a = new geom.Point3D(0, 0, 0);
             var b = new geom.Point3D(e.offsetWidth, 0, 0);
             var c = new geom.Point3D(e.offsetWidth, e.offsetHeight, 0);
@@ -116,30 +74,23 @@ module jsidea.test {
             d = locToGlo.localToGlobal(d.x, d.y);
 
             var gloToLoc = geom.Transform.extract(can);
-            a = gloToLoc.globalToLocal(a.x, a.y);
-            b = gloToLoc.globalToLocal(b.x, b.y);
-            c = gloToLoc.globalToLocal(c.x, c.y);
-            d = gloToLoc.globalToLocal(d.x, d.y);
-            
-            //            orp = geom.Transform.getLocalToGlobal(e, orp);
+            a = gloToLoc.globalToLocal(a.x, a.y, 0, "canvas");
+            b = gloToLoc.globalToLocal(b.x, b.y, 0, "canvas");
+            c = gloToLoc.globalToLocal(c.x, c.y, 0, "canvas");
+            d = gloToLoc.globalToLocal(d.x, d.y, 0, "canvas");
+
             var tim2 = (new Date()).getTime();
-            console.log("TIME TO CALC 4 POINTS", tim2 - tim);
+            //            console.log("TIME TO CALC 4 POINTS", tim2 - tim);
 
             ctx.beginPath();
             ctx.setLineDash([4, 4]);
-            //            ctx.strokeStyle = "#00FFFF";
             ctx.lineWidth = 2;
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
             ctx.lineTo(c.x, c.y);
             ctx.lineTo(d.x, d.y);
             ctx.lineTo(a.x, a.y);
-            //x: number, y: number, radius: number, startAngle: number, endAngle: number, anticlockwise?: boolean
-            //            ctx.moveTo(orp.x + 5, orp.y);
-            //            ctx.arc(orp.x, orp.y, 5, 0, 360);
             ctx.stroke();
-
-            //            ctx.fillText("(" + orp.x.toFixed(2) + ", " + orp.y.toFixed(2) + ") ", orp.x + 5, orp.y - 5);
         }
 
         private getOffestToCrossDoc(f: HTMLElement, aOther: HTMLElement | Window): geom.Point2D {

@@ -12,7 +12,7 @@ module jsidea.layout {
             public my: IPositionValue = {},
             public at: IPositionValue = {},
             public of: HTMLElement = null,
-            public boxModel: string = "border-box",
+            public boxModel: string = "border",
             public useTransform: boolean = true) {
         }
 
@@ -28,15 +28,15 @@ module jsidea.layout {
             var visualHeight = visual.offsetHeight;//CONTENT-HEIGHT + PADDING-VERT + BORDER-VERT
             
             var st = window.getComputedStyle(visual);
-            if (this.boxModel == "content-box") {
+            if (this.boxModel == "content") {
                 visualWidth -= math.Number.parse(st.paddingLeft, 0) + math.Number.parse(st.paddingRight, 0);
                 visualHeight -= math.Number.parse(st.paddingTop, 0) + math.Number.parse(st.paddingBottom, 0);
             }
-            if (this.boxModel == "content-box" || this.boxModel == "padding-box") {
+            if (this.boxModel == "content" || this.boxModel == "padding") {
                 visualWidth -= math.Number.parse(st.borderLeftWidth, 0) + math.Number.parse(st.borderRightWidth, 0);
                 visualHeight -= math.Number.parse(st.borderTopWidth, 0) + math.Number.parse(st.borderBottomWidth, 0);
             }
-            if (this.boxModel == "margin-box") {
+            if (this.boxModel == "margin") {
                 visualWidth += math.Number.parse(st.marginLeft, 0) + math.Number.parse(st.marginRight, 0);
                 visualHeight += math.Number.parse(st.marginTop, 0) + math.Number.parse(st.marginBottom, 0);
             }

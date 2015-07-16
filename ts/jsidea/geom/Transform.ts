@@ -39,29 +39,11 @@ module jsidea.geom {
                 this._matrices[i].invert();
         }
 
-        private applyBoxModel(pt: Point3D, boxModel: string): void {
-            //padding
-            if (boxModel == "content-box") {
-                pt.x -= math.Number.parse(this._style.paddingLeft, 0);
-                pt.y -= math.Number.parse(this._style.paddingTop, 0);
-            }
-            
-            if (boxModel == "content-box" || boxModel == "padding-box") {
-                pt.x -= math.Number.parse(this._style.borderLeftWidth, 0);
-                pt.y -= math.Number.parse(this._style.borderTopWidth, 0);
-            }
-            
-            if (boxModel == "margin-box") {
-                pt.x += math.Number.parse(this._style.marginLeft, 0);
-                pt.y += math.Number.parse(this._style.marginTop, 0);
-            }
-        }
-
-        public localToLocalPoint(to: HTMLElement, pt: geom.Point3D, boxModel: string = "content-box"): jsidea.geom.Point3D {
+        public localToLocalPoint(to: HTMLElement, pt: geom.Point3D, boxModel: string = "border"): jsidea.geom.Point3D {
             return this.localToLocal(to, pt.x, pt.y, pt.z, boxModel);
         }
 
-        public localToLocal(to: HTMLElement, x: number, y: number, z: number = 0, boxModel: string = "content-box"): jsidea.geom.Point3D {
+        public localToLocal(to: HTMLElement, x: number, y: number, z: number = 0, boxModel: string = "border"): jsidea.geom.Point3D {
             //check if to contains element
             //check if element contains to
             //if so shorten the way here
@@ -69,11 +51,11 @@ module jsidea.geom {
             return Transform.extract(to).globalToLocalPoint(gl, boxModel);
         }
 
-        public globalToLocalPoint(pt: geom.Point3D, boxModel: string = "content-box"): jsidea.geom.Point3D {
+        public globalToLocalPoint(pt: geom.Point3D, boxModel: string = "border"): jsidea.geom.Point3D {
             return this.globalToLocal(pt.x, pt.y, pt.z, boxModel);
         }
 
-        public globalToLocal(x: number, y: number, z: number = 0, boxModel: string = "content-box"): jsidea.geom.Point3D {
+        public globalToLocal(x: number, y: number, z: number = 0, boxModel: string = "border"): jsidea.geom.Point3D {
             //we need the globalToLocal matrices
             if (!this._inverted)
                 this.invert();
@@ -84,8 +66,34 @@ module jsidea.geom {
             var l = nodes.length;
             for (var i = 0; i < l; ++i)
                 pt = nodes[i].project(pt, pt);
+            
+            var isCanvasModel = boxModel == "canvas" && this._element instanceof HTMLCanvasElement;
 
-            this.applyBoxModel(pt, boxModel);
+            if (boxModel == "content" || isCanvasModel) {
+                pt.x -= math.Number.parse(this._style.paddingLeft, 0);
+                pt.y -= math.Number.parse(this._style.paddingTop, 0);
+            }
+            
+            if (boxModel == "content" || boxModel == "padding" || isCanvasModel) {
+                pt.x -= math.Number.parse(this._style.borderLeftWidth, 0);
+                pt.y -= math.Number.parse(this._style.borderTopWidth, 0);
+            }
+            
+            if (boxModel == "margin") {
+                pt.x += math.Number.parse(this._style.marginLeft, 0);
+                pt.y += math.Number.parse(this._style.marginTop, 0);
+            }
+            
+            if(isCanvasModel)
+            {
+                var paddingRight = math.Number.parse(this._style.paddingRight, 0);
+                var paddingBottom = math.Number.parse(this._style.paddingBottom, 0);
+                var paddingLeft = math.Number.parse(this._style.paddingLeft, 0);
+                var paddingTop = math.Number.parse(this._style.paddingTop, 0); 
+                var can = <HTMLCanvasElement> this._element;
+                pt.x *= can.width / (can.clientWidth - (paddingLeft + paddingRight));
+                pt.y *= can.height / (can.clientHeight - (paddingTop + paddingBottom));
+            }
 
             return pt;
         }
@@ -122,8 +130,12 @@ module jsidea.geom {
             var element: HTMLElement = node.element;
             var style: CSSStyleDeclaration = node.style;
             
-            
-            
+            //TODO: this handling of canvas-size should/MUST be optional
+//            if(element instanceof HTMLCanvasElement)
+//            {
+//                var can = <HTMLCanvasElement> element;
+//                matrix.appendScaleRaw(can.offsetWidth / can.width, can.offsetHeight / can.height, 1);
+//            }
             
             //------
             //transform
@@ -189,15 +201,6 @@ module jsidea.geom {
             //append the offset to the transform-matrix
             matrix.appendPositionRaw(offsetX, offsetY, 0);
             
-            
-            if(element instanceof  HTMLCanvasElement)
-            {
-                var can = <HTMLCanvasElement> element;
-//                matrix.appendPositionRaw(offsetX, offsetY, 0);
-//                matrix.appendPositionRaw(400, 400, 0);
-                console.log(matrix.toString());
-            }
-            
             //-------
             //perspective
             //-------
@@ -244,7 +247,7 @@ module jsidea.geom {
             var last: geom.Matrix3D = null;
             while (node.parent) {
                 //if last is not null, last becomes the base for the transformation
-                //its like appending the current node.transform to the last transform (child-transform)
+                //its like appending the current node.transform (parent-transform) to the last transform (child-transform)
                 var m: geom.Matrix3D = this.extractMatrix(node, last);
                 if (node.parent && this.isAccumulatable(node)) {
                     last = m;

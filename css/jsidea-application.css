@@ -31,14 +31,17 @@ body {
 
 canvas {
 	position: absolute;
-	top: 0;
-	left: 256px;
+	top: 64px;
+	left: 128px;
 	pointer-events: none;
-	/* width: 512px;
-	height: 512px; */
+	width: 512px;
+	height: 512px;
+	transform: rotateY(45deg) rotate(45deg);
+	transform-origin: 0px 0px;
+	padding: 40px;
+	border: 40px solid #000;
+	background-color: rgba(0, 0, 0, 0.2);
 }
-
-
 
 #view {
 	position: absolute;
