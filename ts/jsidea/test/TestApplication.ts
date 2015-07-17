@@ -18,8 +18,8 @@ module jsidea.test {
 
             var can = document.createElement("canvas");
             can.id = "can";
-            can.width = 256;
-            can.height = 512;
+            can.width = 400;
+            can.height = 400;
             var ctx = can.getContext("2d");
             
             var a = document.createElement("div");

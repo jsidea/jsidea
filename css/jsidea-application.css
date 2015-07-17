@@ -3,7 +3,7 @@ html,body {
 	padding: 0;
 	width: 100%;
 	height: 100%;
-	position: absolute;
+	/* position: absolute; */
 }
 
 body * {
@@ -31,7 +31,7 @@ body {
 	transform: translateX(128px) rotate(30deg); */
 	/* border: 100px solid #FF00FF; */
 	padding: 50px;
-	position: absolute;
+	/* position: absolute; */
 }
 
 canvas {
@@ -39,8 +39,8 @@ canvas {
 	top: 64px;
 	left: 128px;
 	/* pointer-events: none; */
-	width: 512px;
-	height: 512px;
+	width: 800px;
+	height: 800px;
 	transform: rotate(45deg);
 	transform-origin: 0px 0px;
 	margin: 10px;
@@ -73,7 +73,7 @@ canvas:hover {
 }
 
 #content {
-	position: absolute;
+	position: static;
 	width: 512px;
 	height: 512px;
 	border: 70px solid #FFFF00;
@@ -88,7 +88,7 @@ canvas:hover {
 }
 
 #a-cont {
-	position: absolute;
+	position: static;
 	border: 80px solid #00FFFF;
 	width: 512px;
 	height: 512px;
@@ -104,7 +104,7 @@ canvas:hover {
 
 #b-cont {
 	/* overflow: hidden; */
-	position: absolute;
+	position: static;
 	border: 30px solid #0000FF;
 	width: 512px;
 	/* height: 512px; */
@@ -120,9 +120,9 @@ canvas:hover {
 }
 
 #c-cont {
+	position: static;
 	/* overflow: hidden; */
 	/* margin: 10px; */
-	position: absolute;
 	padding: 10px;
 	border: 20px solid #FF0000;
 	width: 128px;
@@ -133,7 +133,7 @@ canvas:hover {
 
 
 #d-cont {
-	position: absolute;
+	position: static;
 	border: 40px solid #883366;
 	width: 128px;
 	height: 128px;
@@ -150,7 +150,7 @@ canvas:hover {
 #d-cont:after {
 	/* overflow: hidden; */
 	content: " CONTENT-BOX ";
-	position: absolute;
+	position: static;
 	background-color: #EE4587;
 	width: 128px;
 	height: 128px;

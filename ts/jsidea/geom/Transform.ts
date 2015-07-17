@@ -183,12 +183,22 @@ module jsidea.geom {
                 }
             }
             
-            if (this.isFirefox && style.position == "absolute" && parentStyle.position == "static") {
-                if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
-                
-                    offsetX += element.offsetParent.clientLeft;
-                    offsetY += element.offsetParent.clientTop;
-                }
+//            if (this.isFirefox && style.position == "absolute" && parentStyle.position == "static") {
+//                if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
+//                
+////                    offsetX += element.offsetParent.clientLeft;
+////                    offsetY += element.offsetParent.clientTop;
+//                }
+//            }
+            
+//            if (this.isFirefox && style.position == "absolute" && parentStyle.position == "absolute") {
+//                    offsetX += element.parentElement.clientLeft;
+//                    offsetY += element.parentElement.clientTop;
+//            }
+            
+            if (this.isFirefox && style.position == "absolute" && parentStyle.overflow != "visible") {
+                    offsetX += element.parentElement.clientLeft;
+                    offsetY += element.parentElement.clientTop;
             }
 
 
