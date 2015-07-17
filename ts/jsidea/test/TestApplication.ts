@@ -36,6 +36,10 @@ module jsidea.test {
             c.appendChild(d);
             con.appendChild(a);
             document.body.appendChild(can);
+            
+//            var e = document.createElement("div");
+//            e.id = "e-cont";
+//            d.appendChild(e);
 
             var pos = new layout.Position();
             pos.to.x = "-100%";

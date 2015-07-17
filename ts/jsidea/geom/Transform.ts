@@ -140,117 +140,40 @@ module jsidea.geom {
             var offsetY = element.offsetTop;
 
 
-            //            if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
-            //                offsetX -= element.parentElement.offsetLeft;
-            //                offsetY -= element.parentElement.offsetTop; 
-            //                offsetX += element.offsetParent.clientLeft;
-            //                offsetY += element.offsetParent.clientTop;   
-            //            }
-            //                offsetX -= math.Number.parse(parentStyle.paddingLeft, 0);
-            //                offsetY -= math.Number.parse(parentStyle.paddingTop, 0);
-            //                
-            //                offsetX += element.clientLeft;
-            //                offsetY += element.clientTop; 
-
-            //            if (style.position == "static") {
-                
-            //                offsetX -= element.parentElement.offsetLeft;
-            //                offsetY -= element.parentElement.offsetTop; 
-            //                offsetX += element.offsetParent.clientLeft;
-            //                offsetY += element.offsetParent.clientTop; 
-            //            }
-
-            if (style.position == "static") {
-                if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
-                    offsetX -= element.parentElement.offsetLeft;
-                    offsetY -= element.parentElement.offsetTop;
-                }
-                else {
-                    offsetX += element.parentElement.clientLeft;
-                    offsetY += element.parentElement.clientTop;
-                }
+            if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
+                offsetX -= element.parentElement.offsetLeft;
+                offsetY -= element.parentElement.offsetTop;
+            }
+            else {
+                offsetX += element.parentElement.clientLeft;
+                offsetY += element.parentElement.clientTop;
             }
 
-            if (style.position == "absolute") {
-
-                if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
-                    offsetX -= element.parentElement.offsetLeft;
-                    offsetY -= element.parentElement.offsetTop;
-                }
-                else {
-                    offsetX += element.parentElement.clientLeft;
-                    offsetY += element.parentElement.clientTop;
-                }
-            }
-            
-            //            if (this.isFirefox && style.position == "absolute" && parentStyle.position == "static") {
-            //                if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
-            //                
-            ////                    offsetX += element.offsetParent.clientLeft;
-            ////                    offsetY += element.offsetParent.clientTop;
-            //                }
-            //            }
-            
-            //            if (this.isFirefox && style.position == "absolute" && parentStyle.position == "absolute") {
-            //                    offsetX += element.parentElement.clientLeft;
-            //                    offsetY += element.parentElement.clientTop;
-            //            }
-            
             if (this.isFirefox) {
-                if (style.position == "absolute" && parentStyle.overflow != "visible" && parentStyle.position != "static") {
+                if ((style.position == "absolute" || style.position == "relative") && parentStyle.overflow != "visible" && parentStyle.position != "static") {
                     offsetX += element.parentElement.clientLeft;
                     offsetY += element.parentElement.clientTop;
                     console.log("BUG-FIX-A: add borderParentClient");
                 }
 
                 if (
-                    style.position == "absolute"
+                    (style.position == "absolute" || style.position == "relative")
                     && parentStyle.position == "static"
                     && element.parentElement
                     && element.offsetParent
                     && element.offsetParent != element.parentElement
                     && window.getComputedStyle(element.offsetParent).overflow != "visible"
-//                    && element.parentElement.parentElement
-//                    && element.parentElement.parentElement.offsetParent != element.offsetParent
+                //                    && element.parentElement.parentElement
+                //                    && element.parentElement.parentElement.offsetParent != element.offsetParent
                     ) {
-                    
+
                     offsetX += element.offsetParent.clientLeft;
                     offsetY += element.offsetParent.clientTop;
 
                     console.log("BUG-FIX-B: add offsetParentClient " + (element.id ? element.id : element.nodeName));
 
                 }
-
-                if (style.position == "absolute" && element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
-                    
-                    //                    if(element.id != "d-cont")
-                    //                    {
-                    //                    offsetX += element.offsetParent.clientLeft;
-                    //                    offsetY += element.offsetParent.clientTop;
-                    //                        }
-                    //                    console.log("BUG-FIX-B: add offsetParentClient " + (element.id ? element.id : element.nodeName));
-                }
-                
-                //                if (style.position == "absolute" && parentStyle.overflow != "visible" && parentStyle.position != "static") {
-                //                    offsetX += element.parentElement.clientLeft;
-                //                    offsetY += element.parentElement.clientTop;
-                //                }
             }
-
-
-            //integrate parent borders
-            //            var borderParentX = math.Number.parse(parentStyle.borderLeftWidth, 0);
-            //            var borderParentY = math.Number.parse(parentStyle.borderTopWidth, 0);
-            //
-            //            if (parentStyle.overflow != "visible") {
-            //                offsetX += borderParentX;
-            //                offsetY += borderParentY;
-            //            }
-            //
-            //            if (parentStyle.boxSizing != "border-box") {
-            //                offsetX += borderParentX;
-            //                offsetY += borderParentY;
-            //            }
             
             //add scrolling offsets
             //webkit has the scroll-values set on html not on the body?
