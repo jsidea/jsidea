@@ -1,6 +1,8 @@
 module jsidea.test {
     export class TestApplication extends jsidea.core.Application {
 
+        private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
+
         constructor() {
             super();
         }
@@ -33,15 +35,16 @@ module jsidea.test {
             document.body.appendChild(can);
 
             var pos = new layout.Position();
-            pos.my.x = "-100%";
-            pos.my.y = "-50%";
-            pos.at.x = 0;
-            pos.at.y = 0;
-            pos.of = document.body;
-            pos.useTransform = false;
-            pos.boxModel = "padding";
+            pos.to.x = "-100%";
+            pos.to.y = "-100%";
+            pos.toBox = "border";
             
-            document.addEventListener("enterframe", (evt) => {
+            //            console.log(this.getOffestToCrossDoc(a, document.body));
+            //            console.log(this.getOffestToCrossDoc2(a, document.body));
+//            console.log(this.getOffestToCrossDoc3(a, document.body));
+            this.logChain(bc);
+
+            document.addEventListener("click",(evt) => {
                 ctx.clearRect(0, 0, can.width, can.height);
                 this.drawBoundingBox(ctx, con);
                 this.drawBoundingBox(ctx, a);
@@ -49,20 +52,20 @@ module jsidea.test {
                 this.drawBoundingBox(ctx, bc);
                 this.drawBoundingBox(ctx, vie);
                 this.drawBoundingBox(ctx, can);
-            });           
+            });
 
-            document.addEventListener("mousemove", (evt) => {
+            document.addEventListener("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
-                pos.at.x = pt.x;
-                pos.at.y = pt.y;
+                pos.from.x = pt.x;
+                pos.from.y = pt.y;
                 pos.apply(bc);
             });
         }
 
         private drawBoundingBox(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
-            
+
             var can: HTMLElement = ctx.canvas;
-            
+
             var a = new geom.Point3D(0, 0, 0);
             var b = new geom.Point3D(e.offsetWidth, 0, 0);
             var c = new geom.Point3D(e.offsetWidth, e.offsetHeight, 0);
@@ -77,12 +80,13 @@ module jsidea.test {
             d = locToGlo.localToGlobal(d.x, d.y);
 
             var gloToLoc = geom.Transform.extract(can);
-            a = gloToLoc.globalToLocal(a.x, a.y, 0, "canvas");
-            b = gloToLoc.globalToLocal(b.x, b.y, 0, "canvas");
-            c = gloToLoc.globalToLocal(c.x, c.y, 0, "canvas");
-            d = gloToLoc.globalToLocal(d.x, d.y, 0, "canvas");
+            gloToLoc.toBox = "canvas";
+            a = gloToLoc.globalToLocal(a.x, a.y);
+            b = gloToLoc.globalToLocal(b.x, b.y);
+            c = gloToLoc.globalToLocal(c.x, c.y);
+            d = gloToLoc.globalToLocal(d.x, d.y);
 
-            //console.log("TIME TO CALC 4 POINTS", (new Date()).getTime() - tim);
+            //            console.log("TIME TO CALC 4 POINTS", (new Date()).getTime() - tim);
 
             ctx.beginPath();
             ctx.setLineDash([4, 4]);
@@ -101,6 +105,119 @@ module jsidea.test {
             while (f && f != aOther) {
                 left += f.offsetLeft;
                 top += f.offsetTop;
+                var par = f.parentElement;
+                if (par) {
+                    f = par;
+                }
+                else {
+
+                }
+            }
+            return new geom.Point2D(left, top);
+        }
+
+        private getOffestToCrossDoc2(f: HTMLElement, aOther: HTMLElement | Window): geom.Point2D {
+            var top: number = 0;
+            var left: number = 0;
+            while (f && f != aOther) {
+                left += f.clientLeft;
+                top += f.clientTop;
+                var par = f.parentElement;
+                if (par) {
+                    f = par;
+                }
+                else {
+
+                }
+            }
+            return new geom.Point2D(left, top);
+        }
+        
+        private logChain(f: HTMLElement): void {
+            while (f) {
+                var st = window.getComputedStyle(f);
+                console.log(
+                text.Text.conc(20, " ", f.id ? f.id : f.nodeName),
+                text.Text.conc(20, " ", "OFFSET", f.offsetLeft, f.offsetTop), 
+                text.Text.conc(20, " ", "CLIENT", f.clientLeft, f.clientTop), 
+                text.Text.conc(20, " ", "MARGIN", st.marginLeft, st.marginTop),
+                text.Text.conc(20, " ", "BORDER", st.borderLeftWidth, st.borderTopWidth),
+                text.Text.conc(20, " ", "PADDING", st.paddingLeft, st.paddingTop),
+                text.Text.conc(20, " ", "SCROLL", f.scrollLeft, f.scrollTop),
+                text.Text.conc(20, " ", "POSITION", st.position, st.left, st.top)
+                );
+                f = f.parentElement;
+            }
+        }
+
+        private getOffestToCrossDoc3(f: HTMLElement, aOther: HTMLElement | Window): geom.Point2D {
+            var top: number = 0;
+            var left: number = 0;
+            var z = 0;
+            while (f && f != aOther) {
+
+                //                top = 0;
+                //                left = 0;
+                
+                if (f.parentElement != document.body) {
+                    left -= f.parentElement.scrollLeft;
+                    top -= f.parentElement.scrollTop;
+                }
+                
+                var parentStyle = window.getComputedStyle(f.parentElement);
+                var style = window.getComputedStyle(f);
+                if (TestApplication.isFirefox) {
+                    //                    left += math.Number.parse(parentStyle.borderLeftWidth, 0);
+                    //                    top += math.Number.parse(parentStyle.borderTopWidth, 0);
+                
+                    //                    left += math.Number.parse(parentStyle.borderLeftWidth, 0);
+                    //                    top += math.Number.parse(parentStyle.borderTopWidth, 0);
+                    
+                    
+                    
+                    left += f.offsetLeft;
+                    top += f.offsetTop;
+
+//                    left += f.clientLeft;
+//                    top += f.clientTop;
+//                    
+//                    left -= f.parentElement.clientLeft;
+//                    top -= f.parentElement.clientTop;
+//
+//                    left += math.Number.parse(parentStyle.borderLeftWidth, 0);
+//                    top += math.Number.parse(parentStyle.borderTopWidth, 0);
+
+//                    left -= math.Number.parse(parentStyle.paddingLeft, 0);
+//                    top -= math.Number.parse(parentStyle.paddingTop, 0);
+                    
+                    //                    left -= math.Number.parse(style.paddingLeft, 0);
+                    //                    top -= math.Number.parse(style.paddingTop, 0);
+                    
+                    //                    left += math.Number.parse(style.borderLeftWidth, 0);
+                    //                    top += math.Number.parse(style.borderTopWidth, 0);
+                    
+                    //                    left += math.Number.parse(parentStyle.borderLeftWidth, 0);
+                    //                    top += math.Number.parse(parentStyle.borderTopWidth, 0);
+                    
+                    //                    left += math.Number.parse(parentStyle.borderLeftWidth, 0);
+                    //                    top += math.Number.parse(parentStyle.borderTopWidth, 0);
+                }
+                else {
+
+                    left += f.offsetLeft;
+                    top += f.offsetTop;
+
+                    //
+                    //                    left += math.Number.parse(parentStyle.paddingLeft, 0);
+                    //                    top += math.Number.parse(parentStyle.paddingTop, 0);
+                    
+                    //                    left += math.Number.parse(parentStyle.marginLeft, 0);
+                    //                    top += math.Number.parse(parentStyle.marginTop, 0);
+                }
+
+                if (++z > 1)
+                    break;
+
                 var par = f.parentElement;
                 if (par) {
                     f = par;

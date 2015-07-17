@@ -10,25 +10,22 @@ module jsidea.geom {
         private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
         private static isIE = (navigator.userAgent.indexOf("MSIE") != -1) || !!navigator.userAgent.match(/Trident.*rv[ :]*11\./);
 
+        public toBox: string = "border";
+        public fromBox: string = "border";
+
         private _matrices: geom.Matrix3D[] = [];
-        private _element: HTMLElement;
-        private _style: CSSStyleDeclaration;
-        private _parentStyle: CSSStyleDeclaration;
         private _inverted: boolean = false;
-        private _root: HTMLElement;
+        private _box: geom.BoxModel = new geom.BoxModel();
 
         constructor(element: HTMLElement, root: HTMLElement = null) {
-            this._element = element;
-            this._root = root;
-            this.update();
+            this.update(element, root);
         }
 
-        private update(): void {
-            var chain = Transform.extractStyleChain(this._element, this._root);
-            this._matrices = Transform.extractAccumulatedMatrices(chain);
-            this._style = chain.style;
-            this._parentStyle = chain.parent.style;
+        private update(element: HTMLElement, root: HTMLElement = null): void {
+            var chain = Transform.extractStyleChain(element, root);
             this._inverted = false;
+            this._matrices = Transform.extractAccumulatedMatrices(chain);
+            this._box.parse(element, chain.style);
         }
 
         private invert(): void {
@@ -39,26 +36,33 @@ module jsidea.geom {
                 this._matrices[i].invert();
         }
 
-        public localToLocalPoint(to: HTMLElement, pt: geom.Point3D, boxModel: string = "border"): jsidea.geom.Point3D {
-            return this.localToLocal(to, pt.x, pt.y, pt.z, boxModel);
+        public localToLocalPoint(to: HTMLElement, pt: geom.Point3D, toBox: string = "auto", fromBox: string = "auto"): jsidea.geom.Point3D {
+            return this.localToLocal(to, pt.x, pt.y, pt.z, toBox, fromBox);
         }
 
-        public localToLocal(to: HTMLElement, x: number, y: number, z: number = 0, boxModel: string = "border"): jsidea.geom.Point3D {
+        public localToLocal(to: HTMLElement, x: number, y: number, z: number = 0, toBox: string = "auto", fromBox: string = "auto"): jsidea.geom.Point3D {
             //check if to contains element
             //check if element contains to
             //if so shorten the way here
-            var gl = this.localToGlobal(x, y, z);
-            return Transform.extract(to).globalToLocalPoint(gl, boxModel);
+            var gl = this.localToGlobal(x, y, z, "border", fromBox);
+            return Transform.extract(to).globalToLocalPoint(gl, toBox, "border");
         }
 
-        public globalToLocalPoint(pt: geom.Point3D, boxModel: string = "border"): jsidea.geom.Point3D {
-            return this.globalToLocal(pt.x, pt.y, pt.z, boxModel);
+        public globalToLocalPoint(pt: geom.Point3D, toBox: string = "auto", fromBox: string = "auto"): jsidea.geom.Point3D {
+            return this.globalToLocal(pt.x, pt.y, pt.z, toBox, fromBox);
         }
 
-        public globalToLocal(x: number, y: number, z: number = 0, boxModel: string = "border"): jsidea.geom.Point3D {
+        public globalToLocal(x: number, y: number, z: number = 0, toBox: string = "auto", fromBox: string = "auto"): jsidea.geom.Point3D {
             //we need the globalToLocal matrices
             if (!this._inverted)
                 this.invert();
+            
+            //apply box model transformations
+            if (toBox == "auto")
+                toBox = this.toBox;
+            if (fromBox == "auto")
+                fromBox = this.fromBox;
+            this._box.point(pt, "border", fromBox);
             
             //project from parent to child
             var nodes: geom.Matrix3D[] = this._matrices;
@@ -66,53 +70,39 @@ module jsidea.geom {
             var l = nodes.length;
             for (var i = 0; i < l; ++i)
                 pt = nodes[i].project(pt, pt);
-            
-            var isCanvasModel = boxModel == "canvas" && this._element instanceof HTMLCanvasElement;
 
-            if (boxModel == "content" || isCanvasModel) {
-                pt.x -= math.Number.parse(this._style.paddingLeft, 0);
-                pt.y -= math.Number.parse(this._style.paddingTop, 0);
-            }
-            
-            if (boxModel == "content" || boxModel == "padding" || isCanvasModel) {
-                pt.x -= math.Number.parse(this._style.borderLeftWidth, 0);
-                pt.y -= math.Number.parse(this._style.borderTopWidth, 0);
-            }
-            
-            if (boxModel == "margin") {
-                pt.x += math.Number.parse(this._style.marginLeft, 0);
-                pt.y += math.Number.parse(this._style.marginTop, 0);
-            }
-            
-            if(isCanvasModel)
-            {
-                var paddingRight = math.Number.parse(this._style.paddingRight, 0);
-                var paddingBottom = math.Number.parse(this._style.paddingBottom, 0);
-                var paddingLeft = math.Number.parse(this._style.paddingLeft, 0);
-                var paddingTop = math.Number.parse(this._style.paddingTop, 0); 
-                var can = <HTMLCanvasElement> this._element;
-                pt.x *= can.width / (can.clientWidth - (paddingLeft + paddingRight));
-                pt.y *= can.height / (can.clientHeight - (paddingTop + paddingBottom));
-            }
+            //apply box model transformations
+            this._box.point(pt, toBox, "border");
 
             return pt;
         }
 
-        public localToGlobalPoint(pt: geom.Point3D): jsidea.geom.Point3D {
-            return this.localToGlobal(pt.x, pt.y, pt.z);
+        public localToGlobalPoint(pt: geom.Point3D, toBox: string = "auto", fromBox: string = "auto"): jsidea.geom.Point3D {
+            return this.localToGlobal(pt.x, pt.y, pt.z, toBox, fromBox);
         }
 
-        public localToGlobal(x: number, y: number, z: number = 0): jsidea.geom.Point3D {
+        public localToGlobal(x: number, y: number, z: number = 0, toBox: string = "auto", fromBox: string = "auto"): jsidea.geom.Point3D {
             //we need the localToGlobal matrices
             if (this._inverted)
                 this.invert();
+
+            var pt = new geom.Point3D(x, y, z);
+            
+            //apply box model transformations
+            if (toBox == "auto")
+                toBox = this.toBox;
+            if (fromBox == "auto")
+                fromBox = this.fromBox;
+            this._box.point(pt, "border", fromBox);            
             
             //unproject from child to parent
             var nodes: geom.Matrix3D[] = this._matrices;
-            var pt = new geom.Point3D(x, y, z);
             var l = nodes.length;
             for (var i = 0; i < l; ++i)
                 pt = nodes[i].unproject(pt, pt);
+            
+            //apply box model transformations
+            this._box.point(pt, toBox, "border");
 
             return pt;
         }
@@ -149,9 +139,18 @@ module jsidea.geom {
             var offsetY = element.offsetTop;
 
             //handle fixed elements (look what ie11 is doing???? very strange or consequent)
+            //            if (element.parentElement && element.parentElement != document.body && this.isWebkit && style.position == "fixed") {
+                
+            if (element.parentElement && style.position == "fixed")
+                console.log(
+                    "OFF", offsetX, offsetY,
+                    "CLIENT", element.clientLeft, element.clientTop,
+                    "PAR_OFF", element.parentElement.offsetLeft, element.parentElement.offsetTop,
+                    "PAR_CLIENT", element.parentElement.clientLeft, element.parentElement.clientTop);
+
             if (element.parentElement && this.isWebkit && style.position == "fixed") {
-                offsetX -= element.parentElement.clientLeft;
-                offsetY -= element.parentElement.clientTop;
+                offsetX -= element.parentElement.offsetLeft;
+                offsetY -= element.parentElement.offsetTop;
             }
 
             var parentStyle: CSSStyleDeclaration = node.parent.style;
@@ -167,15 +166,41 @@ module jsidea.geom {
             //tricky stuff: if parent has border-box and you are NOT in firefox then add parents border.
             //Firefox integrates the border to the offsetLeft and offsetTop values.
             else if (this.isFirefox) {
-                if (parentStyle.boxSizing != "border-box") {
-                    offsetX += borderParentX;
-                    offsetY += borderParentY;
-                }
+
+//                if (parentStyle.position == "relative") {
+//                    //                    offsetX += math.Number.parse(style.borderLeftWidth, 0);
+//                    //                    offsetY += math.Number.parse(style.borderTopWidth, 0);
+//                    if (parentStyle.overflow != "visible") {
+//
+//                        //                        offsetX -= math.Number.parse(style.borderLeftWidth, 0);
+//                        //                        offsetY -= math.Number.parse(style.borderTopWidth, 0);
+//                        //                        offsetX -= borderParentX;
+//                        //                        offsetY -= borderParentY;
+//                        
+//                        offsetX += borderParentX;
+//                        offsetY += borderParentY;
+//                    }
+//                    else {
+//                        offsetX += borderParentX;
+//                        offsetY += borderParentY;
+//                    }
+//                }
+                
                 //WORK-A-ROUND: FF-Bug -> DOUBLE BORDER? in offset and border
                 if (parentStyle.overflow != "visible") {
                     offsetX += borderParentX;
                     offsetY += borderParentY;
                 }
+
+                if (parentStyle.boxSizing != "border-box") {
+                    offsetX += borderParentX;
+                    offsetY += borderParentY;
+                }
+                
+                //                if (style.position != "relative") {
+                //                    offsetX += borderParentX;
+                //                    offsetY += borderParentY;
+                //                }
             }
             
             //add scrolling offsets
@@ -251,7 +276,7 @@ module jsidea.geom {
                 }
                 node = node.parent;
             }
-            if(last)
+            if (last)
                 matrices.push(last);
             return matrices;
         }

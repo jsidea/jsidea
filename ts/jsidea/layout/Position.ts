@@ -8,58 +8,64 @@ module jsidea.layout {
     export class Position {
         private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
 
-        constructor(
-            public my: IPositionValue = {},
-            public at: IPositionValue = {},
-            public of: HTMLElement = null,
-            public boxModel: string = "border",
-            public useTransform: boolean = true) {
+        private _box: geom.BoxModel = new geom.BoxModel();
+
+        public to: IPositionValue = {};
+        public from: IPositionValue = {};
+        public fromElement: HTMLElement = null;
+        public toBox: string = "border";
+        public fromBox: string = "padding";
+        public useTransform: boolean = true;
+
+        constructor() {
         }
 
         public clone(): Position {
-            return new Position(this.my, this.at, this.of);
+            var p = new Position();
+            p.to = this.to;
+            p.from = this.from;
+            p.from = this.from;
+            p.toBox = this.toBox;
+            p.fromBox = this.fromBox;
+            p.useTransform = this.useTransform;
+            return p;
         }
 
         public apply(visual: HTMLElement): void {
             if (!visual)
-                return null;
+                return;
 
-            var visualWidth = visual.offsetWidth;//CONTENT-WIDTH + PADDING-HORZ + BORDER-HORZ
-            var visualHeight = visual.offsetHeight;//CONTENT-HEIGHT + PADDING-VERT + BORDER-VERT
+            //retrieve of-element
+            var fromElement = this.fromElement ? this.fromElement : document.body;
             
-            var st = window.getComputedStyle(visual);
-            if (this.boxModel == "content") {
-                visualWidth -= math.Number.parse(st.paddingLeft, 0) + math.Number.parse(st.paddingRight, 0);
-                visualHeight -= math.Number.parse(st.paddingTop, 0) + math.Number.parse(st.paddingBottom, 0);
-            }
-            if (this.boxModel == "content" || this.boxModel == "padding") {
-                visualWidth -= math.Number.parse(st.borderLeftWidth, 0) + math.Number.parse(st.borderRightWidth, 0);
-                visualHeight -= math.Number.parse(st.borderTopWidth, 0) + math.Number.parse(st.borderBottomWidth, 0);
-            }
-            if (this.boxModel == "margin") {
-                visualWidth += math.Number.parse(st.marginLeft, 0) + math.Number.parse(st.marginRight, 0);
-                visualHeight += math.Number.parse(st.marginTop, 0) + math.Number.parse(st.marginBottom, 0);
-            }
+            //transform box-models of visual
+            this._box.parse(visual);
+            var sizeVisual = new geom.Point2D(visual.offsetWidth, visual.offsetHeight);
+            this._box.size(sizeVisual, this.toBox, "border");
 
-            var myOriginX: number = math.Number.parseRelation(this.my.px, visualWidth, 0);
-            var myOriginY: number = math.Number.parseRelation(this.my.py, visualHeight, 0);
-            var myOffsetX: number = math.Number.parseRelation(this.my.x, visualWidth, 0);
-            var myOffsetY: number = math.Number.parseRelation(this.my.y, visualHeight, 0);
+            var myOriginX: number = math.Number.parseRelation(this.to.px, sizeVisual.x, 0);
+            var myOriginY: number = math.Number.parseRelation(this.to.py, sizeVisual.y, 0);
+            var myOffsetX: number = math.Number.parseRelation(this.to.x, sizeVisual.x, 0);
+            var myOffsetY: number = math.Number.parseRelation(this.to.y, sizeVisual.y, 0);
 
-            var of: any = this.of ? this.of : visual.parentElement;
-            var atW = of.offsetWidth;
-            var atH = of.offsetHeight;
-            var atOffsetX: number = math.Number.parseRelation(this.at.x, atW, 0);
-            var atOffsetY: number = math.Number.parseRelation(this.at.y, atH, 0);
-            var atOriginX: number = math.Number.parseRelation(this.at.px, atW, 0);
-            var atOriginY: number = math.Number.parseRelation(this.at.py, atH, 0);
+            //transform box-models of from
+            this._box.parse(fromElement);
+            var sizeOffset = new geom.Point2D(fromElement.offsetWidth, fromElement.offsetHeight);
+            this._box.size(sizeOffset, this.fromBox, "border");
 
-            var lc = geom.Transform.extract(of).localToLocal(
+            var atOffsetX: number = math.Number.parseRelation(this.from.x, sizeOffset.x, 0);
+            var atOffsetY: number = math.Number.parseRelation(this.from.y, sizeOffset.y, 0);
+            var atOriginX: number = math.Number.parseRelation(this.from.px, sizeOffset.x, 0);
+            var atOriginY: number = math.Number.parseRelation(this.from.py, sizeOffset.y, 0);
+
+            //the transfrom from "from" to visual
+            var lc = geom.Transform.extract(fromElement).localToLocal(
                 visual,
                 atOffsetX - atOriginX,
                 atOffsetY - atOriginY,
                 0,
-                this.boxModel);
+                this.toBox,
+                this.fromBox);
             lc.x += myOffsetX - myOriginX;
             lc.y += myOffsetY - myOriginY;
 
@@ -69,9 +75,12 @@ module jsidea.layout {
             if (this.useTransform) {
                 m.m41 = pt.x;
                 m.m42 = pt.y;
+                visual.style.transform = m.getCSS();
+                
+                //----------->>>>>>>>>> BUG DISAPPEARED????
                 //in firefox you can grab the matrix3D and change its position
                 //and than just re-apply. But webkit and ie11 kills it.
-                visual.style.transform = Position.isFirefox ? m.getCSS() : m.getCSS2D();
+                //visual.style.transform = Position.isFirefox ? m.getCSS() : m.getCSS2D();
             }
             else {
                 var oldLeft = math.Number.parse(visual.style.left, 0);//visual.offsetLeft;
@@ -82,9 +91,9 @@ module jsidea.layout {
         }
 
         public dispose(): void {
-            this.my = null;
-            this.at = null;
-            this.of = null;
+            this.to = null;
+            this.from = null;
+            this.from = null;
         }
 
         public qualifiedClassName(): string {
