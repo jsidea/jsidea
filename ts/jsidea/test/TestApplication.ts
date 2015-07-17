@@ -16,21 +16,24 @@ module jsidea.test {
             var con = document.getElementById("content");
             var vie = document.getElementById("view");
 
-            var a = document.createElement("div");
-            a.id = "a-cont";
-            var b = document.createElement("div");
-            b.id = "b-cont";
-            var bc = document.createElement("div");
-            bc.id = "bc-cont";
-
             var can = document.createElement("canvas");
             can.id = "can";
             can.width = 256;
             can.height = 512;
             var ctx = can.getContext("2d");
+            
+            var a = document.createElement("div");
+            a.id = "a-cont";
+            var b = document.createElement("div");
+            b.id = "b-cont";
+            var c = document.createElement("div");
+            c.id = "c-cont";
+            var d = document.createElement("div");
+            d.id = "d-cont";
 
             a.appendChild(b);
-            b.appendChild(bc);
+            b.appendChild(c);
+            c.appendChild(d);
             con.appendChild(a);
             document.body.appendChild(can);
 
@@ -38,18 +41,20 @@ module jsidea.test {
             pos.to.x = "-100%";
             pos.to.y = "-100%";
             pos.toBox = "border";
+            pos.fromBox = "border";
             
             //            console.log(this.getOffestToCrossDoc(a, document.body));
             //            console.log(this.getOffestToCrossDoc2(a, document.body));
 //            console.log(this.getOffestToCrossDoc3(a, document.body));
-            this.logChain(bc);
+            this.logChain(d);
 
             document.addEventListener("click",(evt) => {
                 ctx.clearRect(0, 0, can.width, can.height);
                 this.drawBoundingBox(ctx, con);
                 this.drawBoundingBox(ctx, a);
                 this.drawBoundingBox(ctx, b);
-                this.drawBoundingBox(ctx, bc);
+                this.drawBoundingBox(ctx, c);
+                this.drawBoundingBox(ctx, d);
                 this.drawBoundingBox(ctx, vie);
                 this.drawBoundingBox(ctx, can);
             });
@@ -58,7 +63,7 @@ module jsidea.test {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
-                pos.apply(bc);
+//                pos.apply(d);
             });
         }
 
@@ -134,20 +139,25 @@ module jsidea.test {
         }
         
         private logChain(f: HTMLElement): void {
+            var res = "LOG-CHAIN\n";
             while (f) {
                 var st = window.getComputedStyle(f);
-                console.log(
-                text.Text.conc(20, " ", f.id ? f.id : f.nodeName),
+                res += ([
+                text.Text.conc(10, " ", f.id ? f.id : f.nodeName),
+                text.Text.conc(20, " ", "PARENT", f.offsetParent ? (f.offsetParent.id ? f.offsetParent.id : f.offsetParent.nodeName) : "NONE"),
                 text.Text.conc(20, " ", "OFFSET", f.offsetLeft, f.offsetTop), 
-                text.Text.conc(20, " ", "CLIENT", f.clientLeft, f.clientTop), 
                 text.Text.conc(20, " ", "MARGIN", st.marginLeft, st.marginTop),
                 text.Text.conc(20, " ", "BORDER", st.borderLeftWidth, st.borderTopWidth),
                 text.Text.conc(20, " ", "PADDING", st.paddingLeft, st.paddingTop),
-                text.Text.conc(20, " ", "SCROLL", f.scrollLeft, f.scrollTop),
+                text.Text.conc(14, " ", "SCROLL", f.scrollLeft, f.scrollTop),
+                text.Text.conc(20, " ", "OVERFLOW", st.overflow),
+                text.Text.conc(20, " ", "BOUNDS", f.getBoundingClientRect().left, f.getBoundingClientRect().top),
                 text.Text.conc(20, " ", "POSITION", st.position, st.left, st.top)
-                );
+                ]).join(" ");
+                res += "\n";
                 f = f.parentElement;
             }
+            console.log(res);
         }
 
         private getOffestToCrossDoc3(f: HTMLElement, aOther: HTMLElement | Window): geom.Point2D {

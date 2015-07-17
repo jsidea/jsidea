@@ -119,6 +119,7 @@ module jsidea.geom {
 
             var element: HTMLElement = node.element;
             var style: CSSStyleDeclaration = node.style;
+            var parentStyle: CSSStyleDeclaration = node.parent.style;
             
             //------
             //transform
@@ -138,77 +139,85 @@ module jsidea.geom {
             var offsetX = element.offsetLeft;
             var offsetY = element.offsetTop;
 
-            //handle fixed elements (look what ie11 is doing???? very strange or consequent)
-            //            if (element.parentElement && element.parentElement != document.body && this.isWebkit && style.position == "fixed") {
-                
-            if (element.parentElement && style.position == "fixed")
-                console.log(
-                    "OFF", offsetX, offsetY,
-                    "CLIENT", element.clientLeft, element.clientTop,
-                    "PAR_OFF", element.parentElement.offsetLeft, element.parentElement.offsetTop,
-                    "PAR_CLIENT", element.parentElement.clientLeft, element.parentElement.clientTop);
 
-            if (element.parentElement && this.isWebkit && style.position == "fixed") {
-                offsetX -= element.parentElement.offsetLeft;
-                offsetY -= element.parentElement.offsetTop;
+            //            if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
+            //                offsetX -= element.parentElement.offsetLeft;
+            //                offsetY -= element.parentElement.offsetTop; 
+            //                offsetX += element.offsetParent.clientLeft;
+            //                offsetY += element.offsetParent.clientTop;   
+            //            }
+            //                offsetX -= math.Number.parse(parentStyle.paddingLeft, 0);
+            //                offsetY -= math.Number.parse(parentStyle.paddingTop, 0);
+            //                
+            //                offsetX += element.clientLeft;
+            //                offsetY += element.clientTop; 
+
+            //            if (style.position == "static") {
+                
+            //                offsetX -= element.parentElement.offsetLeft;
+            //                offsetY -= element.parentElement.offsetTop; 
+            //                offsetX += element.offsetParent.clientLeft;
+            //                offsetY += element.offsetParent.clientTop; 
+            //            }
+
+            if (style.position == "static") {
+                if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
+                    offsetX -= element.parentElement.offsetLeft;
+                    offsetY -= element.parentElement.offsetTop;
+                }
+                else {
+                    offsetX += element.parentElement.clientLeft;
+                    offsetY += element.parentElement.clientTop;
+                }
             }
 
-            var parentStyle: CSSStyleDeclaration = node.parent.style;
+            if (style.position == "absolute") {
+
+                if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
+                    offsetX -= element.parentElement.offsetLeft;
+                    offsetY -= element.parentElement.offsetTop;
+                }
+                else {
+                    offsetX += element.parentElement.clientLeft;
+                    offsetY += element.parentElement.clientTop;
+                }
+            }
+            
+            if (this.isFirefox && style.position == "absolute" && parentStyle.position == "static") {
+                if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
+                
+                    offsetX += element.offsetParent.clientLeft;
+                    offsetY += element.offsetParent.clientTop;
+                }
+            }
+
 
             //integrate parent borders
-            var borderParentX = math.Number.parse(parentStyle.borderLeftWidth, 0);
-            var borderParentY = math.Number.parse(parentStyle.borderTopWidth, 0);
-
-            if (!this.isFirefox) {
-                offsetX += borderParentX;
-                offsetY += borderParentY;
-            }
-            //tricky stuff: if parent has border-box and you are NOT in firefox then add parents border.
-            //Firefox integrates the border to the offsetLeft and offsetTop values.
-            else if (this.isFirefox) {
-
-//                if (parentStyle.position == "relative") {
-//                    //                    offsetX += math.Number.parse(style.borderLeftWidth, 0);
-//                    //                    offsetY += math.Number.parse(style.borderTopWidth, 0);
-//                    if (parentStyle.overflow != "visible") {
-//
-//                        //                        offsetX -= math.Number.parse(style.borderLeftWidth, 0);
-//                        //                        offsetY -= math.Number.parse(style.borderTopWidth, 0);
-//                        //                        offsetX -= borderParentX;
-//                        //                        offsetY -= borderParentY;
-//                        
-//                        offsetX += borderParentX;
-//                        offsetY += borderParentY;
-//                    }
-//                    else {
-//                        offsetX += borderParentX;
-//                        offsetY += borderParentY;
-//                    }
-//                }
-                
-                //WORK-A-ROUND: FF-Bug -> DOUBLE BORDER? in offset and border
-                if (parentStyle.overflow != "visible") {
-                    offsetX += borderParentX;
-                    offsetY += borderParentY;
-                }
-
-                if (parentStyle.boxSizing != "border-box") {
-                    offsetX += borderParentX;
-                    offsetY += borderParentY;
-                }
-                
-                //                if (style.position != "relative") {
-                //                    offsetX += borderParentX;
-                //                    offsetY += borderParentY;
-                //                }
-            }
+            //            var borderParentX = math.Number.parse(parentStyle.borderLeftWidth, 0);
+            //            var borderParentY = math.Number.parse(parentStyle.borderTopWidth, 0);
+            //
+            //            if (parentStyle.overflow != "visible") {
+            //                offsetX += borderParentX;
+            //                offsetY += borderParentY;
+            //            }
+            //
+            //            if (parentStyle.boxSizing != "border-box") {
+            //                offsetX += borderParentX;
+            //                offsetY += borderParentY;
+            //            }
             
             //add scrolling offsets
             //webkit has the scroll-values set on html not on the body?
             if (this.isWebkit) {
                 if (node.parent.element != document.body) {
-                    offsetX -= node.parent.element.scrollLeft;
-                    offsetY -= node.parent.element.scrollTop;
+                    if (node.style.display != "static") {
+                        offsetX -= node.parent.element.scrollLeft;
+                        offsetY -= node.parent.element.scrollTop;
+                    }
+                    else {
+                        offsetX -= node.element.scrollLeft;
+                        offsetY -= node.element.scrollTop;
+                    }
                 }
             }
             else if (node.element != document.body) {

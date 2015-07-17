@@ -6,7 +6,7 @@ module jsidea.layout {
         py?: any;
     }
     export class Position {
-        private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
+//        private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
 
         private _box: geom.BoxModel = new geom.BoxModel();
 

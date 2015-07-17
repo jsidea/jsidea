@@ -29,7 +29,7 @@ body {
 	/* transform-style: preserve-3d; */
 	/* transform-style: preserve-3d;
 	transform: translateX(128px) rotate(30deg); */
-	border: 100px solid #FF00FF;
+	/* border: 100px solid #FF00FF; */
 	padding: 50px;
 	position: absolute;
 }
@@ -41,11 +41,11 @@ canvas {
 	/* pointer-events: none; */
 	width: 512px;
 	height: 512px;
-	transform: rotateY(45deg) rotate(45deg);
+	transform: rotate(45deg);
 	transform-origin: 0px 0px;
-	margin: 40px;
-	padding: 40px;
-	border: 40px solid #000;
+	margin: 10px;
+	padding: 10px;
+	border: 10px solid #000;
 	background-color: rgba(0, 0, 0, 0.2);
 	transition: all 1s;
 }
@@ -58,12 +58,12 @@ canvas:hover {
 }
 
 #view {
-	position: absolute;
+	position: static;
 	width: 512px;
 	height: 512px;
 	/* left: 100px;
 	top: 100px; */
-	border: 80px solid #FF00FF;
+	border: 20px solid #FF00FF;
 	/* transform: translateZ(-20px) rotateY(30deg);
 	transform-style: flat;
 	perspective: 200px;
@@ -73,32 +73,33 @@ canvas:hover {
 }
 
 #content {
-	position: relative;
+	position: absolute;
 	width: 512px;
 	height: 512px;
 	border: 70px solid #FFFF00;
+	margin: 25px;
 	/* left: 200px; */
 	/* transform: translateZ(-20px) rotateY(30deg);
 	transform-style: preserve-3d;
 	/* perspective: 200px; */
 	/* opacity: 0.5; */
-	transform-style: preserve-3d;
+	/* transform-style: preserve-3d; */
 	/* overflow: hidden; */
 }
 
 #a-cont {
 	position: absolute;
-	border: 10px solid #00FFFF;
+	border: 80px solid #00FFFF;
 	width: 512px;
 	height: 512px;
 	/* transform-style: preserve-3d;
 	perspective: 600px; */
 	/* perspective-origin: 128px 128px; */
 	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
-	transform-style: preserve-3d;
-	perspective: 600px;
-	margin: 60px;
-	padding: 50px;
+	/* transform-style: preserve-3d;
+	perspective: 600px; */
+	margin: 30px;
+	padding: 60px;
 }
 
 #b-cont {
@@ -107,10 +108,10 @@ canvas:hover {
 	border: 30px solid #0000FF;
 	width: 512px;
 	/* height: 512px; */
-	padding: 30px;
+	padding: 40px;
 	margin: 30px;
 	/* left: 50px; */
-	transform-style: preserve-3d;
+	/* transform-style: preserve-3d; */
 	/* transform-style: flat; */
 	/* transform-style: flat;
 	transform: translateZ(-20px) rotateY(15deg);
@@ -118,22 +119,37 @@ canvas:hover {
 	/* transform: translateZ(-20px) rotateY(15deg) rotate(-20deg); */
 }
 
-#bc-cont {
+#c-cont {
 	/* overflow: hidden; */
-	margin: 10px;
-	padding: 10px;
+	/* margin: 10px; */
 	position: absolute;
-	border: 10px solid #FF0000;
+	padding: 10px;
+	border: 20px solid #FF0000;
 	width: 128px;
 	height: 128px;
 	cursor: pointer;
 	/* transform: translateZ(-800px) rotate(70deg); */
 }
 
-#bc-cont:after {
+
+#d-cont {
+	position: absolute;
+	border: 40px solid #883366;
+	width: 128px;
+	height: 128px;
+	/* transform-style: preserve-3d;
+	perspective: 600px; */
+	/* perspective-origin: 128px 128px; */
+	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
+	/* transform-style: preserve-3d;
+	perspective: 600px; */
+	margin: 45px;
+	padding: 20px;
+}
+
+#d-cont:after {
 	/* overflow: hidden; */
 	content: " CONTENT-BOX ";
-	position: relative;
 	position: absolute;
 	background-color: #EE4587;
 	width: 128px;
