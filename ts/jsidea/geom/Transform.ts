@@ -183,22 +183,58 @@ module jsidea.geom {
                 }
             }
             
-//            if (this.isFirefox && style.position == "absolute" && parentStyle.position == "static") {
-//                if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
-//                
-////                    offsetX += element.offsetParent.clientLeft;
-////                    offsetY += element.offsetParent.clientTop;
-//                }
-//            }
+            //            if (this.isFirefox && style.position == "absolute" && parentStyle.position == "static") {
+            //                if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
+            //                
+            ////                    offsetX += element.offsetParent.clientLeft;
+            ////                    offsetY += element.offsetParent.clientTop;
+            //                }
+            //            }
             
-//            if (this.isFirefox && style.position == "absolute" && parentStyle.position == "absolute") {
-//                    offsetX += element.parentElement.clientLeft;
-//                    offsetY += element.parentElement.clientTop;
-//            }
+            //            if (this.isFirefox && style.position == "absolute" && parentStyle.position == "absolute") {
+            //                    offsetX += element.parentElement.clientLeft;
+            //                    offsetY += element.parentElement.clientTop;
+            //            }
             
-            if (this.isFirefox && style.position == "absolute" && parentStyle.overflow != "visible") {
+            if (this.isFirefox) {
+                if (style.position == "absolute" && parentStyle.overflow != "visible" && parentStyle.position != "static") {
                     offsetX += element.parentElement.clientLeft;
                     offsetY += element.parentElement.clientTop;
+                    console.log("BUG-FIX-A: add borderParentClient");
+                }
+
+                if (
+                    style.position == "absolute"
+                    && parentStyle.position == "static"
+                    && element.parentElement
+                    && element.offsetParent
+                    && element.offsetParent != element.parentElement
+                    && window.getComputedStyle(element.offsetParent).overflow != "visible"
+//                    && element.parentElement.parentElement
+//                    && element.parentElement.parentElement.offsetParent != element.offsetParent
+                    ) {
+                    
+                    offsetX += element.offsetParent.clientLeft;
+                    offsetY += element.offsetParent.clientTop;
+
+                    console.log("BUG-FIX-B: add offsetParentClient " + (element.id ? element.id : element.nodeName));
+
+                }
+
+                if (style.position == "absolute" && element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
+                    
+                    //                    if(element.id != "d-cont")
+                    //                    {
+                    //                    offsetX += element.offsetParent.clientLeft;
+                    //                    offsetY += element.offsetParent.clientTop;
+                    //                        }
+                    //                    console.log("BUG-FIX-B: add offsetParentClient " + (element.id ? element.id : element.nodeName));
+                }
+                
+                //                if (style.position == "absolute" && parentStyle.overflow != "visible" && parentStyle.position != "static") {
+                //                    offsetX += element.parentElement.clientLeft;
+                //                    offsetY += element.parentElement.clientTop;
+                //                }
             }
 
 
