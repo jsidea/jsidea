@@ -236,16 +236,46 @@ module jsidea.geom {
                 return ret;
             //            element = element.parentElement;
             var p = element.offsetParent ? element.offsetParent : element.parentElement;
+            
+//            ret.x += element.scrollLeft;
+//                ret.y += element.scrollTop;
             //            while (element && element != document.body) {
+//                if(p)
+//                p = p.parentNode;
             while (element && element != p && element != document.body) {
+//                ret.x += element.scrollLeft;
+//                ret.y += element.scrollTop;
+//                var st = window.getComputedStyle(element);
+//                var stp = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
+//                if (stp && stp.position == "static") {
+//                    element = element.offsetParent;
+//                }
+//                else
+//                    element = element.parentElement;
+                
+                var style = window.getComputedStyle(element);
+                var parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
+                
+                
+                if(style.position != "static" && parentStyle && parentStyle.position == "static")
+                {
+//                    ret.x -= element.scrollLeft;
+//                    ret.y -= element.scrollTop;
+                    break;                        
+                }
+                
+                if(style.position != "static" && parentStyle && parentStyle.position != "static")
+                {
+//                    ret.x -= element.scrollLeft;
+//                    ret.y -= element.scrollTop;
+                    ret.x += element.parentElement.scrollLeft;
+                    ret.y += element.parentElement.scrollTop;
+                    break;                        
+                }
+                
                 ret.x += element.scrollLeft;
                 ret.y += element.scrollTop;
-                var st = window.getComputedStyle(element);
-                if (st.position != "static") {
-                    element = element.offsetParent;
-                }
-                else
-                    element = element.parentElement;
+                element = element.parentElement;
             }
             //            console.log(ret);
             return ret;
@@ -262,11 +292,11 @@ module jsidea.geom {
 
                 ret.x += element.offsetLeft;
                 ret.y += element.offsetTop;
-                if (isStatic) {
-                    var sc = this.extractScrollReal(element.parentElement);
+//                if (isStatic) {
+                    var sc = this.extractScrollReal(element);
                     ret.x -= sc.x;
                     ret.y -= sc.y;
-                }
+//                }
                 ret.x += element.offsetParent ? element.offsetParent.clientLeft : 0;
                 ret.y += element.offsetParent ? element.offsetParent.clientTop : 0;
 

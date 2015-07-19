@@ -107,7 +107,7 @@ canvas {
 }
 
 #b-cont {
-	position: static;
+	position: absolute;
 	border: 30px solid #0000FF;
 	width: 512px;
 	padding: 40px;
@@ -124,7 +124,7 @@ canvas {
 }
 
 #c-cont {
-	position: static;
+	position: absolute;
 	/* overflow: hidden; */
 	/* margin: 10px; */
 	padding: 10px;
