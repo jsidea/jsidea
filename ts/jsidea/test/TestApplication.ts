@@ -50,7 +50,7 @@ module jsidea.test {
             //            console.log(this.getOffestToCrossDoc(a, document.body));
             //            console.log(this.getOffestToCrossDoc2(a, document.body));
 //            console.log(this.getOffestToCrossDoc3(a, document.body));
-            this.logChain(d);
+            
 
             document.addEventListener("click",(evt) => {
                 ctx.clearRect(0, 0, can.width, can.height);
@@ -61,6 +61,8 @@ module jsidea.test {
                 this.drawBoundingBox(ctx, d);
                 this.drawBoundingBox(ctx, vie);
                 this.drawBoundingBox(ctx, can);
+                
+                this.logChain(d);
             });
 
             document.addEventListener("mousemove",(evt) => {
@@ -149,12 +151,12 @@ module jsidea.test {
                 res += ([
                 text.Text.conc(10, " ", f.id ? f.id : f.nodeName),
                 text.Text.conc(20, " ", "PARENT", f.offsetParent ? (f.offsetParent.id ? f.offsetParent.id : f.offsetParent.nodeName) : "NONE"),
-                text.Text.conc(20, " ", "OFFSET", f.offsetLeft, f.offsetTop), 
+                text.Text.conc(20, " ", "OFFSET", f.offsetLeft, f.offsetTop, f.offsetLeft - (f.offsetParent ? f.offsetParent.clientLeft : 0)), 
                 text.Text.conc(20, " ", "MARGIN", st.marginLeft, st.marginTop),
                 text.Text.conc(20, " ", "BORDER", st.borderLeftWidth, st.borderTopWidth),
                 text.Text.conc(20, " ", "PADDING", st.paddingLeft, st.paddingTop),
                 text.Text.conc(14, " ", "SCROLL", f.scrollLeft, f.scrollTop),
-                text.Text.conc(20, " ", "OVERFLOW", st.overflow),
+                text.Text.conc(28, " ", "OVERFLOW", st.overflow, st.boxSizing),
                 text.Text.conc(20, " ", "BOUNDS", f.getBoundingClientRect().left, f.getBoundingClientRect().top),
                 text.Text.conc(20, " ", "POSITION", st.position, st.left, st.top)
                 ]).join(" ");

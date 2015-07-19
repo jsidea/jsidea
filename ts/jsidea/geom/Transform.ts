@@ -136,66 +136,48 @@ module jsidea.geom {
             //------
             //offset
             //------
-            var offsetX = element.offsetLeft;
-            var offsetY = element.offsetTop;
+
+            //            var offset = new geom.Point2D(element.offsetLeft, element.offsetTop);
 
 
-            if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
-                offsetX -= element.parentElement.offsetLeft;
-                offsetY -= element.parentElement.offsetTop;
-            }
-            else {
-                offsetX += element.parentElement.clientLeft;
-                offsetY += element.parentElement.clientTop;
-            }
+            
 
-            if (this.isFirefox) {
-                if ((style.position == "absolute" || style.position == "relative") && parentStyle.overflow != "visible" && parentStyle.position != "static") {
-                    offsetX += element.parentElement.clientLeft;
-                    offsetY += element.parentElement.clientTop;
-                    console.log("BUG-FIX-A: add borderParentClient");
-                }
+            var offset = this.extractOffset(element);
+            //            console.log(offset);
 
-                if (
-                    (style.position == "absolute" || style.position == "relative")
-                    && parentStyle.position == "static"
-                    && element.parentElement
-                    && element.offsetParent
-                    && element.offsetParent != element.parentElement
-                    && window.getComputedStyle(element.offsetParent).overflow != "visible"
-                //                    && element.parentElement.parentElement
-                //                    && element.parentElement.parentElement.offsetParent != element.offsetParent
-                    ) {
+            //            if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
+            //                offset = this.extractOffset(element.parentElement, offset);
+            ////                offset.x -= element.parentElement.clientLeft;
+            ////                offset.y -= element.parentElement.clientTop;
+            //            }
+            //            else {
+            //                offset.x += element.parentElement.clientLeft;
+            //                offset.y += element.parentElement.clientTop;
+            //            }
 
-                    offsetX += element.offsetParent.clientLeft;
-                    offsetY += element.offsetParent.clientTop;
-
-                    console.log("BUG-FIX-B: add offsetParentClient " + (element.id ? element.id : element.nodeName));
-
-                }
-            }
             
             //add scrolling offsets
             //webkit has the scroll-values set on html not on the body?
             if (this.isWebkit) {
-                if (node.parent.element != document.body) {
-                    if (node.style.display != "static") {
-                        offsetX -= node.parent.element.scrollLeft;
-                        offsetY -= node.parent.element.scrollTop;
+                if (false && node.parent.element != document.body) {
+//                    if (node.style.display != "static") {
+                        if (node.element.offsetParent != node.parent.element) {
+                        offset.x -= node.parent.element.scrollLeft;
+                        offset.y -= node.parent.element.scrollTop;
                     }
                     else {
-                        offsetX -= node.element.scrollLeft;
-                        offsetY -= node.element.scrollTop;
+                        offset.x -= node.element.scrollLeft;
+                        offset.y -= node.element.scrollTop;
                     }
                 }
             }
             else if (node.element != document.body) {
-                offsetX -= node.parent.element.scrollLeft;
-                offsetY -= node.parent.element.scrollTop;
+                offset.x -= node.parent.element.scrollLeft;
+                offset.y -= node.parent.element.scrollTop;
             }
 
             //append the offset to the transform-matrix
-            matrix.appendPositionRaw(offsetX, offsetY, 0);
+            matrix.appendPositionRaw(offset.x, offset.y, 0);
             
             //-------
             //perspective
@@ -213,6 +195,136 @@ module jsidea.geom {
             matrix.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
 
             return matrix;
+        }
+
+        //FOR WEBKIT AND IE11
+        
+        //return one for subtract
+        //and 1 for add
+        //and 0 for don change offset (keep like firefox give it)
+        private static needBorderSubtract(element: HTMLElement): number {
+            if (!element || !element.parentElement)
+                return 0;
+
+            var style = window.getComputedStyle(element);
+            var parentStyle = window.getComputedStyle(element.parentElement);
+
+            var ret = 1;
+
+            var check = style.position == "absolute"
+                && parentStyle.position == "static"
+                && parentStyle.overflow == "scroll"
+                && element.offsetParent != element.parentElement.offsetParent;
+            if (style.boxSizing == "content-box" && check
+
+                ) {
+                return 1;
+            }
+            else if (style.boxSizing == "border-box" && !check) {
+                return -1;
+            }
+
+            return 0;
+            //            return element.id == "a-cont" ? ret : 0;
+        }
+        
+        //FOR WEBKIT AND IE11
+        private static extractOffset(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+
+            ret.x = element.offsetLeft;
+            ret.y = element.offsetTop;
+
+            var sub = 0;
+            if (this.isFirefox) {
+                if (element.offsetParent && (sub = this.needBorderSubtract(element))) {
+                    ret.x += sub * element.offsetParent.clientLeft;
+                    ret.y += sub * element.offsetParent.clientTop;
+                }
+            }
+
+            if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
+                if (this.isFirefox) {
+                    //
+                    if (element.parentElement.offsetParent && (sub = this.needBorderSubtract(element.parentElement))) {
+
+                        ret.x -= element.parentElement.offsetLeft + sub * element.parentElement.offsetParent.clientLeft;
+                        ret.y -= element.parentElement.offsetTop + sub * element.parentElement.offsetParent.clientTop;
+                    }
+                    else {
+                        ret.x -= element.parentElement.offsetLeft;
+                        ret.y -= element.parentElement.offsetTop;
+                    }
+                }
+                else {
+                    ret.x -= element.parentElement.offsetLeft;
+                    ret.y -= element.parentElement.offsetTop;
+                }
+            }
+            else {
+                ret.x += element.parentElement.clientLeft;
+                ret.y += element.parentElement.clientTop;
+            }
+            return ret;
+        }
+
+        private static extractOffset2(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            if (
+                (window.getComputedStyle(element).boxSizing == "border-box")
+                && element.parentElement
+                && element.offsetParent
+                ) {
+
+
+                if (element.id != "a-cont") {
+                    ret.x -= element.offsetParent.clientLeft;
+                    ret.y -= element.offsetParent.clientTop;
+                }
+                //                    
+                //                                    console.log("BUG-FIX-C: add offsetParentClient " + (element.id ? element.id : element.nodeName));
+
+            }
+
+            //            if (this.isFirefox) {
+            //                if ((style.position == "absolute" || style.position == "relative") && parentStyle.overflow != "visible" && parentStyle.position != "static") {
+            //                    offsetX += element.parentElement.clientLeft;
+            //                    offsetY += element.parentElement.clientTop;
+            //                    console.log("BUG-FIX-A: add borderParentClient");
+            //                }
+            //
+            //                if (
+            //                    (style.boxSizing == "border-box")
+            //                    && element.parentElement
+            //                    && element.offsetParent
+            //                    ) {
+            //
+            //
+            //                    if (element.id != "a-cont") {
+            //                        offsetX -= element.offsetParent.clientLeft;
+            //                        offsetY -= element.offsetParent.clientTop;
+            //                    }
+            ////                    
+            ////                    console.log("BUG-FIX-C: add offsetParentClient " + (element.id ? element.id : element.nodeName));
+            //
+            //                }
+            //
+            //                else if (
+            //                    (style.position == "absolute" || style.position == "relative")
+            //                    && parentStyle.position == "static"
+            //                    && element.parentElement
+            //                    && element.offsetParent
+            //                    && element.offsetParent != element.parentElement
+            //                    && window.getComputedStyle(element.offsetParent).overflow != "visible"
+            //                    ) {
+            //
+            //                    offsetX += element.offsetParent.clientLeft;
+            //                    offsetY += element.offsetParent.clientTop;
+            //
+            //                    console.log("BUG-FIX-B: add offsetParentClient " + (element.id ? element.id : element.nodeName));
+            //
+            //                }
+            //            }    
+            
+            return ret;
         }
 
         private static extractStyleChain(element: HTMLElement, root: HTMLElement = null): INodeStyle {

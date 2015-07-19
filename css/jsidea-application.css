@@ -30,7 +30,7 @@ body {
 	/* transform-style: preserve-3d;
 	transform: translateX(128px) rotate(30deg); */
 	/* border: 100px solid #FF00FF; */
-	padding: 50px;
+	/* padding: 50px; */
 	position: absolute;
 }
 
@@ -58,7 +58,7 @@ canvas:hover {
 }
 
 #view {
-	position: absolute;
+	position: static;
 	width: 512px;
 	height: 512px;
 	/* left: 100px;
@@ -89,7 +89,7 @@ canvas:hover {
 }
 
 #a-cont {
-	position: absolute;
+	position: static;
 	border: 80px solid #00FFFF;
 	width: 512px;
 	height: 512px;
@@ -104,7 +104,7 @@ canvas:hover {
 }
 
 #b-cont {
-	position: absolute;
+	position: static;
 	border: 30px solid #0000FF;
 	width: 512px;
 	padding: 40px;
@@ -121,7 +121,7 @@ canvas:hover {
 }
 
 #c-cont {
-	position: static;
+	position: absolute;
 	/* overflow: hidden; */
 	/* margin: 10px; */
 	padding: 10px;
@@ -144,12 +144,12 @@ canvas:hover {
 	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
 	/* transform-style: preserve-3d;
 	perspective: 600px; */
-	margin: 45px;
-	padding: 20px;
+	/* margin: 45px; */
+	/* padding: 20px; */
 }
 
-#d-cont:after {
-	/* overflow: hidden; */
+/* #d-cont:after {
+	overflow: hidden;
 	content: " CONTENT-BOX ";
 	position: absolute;
 	background-color: #EE4587;
@@ -157,4 +157,4 @@ canvas:hover {
 	height: 128px;
 	line-height: 128px;
 	text-align: center;
-}
+} */
