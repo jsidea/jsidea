@@ -36,26 +36,29 @@ body {
 
 canvas {
 	position: absolute;
-	top: 64px;
-	left: 128px;
+	/* top: 64px;
+	left: 128px; */
+	top: 0;
+	left: 0;
 	/* pointer-events: none; */
 	width: 800px;
 	height: 800px;
-	transform: rotate(45deg);
+	/* transform: rotate(45deg);
 	transform-origin: 0px 0px;
 	margin: 10px;
 	padding: 10px;
-	border: 10px solid #000;
+	border: 10px solid #000; */
 	background-color: rgba(0, 0, 0, 0.2);
 	transition: all 1s;
+	pointer-events: none;
 }
 
-canvas:hover {
+/* canvas:hover {
 	transform: rotateY(5deg) rotate(0deg);
 	background-color: rgba(0, 0, 0, 0.5);
 	padding: 0px;
 	border: 20px solid #FFF;
-}
+} */
 
 #view {
 	position: static;

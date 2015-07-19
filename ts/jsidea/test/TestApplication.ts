@@ -18,10 +18,10 @@ module jsidea.test {
 
             var can = document.createElement("canvas");
             can.id = "can";
-            can.width = 400;
-            can.height = 400;
+            can.width = 800;
+            can.height = 800;
             var ctx = can.getContext("2d");
-            
+
             var a = document.createElement("div");
             a.id = "a-cont";
             var b = document.createElement("div");
@@ -37,9 +37,9 @@ module jsidea.test {
             con.appendChild(a);
             document.body.appendChild(can);
             
-//            var e = document.createElement("div");
-//            e.id = "e-cont";
-//            d.appendChild(e);
+            //            var e = document.createElement("div");
+            //            e.id = "e-cont";
+            //            d.appendChild(e);
 
             var pos = new layout.Position();
             pos.to.x = "-100%";
@@ -49,28 +49,40 @@ module jsidea.test {
             
             //            console.log(this.getOffestToCrossDoc(a, document.body));
             //            console.log(this.getOffestToCrossDoc2(a, document.body));
-//            console.log(this.getOffestToCrossDoc3(a, document.body));
+            //            console.log(this.getOffestToCrossDoc3(a, document.body));
             
 
             document.addEventListener("click",(evt) => {
                 ctx.clearRect(0, 0, can.width, can.height);
-                this.drawBoundingBox(ctx, con);
-                this.drawBoundingBox(ctx, a);
-                this.drawBoundingBox(ctx, b);
-                this.drawBoundingBox(ctx, c);
-                this.drawBoundingBox(ctx, d);
-                this.drawBoundingBox(ctx, vie);
-                this.drawBoundingBox(ctx, can);
+                
+                //                this.drawBoundingBox(ctx, con);
+                //                this.drawBoundingBox(ctx, a);
+                //                this.drawBoundingBox(ctx, b);
+                //                this.drawBoundingBox(ctx, c);
+                //                this.drawBoundingBox(ctx, d);
+                //                this.drawBoundingBox(ctx, vie);
+                //                this.drawBoundingBox(ctx, can);
                 
                 this.logChain(d);
+                this.drawOffsetChain(ctx, d);
             });
 
             document.addEventListener("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
-//                pos.apply(d);
+                //                pos.apply(d);
             });
+        }
+
+        private drawOffsetChain(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
+
+            while (e) {
+                var off = geom.Transform.extractOffsetReal(e);
+                //            console.log(off.x, off.y);
+                this.drawCross(ctx, off.x, off.y);
+                e = e.parentElement;
+            }
         }
 
         private drawBoundingBox(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
@@ -110,6 +122,17 @@ module jsidea.test {
             ctx.stroke();
         }
 
+        private drawCross(ctx, x: number, y: number): void {
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            var size = 20;
+            ctx.moveTo(x + size, y);
+            ctx.lineTo(x - size, y);
+            ctx.moveTo(x, y + size);
+            ctx.lineTo(x, y - size);
+            ctx.stroke();
+        }
+
         private getOffestToCrossDoc(f: HTMLElement, aOther: HTMLElement | Window): geom.Point2D {
             var top: number = 0;
             var left: number = 0;
@@ -143,22 +166,22 @@ module jsidea.test {
             }
             return new geom.Point2D(left, top);
         }
-        
+
         private logChain(f: HTMLElement): void {
             var res = "LOG-CHAIN\n";
             while (f) {
                 var st = window.getComputedStyle(f);
                 res += ([
-                text.Text.conc(10, " ", f.id ? f.id : f.nodeName),
-                text.Text.conc(20, " ", "PARENT", f.offsetParent ? (f.offsetParent.id ? f.offsetParent.id : f.offsetParent.nodeName) : "NONE"),
-                text.Text.conc(20, " ", "OFFSET", f.offsetLeft, f.offsetTop, f.offsetLeft - (f.offsetParent ? f.offsetParent.clientLeft : 0)), 
-                text.Text.conc(20, " ", "MARGIN", st.marginLeft, st.marginTop),
-                text.Text.conc(20, " ", "BORDER", st.borderLeftWidth, st.borderTopWidth),
-                text.Text.conc(20, " ", "PADDING", st.paddingLeft, st.paddingTop),
-                text.Text.conc(14, " ", "SCROLL", f.scrollLeft, f.scrollTop),
-                text.Text.conc(28, " ", "OVERFLOW", st.overflow, st.boxSizing),
-                text.Text.conc(20, " ", "BOUNDS", f.getBoundingClientRect().left, f.getBoundingClientRect().top),
-                text.Text.conc(20, " ", "POSITION", st.position, st.left, st.top)
+                    text.Text.conc(10, " ", f.id ? f.id : f.nodeName),
+                    text.Text.conc(20, " ", "PARENT", f.offsetParent ? (f.offsetParent.id ? f.offsetParent.id : f.offsetParent.nodeName) : "NONE"),
+                    text.Text.conc(20, " ", "OFFSET", f.offsetLeft, f.offsetTop, f.offsetLeft - (f.offsetParent ? f.offsetParent.clientLeft : 0)),
+                    text.Text.conc(20, " ", "MARGIN", st.marginLeft, st.marginTop),
+                    text.Text.conc(20, " ", "BORDER", st.borderLeftWidth, st.borderTopWidth),
+                    text.Text.conc(20, " ", "PADDING", st.paddingLeft, st.paddingTop),
+                    text.Text.conc(14, " ", "SCROLL", f.scrollLeft, f.scrollTop),
+                    text.Text.conc(28, " ", "OVERFLOW", st.overflow, st.boxSizing),
+                    text.Text.conc(20, " ", "BOUNDS", f.getBoundingClientRect().left, f.getBoundingClientRect().top),
+                    text.Text.conc(20, " ", "POSITION", st.position, st.left, st.top)
                 ]).join(" ");
                 res += "\n";
                 f = f.parentElement;
@@ -179,7 +202,7 @@ module jsidea.test {
                     left -= f.parentElement.scrollLeft;
                     top -= f.parentElement.scrollTop;
                 }
-                
+
                 var parentStyle = window.getComputedStyle(f.parentElement);
                 var style = window.getComputedStyle(f);
                 if (TestApplication.isFirefox) {
@@ -194,17 +217,17 @@ module jsidea.test {
                     left += f.offsetLeft;
                     top += f.offsetTop;
 
-//                    left += f.clientLeft;
-//                    top += f.clientTop;
-//                    
-//                    left -= f.parentElement.clientLeft;
-//                    top -= f.parentElement.clientTop;
-//
-//                    left += math.Number.parse(parentStyle.borderLeftWidth, 0);
-//                    top += math.Number.parse(parentStyle.borderTopWidth, 0);
+                    //                    left += f.clientLeft;
+                    //                    top += f.clientTop;
+                    //                    
+                    //                    left -= f.parentElement.clientLeft;
+                    //                    top -= f.parentElement.clientTop;
+                    //
+                    //                    left += math.Number.parse(parentStyle.borderLeftWidth, 0);
+                    //                    top += math.Number.parse(parentStyle.borderTopWidth, 0);
 
-//                    left -= math.Number.parse(parentStyle.paddingLeft, 0);
-//                    top -= math.Number.parse(parentStyle.paddingTop, 0);
+                    //                    left -= math.Number.parse(parentStyle.paddingLeft, 0);
+                    //                    top -= math.Number.parse(parentStyle.paddingTop, 0);
                     
                     //                    left -= math.Number.parse(style.paddingLeft, 0);
                     //                    top -= math.Number.parse(style.paddingTop, 0);

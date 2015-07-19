@@ -160,8 +160,8 @@ module jsidea.geom {
             //webkit has the scroll-values set on html not on the body?
             if (this.isWebkit) {
                 if (false && node.parent.element != document.body) {
-//                    if (node.style.display != "static") {
-                        if (node.element.offsetParent != node.parent.element) {
+                    //                    if (node.style.display != "static") {
+                    if (node.element.offsetParent != node.parent.element) {
                         offset.x -= node.parent.element.scrollLeft;
                         offset.y -= node.parent.element.scrollTop;
                     }
@@ -229,41 +229,89 @@ module jsidea.geom {
         }
         
         //FOR WEBKIT AND IE11
+        public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+
+            if (element == document.body)
+                return ret;
+
+            if (element.parentElement && (element.parentElement == element.offsetParent || !element.offsetParent)) {
+                ret.x += element.parentElement.scrollLeft;
+                ret.y += element.parentElement.scrollTop;
+            }
+            else {
+                var pp = element.offsetParent;
+                while(element instanceof Element && window.getComputedStyle(element).position == "static")
+                {
+                    ret.x += element.scrollLeft;
+                    ret.y += element.scrollTop;
+                    element = element.parentElement;    
+                }
+            }
+
+            return ret;
+
+        }
+        
+        //FOR WEBKIT AND IE11
+        public static extractOffsetReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+
+            var tar = element;
+            while (element) {
+                ret.x += element.offsetLeft;
+                ret.y += element.offsetTop;
+                var sc = this.extractScrollReal(element);
+                ret.x -= sc.x;
+                ret.y -= sc.y;
+                ret.x += element.offsetParent ? element.offsetParent.clientLeft : 0;
+                ret.y += element.offsetParent ? element.offsetParent.clientTop : 0;
+                element = <HTMLElement> element.offsetParent;
+            }
+
+            if (this.isFirefox) {
+
+            }
+
+            return ret;
+        }
+        
+        //FOR WEBKIT AND IE11
         private static extractOffset(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
 
             ret.x = element.offsetLeft;
             ret.y = element.offsetTop;
+            ret.x -= element.parentElement.offsetLeft;
+            ret.y -= element.parentElement.offsetTop;
 
-            var sub = 0;
-            if (this.isFirefox) {
-                if (element.offsetParent && (sub = this.needBorderSubtract(element))) {
-                    ret.x += sub * element.offsetParent.clientLeft;
-                    ret.y += sub * element.offsetParent.clientTop;
-                }
-            }
-
-            if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
-                if (this.isFirefox) {
-                    //
-                    if (element.parentElement.offsetParent && (sub = this.needBorderSubtract(element.parentElement))) {
-
-                        ret.x -= element.parentElement.offsetLeft + sub * element.parentElement.offsetParent.clientLeft;
-                        ret.y -= element.parentElement.offsetTop + sub * element.parentElement.offsetParent.clientTop;
-                    }
-                    else {
-                        ret.x -= element.parentElement.offsetLeft;
-                        ret.y -= element.parentElement.offsetTop;
-                    }
-                }
-                else {
-                    ret.x -= element.parentElement.offsetLeft;
-                    ret.y -= element.parentElement.offsetTop;
-                }
-            }
-            else {
-                ret.x += element.parentElement.clientLeft;
-                ret.y += element.parentElement.clientTop;
-            }
+            //            var sub = 0;
+            //            if (this.isFirefox) {
+            //                if (element.offsetParent && (sub = this.needBorderSubtract(element))) {
+            //                    ret.x += sub * element.offsetParent.clientLeft;
+            //                    ret.y += sub * element.offsetParent.clientTop;
+            //                }
+            //            }
+            //
+            //            if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
+            //                if (this.isFirefox) {
+            //                    //
+            //                    if (element.parentElement.offsetParent && (sub = this.needBorderSubtract(element.parentElement))) {
+            //
+            //                        ret.x -= element.parentElement.offsetLeft + sub * element.parentElement.offsetParent.clientLeft;
+            //                        ret.y -= element.parentElement.offsetTop + sub * element.parentElement.offsetParent.clientTop;
+            //                    }
+            //                    else {
+            //                        ret.x -= element.parentElement.offsetLeft;
+            //                        ret.y -= element.parentElement.offsetTop;
+            //                    }
+            //                }
+            //                else {
+            //                    ret.x -= element.parentElement.offsetLeft;
+            //                    ret.y -= element.parentElement.offsetTop;
+            //                }
+            //            }
+            //            else {
+            //                ret.x += element.parentElement.clientLeft;
+            //                ret.y += element.parentElement.clientTop;
+            //            }
             return ret;
         }
 
