@@ -230,73 +230,117 @@ module jsidea.geom {
         
         //FOR WEBKIT AND IE11
         public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            //            console.log(element);
-            
             if (!element)
                 return ret;
-            //            element = element.parentElement;
-            var p = element.offsetParent ? element.offsetParent : element.parentElement;
-            
-//            ret.x += element.scrollLeft;
-//                ret.y += element.scrollTop;
-            //            while (element && element != document.body) {
-//                if(p)
-//                p = p.parentNode;
-            while (element && element != p && element != document.body) {
-//                ret.x += element.scrollLeft;
-//                ret.y += element.scrollTop;
-//                var st = window.getComputedStyle(element);
-//                var stp = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
-//                if (stp && stp.position == "static") {
-//                    element = element.offsetParent;
-//                }
-//                else
-//                    element = element.parentElement;
-                
-                var style = window.getComputedStyle(element);
-                var parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
-                
-                
-                if(style.position != "static" && parentStyle && parentStyle.position == "static")
-                {
-//                    ret.x -= element.scrollLeft;
-//                    ret.y -= element.scrollTop;
-                    break;                        
-                }
-                
-                if(style.position != "static" && parentStyle && parentStyle.position != "static")
-                {
-//                    ret.x -= element.scrollLeft;
-//                    ret.y -= element.scrollTop;
-                    ret.x += element.parentElement.scrollLeft;
-                    ret.y += element.parentElement.scrollTop;
-                    break;                        
-                }
-                
+
+            while (element && element != document.body) {
+
                 ret.x += element.scrollLeft;
                 ret.y += element.scrollTop;
-                element = element.parentElement;
+
+                var style = window.getComputedStyle(element);
+//                var parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
+                if (style.position != "static") {
+                    element = <HTMLElement> element.offsetParent;
+                }
+                else
+                    element = element.parentElement;
             }
-            //            console.log(ret);
+            
+            //            var style = window.getComputedStyle(element);
+            //            var parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
+            //            if(style.position == "static" && parentStyle.position == "static")
+            //            {
+            //                ret.x += element.parentElement.scrollLeft;
+            //                ret.y += element.parentElement.scrollTop;    
+            //            }
+            //
+            //            var p = element.offsetParent;
+            //            
+            //            //            if(element.parentElement
+            //            
+            //            if (p) {
+            //                ret.x += p.scrollLeft;
+            //                ret.y += p.scrollTop;
+            //                return ret;
+            //            }
+            //            else
+            //                return ret;
+            //
+            //
+            //            element = element.parentElement;
+            //            while (element && element != document.body) {
+            //                var style = window.getComputedStyle(element);
+            //                var parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
+            //
+            //                //                if (element.offsetParent == element.parentElement
+            //                //                || (parentStyle.position == "static" && style.position != "static") || parentStyle.overflow != "visible") {
+            //                //                {
+            //                    
+            //                
+            //                if (parentStyle && parentStyle.overflow != "visible") {
+            //                    ret.x += element.scrollLeft;
+            //                    ret.y += element.scrollTop;
+            //                }
+            //                //                }
+            //
+            //                if (element == p)
+            //                    break;
+            //
+            //                element = element.offsetParent;
+            //                //element = element.parentElement;
+            //            }
+            
+            //            var p = element.offsetParent ? element.offsetParent : element.parentElement;
+            //            while (element && element != p && element != document.body) {
+            //                var style = window.getComputedStyle(element);
+            //                var parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
+            ////                if (style.position != "static" && parentStyle && parentStyle.position == "static") {
+            //////                    ret.x += element.parentElement.scrollLeft;
+            //////                    ret.y += element.parentElement.scrollTop;
+            ////                    break;
+            ////                }
+            ////
+            ////                if (style.position != "static" && parentStyle && parentStyle.position != "static") {
+            ////                    ret.x += element.parentElement.scrollLeft;
+            ////                    ret.y += element.parentElement.scrollTop;
+            ////                    break;
+            ////                }
+            //
+            //                if (style.position == "static" && parentStyle && (parentStyle.position != "static" || parentStyle.overflow != "visible")) {
+            ////                if (parentStyle) {
+            //                    ret.x += element.parentElement.scrollLeft;
+            //                    ret.y += element.parentElement.scrollTop;
+            //                }
+            //
+            //                element = element.parentElement;
+            //            }
             return ret;
+        }
+
+        public static extractOffsetReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            if (this.isWebkit)
+                return this.extractOffsetRealWebkit(element, ret);
+            else
+                return this.extractOffsetRealFirefox(element, ret);
         }
         
         //FOR WEBKIT AND IE11
-        public static extractOffsetReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        public static extractOffsetRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
 
             var tar = element;
             var isStatic = false;
             while (element) {
-                var st = window.getComputedStyle(element);
-                isStatic = st.position == "static";
+                //                var st = window.getComputedStyle(element);
+                //                isStatic = st.position == "static";
 
                 ret.x += element.offsetLeft;
                 ret.y += element.offsetTop;
-//                if (isStatic) {
-                    var sc = this.extractScrollReal(element);
-                    ret.x -= sc.x;
-                    ret.y -= sc.y;
-//                }
+                //                if (isStatic) {
+                var sc = this.extractScrollReal(element);
+                ret.x -= sc.x;
+                ret.y -= sc.y;
+                //                }
                 ret.x += element.offsetParent ? element.offsetParent.clientLeft : 0;
                 ret.y += element.offsetParent ? element.offsetParent.clientTop : 0;
 
@@ -320,24 +364,27 @@ module jsidea.geom {
                 ret.x += element.offsetLeft;
                 ret.y += element.offsetTop;
 
-                var sc = this.extractScrollReal(element);
-                ret.x -= sc.x;
-                ret.y -= sc.y;
-                ret.x += element.offsetParent ? element.offsetParent.clientLeft : 0;
-                ret.y += element.offsetParent ? element.offsetParent.clientTop : 0;
+                var style = window.getComputedStyle(element);
+                var parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
 
-                var st = element instanceof Element ? window.getComputedStyle(element) : null;
-                if (st && element.offsetParent == element.parentElement && st.position == "absolute") {
+                if (style.position != "static" && parentStyle && parentStyle.overflow == "visible") {
                     ret.x -= element.parentElement.clientLeft;
                     ret.y -= element.parentElement.clientTop;
                 }
 
+                //                var sc = this.extractScrollReal(element);
+                //                ret.x -= sc.x;
+                //                ret.y -= sc.y;
+                
+                ret.x += element.offsetParent ? element.offsetParent.clientLeft : 0;
+                ret.y += element.offsetParent ? element.offsetParent.clientTop : 0;
+
                 element = <HTMLElement> element.offsetParent;
             }
 
-            if (this.isFirefox) {
-
-            }
+            var sc = this.extractScrollReal(tar);
+            ret.x -= sc.x;
+            ret.y -= sc.y;
 
             return ret;
         }
