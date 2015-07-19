@@ -53,6 +53,9 @@ module jsidea.test {
             
 
             document.addEventListener("click",(evt) => {
+                this.logChain(d);});
+            
+            document.addEventListener("tick",(evt) => {
                 ctx.clearRect(0, 0, can.width, can.height);
                 
                 //                this.drawBoundingBox(ctx, con);
@@ -63,7 +66,6 @@ module jsidea.test {
                 //                this.drawBoundingBox(ctx, vie);
                 //                this.drawBoundingBox(ctx, can);
                 
-                this.logChain(d);
                 this.drawOffsetChain(ctx, d);
             });
 
@@ -178,7 +180,7 @@ module jsidea.test {
                     text.Text.conc(20, " ", "MARGIN", st.marginLeft, st.marginTop),
                     text.Text.conc(20, " ", "BORDER", st.borderLeftWidth, st.borderTopWidth),
                     text.Text.conc(20, " ", "PADDING", st.paddingLeft, st.paddingTop),
-                    text.Text.conc(14, " ", "SCROLL", f.scrollLeft, f.scrollTop),
+                    text.Text.conc(14, " ", "SCROLL", f.scrollLeft, f.scrollTop, geom.Transform.extractScrollReal(f).x, geom.Transform.extractScrollReal(f).y),
                     text.Text.conc(28, " ", "OVERFLOW", st.overflow, st.boxSizing),
                     text.Text.conc(20, " ", "BOUNDS", f.getBoundingClientRect().left, f.getBoundingClientRect().top),
                     text.Text.conc(20, " ", "POSITION", st.position, st.left, st.top)

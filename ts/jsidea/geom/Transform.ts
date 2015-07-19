@@ -158,23 +158,23 @@ module jsidea.geom {
             
             //add scrolling offsets
             //webkit has the scroll-values set on html not on the body?
-            if (this.isWebkit) {
-                if (false && node.parent.element != document.body) {
-                    //                    if (node.style.display != "static") {
-                    if (node.element.offsetParent != node.parent.element) {
-                        offset.x -= node.parent.element.scrollLeft;
-                        offset.y -= node.parent.element.scrollTop;
-                    }
-                    else {
-                        offset.x -= node.element.scrollLeft;
-                        offset.y -= node.element.scrollTop;
-                    }
-                }
-            }
-            else if (node.element != document.body) {
-                offset.x -= node.parent.element.scrollLeft;
-                offset.y -= node.parent.element.scrollTop;
-            }
+            //            if (this.isWebkit) {
+            //                if (false && node.parent.element != document.body) {
+            //                    //                    if (node.style.display != "static") {
+            //                    if (node.element.offsetParent != node.parent.element) {
+            //                        offset.x -= node.parent.element.scrollLeft;
+            //                        offset.y -= node.parent.element.scrollTop;
+            //                    }
+            //                    else {
+            //                        offset.x -= node.element.scrollLeft;
+            //                        offset.y -= node.element.scrollTop;
+            //                    }
+            //                }
+            //            }
+            //            else if (node.element != document.body) {
+            //                offset.x -= node.parent.element.scrollLeft;
+            //                offset.y -= node.parent.element.scrollTop;
+            //            }
 
             //append the offset to the transform-matrix
             matrix.appendPositionRaw(offset.x, offset.y, 0);
@@ -230,40 +230,78 @@ module jsidea.geom {
         
         //FOR WEBKIT AND IE11
         public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-
-            if (element == document.body)
+            //            console.log(element);
+            
+            if (!element)
                 return ret;
-
-            if (element.parentElement && (element.parentElement == element.offsetParent || !element.offsetParent)) {
-                ret.x += element.parentElement.scrollLeft;
-                ret.y += element.parentElement.scrollTop;
-            }
-            else {
-                var pp = element.offsetParent;
-                while(element instanceof Element && window.getComputedStyle(element).position == "static")
-                {
-                    ret.x += element.scrollLeft;
-                    ret.y += element.scrollTop;
-                    element = element.parentElement;    
+            //            element = element.parentElement;
+            var p = element.offsetParent ? element.offsetParent : element.parentElement;
+            //            while (element && element != document.body) {
+            while (element && element != p && element != document.body) {
+                ret.x += element.scrollLeft;
+                ret.y += element.scrollTop;
+                var st = window.getComputedStyle(element);
+                if (st.position != "static") {
+                    element = element.offsetParent;
                 }
+                else
+                    element = element.parentElement;
             }
-
+            //            console.log(ret);
             return ret;
-
         }
         
         //FOR WEBKIT AND IE11
         public static extractOffsetReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
 
             var tar = element;
+            var isStatic = false;
+            while (element) {
+                var st = window.getComputedStyle(element);
+                isStatic = st.position == "static";
+
+                ret.x += element.offsetLeft;
+                ret.y += element.offsetTop;
+                if (isStatic) {
+                    var sc = this.extractScrollReal(element.parentElement);
+                    ret.x -= sc.x;
+                    ret.y -= sc.y;
+                }
+                ret.x += element.offsetParent ? element.offsetParent.clientLeft : 0;
+                ret.y += element.offsetParent ? element.offsetParent.clientTop : 0;
+
+                element = <HTMLElement> element.offsetParent;
+                
+                //                var st = window.getComputedStyle(element);
+                //                if (st.position == "absolute") {
+                //                    element = element.offsetParent;
+                //                }
+                //                else
+                //                    element = element.parentElement;
+            }
+
+            return ret;
+        }
+        
+        //FOR WEBKIT AND IE11
+        public static extractOffsetRealFirefox(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            var tar = element;
             while (element) {
                 ret.x += element.offsetLeft;
                 ret.y += element.offsetTop;
+
                 var sc = this.extractScrollReal(element);
                 ret.x -= sc.x;
                 ret.y -= sc.y;
                 ret.x += element.offsetParent ? element.offsetParent.clientLeft : 0;
                 ret.y += element.offsetParent ? element.offsetParent.clientTop : 0;
+
+                var st = element instanceof Element ? window.getComputedStyle(element) : null;
+                if (st && element.offsetParent == element.parentElement && st.position == "absolute") {
+                    ret.x -= element.parentElement.clientLeft;
+                    ret.y -= element.parentElement.clientTop;
+                }
+
                 element = <HTMLElement> element.offsetParent;
             }
 

@@ -124,7 +124,7 @@ canvas {
 }
 
 #c-cont {
-	position: absolute;
+	position: static;
 	/* overflow: hidden; */
 	/* margin: 10px; */
 	padding: 10px;
@@ -132,6 +132,7 @@ canvas {
 	width: 128px;
 	height: 128px;
 	cursor: pointer;
+	overflow: scroll;
 	/* transform: translateZ(-800px) rotate(70deg); */
 }
 
@@ -141,6 +142,8 @@ canvas {
 	border: 40px solid #883366;
 	width: 128px;
 	height: 128px;
+	left: 100px;
+	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
 	/* transform-style: preserve-3d;
 	perspective: 600px; */
 	/* perspective-origin: 128px 128px; */
