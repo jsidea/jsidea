@@ -271,8 +271,8 @@ module jsidea.geom {
             }
 
             var style = window.getComputedStyle(element);
-//            if (this.extractIsFixedReal(element))
-                            if (style.position == "fixed")
+            //            if (this.extractIsFixedReal(element))
+            if (style.position == "fixed")
                 return document.body;
 
             element = element.parentElement;
@@ -295,19 +295,23 @@ module jsidea.geom {
                 return <HTMLElement> element.offsetParent;
             }
 
-//            if(element.id == "a-cont")
-//            return document.getElementById("content");
-            
-//            var style = window.getComputedStyle(element);
-//            if (this.extractIsFixedReal(element))
-//                            if (style.position == "fixed")
-//                return document.body;
 
+
+
+//            if (element.id == "c-cont")
+//                return document.getElementById("view");
+
+            var style = window.getComputedStyle(element);
+            //            if (this.extractIsFixedReal(element))
+            //                            if (style.position == "fixed")
+            //                return document.body;
+
+            var isFixed = !this.extractIsFixedReal(element) && style.position == "fixed";
             element = element.parentElement;
             while (element && element != document.body) {
                 var style = window.getComputedStyle(element);
-                if (style.transform != "none" || style.overflow == "visible")
-                    return element;
+                if (style.transform != "none" || (style.overflow != "visible" && style.position != "static" && style.position != "relative"))
+                    return isFixed ? element.parentElement : element;
                 element = element.parentElement;
             }
 
@@ -369,28 +373,28 @@ module jsidea.geom {
             return ret;
         }
         
-//        //FOR WEBKIT AND IE11 (MAYBE firefox too)
-//        public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-//            if (!element || !element.parentElement)
-//                return ret;
-//
-//            var style = window.getComputedStyle(element);
-//            if (style.position != "static")// || this.extractIsFixedReal(element))//style.position == "fixed")
-//                element = <HTMLElement> this.extractOffsetScroll(element);
-//            else
-//                element = element.parentElement;
-//
-//            while (element && element != document.body) {
-//                var style = window.getComputedStyle(element);
-//                ret.x += element.scrollLeft;
-//                ret.y += element.scrollTop;
-//                if (style.position != "static")// || this.extractIsFixedReal(element))//style.position == "fixed")
-//                    element = <HTMLElement> this.extractOffsetScroll(element);
-//                else
-//                    element = element.parentElement;
-//            }
-//            return ret;
-//        }
+        //        //FOR WEBKIT AND IE11 (MAYBE firefox too)
+        //        public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        //            if (!element || !element.parentElement)
+        //                return ret;
+        //
+        //            var style = window.getComputedStyle(element);
+        //            if (style.position != "static")// || this.extractIsFixedReal(element))//style.position == "fixed")
+        //                element = <HTMLElement> this.extractOffsetScroll(element);
+        //            else
+        //                element = element.parentElement;
+        //
+        //            while (element && element != document.body) {
+        //                var style = window.getComputedStyle(element);
+        //                ret.x += element.scrollLeft;
+        //                ret.y += element.scrollTop;
+        //                if (style.position != "static")// || this.extractIsFixedReal(element))//style.position == "fixed")
+        //                    element = <HTMLElement> this.extractOffsetScroll(element);
+        //                else
+        //                    element = element.parentElement;
+        //            }
+        //            return ret;
+        //        }
 
         public static extractOffsetReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             var sc = this.extractScrollReal(element);
@@ -414,7 +418,9 @@ module jsidea.geom {
                     ret.y += document.documentElement.scrollTop;
                 }
             }
-
+            
+            //wow, ie11 and the offsets are correct
+            //if the element is really fixed
             if (this.isIE && this.extractIsFixedReal(element)) {
                 ret.x += element.offsetLeft;
                 ret.y += element.offsetTop;
@@ -424,13 +430,14 @@ module jsidea.geom {
             while (element && element != document.body) {
                 ret.x += element.offsetLeft;
                 ret.y += element.offsetTop;
-                var par = this.extractOffsetParentReal(element);
                 
                 //for webkit (if there is a wrong offserParent set,
                 //then the offsets are also wrong... arghhh)
                 //correct them here
                 this.correctOffset(element, ret);
 
+                //go up
+                var par = this.extractOffsetParentReal(element);
                 ret.x += par ? par.clientLeft : 0;
                 ret.y += par ? par.clientTop : 0;
                 element = <HTMLElement> par;
@@ -594,12 +601,12 @@ module jsidea.geom {
             var style = window.getComputedStyle(element);
             var parentStyle = window.getComputedStyle(element.parentElement);
             var parStyle = par ? window.getComputedStyle(par) : null;
-            
-            if(style.position == "absolute" && parentStyle.position == "fixed")
+
+            if (style.position == "absolute" && parentStyle.position == "fixed")
                 return ret;
-            else if(style.position == "fixed" && parentStyle.position == "static")
+            else if (style.position == "fixed" && parentStyle.position == "static")
                 return ret;
-            
+
             else if (par && style.position == "absolute") {
                 ret.x -= par.clientLeft;
                 ret.y -= par.clientTop;
@@ -624,10 +631,10 @@ module jsidea.geom {
 
                 if (parentStyle.position != "static") {
                     if (parentStyle.position == "relative" || parentStyle.position == "absolute") {
-//                        ret.x += math.Number.parse(style.marginLeft, 0);
-//                        ret.y += math.Number.parse(style.marginTop, 0);
-//                        ret.x -= math.Number.parse(style.paddingLeft, 0);
-//                        ret.y -= math.Number.parse(style.paddingTop, 0);
+                        //                        ret.x += math.Number.parse(style.marginLeft, 0);
+                        //                        ret.y += math.Number.parse(style.marginTop, 0);
+                        //                        ret.x -= math.Number.parse(style.paddingLeft, 0);
+                        //                        ret.y -= math.Number.parse(style.paddingTop, 0);
                     }
                     ret.x -= element.parentElement.offsetLeft;
                     ret.y -= element.parentElement.offsetTop;
@@ -663,7 +670,7 @@ module jsidea.geom {
                 
                     //                                ret.x -= element.parentElement.clientLeft;
                     //                                ret.y -= element.parentElement.clientTop;
-//                    console.log("AAAA", element.id);
+                    //                    console.log("AAAA", element.id);
                 }
             }
             else {

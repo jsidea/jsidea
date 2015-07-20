@@ -173,12 +173,13 @@ module jsidea.test {
             var res = "LOG-CHAIN\n";
             while (f) {
                 var st = window.getComputedStyle(f);
+                var s = geom.Transform.extractOffsetScroll(f);
                 var calcedOff = geom.Transform.extractOffsetParentReal(f);
                 res += ([
                     text.Text.conc(10, " ", f.id ? f.id : f.nodeName),
                     text.Text.conc(30, " ", "PARENT", f.offsetParent ? (f.offsetParent.id ? f.offsetParent.id : f.offsetParent.nodeName) : "NONE", "->", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
                     text.Text.conc(24, " ", "OFFSET", f.offsetLeft, f.offsetTop),
-                    text.Text.conc(24, " ", "OFFSET_C", geom.Transform.correctOffset(f).x, geom.Transform.correctOffset(f).y),
+                    text.Text.conc(24, " ", "OFFSET_C",  s ? (s.id ? s.id : s.nodeName) : "NONE"),
                     text.Text.conc(24, " ", "OFFSET_F", geom.Transform.correctOffset(f, new geom.Point2D(f.offsetLeft, f.offsetTop)).x, geom.Transform.correctOffset(f, new geom.Point2D(f.offsetLeft, f.offsetTop)).y),
                     text.Text.conc(20, " ", "MARGIN", st.marginLeft, st.marginTop),
                     text.Text.conc(20, " ", "BORDER", st.borderLeftWidth, st.borderTopWidth),

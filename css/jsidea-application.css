@@ -60,7 +60,7 @@ canvas {
 } */
 
 #view {
-	position: static;
+	position: absolute;
 	width: 512px;
 	height: 512px;
 	/* left: 100px;
@@ -79,7 +79,7 @@ canvas {
 }
 
 #content {
-	position: absolute;
+	position: fixed;
 	width: 512px;
 	height: 512px;
 	border: 30px solid #FFFF00;
