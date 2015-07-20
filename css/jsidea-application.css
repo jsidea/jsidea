@@ -77,11 +77,11 @@ canvas {
 }
 
 #content {
-	position: relative;
+	position: static;
 	width: 512px;
 	height: 512px;
-	border: 70px solid #FFFF00;
-	margin: 25px;
+	border: 30px solid #FFFF00;
+	margin: 35px;
 	overflow: scroll;
 	/* transform: translateX(0); */
 	/* transform: translateX(0); */
@@ -91,11 +91,12 @@ canvas {
 	/* perspective: 200px; */
 	/* opacity: 0.5; */
 	/* transform-style: preserve-3d; */
+	transform: translateX(0);
 	/* overflow: hidden; */
 }
 
 #a-cont {
-	position: relative;
+	position: static;
 	border: 80px solid #00FFFF;
 	width: 512px;
 	height: 512px;
@@ -105,10 +106,10 @@ canvas {
 	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
 	/* transform-style: preserve-3d;
 	perspective: 600px; */
-	left: 64px;
+	/* left: 64px; */
 	/* transform: translateX(0); */
-	margin: 45px;
-	padding: 60px;
+	margin: 15px;
+	padding: 35px;
 }
 
 #b-cont {
@@ -131,7 +132,7 @@ canvas {
 }
 
 #c-cont {
-	position: relative;
+	position: fixed;
 	/* overflow: hidden; */
 	/* margin: 10px; */
 	padding: 10px;

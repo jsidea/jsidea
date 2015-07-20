@@ -5,6 +5,7 @@ module jsidea.geom {
         offsetX: number;
         offsetY: number;
         style: CSSStyleDeclaration;
+        offsetNode: INodeStyle;
     }
     export class Transform {
 
@@ -219,6 +220,7 @@ module jsidea.geom {
                     parent: null,
                     offsetX: 0,
                     offsetY: 0,
+                    offsetNode: null
                 };
                 if (!leaf)
                     leaf = node;
@@ -236,6 +238,7 @@ module jsidea.geom {
             var matrices: geom.Matrix3D[] = [];
             var last: geom.Matrix3D = null;
             while (node.parent) {
+                
                 //if last is not null, last becomes the base for the transformation
                 //its like appending the current node.transform (parent-transform) to the last transform (child-transform)
                 var m: geom.Matrix3D = this.extractMatrix(node, last);
@@ -246,6 +249,10 @@ module jsidea.geom {
                     last = null;
                     matrices.push(m);
                 }
+                
+                //                if(node.parent && node.parent.style.position == "fixed")
+                //                    break;
+                
                 node = node.parent;
             }
             if (last)
@@ -281,17 +288,18 @@ module jsidea.geom {
             return preserve3d;
         }
         
-        
-        
         //TEST-AREA
-        
         public static extractOffsetParentReal(element: HTMLElement): HTMLElement {
-
             if (!element || element == document.body || element == document.body.parentElement)
                 return null;
 
+            if (this.isIE) {
+                return <HTMLElement> element.offsetParent;
+            }
+
             var style = window.getComputedStyle(element);
-            if (style.position == "fixed")
+            if (this.extractIsFixedReal(element))
+                //            if (style.position == "fixed")
                 return null;
 
             element = element.parentElement;
@@ -304,6 +312,24 @@ module jsidea.geom {
 
             return document.body;
         }
+
+        private static extractIsFixedReal(element: HTMLElement): boolean {
+            var style = window.getComputedStyle(element);
+            var isFixed = style.position == "fixed";
+            if (this.isIE)
+                return isFixed;
+
+            if (!isFixed)
+                return false;
+            element = element.parentElement;
+            while (element && element != document.body) {
+                var style = window.getComputedStyle(element);
+                if (style.transform != "none")
+                    return false;
+                element = element.parentElement;
+            }
+            return true;
+        }
         
         //FOR WEBKIT AND IE11 (MAYBE firefox too)
         public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
@@ -311,7 +337,7 @@ module jsidea.geom {
                 return ret;
 
             var style = window.getComputedStyle(element);
-            if (style.position == "absolute")// && style.transform == "none")
+            if (style.position == "absolute" || this.extractIsFixedReal(element))//style.position == "fixed")
                 element = <HTMLElement> this.extractOffsetParentReal(element);
             else
                 element = element.parentElement;
@@ -320,7 +346,7 @@ module jsidea.geom {
                 var style = window.getComputedStyle(element);
                 ret.x += element.scrollLeft;
                 ret.y += element.scrollTop;
-                if (style.position == "absolute")// && style.transform == "none")
+                if (style.position == "absolute" || this.extractIsFixedReal(element))//style.position == "fixed")
                     element = <HTMLElement> this.extractOffsetParentReal(element);
                 else
                     element = element.parentElement;
@@ -329,14 +355,6 @@ module jsidea.geom {
         }
 
         public static extractOffsetReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            if (this.isWebkit)
-                return this.extractOffsetRealWebkit(element, ret);
-            else
-                return this.extractOffsetRealWebkit(element, ret);
-            //                return this.extractOffsetRealFirefox(element, ret);
-        }
-
-        public static extractOffsetRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             var sc = this.extractScrollReal(element);
             ret.x -= sc.x;
             ret.y -= sc.y;
@@ -397,31 +415,19 @@ module jsidea.geom {
                 ret.x -= math.Number.parse(parentStyle.marginLeft, 0);
                 ret.y -= math.Number.parse(parentStyle.marginTop, 0);
             }
-            else if (par && style.position == "static") {
+            else if (par && style.position == "static" || style.position == "relative") {
                 ret.x -= par.offsetLeft;
                 ret.y -= par.offsetTop;
                 ret.x -= par.clientLeft;
                 ret.y -= par.clientTop;
             }
+            else if (par && style.position == "fixed" && !this.extractIsFixedReal(element)) {
+                ret.x -= par.clientLeft;
+                ret.y -= par.clientTop;
+            }
             else {
+                //                                console.log("AHHH", element);
             }
-            return ret;
-        }
-        
-        //FOR WEBKIT AND IE11
-        public static extractOffsetRealFirefox(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            var sc = this.extractScrollReal(element);
-            ret.x -= sc.x;
-            ret.y -= sc.y;
-
-            while (element) {
-                ret.x += element.offsetLeft;
-                ret.y += element.offsetTop;
-                ret.x += element.offsetParent ? element.offsetParent.clientLeft : 0;
-                ret.y += element.offsetParent ? element.offsetParent.clientTop : 0;
-                element = <HTMLElement> element.offsetParent;
-            }
-
             return ret;
         }
     }
