@@ -112,6 +112,7 @@ canvas {
 	width: 512px;
 	padding: 40px;
 	margin: 30px;
+	overflow: scroll;
 	/* overflow: hidden; */
 	/* height: 512px; */
 	/* left: 50px; */
@@ -124,7 +125,7 @@ canvas {
 }
 
 #c-cont {
-	position: static;
+	position: absolute;
 	/* overflow: hidden; */
 	/* margin: 10px; */
 	padding: 10px;
@@ -140,8 +141,8 @@ canvas {
 #d-cont {
 	position: absolute;
 	border: 40px solid #883366;
-	width: 128px;
-	height: 128px;
+	width: 256px;
+	height: 256px;
 	left: 100px;
 	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
 	/* transform-style: preserve-3d;
@@ -152,6 +153,7 @@ canvas {
 	perspective: 600px; */
 	/* margin: 45px; */
 	/* padding: 20px; */
+	overflow: scroll;
 }
 
 /* #d-cont:after {
