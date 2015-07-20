@@ -304,32 +304,32 @@ module jsidea.geom {
                 element = element.parentElement;
             }
 
-            return null;
+            return document.body;
         }
         
         
-//        //FOR WEBKIT AND IE11 (MAYBE firefox too)
-//        public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-//            if (!element || !element.parentElement)
-//                return ret;
-//
-//            var style = window.getComputedStyle(element);
-//            if (style.position == "absolute")// && style.transform == "none")
-//                element = <HTMLElement> element.offsetParent;
-//            else
-//                element = element.parentElement;
-//
-//            while (element && element != document.body) {
-//                var style = window.getComputedStyle(element);
-//                ret.x += element.scrollLeft;
-//                ret.y += element.scrollTop;
-//                if (style.position == "absolute")// && style.transform == "none")
-//                    element = <HTMLElement> element.offsetParent;
-//                else
-//                    element = element.parentElement;
-//            }
-//            return ret;
-//        }
+        //        //FOR WEBKIT AND IE11 (MAYBE firefox too)
+        //        public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        //            if (!element || !element.parentElement)
+        //                return ret;
+        //
+        //            var style = window.getComputedStyle(element);
+        //            if (style.position == "absolute")// && style.transform == "none")
+        //                element = <HTMLElement> element.offsetParent;
+        //            else
+        //                element = element.parentElement;
+        //
+        //            while (element && element != document.body) {
+        //                var style = window.getComputedStyle(element);
+        //                ret.x += element.scrollLeft;
+        //                ret.y += element.scrollTop;
+        //                if (style.position == "absolute")// && style.transform == "none")
+        //                    element = <HTMLElement> element.offsetParent;
+        //                else
+        //                    element = element.parentElement;
+        //            }
+        //            return ret;
+        //        }
         
         //FOR WEBKIT AND IE11 (MAYBE firefox too)
         public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
@@ -361,34 +361,83 @@ module jsidea.geom {
                 return this.extractOffsetRealFirefox(element, ret);
         }
        
-         //FOR IE11
-//        public static extractOffsetRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-//            var sc = this.extractScrollReal(element);
-//            ret.x -= sc.x;
-//            ret.y -= sc.y;
-//
-//            while (element) {
-//                ret.x += element.offsetLeft;
-//                ret.y += element.offsetTop;
-//                var par = this.extractOffsetParentReal(element);//element.offsetParent;
-//                ret.x += par ? par.clientLeft : 0;
-//                ret.y += par ? par.clientTop : 0;
-//                element = <HTMLElement> par;
-//            }
-//
-//            return ret;
-//        }
+        //FOR IE11
+        //        public static extractOffsetRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        //            var sc = this.extractScrollReal(element);
+        //            ret.x -= sc.x;
+        //            ret.y -= sc.y;
+        //
+        //            while (element) {
+        //                ret.x += element.offsetLeft;
+        //                ret.y += element.offsetTop;
+        //                var par = this.extractOffsetParentReal(element);//element.offsetParent;
+        //                ret.x += par ? par.clientLeft : 0;
+        //                ret.y += par ? par.clientTop : 0;
+        //                element = <HTMLElement> par;
+        //            }
+        //
+        //            return ret;
+        //        }
         
         //FOR WEBKIT AND IE11
+        //        public static extractOffsetRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        //            var sc = this.extractScrollReal(element);
+        //            ret.x -= sc.x;
+        //            ret.y -= sc.y;
+        //
+        //            while (element) {
+        //                ret.x += element.offsetLeft;
+        //                ret.y += element.offsetTop;
+        //                var par = this.extractOffsetParentReal(element);//element.offsetParent;
+        //                ret.x += par ? par.clientLeft : 0;
+        //                ret.y += par ? par.clientTop : 0;
+        //                element = <HTMLElement> par;
+        //            }
+        //
+        //            return ret;
+        //        }
+        
         public static extractOffsetRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             var sc = this.extractScrollReal(element);
             ret.x -= sc.x;
             ret.y -= sc.y;
 
-            while (element) {
+            while (element && element != document.body) {
                 ret.x += element.offsetLeft;
                 ret.y += element.offsetTop;
                 var par = this.extractOffsetParentReal(element);//element.offsetParent;
+                
+                //for webkit (if there is a wrong offserParent set
+                //then the offsets are also wrong... arghhh
+                if (par != element.offsetParent) {
+                    //                    if (par != element.parentElement) {
+                    //                        ret.x -= par ? par.clientLeft : 0;
+                    //                        ret.y -= par ? par.clientTop : 0;
+                    //                    }
+                    //                    else {
+                    //                        ret.x -= par ? par.clientLeft : 0;
+                    //                        ret.y -= par ? par.clientTop : 0;
+                    //                        var style = window.getComputedStyle(element);
+                    //                        if (style.position != "absolute") {
+                    //                            ret.x -= par ? par.offsetLeft : 0;
+                    //                            ret.y -= par ? par.offsetTop : 0;
+                    //                        }
+                    //                    }
+                    
+                    var style = window.getComputedStyle(element);
+                    if (par == element.parentElement && style.position != "absolute") {
+                        ret.x -= par ? par.offsetLeft : 0;
+                        ret.y -= par ? par.offsetLeft : 0;
+                    }
+
+                    if (element.offsetParent) {
+                        ret.x += element.offsetParent.clientLeft;
+                        ret.y += element.offsetParent.clientTop;
+                    }
+                    ret.x -= par ? par.clientLeft : 0;
+                    ret.y -= par ? par.clientTop : 0;
+                }
+
                 ret.x += par ? par.clientLeft : 0;
                 ret.y += par ? par.clientTop : 0;
                 element = <HTMLElement> par;
