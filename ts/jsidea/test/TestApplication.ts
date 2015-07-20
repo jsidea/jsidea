@@ -176,15 +176,16 @@ module jsidea.test {
                 var calcedOff = geom.Transform.extractOffsetParentReal(f);
                 res += ([
                     text.Text.conc(10, " ", f.id ? f.id : f.nodeName),
-                    text.Text.conc(20, " ", "PARENT", f.offsetParent ? (f.offsetParent.id ? f.offsetParent.id : f.offsetParent.nodeName) : "NONE"),
-                    text.Text.conc(20, " ", "PARENT-C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
-                    text.Text.conc(20, " ", "OFFSET", f.offsetLeft, f.offsetTop, f.offsetLeft - (f.offsetParent ? f.offsetParent.clientLeft : 0)),
+                    text.Text.conc(30, " ", "PARENT", f.offsetParent ? (f.offsetParent.id ? f.offsetParent.id : f.offsetParent.nodeName) : "NONE", "->", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
+                    text.Text.conc(24, " ", "OFFSET", f.offsetLeft, f.offsetTop),
+                    text.Text.conc(24, " ", "OFFSET_C", geom.Transform.correctWebkitOffset(f).x, geom.Transform.correctWebkitOffset(f).y),
+                    text.Text.conc(24, " ", "OFFSET_F", geom.Transform.correctWebkitOffset(f, new geom.Point2D(f.offsetLeft, f.offsetTop)).x, geom.Transform.correctWebkitOffset(f, new geom.Point2D(f.offsetLeft, f.offsetTop)).y),
                     text.Text.conc(20, " ", "MARGIN", st.marginLeft, st.marginTop),
                     text.Text.conc(20, " ", "BORDER", st.borderLeftWidth, st.borderTopWidth),
                     text.Text.conc(20, " ", "PADDING", st.paddingLeft, st.paddingTop),
-                    text.Text.conc(14, " ", "SCROLL", f.scrollLeft, f.scrollTop, geom.Transform.extractScrollReal(f).x, geom.Transform.extractScrollReal(f).y),
-                    text.Text.conc(28, " ", "OVERFLOW", st.overflow, st.boxSizing),
-                    text.Text.conc(20, " ", "BOUNDS", f.getBoundingClientRect().left, f.getBoundingClientRect().top),
+//                    text.Text.conc(14, " ", "SCROLL", f.scrollLeft, f.scrollTop, geom.Transform.extractScrollReal(f).x, geom.Transform.extractScrollReal(f).y),
+//                    text.Text.conc(28, " ", "OVERFLOW", st.overflow, st.boxSizing),
+//                    text.Text.conc(20, " ", "BOUNDS", f.getBoundingClientRect().left, f.getBoundingClientRect().top),
                     text.Text.conc(20, " ", "POSITION", st.position, st.left, st.top)
                 ]).join(" ");
                 res += "\n";

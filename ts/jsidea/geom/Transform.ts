@@ -289,7 +289,7 @@ module jsidea.geom {
         
         public static extractOffsetParentReal(element: HTMLElement): HTMLElement {
 
-            if (!element)
+            if (!element || element == document.body || element == document.body.parentElement)
                 return null;
 
             var style = window.getComputedStyle(element);
@@ -405,37 +405,13 @@ module jsidea.geom {
             while (element && element != document.body) {
                 ret.x += element.offsetLeft;
                 ret.y += element.offsetTop;
-                var par = this.extractOffsetParentReal(element);//element.offsetParent;
+                var par = this.extractOffsetParentReal(element);
                 
-                //for webkit (if there is a wrong offserParent set
-                //then the offsets are also wrong... arghhh
+                //for webkit (if there is a wrong offserParent set,
+                //then the offsets are also wrong... arghhh)
+                //correct them here
                 if (par != element.offsetParent) {
-                    //                    if (par != element.parentElement) {
-                    //                        ret.x -= par ? par.clientLeft : 0;
-                    //                        ret.y -= par ? par.clientTop : 0;
-                    //                    }
-                    //                    else {
-                    //                        ret.x -= par ? par.clientLeft : 0;
-                    //                        ret.y -= par ? par.clientTop : 0;
-                    //                        var style = window.getComputedStyle(element);
-                    //                        if (style.position != "absolute") {
-                    //                            ret.x -= par ? par.offsetLeft : 0;
-                    //                            ret.y -= par ? par.offsetTop : 0;
-                    //                        }
-                    //                    }
-                    
-                    var style = window.getComputedStyle(element);
-                    if (par == element.parentElement && style.position != "absolute") {
-                        ret.x -= par ? par.offsetLeft : 0;
-                        ret.y -= par ? par.offsetLeft : 0;
-                    }
-
-                    if (element.offsetParent) {
-                        ret.x += element.offsetParent.clientLeft;
-                        ret.y += element.offsetParent.clientTop;
-                    }
-                    ret.x -= par ? par.clientLeft : 0;
-                    ret.y -= par ? par.clientTop : 0;
+                    this.correctWebkitOffset(element, ret);
                 }
 
                 ret.x += par ? par.clientLeft : 0;
@@ -443,6 +419,37 @@ module jsidea.geom {
                 element = <HTMLElement> par;
             }
 
+            return ret;
+        }
+
+        public static correctWebkitOffset(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            var par = this.extractOffsetParentReal(element);
+
+            if (par == element.offsetParent)
+                return ret;
+
+            var style = window.getComputedStyle(element);
+            if (par && style.position == "absolute") {
+                ret.x += element.offsetParent.clientLeft;
+                ret.y += element.offsetParent.clientTop;
+                ret.x -= par ? par.clientLeft : 0;
+                ret.y -= par ? par.clientTop : 0;
+            }
+            else if (par && style.position == "static" && element.offsetParent == element.parentElement) {
+                ret.x -= par ? par.clientLeft : 0;
+                ret.y -= par ? par.clientTop : 0;
+                var parentStyle = window.getComputedStyle(par);
+                ret.x -= math.Number.parse(parentStyle.marginLeft, 0);
+                ret.y -= math.Number.parse(parentStyle.marginTop, 0);
+            }
+            else if (par && style.position == "static") {
+                ret.x -= par.offsetLeft;
+                ret.y -= par.offsetTop;
+                ret.x -= par.clientLeft;
+                ret.y -= par.clientTop;
+            }
+            else {
+            }
             return ret;
         }
         
