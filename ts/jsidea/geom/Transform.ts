@@ -309,7 +309,7 @@ module jsidea.geom {
             element = element.parentElement;
             while (element && element != document.body) {
                 var style = window.getComputedStyle(element);
-//                if (style.transform != "none")// || style.position != "static")
+                //                if (style.transform != "none")// || style.position != "static")
                 if (style.transform != "none" || style.position != "static")
                     return false;
                 element = element.parentElement;
@@ -393,6 +393,7 @@ module jsidea.geom {
                 this.correctWebkitOffset(element, ret);
             } else if (this.isFirefox) {
                 this.correctFirefoxOffset(element, ret);
+                this.correctWebkitOffset(element, ret);
             }
             return ret;
         }
@@ -412,20 +413,96 @@ module jsidea.geom {
                 ret.x -= element.parentElement.clientLeft;
                 ret.y -= element.parentElement.clientTop;
             }
-            else if (par && parentStyle && style.position == "fixed" && parentStyle.position == "static") {
-                ret.x -= element.parentElement.offsetLeft;
-                ret.y -= element.parentElement.offsetTop;
-                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
-                ret.y += math.Number.parse(parentStyle.marginTop, 0);
-                ret.x += par.clientLeft;
-                ret.y += par.clientTop;
-            }
-            else if (par && parentStyle && style.position == "fixed" && (parentStyle.position == "relative" || parentStyle.position == "absolute")) {
-                ret.x -= par.clientLeft;
-                ret.y -= par.clientTop;
+            //            else if (par && parentStyle && style.position == "fixed" && parentStyle.position == "static") {
+            ////                ret.x -= element.parentElement.offsetLeft;
+            ////                ret.y -= element.parentElement.offsetTop;
+            ////                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
+            ////                ret.y += math.Number.parse(parentStyle.marginTop, 0);
+            //                ret.x += par.clientLeft;
+            //                ret.y += par.clientTop;
+            //                
+            //                if (parentStyle.position == "relative" || parentStyle.position == "absolute") {
+            //                    ret.x -= par.clientLeft;
+            //                    ret.y -= par.clientTop;
+            //
+            //                    ret.x -= math.Number.parse(style.marginLeft, 0);
+            //                    ret.y -= math.Number.parse(style.marginTop, 0);
+            //                }
+            //                else {
+            //                    //                    ret.x -= element.parentElement.offsetLeft;
+            //                    //                    ret.y -= element.parentElement.offsetTop;
+            //                    //                     console.log("AHHH", element);
+            //                    
+            //                    ret.x -= par.offsetLeft;
+            //                    ret.y -= par.offsetTop;
+            ////                    console.log("AHHH", element);
+            //                }
+            //            }
+            else if (par && parentStyle && style.position == "fixed" && !this.extractIsFixedReal(element)) {
 
-                ret.x -= math.Number.parse(style.marginLeft, 0);
-                ret.y -= math.Number.parse(style.marginTop, 0);
+                if (parentStyle.position == "relative" || parentStyle.position == "absolute") {
+                    //                    ret.x -= par.clientLeft;
+                    //                    ret.y -= par.clientTop;
+                    //
+                    //                    ret.x -= math.Number.parse(style.marginLeft, 0);
+                    //                    ret.y -= math.Number.parse(style.marginTop, 0);
+                    
+                    
+                    ret.x -= element.parentElement.offsetLeft;
+                    ret.y -= element.parentElement.offsetTop;
+                    ret.x -= element.parentElement.clientLeft;
+                    ret.y -= element.parentElement.clientTop;
+
+                }
+                else {
+//                    ret.x -= element.parentElement.offsetLeft;
+//                    ret.y -= element.parentElement.offsetTop;
+                    var parStyle = par ? window.getComputedStyle(par) : null;
+                    if(element.parentElement != par && parStyle.position == "static")
+                    {
+//                        if(element.id == "a-cont")
+//                        {
+                        ret.x += par.clientLeft;
+                        ret.y += par.clientTop;
+//                        }
+//                         console.log("AHHH", element.id);
+                    }
+                    
+                    //                     console.log("AHHH", element);
+                    //                    ret.x += element.parentElement.clientLeft;
+                    //                    ret.y += element.parentElement.clientTop;
+                    //                    ret.x -= par.offsetLeft;
+                    //                    ret.y -= par.offsetTop;
+                    
+//                    ret.x += element.clientLeft;
+//                    ret.y += element.clientTop;                   
+                    
+                    
+//                    ret.x += math.Number.parse(style.marginLeft, 0);
+//                    ret.y += math.Number.parse(style.marginTop, 0);
+//                    //                    
+//                                                            ret.x -= math.Number.parse(style.paddingLeft, 0);
+//                                                            ret.y -= math.Number.parse(style.paddingTop, 0);
+                    
+                    
+                    //                    ret.x -= element.parentElement.offsetLeft;
+                    //                    ret.y -= element.parentElement.offsetTop;
+                    //                    ret.x -= par.clientLeft;
+                    //                    ret.y -= par.clientTop;
+                    
+                    //                    ret.x -= element.parentElement.clientLeft;
+                    //                    ret.y -= element.parentElement.clientTop;
+                    
+                    //                    ret.x -= math.Number.parse(style.marginLeft, 0);
+                    //                    ret.y -= math.Number.parse(style.marginTop, 0);
+                    //                    ret.x += math.Number.parse(style.paddingLeft, 0);
+                    //                    ret.y += math.Number.parse(style.paddingTop, 0);
+                    
+                    //                    ret.x += math.Number.parse(parentStyle.marginLeft, 0);
+                    //                    ret.y += math.Number.parse(parentStyle.marginTop, 0);
+                    
+                    //                                       console.log("AHHH", element);
+                }
                 
                 //                ret.x -= element.parentElement.offsetLeft;
                 //                ret.y -= element.parentElement.offsetTop;
@@ -500,40 +577,40 @@ module jsidea.geom {
                     ret.y -= element.parentElement.offsetTop;
                 }
                 else {
-//                    ret.x -= element.parentElement.offsetLeft;
-//                    ret.y -= element.parentElement.offsetTop;
-//                     console.log("AHHH", element);
+                    //                    ret.x -= element.parentElement.offsetLeft;
+                    //                    ret.y -= element.parentElement.offsetTop;
+                    //                     console.log("AHHH", element);
                     
-                                ret.x -= par.offsetLeft;
-                                ret.y -= par.offsetTop;
+                    ret.x -= par.offsetLeft;
+                    ret.y -= par.offsetTop;
                 
-                //                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
-                //                ret.y += math.Number.parse(parentStyle.marginTop, 0);
+                    //                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
+                    //                ret.y += math.Number.parse(parentStyle.marginTop, 0);
                 
-//                                ret.x += par.clientLeft;
-//                                ret.y += par.clientTop;
+                    //                                ret.x += par.clientLeft;
+                    //                                ret.y += par.clientTop;
                 
-//                                ret.x += par.clientLeft;
-//                                ret.y += par.clientTop;
+                    //                                ret.x += par.clientLeft;
+                    //                                ret.y += par.clientTop;
                 
-                //                ret.x -= math.Number.parse(style.paddingLeft, 0);
-                //                ret.y -= math.Number.parse(style.paddingTop, 0);
+                    //                ret.x -= math.Number.parse(style.paddingLeft, 0);
+                    //                ret.y -= math.Number.parse(style.paddingTop, 0);
 
-//                                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
-//                                ret.y += math.Number.parse(parentStyle.marginTop, 0);
-//                
-//                                ret.x -= math.Number.parse(style.paddingLeft, 0);
-//                                ret.y -= math.Number.parse(style.paddingTop, 0);
+                    //                                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
+                    //                                ret.y += math.Number.parse(parentStyle.marginTop, 0);
+                    //                
+                    //                                ret.x -= math.Number.parse(style.paddingLeft, 0);
+                    //                                ret.y -= math.Number.parse(style.paddingTop, 0);
                 
-                //                ret.x -= element.parentElement.offsetLeft;
-                //                ret.y -= element.parentElement.offsetTop;
+                    //                ret.x -= element.parentElement.offsetLeft;
+                    //                ret.y -= element.parentElement.offsetTop;
                 
-//                                ret.x -= element.parentElement.clientLeft;
-//                                ret.y -= element.parentElement.clientTop;
+                    //                                ret.x -= element.parentElement.clientLeft;
+                    //                                ret.y -= element.parentElement.clientTop;
                 }
             }
             else {
-//                                            console.log("AHHH", element);
+                //                                            console.log("AHHH", element);
             }
             return ret;
         }
