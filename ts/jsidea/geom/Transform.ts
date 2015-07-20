@@ -370,8 +370,8 @@ module jsidea.geom {
                 else if (this.isFirefox) {
                     ret.x += document.documentElement.scrollLeft;
                     ret.y += document.documentElement.scrollTop;
-//                    ret.x += document.body.scrollLeft;
-//                    ret.y += document.body.scrollTop;
+                    //                    ret.x += document.body.scrollLeft;
+                    //                    ret.y += document.body.scrollTop;
                 }
 
 
@@ -391,11 +391,7 @@ module jsidea.geom {
                 //for webkit (if there is a wrong offserParent set,
                 //then the offsets are also wrong... arghhh)
                 //correct them here
-                if (this.isWebkit && par != element.offsetParent) {
-                    this.correctWebkitOffset(element, ret);
-                } else if (this.isFirefox) {
-                    this.correctFirefoxOffset(element, ret);
-                }
+                this.correctOffset(element, ret);
 
                 ret.x += par ? par.clientLeft : 0;
                 ret.y += par ? par.clientTop : 0;
@@ -405,16 +401,38 @@ module jsidea.geom {
             return ret;
         }
 
+        public static correctOffset(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            if (this.isWebkit) {
+                this.correctWebkitOffset(element, ret);
+            } else if (this.isFirefox) {
+                this.correctFirefoxOffset(element, ret);
+            }
+            return ret;
+        }
+
         public static correctFirefoxOffset(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             var style = window.getComputedStyle(element);
+            var par = this.extractOffsetParentReal(element);
+            var parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
+            
+            if (par && style.position == "absolute") {
+                ret.x += par.clientLeft;
+                ret.y += par.clientTop;
+            }
+            if (parentStyle && style.position == "fixed" && parentStyle.position == "fixed") {
 
-            if (style.position == "absolute") {
-                var par = this.extractOffsetParentReal(element);
-                if (par) {
-                    ret.x += par.clientLeft;
-                    ret.y += par.clientTop;
-                }
-                
+                ret.x -= element.parentElement.offsetLeft;
+                ret.y -= element.parentElement.offsetTop;
+                ret.x -= element.parentElement.clientLeft;
+                ret.y -= element.parentElement.clientTop;
+            }
+            if (par && parentStyle && style.position == "fixed" && parentStyle.position == "static") {
+                ret.x -= element.parentElement.offsetLeft;
+                ret.y -= element.parentElement.offsetTop;
+                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
+                ret.y += math.Number.parse(parentStyle.marginTop, 0);
+                ret.x += par.clientLeft;
+                ret.y += par.clientTop;
             }
 
             return ret;
@@ -455,8 +473,6 @@ module jsidea.geom {
                     ret.x -= par.offsetLeft;
                     ret.y -= par.offsetTop;
                 }
-                //                ret.x += element.offsetParent.clientLeft;
-                //                ret.y += element.offsetParent.clientTop;
             }
             else {
                 //                console.log("AHHH", element);
