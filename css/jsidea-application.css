@@ -15,7 +15,6 @@ body * {
 	/* perspective: 600px; */
 	/* transform-style: flat; */
 	/* box-sizing: border-box; */
-	
 }
 
 body {
@@ -72,18 +71,20 @@ canvas {
 	transform-style: flat;
 	perspective: 200px;
 	overflow: hidden; */
+	/* transform: translateX(0); */
 	/* transform: translateZ(-20px) rotate(30deg); */
 	overflow: scroll;
 }
 
 #content {
-	position: static;
+	position: relative;
 	width: 512px;
 	height: 512px;
 	border: 70px solid #FFFF00;
 	margin: 25px;
 	overflow: scroll;
-	transform: translateX(0);
+	/* transform: translateX(0); */
+	/* transform: translateX(0); */
 	/* left: 200px; */
 	/* transform: translateZ(-20px) rotateY(30deg);
 	transform-style: preserve-3d;
@@ -94,7 +95,7 @@ canvas {
 }
 
 #a-cont {
-	position: static;
+	position: relative;
 	border: 80px solid #00FFFF;
 	width: 512px;
 	height: 512px;
@@ -105,7 +106,7 @@ canvas {
 	/* transform-style: preserve-3d;
 	perspective: 600px; */
 	left: 64px;
-	transform: translateX(0);
+	/* transform: translateX(0); */
 	margin: 45px;
 	padding: 60px;
 }
@@ -116,7 +117,7 @@ canvas {
 	width: 512px;
 	padding: 45px;
 	margin: 35px;
-	transform: translateX(0);
+	/* transform: translateX(0); */
 	/* overflow: scroll; */
 	/* overflow: hidden; */
 	/* height: 512px; */
@@ -130,7 +131,7 @@ canvas {
 }
 
 #c-cont {
-	position: static;
+	position: relative;
 	/* overflow: hidden; */
 	/* margin: 10px; */
 	padding: 10px;
@@ -139,12 +140,13 @@ canvas {
 	height: 128px;
 	cursor: pointer;
 	overflow: scroll;
+	/* transform: translateX(100px); */
 	/* transform: translateZ(-800px) rotate(70deg); */
 }
 
 
 #d-cont {
-	/* position: absolute; */
+	position: relative;
 	border: 40px solid #883366;
 	width: 256px;
 	height: 256px;

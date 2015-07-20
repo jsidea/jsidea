@@ -285,8 +285,6 @@ module jsidea.geom {
         
         //TEST-AREA
         
-        
-        
         public static extractOffsetParentReal(element: HTMLElement): HTMLElement {
 
             if (!element || element == document.body || element == document.body.parentElement)
@@ -299,37 +297,13 @@ module jsidea.geom {
             element = element.parentElement;
             while (element && element != document.body) {
                 var style = window.getComputedStyle(element);
-                if (style.position == "absolute" || style.transform != "none")
+                if (style.position != "static" || style.transform != "none")
                     return element;
                 element = element.parentElement;
             }
 
             return document.body;
         }
-        
-        
-        //        //FOR WEBKIT AND IE11 (MAYBE firefox too)
-        //        public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-        //            if (!element || !element.parentElement)
-        //                return ret;
-        //
-        //            var style = window.getComputedStyle(element);
-        //            if (style.position == "absolute")// && style.transform == "none")
-        //                element = <HTMLElement> element.offsetParent;
-        //            else
-        //                element = element.parentElement;
-        //
-        //            while (element && element != document.body) {
-        //                var style = window.getComputedStyle(element);
-        //                ret.x += element.scrollLeft;
-        //                ret.y += element.scrollTop;
-        //                if (style.position == "absolute")// && style.transform == "none")
-        //                    element = <HTMLElement> element.offsetParent;
-        //                else
-        //                    element = element.parentElement;
-        //            }
-        //            return ret;
-        //        }
         
         //FOR WEBKIT AND IE11 (MAYBE firefox too)
         public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
@@ -358,45 +332,10 @@ module jsidea.geom {
             if (this.isWebkit)
                 return this.extractOffsetRealWebkit(element, ret);
             else
-                return this.extractOffsetRealFirefox(element, ret);
+                return this.extractOffsetRealWebkit(element, ret);
+            //                return this.extractOffsetRealFirefox(element, ret);
         }
-       
-        //FOR IE11
-        //        public static extractOffsetRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-        //            var sc = this.extractScrollReal(element);
-        //            ret.x -= sc.x;
-        //            ret.y -= sc.y;
-        //
-        //            while (element) {
-        //                ret.x += element.offsetLeft;
-        //                ret.y += element.offsetTop;
-        //                var par = this.extractOffsetParentReal(element);//element.offsetParent;
-        //                ret.x += par ? par.clientLeft : 0;
-        //                ret.y += par ? par.clientTop : 0;
-        //                element = <HTMLElement> par;
-        //            }
-        //
-        //            return ret;
-        //        }
-        
-        //FOR WEBKIT AND IE11
-        //        public static extractOffsetRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-        //            var sc = this.extractScrollReal(element);
-        //            ret.x -= sc.x;
-        //            ret.y -= sc.y;
-        //
-        //            while (element) {
-        //                ret.x += element.offsetLeft;
-        //                ret.y += element.offsetTop;
-        //                var par = this.extractOffsetParentReal(element);//element.offsetParent;
-        //                ret.x += par ? par.clientLeft : 0;
-        //                ret.y += par ? par.clientTop : 0;
-        //                element = <HTMLElement> par;
-        //            }
-        //
-        //            return ret;
-        //        }
-        
+
         public static extractOffsetRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             var sc = this.extractScrollReal(element);
             ret.x -= sc.x;
@@ -410,13 +349,29 @@ module jsidea.geom {
                 //for webkit (if there is a wrong offserParent set,
                 //then the offsets are also wrong... arghhh)
                 //correct them here
-                if (par != element.offsetParent) {
+                if (this.isWebkit && par != element.offsetParent) {
                     this.correctWebkitOffset(element, ret);
+                } else if (this.isFirefox) {
+                    this.correctFirefoxOffset(element, ret);
                 }
 
                 ret.x += par ? par.clientLeft : 0;
                 ret.y += par ? par.clientTop : 0;
                 element = <HTMLElement> par;
+            }
+
+            return ret;
+        }
+
+        public static correctFirefoxOffset(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            var style = window.getComputedStyle(element);
+
+            if (style.position == "absolute") {
+                var par = this.extractOffsetParentReal(element);
+                if (par) {
+                    ret.x += par.clientLeft;
+                    ret.y += par.clientTop;
+                }
             }
 
             return ret;
