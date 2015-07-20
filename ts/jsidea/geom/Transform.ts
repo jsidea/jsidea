@@ -196,76 +196,28 @@ module jsidea.geom {
 
             return matrix;
         }
-
-        //FOR WEBKIT AND IE11
         
-        //return one for subtract
-        //and 1 for add
-        //and 0 for don change offset (keep like firefox give it)
-        private static needBorderSubtract(element: HTMLElement): number {
-            if (!element || !element.parentElement)
-                return 0;
-
-            var style = window.getComputedStyle(element);
-            var parentStyle = window.getComputedStyle(element.parentElement);
-
-            var ret = 1;
-
-            var check = style.position == "absolute"
-                && parentStyle.position == "static"
-                && parentStyle.overflow == "scroll"
-                && element.offsetParent != element.parentElement.offsetParent;
-            if (style.boxSizing == "content-box" && check
-
-                ) {
-                return 1;
-            }
-            else if (style.boxSizing == "border-box" && !check) {
-                return -1;
-            }
-
-            return 0;
-            //            return element.id == "a-cont" ? ret : 0;
-        }
-        
-        //FOR WEBKIT AND IE11
+        //FOR WEBKIT AND IE11 (MAYBE firefox too)
         public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!element || !element.parentElement)
                 return ret;
 
             var style = window.getComputedStyle(element);
-            if (style.position != "static")
+//            if (style.position != "static")
+            if (style.position == "absolute")
                 element = <HTMLElement> element.offsetParent;
             else
                 element = element.parentElement;
-            
-            //            element = element.parentElement;
-            
-            //            var style = window.getComputedStyle(element);
-            //            var parentStyle = window.getComputedStyle(element.parentElement);
-            //            if (style.position != "static")
-            //                element = <HTMLElement> element.offsetParent;
-            //            else
-            //                element = element.parentElement;
 
-            var isUp = false;
             while (element && element != document.body) {
-
-                //                isUp = element.parentElement != element.offsetParent;
-                
                 var style = window.getComputedStyle(element);
-                var parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
-                //                if (style.position != "static") {
-                //                if (style.position != "static") {
                 ret.x += element.scrollLeft;
                 ret.y += element.scrollTop;
-                //                }
-
-                if (style.position != "static")
+//                if (style.position != "static")
+                if (style.position == "absolute")
                     element = <HTMLElement> element.offsetParent;
                 else
                     element = element.parentElement;
-                //                element = <HTMLElement> element.parentElement;
             }
             return ret;
         }
@@ -279,18 +231,6 @@ module jsidea.geom {
         
         //FOR WEBKIT AND IE11
         public static extractOffsetRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            
-            //            var style = window.getComputedStyle(element);
-            //            var usePar = style.position == "static";
-            //            if(!usePar)
-            //            {
-            //                usePar = element.offsetParent == element.parentElement;    
-            //            }
-            //            if(!usePar && element.offsetParent)
-            //            {
-            //                usePar = element.offsetParent == element.parentElement;    
-            //            }
-            //            var sc = this.extractScrollReal(usePar ? element.parentElement : element);
             var sc = this.extractScrollReal(element);
             ret.x -= sc.x;
             ret.y -= sc.y;
