@@ -313,6 +313,16 @@ module jsidea.geom {
             return document.body;
         }
 
+        private static extractIsFixedRealAsso(element: HTMLElement): boolean {
+            while(element && element != document.body)
+            {
+                if(this.extractIsFixedReal(element))
+                    return true;
+                element = element.parentElement;    
+            }
+            return false;
+        }
+        
         private static extractIsFixedReal(element: HTMLElement): boolean {
             var style = window.getComputedStyle(element);
             var isFixed = style.position == "fixed";
@@ -328,6 +338,7 @@ module jsidea.geom {
                     return false;
                 element = element.parentElement;
             }
+            //            console.log("REALLY FIXED");
             return true;
         }
         
@@ -335,6 +346,16 @@ module jsidea.geom {
         public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!element || !element.parentElement)
                 return ret;
+            
+            
+            //            if(this.extractIsFixedReal(element))
+            //            {
+            //                ret.x += document.body.scrollLeft;
+            //                ret.y += document.body.scrollTop;          
+            ////                console.log(document.body.scrollLeft, document.body.scrollTop);      
+            //            }
+            
+            
 
             var style = window.getComputedStyle(element);
             if (style.position == "absolute" || this.extractIsFixedReal(element))//style.position == "fixed")
@@ -358,6 +379,24 @@ module jsidea.geom {
             var sc = this.extractScrollReal(element);
             ret.x -= sc.x;
             ret.y -= sc.y;
+
+            //if is really fixed, then just make it fast
+            if (this.extractIsFixedRealAsso(element)) {
+                if (this.isIE) {
+                    ret.x += document.documentElement.scrollLeft;
+                    ret.y += document.documentElement.scrollTop;
+                }
+                else {
+                    ret.x += document.body.scrollLeft;
+                    ret.y += document.body.scrollTop;
+                }
+//                ret.x += element.offsetLeft;
+//                ret.y += element.offsetTop;
+//                
+//                var style = window.getComputedStyle(element);
+//                
+//                return ret;
+            }
 
             while (element && element != document.body) {
                 ret.x += element.offsetLeft;
@@ -403,30 +442,38 @@ module jsidea.geom {
 
             var style = window.getComputedStyle(element);
             if (par && style.position == "absolute") {
+                ret.x -= par.clientLeft;
+                ret.y -= par.clientTop;
                 ret.x += element.offsetParent.clientLeft;
                 ret.y += element.offsetParent.clientTop;
-                ret.x -= par ? par.clientLeft : 0;
-                ret.y -= par ? par.clientTop : 0;
             }
             else if (par && style.position == "static" && element.offsetParent == element.parentElement) {
-                ret.x -= par ? par.clientLeft : 0;
-                ret.y -= par ? par.clientTop : 0;
+                ret.x -= par.clientLeft;
+                ret.y -= par.clientTop;
                 var parentStyle = window.getComputedStyle(par);
                 ret.x -= math.Number.parse(parentStyle.marginLeft, 0);
                 ret.y -= math.Number.parse(parentStyle.marginTop, 0);
             }
             else if (par && style.position == "static" || style.position == "relative") {
-                ret.x -= par.offsetLeft;
-                ret.y -= par.offsetTop;
                 ret.x -= par.clientLeft;
                 ret.y -= par.clientTop;
+                ret.x -= par.offsetLeft;
+                ret.y -= par.offsetTop;
             }
             else if (par && style.position == "fixed" && !this.extractIsFixedReal(element)) {
                 ret.x -= par.clientLeft;
                 ret.y -= par.clientTop;
+
+                var parentStyle = window.getComputedStyle(par);
+                if (parentStyle.position != "static") {
+                    ret.x -= par.offsetLeft;
+                    ret.y -= par.offsetTop;
+                }
+                //                ret.x += element.offsetParent.clientLeft;
+                //                ret.y += element.offsetParent.clientTop;
             }
             else {
-                //                                console.log("AHHH", element);
+//                console.log("AHHH", element);
             }
             return ret;
         }
