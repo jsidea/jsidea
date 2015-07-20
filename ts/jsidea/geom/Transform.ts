@@ -309,7 +309,8 @@ module jsidea.geom {
             element = element.parentElement;
             while (element && element != document.body) {
                 var style = window.getComputedStyle(element);
-                if (style.transform != "none")// || style.position != "static")
+//                if (style.transform != "none")// || style.position != "static")
+                if (style.transform != "none" || style.position != "static")
                     return false;
                 element = element.parentElement;
             }
@@ -321,16 +322,6 @@ module jsidea.geom {
         public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!element || !element.parentElement)
                 return ret;
-            
-            
-            //            if(this.extractIsFixedReal(element))
-            //            {
-            //                ret.x += document.body.scrollLeft;
-            //                ret.y += document.body.scrollTop;          
-            ////                console.log(document.body.scrollLeft, document.body.scrollTop);      
-            //            }
-            
-            
 
             var style = window.getComputedStyle(element);
             if (style.position == "absolute" || this.extractIsFixedReal(element))//style.position == "fixed")
@@ -356,11 +347,11 @@ module jsidea.geom {
             ret.y -= sc.y;
 
             if (this.isIE) {
-                //            if (!this.isWebkit) {
                 ret.x += document.documentElement.scrollLeft;
                 ret.y += document.documentElement.scrollTop;
             }
 
+            //add scroll value only if reference of the element is the window not the body
             //if is really fixed, then just make it fast
             if (this.extractIsFixedRealAsso(element)) {
                 if (this.isWebkit) {
@@ -370,11 +361,7 @@ module jsidea.geom {
                 else if (this.isFirefox) {
                     ret.x += document.documentElement.scrollLeft;
                     ret.y += document.documentElement.scrollTop;
-                    //                    ret.x += document.body.scrollLeft;
-                    //                    ret.y += document.body.scrollTop;
                 }
-
-
             }
 
             if (this.isIE && this.extractIsFixedReal(element)) {
@@ -414,25 +401,58 @@ module jsidea.geom {
             var style = window.getComputedStyle(element);
             var par = this.extractOffsetParentReal(element);
             var parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
-            
+
             if (par && style.position == "absolute") {
                 ret.x += par.clientLeft;
                 ret.y += par.clientTop;
             }
-            if (parentStyle && style.position == "fixed" && parentStyle.position == "fixed") {
-
+            else if (parentStyle && style.position == "fixed" && parentStyle.position == "fixed") {
                 ret.x -= element.parentElement.offsetLeft;
                 ret.y -= element.parentElement.offsetTop;
                 ret.x -= element.parentElement.clientLeft;
                 ret.y -= element.parentElement.clientTop;
             }
-            if (par && parentStyle && style.position == "fixed" && parentStyle.position == "static") {
+            else if (par && parentStyle && style.position == "fixed" && parentStyle.position == "static") {
                 ret.x -= element.parentElement.offsetLeft;
                 ret.y -= element.parentElement.offsetTop;
                 ret.x += math.Number.parse(parentStyle.marginLeft, 0);
                 ret.y += math.Number.parse(parentStyle.marginTop, 0);
                 ret.x += par.clientLeft;
                 ret.y += par.clientTop;
+            }
+            else if (par && parentStyle && style.position == "fixed" && (parentStyle.position == "relative" || parentStyle.position == "absolute")) {
+                ret.x -= par.clientLeft;
+                ret.y -= par.clientTop;
+
+                ret.x -= math.Number.parse(style.marginLeft, 0);
+                ret.y -= math.Number.parse(style.marginTop, 0);
+                
+                //                ret.x -= element.parentElement.offsetLeft;
+                //                ret.y -= element.parentElement.offsetTop;
+                
+                //                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
+                //                ret.y += math.Number.parse(parentStyle.marginTop, 0);
+                
+                //                ret.x += par.clientLeft;
+                //                ret.y += par.clientTop;
+                
+                //                ret.x -= par.clientLeft;
+                //                ret.y -= par.clientTop;
+                
+                //                ret.x -= math.Number.parse(style.paddingLeft, 0);
+                //                ret.y -= math.Number.parse(style.paddingTop, 0);
+
+                //                ret.x += math.Number.parse(style.marginLeft, 0);
+                //                ret.y += math.Number.parse(style.marginTop, 0);
+                
+                //                ret.x -= math.Number.parse(style.paddingLeft, 0);
+                //                ret.y -= math.Number.parse(style.paddingTop, 0);
+                
+                //                ret.x -= element.parentElement.offsetLeft;
+                //                ret.y -= element.parentElement.offsetTop;
+                
+                //                ret.x -= element.parentElement.clientLeft;
+                //                ret.y -= element.parentElement.clientTop;
             }
 
             return ret;
@@ -468,14 +488,52 @@ module jsidea.geom {
                 ret.x -= par.clientLeft;
                 ret.y -= par.clientTop;
 
-                var parentStyle = window.getComputedStyle(par);
+                var parentStyle = window.getComputedStyle(element.parentElement);
                 if (parentStyle.position != "static") {
-                    ret.x -= par.offsetLeft;
-                    ret.y -= par.offsetTop;
+                    if (parentStyle.position == "relative" || parentStyle.position == "absolute") {
+                        ret.x += math.Number.parse(style.marginLeft, 0);
+                        ret.y += math.Number.parse(style.marginTop, 0);
+                        ret.x -= math.Number.parse(style.paddingLeft, 0);
+                        ret.y -= math.Number.parse(style.paddingTop, 0);
+                    }
+                    ret.x -= element.parentElement.offsetLeft;
+                    ret.y -= element.parentElement.offsetTop;
+                }
+                else {
+//                    ret.x -= element.parentElement.offsetLeft;
+//                    ret.y -= element.parentElement.offsetTop;
+//                     console.log("AHHH", element);
+                    
+                                ret.x -= par.offsetLeft;
+                                ret.y -= par.offsetTop;
+                
+                //                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
+                //                ret.y += math.Number.parse(parentStyle.marginTop, 0);
+                
+//                                ret.x += par.clientLeft;
+//                                ret.y += par.clientTop;
+                
+//                                ret.x += par.clientLeft;
+//                                ret.y += par.clientTop;
+                
+                //                ret.x -= math.Number.parse(style.paddingLeft, 0);
+                //                ret.y -= math.Number.parse(style.paddingTop, 0);
+
+//                                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
+//                                ret.y += math.Number.parse(parentStyle.marginTop, 0);
+//                
+//                                ret.x -= math.Number.parse(style.paddingLeft, 0);
+//                                ret.y -= math.Number.parse(style.paddingTop, 0);
+                
+                //                ret.x -= element.parentElement.offsetLeft;
+                //                ret.y -= element.parentElement.offsetTop;
+                
+//                                ret.x -= element.parentElement.clientLeft;
+//                                ret.y -= element.parentElement.clientTop;
                 }
             }
             else {
-                //                console.log("AHHH", element);
+//                                            console.log("AHHH", element);
             }
             return ret;
         }
