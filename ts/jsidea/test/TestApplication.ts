@@ -173,7 +173,7 @@ module jsidea.test {
             var res = "LOG-CHAIN\n";
             while (f) {
                 var st = window.getComputedStyle(f);
-                var s = geom.Transform.extractOffsetScroll(f);
+                var s = geom.Transform.scrollParent(f);
                 var calcedOff = geom.Transform.extractOffsetParentReal(f);
                 res += ([
                     text.Text.conc(10, " ", f.id ? f.id : f.nodeName),

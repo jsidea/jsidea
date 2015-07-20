@@ -263,6 +263,10 @@ module jsidea.geom {
         
         //TEST-AREA
         public static extractOffsetParentReal(element: HTMLElement): HTMLElement {
+            
+            //            return this.scrollParent(element);
+            
+            
             if (!element || element == document.body || element == document.body.parentElement)
                 return null;
 
@@ -287,7 +291,7 @@ module jsidea.geom {
         }
         
         //TEST-AREA
-        public static extractOffsetScroll(element: HTMLElement): HTMLElement {
+        public static scrollParent(element: HTMLElement): HTMLElement {
             if (!element || element == document.body || element == document.body.parentElement)
                 return null;
 
@@ -296,26 +300,69 @@ module jsidea.geom {
             }
 
 
+            //            if (element.id == "c-cont")
+            //                return document.getElementById("view");
 
-
-//            if (element.id == "c-cont")
-//                return document.getElementById("view");
-
-            var style = window.getComputedStyle(element);
+            //            var style = window.getComputedStyle(element);
+            
             //            if (this.extractIsFixedReal(element))
-            //                            if (style.position == "fixed")
             //                return document.body;
-
-            var isFixed = !this.extractIsFixedReal(element) && style.position == "fixed";
+            //            //                            if (style.position == "fixed")
+            //
+            //            element = element.parentElement;
+            //            while (element && element != document.body) {
+            //                var style = window.getComputedStyle(element);
+            //                var isFixed = !this.extractIsFixedReal(element) && style.position == "fixed";
+            //                if (style.transform != "none" || (style.overflow != "visible" && style.position != "static" && style.position != "relative"))
+            //                    return isFixed ? element.parentElement : element;
+            //                element = element.parentElement;
+            //            }
+            //
+            //            return document.body;
             element = element.parentElement;
+
+
+            var overflowRegex = /(auto|scroll)/;
+            var style = window.getComputedStyle(element);
+            var position = style.position;
+            var excludeStaticParent = position === "absolute";// || (position == "fixed" && this.extractIsFixedReal(element));
+            //            var scrollParent = this.parents().filter(function() {
+            //            var isFixedToAbsolute = position == "fixed" && !this.extractIsFixedReal(element);
+
+            //            if (isFixedToAbsolute)
+            //                excludeStaticParent = true;
+            
+            //            if(this.extractIsFixedReal(element))
+            //            {
+            //                console.log("REAL FIXED", element.id);    
+            //            }
+
+            var el = element;
+            var scrollParent = null;
             while (element && element != document.body) {
                 var style = window.getComputedStyle(element);
-                if (style.transform != "none" || (style.overflow != "visible" && style.position != "static" && style.position != "relative"))
-                    return isFixed ? element.parentElement : element;
+                if (excludeStaticParent && style.position === "static" && style.transform == "none") {
+
+                }
+                else {
+                    //style.transform != "none" || 
+                    if ((overflowRegex).test(style.overflow + style.overflowY + style.overflowX)) {
+                        scrollParent = element;
+                        break;
+                    }
+                }
                 element = element.parentElement;
             }
 
-            return document.body;
+            //            if (isFixedToAbsolute && scrollParent) {
+            //                return scrollParent.parentElement;    
+            //                console.log(element.id);
+            //            }
+
+            //            return position === "fixed" || !scrollParent ? (el.ownerDocument || document) : scrollParent;
+            return position !== "fixed" || !scrollParent ? document.body : scrollParent;
+            //            return this.extractIsFixedReal(el) || !scrollParent ? document.body : scrollParent;
+
         }
 
         private static extractIsFixedRealAsso(element: HTMLElement): boolean {
@@ -357,7 +404,7 @@ module jsidea.geom {
 
             var style = window.getComputedStyle(element);
             if (style.position != "static")// || this.extractIsFixedReal(element))//style.position == "fixed")
-                element = <HTMLElement> this.extractOffsetScroll(element);
+                element = <HTMLElement> this.scrollParent(element);
             else
                 element = element.parentElement;
 
@@ -366,7 +413,7 @@ module jsidea.geom {
                 ret.x += element.scrollLeft;
                 ret.y += element.scrollTop;
                 if (style.position != "static")// || this.extractIsFixedReal(element))//style.position == "fixed")
-                    element = <HTMLElement> this.extractOffsetScroll(element);
+                    element = <HTMLElement> this.scrollParent(element);
                 else
                     element = element.parentElement;
             }
@@ -511,6 +558,7 @@ module jsidea.geom {
                     ret.x -= element.parentElement.clientLeft;
                     ret.y -= element.parentElement.clientTop;
 
+
                 }
                 else {
                     //                    ret.x -= element.parentElement.offsetLeft;
@@ -602,10 +650,17 @@ module jsidea.geom {
             var parentStyle = window.getComputedStyle(element.parentElement);
             var parStyle = par ? window.getComputedStyle(par) : null;
 
+            //            console.log("AHHH", element);
+            
             if (style.position == "absolute" && parentStyle.position == "fixed")
                 return ret;
             else if (style.position == "fixed" && parentStyle.position == "static")
                 return ret;
+            else if (style.position == "fixed" && parentStyle.position == "absolute")
+                return ret;
+            else if (style.position == "fixed" && parentStyle.position == "fixed")
+                return ret;
+
 
             else if (par && style.position == "absolute") {
                 ret.x -= par.clientLeft;
@@ -646,6 +701,8 @@ module jsidea.geom {
                     
                     ret.x -= par.offsetLeft;
                     ret.y -= par.offsetTop;
+                    
+                    //                    console.log(element);
                 
                     //                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
                     //                ret.y += math.Number.parse(parentStyle.marginTop, 0);
