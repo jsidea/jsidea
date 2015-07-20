@@ -150,7 +150,7 @@ canvas {
 
 
 #d-cont {
-	position: absolute;
+	position: fixed;
 	border: 40px solid #883366;
 	width: 256px;
 	height: 256px;

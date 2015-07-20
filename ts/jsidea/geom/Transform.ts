@@ -271,8 +271,8 @@ module jsidea.geom {
             }
 
             var style = window.getComputedStyle(element);
-            if (this.extractIsFixedReal(element))
-                //            if (style.position == "fixed")
+//            if (this.extractIsFixedReal(element))
+                            if (style.position == "fixed")
                 return null;
 
             element = element.parentElement;
@@ -393,7 +393,7 @@ module jsidea.geom {
                 this.correctWebkitOffset(element, ret);
             } else if (this.isFirefox) {
                 this.correctFirefoxOffset(element, ret);
-                this.correctWebkitOffset(element, ret);
+                //                this.correctWebkitOffset(element, ret);
             }
             return ret;
         }
@@ -455,17 +455,16 @@ module jsidea.geom {
 
                 }
                 else {
-//                    ret.x -= element.parentElement.offsetLeft;
-//                    ret.y -= element.parentElement.offsetTop;
+                    //                    ret.x -= element.parentElement.offsetLeft;
+                    //                    ret.y -= element.parentElement.offsetTop;
                     var parStyle = par ? window.getComputedStyle(par) : null;
-                    if(element.parentElement != par && parStyle.position == "static")
-                    {
-//                        if(element.id == "a-cont")
-//                        {
+                    if (element.parentElement != par && parStyle.position == "static") {
+                        //                        if(element.id == "a-cont")
+                        //                        {
                         ret.x += par.clientLeft;
                         ret.y += par.clientTop;
-//                        }
-//                         console.log("AHHH", element.id);
+                        //                        }
+                        //                         console.log("AHHH", element.id);
                     }
                     
                     //                     console.log("AHHH", element);
@@ -474,15 +473,15 @@ module jsidea.geom {
                     //                    ret.x -= par.offsetLeft;
                     //                    ret.y -= par.offsetTop;
                     
-//                    ret.x += element.clientLeft;
-//                    ret.y += element.clientTop;                   
+                    //                    ret.x += element.clientLeft;
+                    //                    ret.y += element.clientTop;                   
                     
                     
-//                    ret.x += math.Number.parse(style.marginLeft, 0);
-//                    ret.y += math.Number.parse(style.marginTop, 0);
-//                    //                    
-//                                                            ret.x -= math.Number.parse(style.paddingLeft, 0);
-//                                                            ret.y -= math.Number.parse(style.paddingTop, 0);
+                    //                    ret.x += math.Number.parse(style.marginLeft, 0);
+                    //                    ret.y += math.Number.parse(style.marginTop, 0);
+                    //                    //                    
+                    //                                                            ret.x -= math.Number.parse(style.paddingLeft, 0);
+                    //                                                            ret.y -= math.Number.parse(style.paddingTop, 0);
                     
                     
                     //                    ret.x -= element.parentElement.offsetLeft;
@@ -542,7 +541,15 @@ module jsidea.geom {
                 return ret;
 
             var style = window.getComputedStyle(element);
-            if (par && style.position == "absolute") {
+            var parentStyle = window.getComputedStyle(element.parentElement);
+            var parStyle = par ? window.getComputedStyle(par) : null;
+            
+            if(style.position == "absolute" && parentStyle.position == "fixed")
+                return ret;
+            else if(style.position == "fixed" && parentStyle.position == "static")
+                return ret;
+            
+            else if (par && style.position == "absolute") {
                 ret.x -= par.clientLeft;
                 ret.y -= par.clientTop;
                 ret.x += element.offsetParent.clientLeft;
@@ -551,9 +558,8 @@ module jsidea.geom {
             else if (par && style.position == "static" && element.offsetParent == element.parentElement) {
                 ret.x -= par.clientLeft;
                 ret.y -= par.clientTop;
-                var parentStyle = window.getComputedStyle(par);
-                ret.x -= math.Number.parse(parentStyle.marginLeft, 0);
-                ret.y -= math.Number.parse(parentStyle.marginTop, 0);
+                ret.x -= math.Number.parse(parStyle.marginLeft, 0);
+                ret.y -= math.Number.parse(parStyle.marginTop, 0);
             }
             else if (par && style.position == "static" || style.position == "relative") {
                 ret.x -= par.clientLeft;
@@ -565,13 +571,12 @@ module jsidea.geom {
                 ret.x -= par.clientLeft;
                 ret.y -= par.clientTop;
 
-                var parentStyle = window.getComputedStyle(element.parentElement);
                 if (parentStyle.position != "static") {
                     if (parentStyle.position == "relative" || parentStyle.position == "absolute") {
-                        ret.x += math.Number.parse(style.marginLeft, 0);
-                        ret.y += math.Number.parse(style.marginTop, 0);
-                        ret.x -= math.Number.parse(style.paddingLeft, 0);
-                        ret.y -= math.Number.parse(style.paddingTop, 0);
+//                        ret.x += math.Number.parse(style.marginLeft, 0);
+//                        ret.y += math.Number.parse(style.marginTop, 0);
+//                        ret.x -= math.Number.parse(style.paddingLeft, 0);
+//                        ret.y -= math.Number.parse(style.paddingTop, 0);
                     }
                     ret.x -= element.parentElement.offsetLeft;
                     ret.y -= element.parentElement.offsetTop;
@@ -607,10 +612,11 @@ module jsidea.geom {
                 
                     //                                ret.x -= element.parentElement.clientLeft;
                     //                                ret.y -= element.parentElement.clientTop;
+//                    console.log("AAAA", element.id);
                 }
             }
             else {
-                //                                            console.log("AHHH", element);
+                console.log("WEBKIT-NO-BUG", element);
             }
             return ret;
         }
