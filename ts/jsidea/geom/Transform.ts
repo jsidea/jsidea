@@ -382,13 +382,13 @@ module jsidea.geom {
 
             //if is really fixed, then just make it fast
             if (this.extractIsFixedRealAsso(element)) {
-                if (this.isIE) {
-                    ret.x += document.documentElement.scrollLeft;
-                    ret.y += document.documentElement.scrollTop;
-                }
-                else {
+                if (this.isWebkit) {
                     ret.x += document.body.scrollLeft;
                     ret.y += document.body.scrollTop;
+                }
+                else {
+                    ret.x += document.documentElement.scrollLeft;
+                    ret.y += document.documentElement.scrollTop;
                 }
 //                ret.x += element.offsetLeft;
 //                ret.y += element.offsetTop;
