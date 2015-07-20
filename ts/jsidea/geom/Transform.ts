@@ -139,45 +139,7 @@ module jsidea.geom {
             //------
             //offset
             //------
-
-            //            var offset = new geom.Point2D(element.offsetLeft, element.offsetTop);
-
-
-            
-
             var offset = this.extractOffset(node);
-            //            console.log(offset);
-
-            //            if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
-            //                offset = this.extractOffset(element.parentElement, offset);
-            ////                offset.x -= element.parentElement.clientLeft;
-            ////                offset.y -= element.parentElement.clientTop;
-            //            }
-            //            else {
-            //                offset.x += element.parentElement.clientLeft;
-            //                offset.y += element.parentElement.clientTop;
-            //            }
-
-            
-            //add scrolling offsets
-            //webkit has the scroll-values set on html not on the body?
-            //            if (this.isWebkit) {
-            //                if (false && node.parent.element != document.body) {
-            //                    //                    if (node.style.display != "static") {
-            //                    if (node.element.offsetParent != node.parent.element) {
-            //                        offset.x -= node.parent.element.scrollLeft;
-            //                        offset.y -= node.parent.element.scrollTop;
-            //                    }
-            //                    else {
-            //                        offset.x -= node.element.scrollLeft;
-            //                        offset.y -= node.element.scrollTop;
-            //                    }
-            //                }
-            //            }
-            //            else if (node.element != document.body) {
-            //                offset.x -= node.parent.element.scrollLeft;
-            //                offset.y -= node.parent.element.scrollTop;
-            //            }
 
             //append the offset to the transform-matrix
             matrix.appendPositionRaw(offset.x, offset.y, 0);
@@ -203,6 +165,10 @@ module jsidea.geom {
         private static extractOffset(node: INodeStyle): geom.Point2D {
 
             var off = this.extractOffsetReal(node.element);
+            
+            if(this.isIE && this.extractIsFixedReal(node.element))
+                return off;
+            
             var off2 = this.extractOffsetReal(node.parent ? node.parent.element : null);
 
             return off.sub(off2);
@@ -250,9 +216,17 @@ module jsidea.geom {
                     matrices.push(m);
                 }
                 
-                //                if(node.parent && node.parent.style.position == "fixed")
-                //                    break;
+                //                                if(node.parent && node.parent.style.position == "fixed")
                 
+                if (this.isIE) {
+//                    if (node.parent && this.extractIsFixedReal(node.parent.element))
+                    if (node && this.extractIsFixedReal(node.element))
+                    {
+//                        last = m;
+                        break;
+                        }
+                }
+
                 node = node.parent;
             }
             if (last)
@@ -314,15 +288,17 @@ module jsidea.geom {
         }
 
         private static extractIsFixedRealAsso(element: HTMLElement): boolean {
-            while(element && element != document.body)
-            {
-                if(this.extractIsFixedReal(element))
+            if (this.isIE)
+                return this.extractIsFixedReal(element);
+
+            while (element && element != document.body) {
+                if (this.extractIsFixedReal(element))
                     return true;
-                element = element.parentElement;    
+                element = element.parentElement;
             }
             return false;
         }
-        
+
         private static extractIsFixedReal(element: HTMLElement): boolean {
             var style = window.getComputedStyle(element);
             var isFixed = style.position == "fixed";
@@ -390,12 +366,14 @@ module jsidea.geom {
                     ret.x += document.documentElement.scrollLeft;
                     ret.y += document.documentElement.scrollTop;
                 }
-//                ret.x += element.offsetLeft;
-//                ret.y += element.offsetTop;
-//                
-//                var style = window.getComputedStyle(element);
-//                
-//                return ret;
+
+
+            }
+
+            if (this.isIE && this.extractIsFixedReal(element)) {
+                ret.x += element.offsetLeft;
+                ret.y += element.offsetTop;
+                return ret;
             }
 
             while (element && element != document.body) {
@@ -473,7 +451,7 @@ module jsidea.geom {
                 //                ret.y += element.offsetParent.clientTop;
             }
             else {
-//                console.log("AHHH", element);
+                //                console.log("AHHH", element);
             }
             return ret;
         }
