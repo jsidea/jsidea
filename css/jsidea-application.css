@@ -79,7 +79,7 @@ canvas {
 }
 
 #content {
-	position: static;
+	position: absolute;
 	width: 512px;
 	height: 512px;
 	border: 30px solid #FFFF00;
@@ -99,7 +99,7 @@ canvas {
 }
 
 #a-cont {
-	position: fixed;
+	position: relative;
 	border: 35px solid #00FFFF;
 	width: 512px;
 	height: 512px;
@@ -150,7 +150,7 @@ canvas {
 
 
 #d-cont {
-	position: fixed;
+	position: static;
 	border: 40px solid #883366;
 	width: 256px;
 	height: 256px;

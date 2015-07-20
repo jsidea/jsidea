@@ -273,12 +273,40 @@ module jsidea.geom {
             var style = window.getComputedStyle(element);
 //            if (this.extractIsFixedReal(element))
                             if (style.position == "fixed")
-                return null;
+                return document.body;
 
             element = element.parentElement;
             while (element && element != document.body) {
                 var style = window.getComputedStyle(element);
                 if (style.position != "static" || style.transform != "none")
+                    return element;
+                element = element.parentElement;
+            }
+
+            return document.body;
+        }
+        
+        //TEST-AREA
+        public static extractOffsetScroll(element: HTMLElement): HTMLElement {
+            if (!element || element == document.body || element == document.body.parentElement)
+                return null;
+
+            if (this.isIE) {
+                return <HTMLElement> element.offsetParent;
+            }
+
+//            if(element.id == "a-cont")
+//            return document.getElementById("content");
+            
+//            var style = window.getComputedStyle(element);
+//            if (this.extractIsFixedReal(element))
+//                            if (style.position == "fixed")
+//                return document.body;
+
+            element = element.parentElement;
+            while (element && element != document.body) {
+                var style = window.getComputedStyle(element);
+                if (style.transform != "none" || style.overflow == "visible")
                     return element;
                 element = element.parentElement;
             }
@@ -324,8 +352,8 @@ module jsidea.geom {
                 return ret;
 
             var style = window.getComputedStyle(element);
-            if (style.position == "absolute" || this.extractIsFixedReal(element))//style.position == "fixed")
-                element = <HTMLElement> this.extractOffsetParentReal(element);
+            if (style.position != "static")// || this.extractIsFixedReal(element))//style.position == "fixed")
+                element = <HTMLElement> this.extractOffsetScroll(element);
             else
                 element = element.parentElement;
 
@@ -333,13 +361,36 @@ module jsidea.geom {
                 var style = window.getComputedStyle(element);
                 ret.x += element.scrollLeft;
                 ret.y += element.scrollTop;
-                if (style.position == "absolute" || this.extractIsFixedReal(element))//style.position == "fixed")
-                    element = <HTMLElement> this.extractOffsetParentReal(element);
+                if (style.position != "static")// || this.extractIsFixedReal(element))//style.position == "fixed")
+                    element = <HTMLElement> this.extractOffsetScroll(element);
                 else
                     element = element.parentElement;
             }
             return ret;
         }
+        
+//        //FOR WEBKIT AND IE11 (MAYBE firefox too)
+//        public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+//            if (!element || !element.parentElement)
+//                return ret;
+//
+//            var style = window.getComputedStyle(element);
+//            if (style.position != "static")// || this.extractIsFixedReal(element))//style.position == "fixed")
+//                element = <HTMLElement> this.extractOffsetScroll(element);
+//            else
+//                element = element.parentElement;
+//
+//            while (element && element != document.body) {
+//                var style = window.getComputedStyle(element);
+//                ret.x += element.scrollLeft;
+//                ret.y += element.scrollTop;
+//                if (style.position != "static")// || this.extractIsFixedReal(element))//style.position == "fixed")
+//                    element = <HTMLElement> this.extractOffsetScroll(element);
+//                else
+//                    element = element.parentElement;
+//            }
+//            return ret;
+//        }
 
         public static extractOffsetReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             var sc = this.extractScrollReal(element);
