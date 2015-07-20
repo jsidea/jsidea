@@ -2,6 +2,8 @@ module jsidea.geom {
     interface INodeStyle {
         parent: INodeStyle;
         element: HTMLElement;
+        offsetX: number;
+        offsetY: number;
         style: CSSStyleDeclaration;
     }
     export class Transform {
@@ -142,7 +144,7 @@ module jsidea.geom {
 
             
 
-            var offset = this.extractOffset(element);
+            var offset = this.extractOffset(node);
             //            console.log(offset);
 
             //            if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
@@ -196,172 +198,13 @@ module jsidea.geom {
 
             return matrix;
         }
-        
-        //FOR WEBKIT AND IE11 (MAYBE firefox too)
-        public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            if (!element || !element.parentElement)
-                return ret;
 
-            var style = window.getComputedStyle(element);
-//            if (style.position != "static")
-            if (style.position == "absolute")
-                element = <HTMLElement> element.offsetParent;
-            else
-                element = element.parentElement;
+        private static extractOffset(node: INodeStyle): geom.Point2D {
 
-            while (element && element != document.body) {
-                var style = window.getComputedStyle(element);
-                ret.x += element.scrollLeft;
-                ret.y += element.scrollTop;
-//                if (style.position != "static")
-                if (style.position == "absolute")
-                    element = <HTMLElement> element.offsetParent;
-                else
-                    element = element.parentElement;
-            }
-            return ret;
-        }
+            var off = this.extractOffsetReal(node.element);
+            var off2 = this.extractOffsetReal(node.parent ? node.parent.element : null);
 
-        public static extractOffsetReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            if (this.isWebkit)
-                return this.extractOffsetRealWebkit(element, ret);
-            else
-                return this.extractOffsetRealFirefox(element, ret);
-        }
-        
-        //FOR WEBKIT AND IE11
-        public static extractOffsetRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            var sc = this.extractScrollReal(element);
-            ret.x -= sc.x;
-            ret.y -= sc.y;
-
-            while (element) {
-                ret.x += element.offsetLeft;
-                ret.y += element.offsetTop;
-                ret.x += element.offsetParent ? element.offsetParent.clientLeft : 0;
-                ret.y += element.offsetParent ? element.offsetParent.clientTop : 0;
-                element = <HTMLElement> element.offsetParent;
-            }
-
-            return ret;
-        }
-        
-        //FOR WEBKIT AND IE11
-        public static extractOffsetRealFirefox(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            var sc = this.extractScrollReal(element);
-            ret.x -= sc.x;
-            ret.y -= sc.y;
-
-            while (element) {
-                ret.x += element.offsetLeft;
-                ret.y += element.offsetTop;
-                ret.x += element.offsetParent ? element.offsetParent.clientLeft : 0;
-                ret.y += element.offsetParent ? element.offsetParent.clientTop : 0;
-                element = <HTMLElement> element.offsetParent;
-            }
-
-            return ret;
-        }
-        
-        //FOR WEBKIT AND IE11
-        private static extractOffset(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-
-            ret.x = element.offsetLeft;
-            ret.y = element.offsetTop;
-            ret.x -= element.parentElement.offsetLeft;
-            ret.y -= element.parentElement.offsetTop;
-
-            //            var sub = 0;
-            //            if (this.isFirefox) {
-            //                if (element.offsetParent && (sub = this.needBorderSubtract(element))) {
-            //                    ret.x += sub * element.offsetParent.clientLeft;
-            //                    ret.y += sub * element.offsetParent.clientTop;
-            //                }
-            //            }
-            //
-            //            if (element.parentElement && element.offsetParent && element.offsetParent != element.parentElement) {
-            //                if (this.isFirefox) {
-            //                    //
-            //                    if (element.parentElement.offsetParent && (sub = this.needBorderSubtract(element.parentElement))) {
-            //
-            //                        ret.x -= element.parentElement.offsetLeft + sub * element.parentElement.offsetParent.clientLeft;
-            //                        ret.y -= element.parentElement.offsetTop + sub * element.parentElement.offsetParent.clientTop;
-            //                    }
-            //                    else {
-            //                        ret.x -= element.parentElement.offsetLeft;
-            //                        ret.y -= element.parentElement.offsetTop;
-            //                    }
-            //                }
-            //                else {
-            //                    ret.x -= element.parentElement.offsetLeft;
-            //                    ret.y -= element.parentElement.offsetTop;
-            //                }
-            //            }
-            //            else {
-            //                ret.x += element.parentElement.clientLeft;
-            //                ret.y += element.parentElement.clientTop;
-            //            }
-            return ret;
-        }
-
-        private static extractOffset2(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            if (
-                (window.getComputedStyle(element).boxSizing == "border-box")
-                && element.parentElement
-                && element.offsetParent
-                ) {
-
-
-                if (element.id != "a-cont") {
-                    ret.x -= element.offsetParent.clientLeft;
-                    ret.y -= element.offsetParent.clientTop;
-                }
-                //                    
-                //                                    console.log("BUG-FIX-C: add offsetParentClient " + (element.id ? element.id : element.nodeName));
-
-            }
-
-            //            if (this.isFirefox) {
-            //                if ((style.position == "absolute" || style.position == "relative") && parentStyle.overflow != "visible" && parentStyle.position != "static") {
-            //                    offsetX += element.parentElement.clientLeft;
-            //                    offsetY += element.parentElement.clientTop;
-            //                    console.log("BUG-FIX-A: add borderParentClient");
-            //                }
-            //
-            //                if (
-            //                    (style.boxSizing == "border-box")
-            //                    && element.parentElement
-            //                    && element.offsetParent
-            //                    ) {
-            //
-            //
-            //                    if (element.id != "a-cont") {
-            //                        offsetX -= element.offsetParent.clientLeft;
-            //                        offsetY -= element.offsetParent.clientTop;
-            //                    }
-            ////                    
-            ////                    console.log("BUG-FIX-C: add offsetParentClient " + (element.id ? element.id : element.nodeName));
-            //
-            //                }
-            //
-            //                else if (
-            //                    (style.position == "absolute" || style.position == "relative")
-            //                    && parentStyle.position == "static"
-            //                    && element.parentElement
-            //                    && element.offsetParent
-            //                    && element.offsetParent != element.parentElement
-            //                    && window.getComputedStyle(element.offsetParent).overflow != "visible"
-            //                    ) {
-            //
-            //                    offsetX += element.offsetParent.clientLeft;
-            //                    offsetY += element.offsetParent.clientTop;
-            //
-            //                    console.log("BUG-FIX-B: add offsetParentClient " + (element.id ? element.id : element.nodeName));
-            //
-            //                }
-            //            }    
-            
-            return ret;
+            return off.sub(off2);
         }
 
         private static extractStyleChain(element: HTMLElement, root: HTMLElement = null): INodeStyle {
@@ -373,7 +216,9 @@ module jsidea.geom {
                 var node = {
                     element: element,
                     style: window.getComputedStyle(element),
-                    parent: null
+                    parent: null,
+                    offsetX: 0,
+                    offsetY: 0,
                 };
                 if (!leaf)
                     leaf = node;
@@ -434,6 +279,139 @@ module jsidea.geom {
                 preserve3d = this.isAccumulatable(parent.parent);
 
             return preserve3d;
+        }
+        
+        
+        
+        //TEST-AREA
+        
+        
+        
+        public static extractOffsetParentReal(element: HTMLElement): HTMLElement {
+
+            if (!element)
+                return null;
+
+            var style = window.getComputedStyle(element);
+            if (style.position == "fixed")
+                return null;
+
+            element = element.parentElement;
+            while (element && element != document.body) {
+                var style = window.getComputedStyle(element);
+                if (style.position == "absolute" || style.transform != "none")
+                    return element;
+                element = element.parentElement;
+            }
+
+            return null;
+        }
+        
+        
+//        //FOR WEBKIT AND IE11 (MAYBE firefox too)
+//        public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+//            if (!element || !element.parentElement)
+//                return ret;
+//
+//            var style = window.getComputedStyle(element);
+//            if (style.position == "absolute")// && style.transform == "none")
+//                element = <HTMLElement> element.offsetParent;
+//            else
+//                element = element.parentElement;
+//
+//            while (element && element != document.body) {
+//                var style = window.getComputedStyle(element);
+//                ret.x += element.scrollLeft;
+//                ret.y += element.scrollTop;
+//                if (style.position == "absolute")// && style.transform == "none")
+//                    element = <HTMLElement> element.offsetParent;
+//                else
+//                    element = element.parentElement;
+//            }
+//            return ret;
+//        }
+        
+        //FOR WEBKIT AND IE11 (MAYBE firefox too)
+        public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            if (!element || !element.parentElement)
+                return ret;
+
+            var style = window.getComputedStyle(element);
+            if (style.position == "absolute")// && style.transform == "none")
+                element = <HTMLElement> this.extractOffsetParentReal(element);
+            else
+                element = element.parentElement;
+
+            while (element && element != document.body) {
+                var style = window.getComputedStyle(element);
+                ret.x += element.scrollLeft;
+                ret.y += element.scrollTop;
+                if (style.position == "absolute")// && style.transform == "none")
+                    element = <HTMLElement> this.extractOffsetParentReal(element);
+                else
+                    element = element.parentElement;
+            }
+            return ret;
+        }
+
+        public static extractOffsetReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            if (this.isWebkit)
+                return this.extractOffsetRealWebkit(element, ret);
+            else
+                return this.extractOffsetRealFirefox(element, ret);
+        }
+       
+         //FOR IE11
+//        public static extractOffsetRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+//            var sc = this.extractScrollReal(element);
+//            ret.x -= sc.x;
+//            ret.y -= sc.y;
+//
+//            while (element) {
+//                ret.x += element.offsetLeft;
+//                ret.y += element.offsetTop;
+//                var par = this.extractOffsetParentReal(element);//element.offsetParent;
+//                ret.x += par ? par.clientLeft : 0;
+//                ret.y += par ? par.clientTop : 0;
+//                element = <HTMLElement> par;
+//            }
+//
+//            return ret;
+//        }
+        
+        //FOR WEBKIT AND IE11
+        public static extractOffsetRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            var sc = this.extractScrollReal(element);
+            ret.x -= sc.x;
+            ret.y -= sc.y;
+
+            while (element) {
+                ret.x += element.offsetLeft;
+                ret.y += element.offsetTop;
+                var par = this.extractOffsetParentReal(element);//element.offsetParent;
+                ret.x += par ? par.clientLeft : 0;
+                ret.y += par ? par.clientTop : 0;
+                element = <HTMLElement> par;
+            }
+
+            return ret;
+        }
+        
+        //FOR WEBKIT AND IE11
+        public static extractOffsetRealFirefox(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            var sc = this.extractScrollReal(element);
+            ret.x -= sc.x;
+            ret.y -= sc.y;
+
+            while (element) {
+                ret.x += element.offsetLeft;
+                ret.y += element.offsetTop;
+                ret.x += element.offsetParent ? element.offsetParent.clientLeft : 0;
+                ret.y += element.offsetParent ? element.offsetParent.clientTop : 0;
+                element = <HTMLElement> element.offsetParent;
+            }
+
+            return ret;
         }
     }
 }

@@ -58,13 +58,13 @@ module jsidea.test {
             document.addEventListener("tick",(evt) => {
                 ctx.clearRect(0, 0, can.width, can.height);
                 
-                //                this.drawBoundingBox(ctx, con);
-                //                this.drawBoundingBox(ctx, a);
-                //                this.drawBoundingBox(ctx, b);
-                //                this.drawBoundingBox(ctx, c);
-                //                this.drawBoundingBox(ctx, d);
-                //                this.drawBoundingBox(ctx, vie);
-                //                this.drawBoundingBox(ctx, can);
+                this.drawBoundingBox(ctx, con);
+                this.drawBoundingBox(ctx, a);
+                this.drawBoundingBox(ctx, b);
+                this.drawBoundingBox(ctx, c);
+                this.drawBoundingBox(ctx, d);
+                this.drawBoundingBox(ctx, vie);
+                this.drawBoundingBox(ctx, can);
                 
                 this.drawOffsetChain(ctx, d);
             });
@@ -173,9 +173,11 @@ module jsidea.test {
             var res = "LOG-CHAIN\n";
             while (f) {
                 var st = window.getComputedStyle(f);
+                var calcedOff = geom.Transform.extractOffsetParentReal(f);
                 res += ([
                     text.Text.conc(10, " ", f.id ? f.id : f.nodeName),
                     text.Text.conc(20, " ", "PARENT", f.offsetParent ? (f.offsetParent.id ? f.offsetParent.id : f.offsetParent.nodeName) : "NONE"),
+                    text.Text.conc(20, " ", "PARENT-C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
                     text.Text.conc(20, " ", "OFFSET", f.offsetLeft, f.offsetTop, f.offsetLeft - (f.offsetParent ? f.offsetParent.clientLeft : 0)),
                     text.Text.conc(20, " ", "MARGIN", st.marginLeft, st.marginTop),
                     text.Text.conc(20, " ", "BORDER", st.borderLeftWidth, st.borderTopWidth),

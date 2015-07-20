@@ -14,7 +14,7 @@ body * {
 	/* transform-style: flat; */
 	/* perspective: 600px; */
 	/* transform-style: flat; */
-	box-sizing: border-box;
+	/* box-sizing: border-box; */
 	
 }
 
@@ -67,6 +67,7 @@ canvas {
 	/* left: 100px;
 	top: 100px; */
 	border: 20px solid #FF00FF;
+	/* transform: rotate(30deg); */
 	/* transform: translateZ(-20px) rotateY(30deg);
 	transform-style: flat;
 	perspective: 200px;
@@ -76,12 +77,13 @@ canvas {
 }
 
 #content {
-	position: static;
+	/* position: absolute; */
 	width: 512px;
 	height: 512px;
 	border: 70px solid #FFFF00;
 	margin: 25px;
 	overflow: scroll;
+	transform: translateX(0);
 	/* left: 200px; */
 	/* transform: translateZ(-20px) rotateY(30deg);
 	transform-style: preserve-3d;
@@ -125,7 +127,7 @@ canvas {
 }
 
 #c-cont {
-	position: fixed;
+	position: absolute;
 	/* overflow: hidden; */
 	/* margin: 10px; */
 	padding: 10px;
@@ -139,7 +141,7 @@ canvas {
 
 
 #d-cont {
-	position: fixed;
+	position: absolute;
 	border: 40px solid #883366;
 	width: 256px;
 	height: 256px;
