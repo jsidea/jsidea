@@ -165,10 +165,10 @@ module jsidea.geom {
         private static extractOffset(node: INodeStyle): geom.Point2D {
 
             var off = this.extractOffsetReal(node.element);
-            
-            if(this.isIE && this.extractIsFixedReal(node.element))
+
+            if (this.isIE && this.extractIsFixedReal(node.element))
                 return off;
-            
+
             var off2 = this.extractOffsetReal(node.parent ? node.parent.element : null);
 
             return off.sub(off2);
@@ -219,12 +219,11 @@ module jsidea.geom {
                 //                                if(node.parent && node.parent.style.position == "fixed")
                 
                 if (this.isIE) {
-//                    if (node.parent && this.extractIsFixedReal(node.parent.element))
-                    if (node && this.extractIsFixedReal(node.element))
-                    {
-//                        last = m;
+                    //                    if (node.parent && this.extractIsFixedReal(node.parent.element))
+                    if (node && this.extractIsFixedReal(node.element)) {
+                        //                        last = m;
                         break;
-                        }
+                    }
                 }
 
                 node = node.parent;
@@ -310,7 +309,7 @@ module jsidea.geom {
             element = element.parentElement;
             while (element && element != document.body) {
                 var style = window.getComputedStyle(element);
-                if (style.transform != "none")
+                if (style.transform != "none")// || style.position != "static")
                     return false;
                 element = element.parentElement;
             }
@@ -356,15 +355,23 @@ module jsidea.geom {
             ret.x -= sc.x;
             ret.y -= sc.y;
 
+            if (this.isIE) {
+                //            if (!this.isWebkit) {
+                ret.x += document.documentElement.scrollLeft;
+                ret.y += document.documentElement.scrollTop;
+            }
+
             //if is really fixed, then just make it fast
             if (this.extractIsFixedRealAsso(element)) {
                 if (this.isWebkit) {
                     ret.x += document.body.scrollLeft;
                     ret.y += document.body.scrollTop;
                 }
-                else {
+                else if (this.isFirefox) {
                     ret.x += document.documentElement.scrollLeft;
                     ret.y += document.documentElement.scrollTop;
+//                    ret.x += document.body.scrollLeft;
+//                    ret.y += document.body.scrollTop;
                 }
 
 
@@ -407,6 +414,7 @@ module jsidea.geom {
                     ret.x += par.clientLeft;
                     ret.y += par.clientTop;
                 }
+                
             }
 
             return ret;
