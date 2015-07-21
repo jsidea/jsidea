@@ -66,7 +66,7 @@ canvas {
 	/* left: 100px;
 	top: 100px; */
 	border: 40px solid #FF00FF;
-	transform: translateX(0);
+	/* transform: translateX(0); */
 	/* transform: rotate(45deg); */
 	/* transform: rotate(30deg); */
 	/* transform: translateZ(-20px) rotateY(30deg);
@@ -79,7 +79,7 @@ canvas {
 }
 
 #content {
-	position: fixed;
+	position: static;
 	width: 512px;
 	height: 512px;
 	border: 30px solid #FFFF00;
@@ -99,7 +99,7 @@ canvas {
 }
 
 #a-cont {
-	position: relative;
+	position: static;
 	border: 35px solid #00FFFF;
 	width: 512px;
 	height: 512px;
@@ -135,7 +135,7 @@ canvas {
 }
 
 #c-cont {
-	position: fixed;
+	position: relative;
 	/* overflow: hidden; */
 	/* margin: 10px; */
 	padding: 10px;
