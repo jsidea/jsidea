@@ -18,6 +18,7 @@ module jsidea.geom {
         isRelative: boolean;
         isAbsolute: boolean;
         isStatic: boolean;
+        isScrollable: boolean;
         isFixed: boolean;
         isSticked: boolean;
         isTransformed: boolean;
@@ -200,6 +201,7 @@ module jsidea.geom {
                     isRelative: style.position == "relative",
                     isAbsolute: style.position == "absolute",
                     isStatic: style.position == "static",
+                    isScrollable: style.position != "visible",
                     isSticked: false,
                     isFixedAssociative: false,
                     isFixedToAbsolute: false,
@@ -312,10 +314,11 @@ module jsidea.geom {
         
         //TEST-AREA
         public static getParentOffset(node: INodeStyle): INodeStyle {
-            if (!node || node.element == document.body || node.element == document.body.parentElement)
+            if (!node || node.element == document.body)// || node.element == document.body.parentElement)
                 return null;
 
-            if (node.isFixed)
+//            if (node.isFixed)
+            if (node.isSticked)
                 return null;
 
             while (node = node.parent) {
@@ -325,43 +328,16 @@ module jsidea.geom {
 
             return null;
         }
-        
-        //TEST-AREA
-        public static getParentBlock(element: HTMLElement): HTMLElement {
-            if (!element || element == document.body || element == document.body.parentElement)
-                return null;
 
-            if (this.isIE) {
-                return <HTMLElement> element.offsetParent;
-            }
-
-            var style = window.getComputedStyle(element);
-            if (style.position == "static" || style.position == "relative")
-                return element.parentElement;
-
-            var html = document.body.parentElement;
-            while ((element = element.parentElement) && element != html) {
-                var style = window.getComputedStyle(element);
-                //                if(style.position == "relative" || style.position == "absolute" || style.position == "fixed")
-                if (style.position != "static" || style.transform != "none" || style.transformStyle == "preserve-3d")
-                    return element;
-            }
-
-            return document.body.parentElement;
-        }
-        
-        //TEST-AREA
         public static getParentScroll(node: INodeStyle): INodeStyle {
-            if (!node || node.element == document.body || node.element == document.body.parentElement)
+            if (!node || !node.parent || node.element == document.body.parentElement)
                 return null;
 
             if (node.isSticked) {
                 return null;
             }
 
-            var overflowRegex = /(auto|scroll)/;
             var excludeStaticParent = node.isAbsolute;
-            var isFixedToAbsolute = node.isFixedToAbsolute;
             var leaf: INodeStyle = node;
 
             node = node.parent;
@@ -371,17 +347,15 @@ module jsidea.geom {
                 if (excludeStaticParent && node.isStatic && !node.isTransformed) {
 
                 }
-                else {
-                    if ((overflowRegex).test(node.style.overflow + node.style.overflowY + node.style.overflowX)) {
-                        scrollParent = node;
-                        break;
-                    }
+                else if (node.isScrollable) {
+                    scrollParent = node;
+                    break;
                 }
                 node = node.parent;
             }
 
             scrollParent = !scrollParent ? null : scrollParent;
-            if (isFixedToAbsolute) {
+            if (leaf.isFixedToAbsolute) {
                 if (leaf.parent.isFixed)
                     return scrollParent;
                 else {
@@ -446,10 +420,8 @@ module jsidea.geom {
             ret.y -= sc.y;
 
             if (this.isIE) {
-                ret.x += document.documentElement.scrollLeft;
-                ret.y += document.documentElement.scrollTop;
-                ret.x += document.documentElement.scrollLeft;
-                ret.y += document.documentElement.scrollTop;
+                ret.x += document.documentElement.scrollLeft * 2;
+                ret.y += document.documentElement.scrollTop * 2;
             }
 
             //add scroll value only if reference of the element is the window not the body
@@ -537,13 +509,33 @@ module jsidea.geom {
         }
 
         public static correctWebkitOffset(node: INodeStyle, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+//            if (node.isFixedToAbsolute) {
+//                
+////                ret.x += 200;
+//                
+//                console.log("HMMMMM");
+//                
+////                return ret;
+//            }
+            
+//            if (!node.parentOffset || node.parentOffset.element == node.element.offsetParent)
             if (!node.parentOffset || node.parentOffset.element == node.element.offsetParent)
                 return ret;
 
             if (node.isFixedToAbsolute) {
+                
+                ret.x -= node.parentOffset.clientLeft;
+                ret.y -= node.parentOffset.clientTop;
+                
+//                ret.x += 200;
+                
+//                console.log("NODE IS FIXED TO ABS");
+                
                 return ret;
             }
-            else if (node.isAbsolute && node.parent.isFixed)
+            else 
+                
+                if (node.isAbsolute && node.parent.isFixed)
                 return ret;
             else if (node.isFixed && node.parent.isStatic)
                 return ret;
@@ -569,19 +561,6 @@ module jsidea.geom {
                 ret.y -= node.parentOffset.clientTop;
                 ret.x -= node.parentOffset.offsetLeft;
                 ret.y -= node.parentOffset.offsetTop;
-            }
-            else if (node.parentOffset && node.isFixedToAbsolute) {
-                ret.x -= node.parentOffset.clientLeft;
-                ret.y -= node.parentOffset.clientTop;
-
-                if (!node.parent.isStatic) {
-                    ret.x -= node.parent.offsetLeft;
-                    ret.y -= node.parent.offsetTop;
-                }
-                else {
-                    ret.x -= node.parentOffset.offsetLeft;
-                    ret.y -= node.parentOffset.offsetTop;
-                }
             }
             else {
                 //console.log("WEBKIT-NO-BUG", element);
