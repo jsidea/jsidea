@@ -283,8 +283,8 @@ module jsidea.geom {
 
             var style = window.getComputedStyle(element);
             //            if (this.extractIsFixedReal(element))
-            //            if (style.position == "fixed")
-            if (this.isFixed(element))
+                        if (style.position == "fixed")
+//            if (this.isFixed(element))
                 return document.body;
 
             element = element.parentElement;
@@ -691,25 +691,40 @@ module jsidea.geom {
             var style = window.getComputedStyle(element);
             var parentStyle = window.getComputedStyle(element.parentElement);
             var parStyle = par ? window.getComputedStyle(par) : null;
-            var isFixedToAbsolute = style.position == "fixed" && !this.isFixed(element);
+            var forceAbsolute = style.position == "fixed" && !this.isFixed(element);
 
             //            console.log("AHHH", element);
             
-            if (isFixedToAbsolute)
+            if (forceAbsolute)
             {
+                return ret;
+                
 //                ret.x -= element.offsetLeft;
 //                ret.y -= element.offsetTop;
 //                ret.x += element.parentElement.offsetLeft;
 //                ret.y += element.parentElement.offsetTop;
-//                ret.x += element.parentElement.clientLeft;
-//                ret.y += element.parentElement.clientTop;
+//                ret.x -= element.parentElement.clientLeft;
+//                ret.y -= element.parentElement.clientTop;
                 
-                ret.x -= par.offsetLeft;
-                ret.y -= par.offsetTop;
-//                ret.x += element.parentElement.offsetLeft;
-//                ret.y += element.parentElement.offsetTop;
+//                ret.x -= element.offsetLeft;
+//                ret.y -= element.offsetTop;
+//                ret.x -= element.clientLeft;
+//                ret.y -= element.clientTop;
+//                
+//                ret.x -= par.offsetLeft;
+//                ret.y -= par.offsetTop;
+//                ret.x -= par.clientLeft;
+//                ret.y -= par.clientTop;
+                
                 ret.x -= element.parentElement.clientLeft;
                 ret.y -= element.parentElement.clientTop;
+                ret.x -= element.parentElement.offsetLeft;
+                ret.y -= element.parentElement.offsetTop;
+                
+//                if(this.extractIsFixedRealAsso(element))
+//                {
+//                    console.log(element.id);    
+//                }
                 
                 return ret;
             }
