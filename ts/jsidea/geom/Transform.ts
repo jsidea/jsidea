@@ -383,7 +383,8 @@ module jsidea.geom {
             scrollParent = !scrollParent ? document.body : scrollParent;
             if (isFixedToAbsolute)
             {
-                return scrollParent.parentElement;    
+                return this.scrollParent(scrollParent);
+//                return scrollParent.parentElement;    
             }
 
 
