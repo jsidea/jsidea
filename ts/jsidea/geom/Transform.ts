@@ -171,10 +171,11 @@ module jsidea.geom {
             var off = this.extractOffsetReal(node.element);
 
             //            if (this.isIE && this.isFixed(node.element))
-            if (this.isIE && this.isFixed(node.element))
-                return off;
-
-            else if (this.isFixed(node.element))
+            //            if (this.isIE && this.isFixed(node.element))
+            //                return off;
+            //
+            //            else 
+            if (this.isFixed(node.element))
                 return off;
 
             var off2 = this.extractOffsetReal(node.parent ? node.parent.element : null);
@@ -227,14 +228,7 @@ module jsidea.geom {
                 
                 //                                if(node.parent && node.parent.style.position == "fixed")
                 
-                if (this.isIE) {
-                    //                    if (node.parent && this.extractIsFixedReal(node.parent.element))
-                    if (node && this.isFixed(node.element)) {
-                        //                        last = m;
-                        break;
-                    }
-                }
-                else if (node && this.isFixed(node.element)) {
+                if (node && this.isFixed(node.element)) {
                     //                        last = m;
                     break;
                 }
@@ -283,9 +277,9 @@ module jsidea.geom {
             if (!element || element == document.body || element == document.body.parentElement)
                 return null;
 
-            if (this.isIE) {
-                return <HTMLElement> element.offsetParent;
-            }
+            //            if (this.isIE) {
+            //                return <HTMLElement> element.offsetParent;
+            //            }
 
             var style = window.getComputedStyle(element);
             //            if (this.extractIsFixedReal(element))
@@ -333,9 +327,9 @@ module jsidea.geom {
             if (!element || element == document.body || element == document.body.parentElement)
                 return null;
 
-            if (this.isIE) {
-                return <HTMLElement> element.offsetParent;
-            }
+            //            if (this.isIE) {
+            //                return <HTMLElement> element.offsetParent;
+            //            }
 
             if (this.isFixed(element)) {
                 //                console.log("REAL FIXED", element.id);
@@ -347,7 +341,9 @@ module jsidea.geom {
             //                return document.body;    
             //            }
             
-            
+            //            if (this.isIE)
+            //                element = element.parentElement;
+
 
             var overflowRegex = /(auto|scroll)/;
             var style = window.getComputedStyle(element);
@@ -355,7 +351,10 @@ module jsidea.geom {
             var excludeStaticParent = position === "absolute";// || (position == "fixed" && this.extractIsFixedReal(element));
             var isFixedToAbsolute = position == "fixed" && !this.isFixed(element);
 
-
+            
+//            if(isFixedToAbsolute)
+//                excludeStaticParent = true;
+            //            if (this.isWebkit)
             element = element.parentElement;
 
             var el = element;
@@ -376,7 +375,7 @@ module jsidea.geom {
             }
 
             if (isFixedToAbsolute) {
-                console.log(element.id);
+//                console.log(element.id);
                 return document.body;//scrollParent ? scrollParent.pareElement : null;
             }
 
@@ -426,20 +425,13 @@ module jsidea.geom {
             if (!element || !element.parentElement)
                 return ret;
 
-            var style = window.getComputedStyle(element);
-            if (style.position != "static")
-                element = <HTMLElement> element.offsetParent;
-            else
-                element = element.parentElement;
+            element = <HTMLElement> this.scrollParent(element);
 
             while (element && element != document.body) {
                 var style = window.getComputedStyle(element);
                 ret.x += element.scrollLeft;
                 ret.y += element.scrollTop;
-                if (style.position != "static")
-                    element = <HTMLElement> element.offsetParent;
-                else
-                    element = element.parentElement;
+                element = <HTMLElement> this.scrollParent(element);
             }
             return ret;
         }
@@ -449,8 +441,8 @@ module jsidea.geom {
             if (!element || !element.parentElement)
                 return ret;
 
-//            if (!this.isFixed(element))
-//                element = element.parentElement;
+            //            if (!this.isFixed(element))
+            //                element = element.parentElement;
             //            element = <HTMLElement> this.scrollParent(element);
             
             element = <HTMLElement> this.scrollParent(element);
@@ -488,6 +480,9 @@ module jsidea.geom {
         //        }
 
         public static extractOffsetReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            ret.x = 0;
+            ret.y = 0;
+            
             var sc = this.isIE ? this.extractScrollRealIE(element) : this.extractScrollRealWebkit(element);
             ret.x -= sc.x;
             ret.y -= sc.y;
@@ -513,20 +508,7 @@ module jsidea.geom {
             
             //wow, ie11 and the offsets are correct
             //if the element is really fixed
-            if (this.isIE && this.isFixed(element)) {
-                
-                //                ret.x += sc.x;
-                //                ret.y += sc.y;
-                
-                ret.x += element.offsetLeft;
-                ret.y += element.offsetTop;
-                return ret;
-            }
-            else if (this.isFixed(element)) {
-                
-                //                ret.x += sc.x;
-                //                ret.y += sc.y;
-                //                console.log(element.id, element.offsetLeft, element.offsetTop);
+            if (this.isFixed(element)) {
                 ret.x += element.offsetLeft;
                 ret.y += element.offsetTop;
                 return ret;
@@ -565,7 +547,9 @@ module jsidea.geom {
             var style = window.getComputedStyle(element);
             var par = this.extractOffsetParentReal(element);
             var parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
-
+            
+            
+            
             if (par && style.position == "absolute") {
                 ret.x += par.clientLeft;
                 ret.y += par.clientTop;
@@ -707,10 +691,29 @@ module jsidea.geom {
             var style = window.getComputedStyle(element);
             var parentStyle = window.getComputedStyle(element.parentElement);
             var parStyle = par ? window.getComputedStyle(par) : null;
+            var isFixedToAbsolute = style.position == "fixed" && !this.isFixed(element);
 
             //            console.log("AHHH", element);
             
-            if (style.position == "absolute" && parentStyle.position == "fixed")
+            if (isFixedToAbsolute)
+            {
+//                ret.x -= element.offsetLeft;
+//                ret.y -= element.offsetTop;
+//                ret.x += element.parentElement.offsetLeft;
+//                ret.y += element.parentElement.offsetTop;
+//                ret.x += element.parentElement.clientLeft;
+//                ret.y += element.parentElement.clientTop;
+                
+                ret.x -= par.offsetLeft;
+                ret.y -= par.offsetTop;
+//                ret.x += element.parentElement.offsetLeft;
+//                ret.y += element.parentElement.offsetTop;
+                ret.x -= element.parentElement.clientLeft;
+                ret.y -= element.parentElement.clientTop;
+                
+                return ret;
+            }
+            else if (style.position == "absolute" && parentStyle.position == "fixed")
                 return ret;
             else if (style.position == "fixed" && parentStyle.position == "static")
                 return ret;
@@ -789,7 +792,7 @@ module jsidea.geom {
                 }
             }
             else {
-                console.log("WEBKIT-NO-BUG", element);
+//                console.log("WEBKIT-NO-BUG", element);
             }
             return ret;
         }
