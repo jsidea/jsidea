@@ -328,6 +328,7 @@ module jsidea.geom {
             //            }
 
             if (this.isFixed(element)) {
+                //                console.log("AHHH", element.id);
                 return document.body.parentElement;
             }
 
@@ -336,6 +337,7 @@ module jsidea.geom {
             var position = style.position;
             var excludeStaticParent = position === "absolute";
             var isFixedToAbsolute = position == "fixed" && !this.isFixed(element);
+            var el = element;
 
             element = element.parentElement;
 
@@ -356,8 +358,12 @@ module jsidea.geom {
 
             scrollParent = !scrollParent ? document.body : scrollParent;
             if (isFixedToAbsolute) {
-                var z = this.scrollParent(scrollParent);
-                return z ? z.parentElement : document.body;
+                if (window.getComputedStyle(el.parentElement).position == "fixed")
+                    return scrollParent;
+                else {
+                    var z = this.scrollParent(scrollParent);
+                    return z ? z.parentElement : document.body;
+                }
             }
             return scrollParent;
         }
@@ -416,7 +422,7 @@ module jsidea.geom {
         public static extractScrollRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!element || !element.parentElement)
                 return ret;
-            
+
             element = <HTMLElement> this.scrollParent(element);
 
             while (element && element != document.body) {
@@ -448,7 +454,7 @@ module jsidea.geom {
             //add scroll value only if reference of the element is the window not the body
             //if is really fixed, then just make it fast
             if (this.isFixedAssociative(element)) {
-//            if (this.isFixed(element)) {
+                //            if (this.isFixed(element)) {
                 if (this.isWebkit) {
                     ret.x += document.body.scrollLeft;
                     ret.y += document.body.scrollTop;
