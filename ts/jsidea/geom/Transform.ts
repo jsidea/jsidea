@@ -5,11 +5,25 @@ interface HTMLElement {
 module jsidea.geom {
     export interface INodeStyle {
         parent: INodeStyle;
+        parentOffset: INodeStyle;
+        parentScroll: INodeStyle;
+        next: INodeStyle;
         element: HTMLElement;
         offsetX: number;
         offsetY: number;
+        offsetLeft: number;
+        offsetTop: number;
+        clientLeft: number;
+        clientTop: number;
+        isRelative: boolean;
+        isAbsolute: boolean;
+        isStatic: boolean;
+        isFixed: boolean;
+        isSticked: boolean;
+        isTransformed: boolean;
+        isFixedAssociative: boolean;
+        isFixedToAbsolute: boolean;
         style: CSSStyleDeclaration;
-        offsetNode: INodeStyle;
     }
     export class Transform {
 
@@ -143,10 +157,10 @@ module jsidea.geom {
             //------
             //offset
             //------
-            var offset = this.extractOffset(node);
+            var position = this.getPosition(node);
 
             //append the offset to the transform-matrix
-            matrix.appendPositionRaw(offset.x, offset.y, 0);
+            matrix.appendPositionRaw(position.x, position.y, 0);
             
             //-------
             //perspective
@@ -166,45 +180,67 @@ module jsidea.geom {
             return matrix;
         }
 
-        private static extractOffset(node: INodeStyle): geom.Point2D {
-
-            var off = this.extractOffsetReal(node.element);
-
-            //            if (this.isIE && this.isFixed(node.element))
-            //            if (this.isIE && this.isFixed(node.element))
-            //                return off;
-            //
-            //            else 
-            if (this.isFixed(node.element))
-                return off;
-
-            var off2 = this.extractOffsetReal(node.parent ? node.parent.element : null);
-
-            return off.sub(off2);
-        }
-
-        private static extractStyleChain(element: HTMLElement, root: HTMLElement = null): INodeStyle {
+        public static extractStyleChain(element: HTMLElement, root: HTMLElement = null): INodeStyle {
             //collect computed styles/nodes up to html/root (including html/root)
-            root = root ? root : document.body.parentElement;
+            root = root ? root : document.body;//document.body.parentElement
             var lastNode: INodeStyle = null;
             var leaf: INodeStyle = null;
             while (element && element != root.parentElement) {
-                var node = {
+                var style = window.getComputedStyle(element);
+                var node: INodeStyle = {
                     element: element,
-                    style: window.getComputedStyle(element),
+                    style: style,
                     parent: null,
+                    parentOffset: null,
+                    parentScroll: null,
+                    next: lastNode,
                     offsetX: 0,
                     offsetY: 0,
-                    offsetNode: null
+                    isFixed: style.position == "fixed",
+                    isRelative: style.position == "relative",
+                    isAbsolute: style.position == "absolute",
+                    isStatic: style.position == "static",
+                    isSticked: false,
+                    isFixedAssociative: false,
+                    isFixedToAbsolute: false,
+                    offsetLeft: element.offsetLeft,
+                    offsetTop: element.offsetTop,
+                    clientLeft: element.clientLeft,
+                    clientTop: element.clientTop,
+                    isTransformed: style.transform != "none"
                 };
+
+                //for better handling
+                //TODO: garbage collection
                 element._node = node;
                 if (!leaf)
                     leaf = node;
+                //bind nodes from child to parent
                 if (lastNode)
                     lastNode.parent = node;
                 lastNode = node;
                 element = element.parentElement;
             }
+
+            //set "isFixed" and "isFixedToAbsolut"
+            node = leaf;
+            while (node) {
+                node.isSticked = this.getIsSticked(node);
+                node.isFixedToAbsolute = node.isFixed && !node.isSticked;
+                node = node.parent;
+            }
+
+            //set "isFixedAssociative"
+            //the "isFixed" properties need to be set before
+            //so this is a antoher loop/path
+            node = leaf;
+            while (node) {
+                node.isFixedAssociative = this.getIsFixedAssociative(node);
+                node.parentOffset = this.getParentOffset(node);
+                node.parentScroll = this.getParentScroll(node);
+                node = node.parent;
+            }
+
             return leaf;
         }
 
@@ -225,11 +261,8 @@ module jsidea.geom {
                     last = null;
                     matrices.push(m);
                 }
-                
-                //                                if(node.parent && node.parent.style.position == "fixed")
-                
-                if (node && this.isFixed(node.element)) {
-                    //                        last = m;
+
+                if (node && node.isSticked) {
                     break;
                 }
 
@@ -267,35 +300,34 @@ module jsidea.geom {
 
             return preserve3d;
         }
-        
-        //TEST-AREA
-        public static extractOffsetParentReal(element: HTMLElement): HTMLElement {
-            if (!element || element == document.body || element == document.body.parentElement)
-                return null;
 
-            //            if (this.isIE) {
-            //                return <HTMLElement> element.offsetParent;
-            //            }
-
-            var style = window.getComputedStyle(element);
-            //            if (this.extractIsFixedReal(element))
-            if (style.position == "fixed")
-                //            if (this.isFixed(element))
-                return document.body;
-
-            element = element.parentElement;
-            while (element && element != document.body) {
-                var style = window.getComputedStyle(element);
-                if (style.position != "static" || style.transform != "none")
-                    return element;
-                element = element.parentElement;
-            }
-
-            return document.body;
+        //returns the local position the direct parent
+        private static getPosition(node: INodeStyle): geom.Point2D {
+            var off = this.getOffset(node);
+            if (node.isSticked)
+                return off;
+            var off2 = this.getOffset(node.parent ? node.parent : null);
+            return off.sub(off2);
         }
         
         //TEST-AREA
-        public static getContainingBlock(element: HTMLElement): HTMLElement {
+        public static getParentOffset(node: INodeStyle): INodeStyle {
+            if (!node || node.element == document.body || node.element == document.body.parentElement)
+                return null;
+
+            if (node.isFixed)
+                return null;
+
+            while (node = node.parent) {
+                if (!node.isStatic || node.isTransformed)
+                    return node;
+            }
+
+            return null;
+        }
+        
+        //TEST-AREA
+        public static getParentBlock(element: HTMLElement): HTMLElement {
             if (!element || element == document.body || element == document.body.parentElement)
                 return null;
 
@@ -319,128 +351,97 @@ module jsidea.geom {
         }
         
         //TEST-AREA
-        public static scrollParent(element: HTMLElement): HTMLElement {
-            if (!element || element == document.body || element == document.body.parentElement)
+        public static getParentScroll(node: INodeStyle): INodeStyle {
+            if (!node || node.element == document.body || node.element == document.body.parentElement)
                 return null;
 
-            //            if (this.isIE) {
-            //                return <HTMLElement> element.offsetParent;
-            //            }
-
-            if (this.isFixed(element)) {
-                //                console.log("AHHH", element.id);
-                return document.body.parentElement;
+            if (node.isSticked) {
+                return null;
             }
 
             var overflowRegex = /(auto|scroll)/;
-            var style = window.getComputedStyle(element);
-            var position = style.position;
-            var excludeStaticParent = position === "absolute";
-            var isFixedToAbsolute = position == "fixed" && !this.isFixed(element);
-            var el = element;
+            var excludeStaticParent = node.isAbsolute;
+            var isFixedToAbsolute = node.isFixedToAbsolute;
+            var leaf: INodeStyle = node;
 
-            element = element.parentElement;
+            node = node.parent;
 
-            var scrollParent = null;
-            while (element && element != document.body) {
-                var style = window.getComputedStyle(element);
-                if (excludeStaticParent && style.position === "static" && style.transform == "none") {
+            var scrollParent: INodeStyle = null;
+            while (node) {
+                if (excludeStaticParent && node.isStatic && !node.isTransformed) {
 
                 }
                 else {
-                    if ((overflowRegex).test(style.overflow + style.overflowY + style.overflowX)) {
-                        scrollParent = element;
+                    if ((overflowRegex).test(node.style.overflow + node.style.overflowY + node.style.overflowX)) {
+                        scrollParent = node;
                         break;
                     }
                 }
-                element = element.parentElement;
+                node = node.parent;
             }
 
-            scrollParent = !scrollParent ? document.body : scrollParent;
+            scrollParent = !scrollParent ? null : scrollParent;
             if (isFixedToAbsolute) {
-                if (window.getComputedStyle(el.parentElement).position == "fixed")
+                if (leaf.parent.isFixed)
                     return scrollParent;
                 else {
-                    var z = this.scrollParent(scrollParent);
-                    return z ? z.parentElement : document.body;
+                    var z = this.getParentScroll(scrollParent);
+                    return z ? z.parent : null;
                 }
             }
             return scrollParent;
         }
 
-        private static isFixedAssociative(element: HTMLElement): boolean {
+        private static getIsFixedAssociative(node: INodeStyle): boolean {
             if (this.isIE)
-                return this.isFixed(element);
+                return node.isSticked;
 
-            while (element && element != document.body) {
-                if (this.isFixed(element))
+            while (node) {
+                if (node.isSticked)
                     return true;
-                element = element.parentElement;
+                node = node.parent;
             }
             return false;
         }
 
-        private static isFixed(element: HTMLElement): boolean {
-            var style = window.getComputedStyle(element);
-            var isFixed = style.position == "fixed";
+        private static getIsSticked(node: INodeStyle): boolean {
+            //just skip if the element itself has not fixed
+            if (!node.isFixed)
+                return false;
             
             //ie does it right
             if (this.isIE)
-                return isFixed;
+                return node.isFixed;
 
-            //just skip if the element itself has not fixed
-            if (!isFixed)
-                return false;
-
-            var el = element;
-            while ((element = element.parentElement) && element != document.body) {
-                var style = window.getComputedStyle(element);
-                if (style.transform != "none" || style.position != "static")
+            while (node = node.parent) {
+                if (!node.isStatic || node.isTransformed)
                     return false;
             }
-            //            console.log("REALLY FIXED", el.id);
             return true;
         }
         
-        //FOR IE11
-        public static extractScrollRealIE(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            if (!element || !element.parentElement)
-                return ret;
-
-            element = <HTMLElement> this.scrollParent(element);
-
-            while (element && element != document.body) {
-                var style = window.getComputedStyle(element);
-                ret.x += element.scrollLeft;
-                ret.y += element.scrollTop;
-                element = <HTMLElement> this.scrollParent(element);
-            }
-            return ret;
-        }
-        
         //FOR WEBKIT AND IE11 (MAYBE firefox too)
-        public static extractScrollRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            if (!element || !element.parentElement)
+        public static getScrollOffset(node: INodeStyle, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            if (!node || !node.parent)
                 return ret;
 
-            element = <HTMLElement> this.scrollParent(element);
-
-            while (element && element != document.body) {
-                var style = window.getComputedStyle(element);
-                ret.x += element.scrollLeft;
-                ret.y += element.scrollTop;
-                element = <HTMLElement> this.scrollParent(element);
+            while (node = node.parentScroll) {
+                ret.x += node.element.scrollLeft;
+                ret.y += node.element.scrollTop;
             }
             return ret;
         }
 
-        public static extractOffsetReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        public static getOffset(node: INodeStyle, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             ret.x = 0;
             ret.y = 0;
 
+            if (!node)
+                return ret;
+
             //if you subtract the scroll from the accumlated/summed offset
             //you get the real offset to window (initial-containing-block)
-            var sc = this.isIE ? this.extractScrollRealIE(element) : this.extractScrollRealWebkit(element);
+            var sc = this.getScrollOffset(node);
             ret.x -= sc.x;
             ret.y -= sc.y;
 
@@ -453,8 +454,8 @@ module jsidea.geom {
 
             //add scroll value only if reference of the element is the window not the body
             //if is really fixed, then just make it fast
-            if (this.isFixedAssociative(element)) {
-                //            if (this.isFixed(element)) {
+            if (node.isFixedAssociative) {
+                //if (node.isFixed) {
                 if (this.isWebkit) {
                     ret.x += document.body.scrollLeft;
                     ret.y += document.body.scrollTop;
@@ -467,134 +468,123 @@ module jsidea.geom {
             
             //wow, ie11 and the offsets are correct
             //if the element is really fixed
-            if (this.isFixed(element)) {
-                ret.x += element.offsetLeft;
-                ret.y += element.offsetTop;
+            if (node.isSticked) {
+                ret.x += node.offsetLeft;
+                ret.y += node.offsetTop;
                 return ret;
             }
 
-            while (element && element != document.body) {
-                ret.x += element.offsetLeft;
-                ret.y += element.offsetTop;
+            while (node) {
+                ret.x += node.offsetLeft;
+                ret.y += node.offsetTop;
                 
                 //for webkit (if there is a wrong offserParent set,
                 //then the offsets are also wrong... arghhh)
                 //correct them here
-                this.correctOffset(element, ret);
+                this.getOffsetCorrection(node, ret);
 
                 //go up
-                var par = this.extractOffsetParentReal(element);
+                var par = node.parentOffset;
                 ret.x += par ? par.clientLeft : 0;
                 ret.y += par ? par.clientTop : 0;
-                element = <HTMLElement> par;
+                node = par;
             }
 
             return ret;
         }
 
-        public static correctOffset(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        public static getOffsetCorrection(node: INodeStyle, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (this.isWebkit) {
-                this.correctWebkitOffset(element, ret);
+                this.correctWebkitOffset(node, ret);
             } else if (this.isFirefox) {
-                this.correctFirefoxOffset(element, ret);
+                this.correctFirefoxOffset(node, ret);
+            } else if (this.isIE) { 
+                //NOT YET NEEDED :-)
             }
             return ret;
         }
 
-        public static correctFirefoxOffset(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            var style = window.getComputedStyle(element);
-            var par = this.extractOffsetParentReal(element);
-            var parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
-
-            if (par && style.position == "absolute") {
-                ret.x += par.clientLeft;
-                ret.y += par.clientTop;
+        public static correctFirefoxOffset(node: INodeStyle, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            if (node.parentOffset && node.isAbsolute) {
+                ret.x += node.parentOffset.clientLeft;
+                ret.y += node.parentOffset.clientTop;
             }
-            else if (parentStyle && style.position == "fixed" && parentStyle.position == "fixed") {
-                ret.x -= element.parentElement.offsetLeft;
-                ret.y -= element.parentElement.offsetTop;
-                ret.x -= element.parentElement.clientLeft;
-                ret.y -= element.parentElement.clientTop;
+            else if (node.parent && node.isFixed && node.parent.isFixed) {
+                ret.x -= node.parent.offsetLeft;
+                ret.y -= node.parent.offsetTop;
+                ret.x -= node.parent.clientLeft;
+                ret.y -= node.parent.clientTop;
             }
-            else if (par && parentStyle && style.position == "fixed" && !this.isFixed(element)) {
+            else if (node.parentOffset && node.parent && node.isFixed && !node.isSticked) {
 
-                if (parentStyle.position == "relative" || parentStyle.position == "absolute") {
-                    ret.x -= element.parentElement.offsetLeft;
-                    ret.y -= element.parentElement.offsetTop;
-                    ret.x -= element.parentElement.clientLeft;
-                    ret.y -= element.parentElement.clientTop;
+                if (node.parent.isRelative || node.parent.isAbsolute) {
+                    ret.x -= node.parent.offsetLeft;
+                    ret.y -= node.parent.offsetTop;
+                    ret.x -= node.parent.clientLeft;
+                    ret.y -= node.parent.clientTop;
                 }
                 else {
-                    var parStyle = par ? window.getComputedStyle(par) : null;
-                    if (element.parentElement != par && parStyle.position == "static") {
-                        ret.x += par.clientLeft;
-                        ret.y += par.clientTop;
+                    if (node.parent != node.parentOffset && node.parentOffset.isStatic) {
+                        ret.x += node.parentOffset.clientLeft;
+                        ret.y += node.parentOffset.clientTop;
                     }
                 }
             }
             else {
-                //                console.log("FIREFOX-NO-BUG", element);
+                //console.log("FIREFOX-NO-BUG", element);
             }
-
             return ret;
         }
 
-        public static correctWebkitOffset(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            var par = this.extractOffsetParentReal(element);
-
-            if (par == element.offsetParent)
+        public static correctWebkitOffset(node: INodeStyle, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            if (!node.parentOffset || node.parentOffset.element == node.element.offsetParent)
                 return ret;
 
-            var style = window.getComputedStyle(element);
-            var parentStyle = window.getComputedStyle(element.parentElement);
-            var parStyle = par ? window.getComputedStyle(par) : null;
-            var forceAbsolute = style.position == "fixed" && !this.isFixed(element);
-
-            if (forceAbsolute) {
+            if (node.isFixedToAbsolute) {
                 return ret;
             }
-            else if (style.position == "absolute" && parentStyle.position == "fixed")
+            else if (node.isAbsolute && node.parent.isFixed)
                 return ret;
-            else if (style.position == "fixed" && parentStyle.position == "static")
+            else if (node.isFixed && node.parent.isStatic)
                 return ret;
-            else if (style.position == "fixed" && parentStyle.position == "absolute")
+            else if (node.isFixed && node.parent.isAbsolute)
                 return ret;
-            else if (style.position == "fixed" && parentStyle.position == "fixed")
+            else if (node.isFixed && node.parent.isFixed)
                 return ret;
 
-            else if (par && style.position == "absolute") {
-                ret.x -= par.clientLeft;
-                ret.y -= par.clientTop;
-                ret.x += element.offsetParent.clientLeft;
-                ret.y += element.offsetParent.clientTop;
+            else if (node.parentOffset && node.isAbsolute) {
+                ret.x -= node.parentOffset.clientLeft;
+                ret.y -= node.parentOffset.clientTop;
+                ret.x += node.element.offsetParent.clientLeft;
+                ret.y += node.element.offsetParent.clientTop;
             }
-            else if (par && style.position == "static" && element.offsetParent == element.parentElement) {
-                ret.x -= par.clientLeft;
-                ret.y -= par.clientTop;
-                ret.x -= math.Number.parse(parStyle.marginLeft, 0);
-                ret.y -= math.Number.parse(parStyle.marginTop, 0);
+            else if (node.parentOffset && node.isStatic && node.element.offsetParent == node.element.parentElement) {
+                ret.x -= node.parentOffset.clientLeft;
+                ret.y -= node.parentOffset.clientTop;
+                ret.x -= math.Number.parse(node.parent.style.marginLeft, 0);
+                ret.y -= math.Number.parse(node.parent.style.marginTop, 0);
             }
-            else if (par && style.position == "static" || style.position == "relative") {
-                ret.x -= par.clientLeft;
-                ret.y -= par.clientTop;
-                ret.x -= par.offsetLeft;
-                ret.y -= par.offsetTop;
+            else if (node.parentOffset && node.isStatic || node.isRelative) {
+                ret.x -= node.parentOffset.clientLeft;
+                ret.y -= node.parentOffset.clientTop;
+                ret.x -= node.parentOffset.offsetLeft;
+                ret.y -= node.parentOffset.offsetTop;
             }
-            else if (par && style.position == "fixed" && !this.isFixed(element)) {
-                ret.x -= par.clientLeft;
-                ret.y -= par.clientTop;
+            else if (node.parentOffset && node.isFixedToAbsolute) {
+                ret.x -= node.parentOffset.clientLeft;
+                ret.y -= node.parentOffset.clientTop;
 
-                if (parentStyle.position != "static") {
-                    ret.x -= element.parentElement.offsetLeft;
-                    ret.y -= element.parentElement.offsetTop;
+                if (!node.parent.isStatic) {
+                    ret.x -= node.parent.offsetLeft;
+                    ret.y -= node.parent.offsetTop;
                 }
                 else {
-                    ret.x -= par.offsetLeft;
-                    ret.y -= par.offsetTop;
+                    ret.x -= node.parentOffset.offsetLeft;
+                    ret.y -= node.parentOffset.offsetTop;
                 }
             }
             else {
-                //                console.log("WEBKIT-NO-BUG", element);
+                //console.log("WEBKIT-NO-BUG", element);
             }
             return ret;
         }

@@ -53,11 +53,12 @@ module jsidea.test {
             
 
             document.addEventListener("click",(evt) => {
-                this.logChain(d);});
-            
+                this.logChain(d);
+            });
+
             document.addEventListener("tick",(evt) => {
                 ctx.clearRect(0, 0, can.width, can.height);
-                
+
                 this.drawBoundingBox(ctx, con);
                 this.drawBoundingBox(ctx, a);
                 this.drawBoundingBox(ctx, b);
@@ -65,7 +66,7 @@ module jsidea.test {
                 this.drawBoundingBox(ctx, d);
                 this.drawBoundingBox(ctx, vie);
                 this.drawBoundingBox(ctx, can);
-                
+
                 this.drawOffsetChain(ctx, d);
             });
 
@@ -80,7 +81,8 @@ module jsidea.test {
         private drawOffsetChain(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
 
             while (e) {
-                var off = geom.Transform.extractOffsetReal(e);
+                var sc = geom.Transform.extractStyleChain(e);
+                var off = geom.Transform.getOffset(sc);
                 //            console.log(off.x, off.y);
                 this.drawCross(ctx, off.x, off.y);
                 e = e.parentElement;
@@ -173,21 +175,24 @@ module jsidea.test {
             var res = "LOG-CHAIN\n";
             while (f) {
                 var st = window.getComputedStyle(f);
-                var s = geom.Transform.scrollParent(f);
-                var calcedOff = geom.Transform.extractOffsetParentReal(f);
+                var sn = geom.Transform.getParentScroll(f._node);
+                var s = sn ? sn.element : null;
+                var calced = geom.Transform.getParentOffset(f._node);
+                var calcedOff = calced ? calced.element : null;
+                var ofp = <HTMLElement> f.offsetParent;
                 res += ([
                     text.Text.conc(10, " ", f.id ? f.id : f.nodeName),
-                    text.Text.conc(30, " ", "PARENT", f.offsetParent ? (f.offsetParent.id ? f.offsetParent.id : f.offsetParent.nodeName) : "NONE", "->", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
+                    text.Text.conc(30, " ", "PARENT", f.offsetParent ? (ofp.id ? ofp.id : ofp.nodeName) : "NONE", "->", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
                     text.Text.conc(24, " ", "OFFSET", f.offsetLeft, f.offsetTop),
-                    text.Text.conc(24, " ", "OFFSET_C",  s ? (s.id ? s.id : s.nodeName) : "NONE"),
-                    text.Text.conc(24, " ", "OFFSET_F", geom.Transform.correctOffset(f, new geom.Point2D(f.offsetLeft, f.offsetTop)).x, geom.Transform.correctOffset(f, new geom.Point2D(f.offsetLeft, f.offsetTop)).y),
+                    text.Text.conc(24, " ", "OFFSET_C", s ? (s.id ? s.id : s.nodeName) : "NONE"),
+//                    text.Text.conc(24, " ", "OFFSET_F", geom.Transform.getOffsetCorrection(f._node, new geom.Point2D(f.offsetLeft, f.offsetTop)).x, geom.Transform.getOffsetCorrection(f._node, new geom.Point2D(f.offsetLeft, f.offsetTop)).y),
                     text.Text.conc(20, " ", "MARGIN", st.marginLeft, st.marginTop),
                     text.Text.conc(20, " ", "BORDER", st.borderLeftWidth, st.borderTopWidth),
                     text.Text.conc(20, " ", "PADDING", st.paddingLeft, st.paddingTop),
-//                    text.Text.conc(14, " ", "SCROLL", f.scrollLeft, f.scrollTop, geom.Transform.extractScrollReal(f).x, geom.Transform.extractScrollReal(f).y),
-//                    text.Text.conc(28, " ", "OVERFLOW", st.overflow, st.boxSizing),
-//                    text.Text.conc(20, " ", "BOUNDS", f.getBoundingClientRect().left, f.getBoundingClientRect().top),
-                    text.Text.conc(20, " ", "POSITION", st.position, st.left, st.top)
+                    //                    text.Text.conc(14, " ", "SCROLL", f.scrollLeft, f.scrollTop, geom.Transform.extractScrollReal(f).x, geom.Transform.extractScrollReal(f).y),
+                    //                    text.Text.conc(28, " ", "OVERFLOW", st.overflow, st.boxSizing),
+                    //                    text.Text.conc(20, " ", "BOUNDS", f.getBoundingClientRect().left, f.getBoundingClientRect().top),
+                    text.Text.conc(20, " ", "POSITION", st.position)
                 ]).join(" ");
                 res += "\n";
                 f = f.parentElement;
