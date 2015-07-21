@@ -283,8 +283,8 @@ module jsidea.geom {
 
             var style = window.getComputedStyle(element);
             //            if (this.extractIsFixedReal(element))
-                        if (style.position == "fixed")
-//            if (this.isFixed(element))
+            if (style.position == "fixed")
+                //            if (this.isFixed(element))
                 return document.body;
 
             element = element.parentElement;
@@ -352,12 +352,18 @@ module jsidea.geom {
             var isFixedToAbsolute = position == "fixed" && !this.isFixed(element);
 
             
-//            if(isFixedToAbsolute)
-//                excludeStaticParent = true;
+            //            if (isFixedToAbsolute) {
+            //                //                console.log(element.id);
+            //                return document.body;//scrollParent ? scrollParent.pareElement : null;
+            //            }
+            
+            //            if(isFixedToAbsolute)
+            //                excludeStaticParent = true;
             //            if (this.isWebkit)
             element = element.parentElement;
 
-            var el = element;
+            //            var el = element;
+            
             var scrollParent = null;
             while (element && element != document.body) {
                 var style = window.getComputedStyle(element);
@@ -374,14 +380,16 @@ module jsidea.geom {
                 element = element.parentElement;
             }
 
-            if (isFixedToAbsolute) {
-//                console.log(element.id);
-                return document.body;//scrollParent ? scrollParent.pareElement : null;
+            scrollParent = !scrollParent ? document.body : scrollParent;
+            if (isFixedToAbsolute)
+            {
+                return scrollParent.parentElement;    
             }
 
-            return !scrollParent ? document.body : scrollParent;
-            //            return this.extractIsFixedReal(el) || !scrollParent ? document.body : scrollParent;
 
+
+            return scrollParent;
+            //            return this.extractIsFixedReal(el) || !scrollParent ? document.body : scrollParent;
         }
 
         private static extractIsFixedRealAsso(element: HTMLElement): boolean {
@@ -482,7 +490,7 @@ module jsidea.geom {
         public static extractOffsetReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             ret.x = 0;
             ret.y = 0;
-            
+
             var sc = this.isIE ? this.extractScrollRealIE(element) : this.extractScrollRealWebkit(element);
             ret.x -= sc.x;
             ret.y -= sc.y;
@@ -547,9 +555,9 @@ module jsidea.geom {
             var style = window.getComputedStyle(element);
             var par = this.extractOffsetParentReal(element);
             var parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
-            
-            
-            
+
+
+
             if (par && style.position == "absolute") {
                 ret.x += par.clientLeft;
                 ret.y += par.clientTop;
@@ -695,36 +703,41 @@ module jsidea.geom {
 
             //            console.log("AHHH", element);
             
-            if (forceAbsolute)
-            {
+            if (forceAbsolute) {
+
+                //                ret.x -= element.parentElement.clientLeft;
+                //                ret.y -= element.parentElement.clientTop;
+                //                ret.x -= element.parentElement.offsetLeft;
+                //                ret.y -= element.parentElement.offsetTop;
+
                 return ret;
                 
-//                ret.x -= element.offsetLeft;
-//                ret.y -= element.offsetTop;
-//                ret.x += element.parentElement.offsetLeft;
-//                ret.y += element.parentElement.offsetTop;
-//                ret.x -= element.parentElement.clientLeft;
-//                ret.y -= element.parentElement.clientTop;
+                //                ret.x -= element.offsetLeft;
+                //                ret.y -= element.offsetTop;
+                //                ret.x += element.parentElement.offsetLeft;
+                //                ret.y += element.parentElement.offsetTop;
+                //                ret.x -= element.parentElement.clientLeft;
+                //                ret.y -= element.parentElement.clientTop;
                 
-//                ret.x -= element.offsetLeft;
-//                ret.y -= element.offsetTop;
-//                ret.x -= element.clientLeft;
-//                ret.y -= element.clientTop;
-//                
-//                ret.x -= par.offsetLeft;
-//                ret.y -= par.offsetTop;
-//                ret.x -= par.clientLeft;
-//                ret.y -= par.clientTop;
+                //                ret.x -= element.offsetLeft;
+                //                ret.y -= element.offsetTop;
+                //                ret.x -= element.clientLeft;
+                //                ret.y -= element.clientTop;
+                //                
+                //                ret.x -= par.offsetLeft;
+                //                ret.y -= par.offsetTop;
+                //                ret.x -= par.clientLeft;
+                //                ret.y -= par.clientTop;
                 
-                ret.x -= element.parentElement.clientLeft;
-                ret.y -= element.parentElement.clientTop;
-                ret.x -= element.parentElement.offsetLeft;
-                ret.y -= element.parentElement.offsetTop;
+                //                ret.x -= element.parentElement.clientLeft;
+                //                ret.y -= element.parentElement.clientTop;
+                //                ret.x -= element.parentElement.offsetLeft;
+                //                ret.y -= element.parentElement.offsetTop;
                 
-//                if(this.extractIsFixedRealAsso(element))
-//                {
-//                    console.log(element.id);    
-//                }
+                //                if(this.extractIsFixedRealAsso(element))
+                //                {
+                //                    console.log(element.id);    
+                //                }
                 
                 return ret;
             }
@@ -807,7 +820,7 @@ module jsidea.geom {
                 }
             }
             else {
-//                console.log("WEBKIT-NO-BUG", element);
+                //                console.log("WEBKIT-NO-BUG", element);
             }
             return ret;
         }

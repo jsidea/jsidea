@@ -79,7 +79,7 @@ canvas {
 }
 
 #content {
-	position: fixed;
+	position: static;
 	width: 512px;
 	height: 512px;
 	border: 30px solid #FFFF00;
