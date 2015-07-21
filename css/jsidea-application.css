@@ -79,7 +79,7 @@ canvas {
 }
 
 #content {
-	position: static;
+	position: absolute;
 	width: 512px;
 	height: 512px;
 	border: 30px solid #FFFF00;
@@ -135,7 +135,7 @@ canvas {
 }
 
 #c-cont {
-	position: static;
+	position: absolute;
 	/* overflow: hidden; */
 	/* margin: 10px; */
 	padding: 10px;

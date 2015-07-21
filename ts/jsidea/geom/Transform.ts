@@ -270,10 +270,6 @@ module jsidea.geom {
         
         //TEST-AREA
         public static extractOffsetParentReal(element: HTMLElement): HTMLElement {
-            
-            //            return this.scrollParent(element);
-            
-            
             if (!element || element == document.body || element == document.body.parentElement)
                 return null;
 
@@ -332,38 +328,17 @@ module jsidea.geom {
             //            }
 
             if (this.isFixed(element)) {
-                //                console.log("REAL FIXED", element.id);
                 return document.body.parentElement;
             }
-            
-            //            if(this.isFixed(element))
-            //            {
-            //                return document.body;    
-            //            }
-            
-            //            if (this.isIE)
-            //                element = element.parentElement;
-
 
             var overflowRegex = /(auto|scroll)/;
             var style = window.getComputedStyle(element);
             var position = style.position;
-            var excludeStaticParent = position === "absolute";// || (position == "fixed" && this.extractIsFixedReal(element));
+            var excludeStaticParent = position === "absolute";
             var isFixedToAbsolute = position == "fixed" && !this.isFixed(element);
 
-            
-            //            if (isFixedToAbsolute) {
-            //                //                console.log(element.id);
-            //                return document.body;//scrollParent ? scrollParent.pareElement : null;
-            //            }
-            
-            //            if(isFixedToAbsolute)
-            //                excludeStaticParent = true;
-            //            if (this.isWebkit)
             element = element.parentElement;
 
-            //            var el = element;
-            
             var scrollParent = null;
             while (element && element != document.body) {
                 var style = window.getComputedStyle(element);
@@ -371,7 +346,6 @@ module jsidea.geom {
 
                 }
                 else {
-                    //style.transform != "none" || 
                     if ((overflowRegex).test(style.overflow + style.overflowY + style.overflowX)) {
                         scrollParent = element;
                         break;
@@ -382,17 +356,13 @@ module jsidea.geom {
 
             scrollParent = !scrollParent ? document.body : scrollParent;
             if (isFixedToAbsolute) {
-                return this.scrollParent(scrollParent);
-                //                return scrollParent.parentElement;    
+                var z = this.scrollParent(scrollParent);
+                return z ? z.parentElement : document.body;
             }
-
-
-
             return scrollParent;
-            //            return this.extractIsFixedReal(el) || !scrollParent ? document.body : scrollParent;
         }
 
-        private static extractIsFixedRealAsso(element: HTMLElement): boolean {
+        private static isFixedAssociative(element: HTMLElement): boolean {
             if (this.isIE)
                 return this.isFixed(element);
 
@@ -419,9 +389,7 @@ module jsidea.geom {
             var el = element;
             while ((element = element.parentElement) && element != document.body) {
                 var style = window.getComputedStyle(element);
-                //if (style.transform != "none")// || style.position != "static")
-                //                if (style.transform != "none" || style.position != "static")
-                if (style.transform != "none" || style.position != "static")// || style.overflow != "visible")
+                if (style.transform != "none" || style.position != "static")
                     return false;
             }
             //            console.log("REALLY FIXED", el.id);
@@ -448,10 +416,6 @@ module jsidea.geom {
         public static extractScrollRealWebkit(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!element || !element.parentElement)
                 return ret;
-
-            //            if (!this.isFixed(element))
-            //                element = element.parentElement;
-            //            element = <HTMLElement> this.scrollParent(element);
             
             element = <HTMLElement> this.scrollParent(element);
 
@@ -463,38 +427,16 @@ module jsidea.geom {
             }
             return ret;
         }
-        
-        //        //FOR WEBKIT AND IE11 (MAYBE firefox too)
-        //        public static extractScrollReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-        //            if (!element || !element.parentElement)
-        //                return ret;
-        //
-        //            var style = window.getComputedStyle(element);
-        //            if (style.position != "static")// || this.extractIsFixedReal(element))//style.position == "fixed")
-        //                element = <HTMLElement> this.extractOffsetScroll(element);
-        //            else
-        //                element = element.parentElement;
-        //
-        //            while (element && element != document.body) {
-        //                var style = window.getComputedStyle(element);
-        //                ret.x += element.scrollLeft;
-        //                ret.y += element.scrollTop;
-        //                if (style.position != "static")// || this.extractIsFixedReal(element))//style.position == "fixed")
-        //                    element = <HTMLElement> this.extractOffsetScroll(element);
-        //                else
-        //                    element = element.parentElement;
-        //            }
-        //            return ret;
-        //        }
 
         public static extractOffsetReal(element: HTMLElement, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             ret.x = 0;
             ret.y = 0;
 
+            //if you subtract the scroll from the accumlated/summed offset
+            //you get the real offset to window (initial-containing-block)
             var sc = this.isIE ? this.extractScrollRealIE(element) : this.extractScrollRealWebkit(element);
             ret.x -= sc.x;
             ret.y -= sc.y;
-            //            console.log(sc.x, sc.y);
 
             if (this.isIE) {
                 ret.x += document.documentElement.scrollLeft;
@@ -505,7 +447,8 @@ module jsidea.geom {
 
             //add scroll value only if reference of the element is the window not the body
             //if is really fixed, then just make it fast
-            if (this.extractIsFixedRealAsso(element)) {
+//            if (this.isFixedAssociative(element)) {
+            if (this.isFixed(element)) {
                 if (this.isWebkit) {
                     ret.x += document.body.scrollLeft;
                     ret.y += document.body.scrollTop;
@@ -548,7 +491,6 @@ module jsidea.geom {
                 this.correctWebkitOffset(element, ret);
             } else if (this.isFirefox) {
                 this.correctFirefoxOffset(element, ret);
-                //                this.correctWebkitOffset(element, ret);
             }
             return ret;
         }
@@ -557,8 +499,6 @@ module jsidea.geom {
             var style = window.getComputedStyle(element);
             var par = this.extractOffsetParentReal(element);
             var parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
-
-
 
             if (par && style.position == "absolute") {
                 ret.x += par.clientLeft;
@@ -570,123 +510,24 @@ module jsidea.geom {
                 ret.x -= element.parentElement.clientLeft;
                 ret.y -= element.parentElement.clientTop;
             }
-            //            else if (par && parentStyle && style.position == "fixed" && parentStyle.position == "static") {
-            ////                ret.x -= element.parentElement.offsetLeft;
-            ////                ret.y -= element.parentElement.offsetTop;
-            ////                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
-            ////                ret.y += math.Number.parse(parentStyle.marginTop, 0);
-            //                ret.x += par.clientLeft;
-            //                ret.y += par.clientTop;
-            //                
-            //                if (parentStyle.position == "relative" || parentStyle.position == "absolute") {
-            //                    ret.x -= par.clientLeft;
-            //                    ret.y -= par.clientTop;
-            //
-            //                    ret.x -= math.Number.parse(style.marginLeft, 0);
-            //                    ret.y -= math.Number.parse(style.marginTop, 0);
-            //                }
-            //                else {
-            //                    //                    ret.x -= element.parentElement.offsetLeft;
-            //                    //                    ret.y -= element.parentElement.offsetTop;
-            //                    //                     console.log("AHHH", element);
-            //                    
-            //                    ret.x -= par.offsetLeft;
-            //                    ret.y -= par.offsetTop;
-            ////                    console.log("AHHH", element);
-            //                }
-            //            }
             else if (par && parentStyle && style.position == "fixed" && !this.isFixed(element)) {
 
                 if (parentStyle.position == "relative" || parentStyle.position == "absolute") {
-                    //                    ret.x -= par.clientLeft;
-                    //                    ret.y -= par.clientTop;
-                    //
-                    //                    ret.x -= math.Number.parse(style.marginLeft, 0);
-                    //                    ret.y -= math.Number.parse(style.marginTop, 0);
-                    
-                    
                     ret.x -= element.parentElement.offsetLeft;
                     ret.y -= element.parentElement.offsetTop;
                     ret.x -= element.parentElement.clientLeft;
                     ret.y -= element.parentElement.clientTop;
-
-
                 }
                 else {
-                    //                    ret.x -= element.parentElement.offsetLeft;
-                    //                    ret.y -= element.parentElement.offsetTop;
                     var parStyle = par ? window.getComputedStyle(par) : null;
                     if (element.parentElement != par && parStyle.position == "static") {
-                        //                        if(element.id == "a-cont")
-                        //                        {
                         ret.x += par.clientLeft;
                         ret.y += par.clientTop;
-                        //                        }
-                        //                         console.log("AHHH", element.id);
                     }
-                    
-                    //                     console.log("AHHH", element);
-                    //                    ret.x += element.parentElement.clientLeft;
-                    //                    ret.y += element.parentElement.clientTop;
-                    //                    ret.x -= par.offsetLeft;
-                    //                    ret.y -= par.offsetTop;
-                    
-                    //                    ret.x += element.clientLeft;
-                    //                    ret.y += element.clientTop;                   
-                    
-                    
-                    //                    ret.x += math.Number.parse(style.marginLeft, 0);
-                    //                    ret.y += math.Number.parse(style.marginTop, 0);
-                    //                    //                    
-                    //                                                            ret.x -= math.Number.parse(style.paddingLeft, 0);
-                    //                                                            ret.y -= math.Number.parse(style.paddingTop, 0);
-                    
-                    
-                    //                    ret.x -= element.parentElement.offsetLeft;
-                    //                    ret.y -= element.parentElement.offsetTop;
-                    //                    ret.x -= par.clientLeft;
-                    //                    ret.y -= par.clientTop;
-                    
-                    //                    ret.x -= element.parentElement.clientLeft;
-                    //                    ret.y -= element.parentElement.clientTop;
-                    
-                    //                    ret.x -= math.Number.parse(style.marginLeft, 0);
-                    //                    ret.y -= math.Number.parse(style.marginTop, 0);
-                    //                    ret.x += math.Number.parse(style.paddingLeft, 0);
-                    //                    ret.y += math.Number.parse(style.paddingTop, 0);
-                    
-                    //                    ret.x += math.Number.parse(parentStyle.marginLeft, 0);
-                    //                    ret.y += math.Number.parse(parentStyle.marginTop, 0);
-                    
-                    //                                       console.log("AHHH", element);
                 }
-                
-                //                ret.x -= element.parentElement.offsetLeft;
-                //                ret.y -= element.parentElement.offsetTop;
-                
-                //                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
-                //                ret.y += math.Number.parse(parentStyle.marginTop, 0);
-                
-                //                ret.x += par.clientLeft;
-                //                ret.y += par.clientTop;
-                
-                //                ret.x -= par.clientLeft;
-                //                ret.y -= par.clientTop;
-                
-                //                ret.x -= math.Number.parse(style.paddingLeft, 0);
-                //                ret.y -= math.Number.parse(style.paddingTop, 0);
-
-                //                ret.x += math.Number.parse(style.marginLeft, 0);
-                //                ret.y += math.Number.parse(style.marginTop, 0);
-                
-                //                ret.x -= math.Number.parse(style.paddingLeft, 0);
-                //                ret.y -= math.Number.parse(style.paddingTop, 0);
-                
-                //                ret.x -= element.parentElement.offsetLeft;
-                //                ret.y -= element.parentElement.offsetTop;
-                
-                //                ret.x -= element.parentElement.clientLeft;
-                //                ret.y -= element.parentElement.clientTop;
+            }
+            else {
+                //                console.log("FIREFOX-NO-BUG", element);
             }
 
             return ret;
@@ -703,44 +544,7 @@ module jsidea.geom {
             var parStyle = par ? window.getComputedStyle(par) : null;
             var forceAbsolute = style.position == "fixed" && !this.isFixed(element);
 
-            //            console.log("AHHH", element);
-            
             if (forceAbsolute) {
-
-                //                ret.x -= element.parentElement.clientLeft;
-                //                ret.y -= element.parentElement.clientTop;
-                //                ret.x -= element.parentElement.offsetLeft;
-                //                ret.y -= element.parentElement.offsetTop;
-
-                return ret;
-                
-                //                ret.x -= element.offsetLeft;
-                //                ret.y -= element.offsetTop;
-                //                ret.x += element.parentElement.offsetLeft;
-                //                ret.y += element.parentElement.offsetTop;
-                //                ret.x -= element.parentElement.clientLeft;
-                //                ret.y -= element.parentElement.clientTop;
-                
-                //                ret.x -= element.offsetLeft;
-                //                ret.y -= element.offsetTop;
-                //                ret.x -= element.clientLeft;
-                //                ret.y -= element.clientTop;
-                //                
-                //                ret.x -= par.offsetLeft;
-                //                ret.y -= par.offsetTop;
-                //                ret.x -= par.clientLeft;
-                //                ret.y -= par.clientTop;
-                
-                //                ret.x -= element.parentElement.clientLeft;
-                //                ret.y -= element.parentElement.clientTop;
-                //                ret.x -= element.parentElement.offsetLeft;
-                //                ret.y -= element.parentElement.offsetTop;
-                
-                //                if(this.extractIsFixedRealAsso(element))
-                //                {
-                //                    console.log(element.id);    
-                //                }
-                
                 return ret;
             }
             else if (style.position == "absolute" && parentStyle.position == "fixed")
@@ -751,7 +555,6 @@ module jsidea.geom {
                 return ret;
             else if (style.position == "fixed" && parentStyle.position == "fixed")
                 return ret;
-
 
             else if (par && style.position == "absolute") {
                 ret.x -= par.clientLeft;
@@ -776,49 +579,12 @@ module jsidea.geom {
                 ret.y -= par.clientTop;
 
                 if (parentStyle.position != "static") {
-                    if (parentStyle.position == "relative" || parentStyle.position == "absolute") {
-                        //                        ret.x += math.Number.parse(style.marginLeft, 0);
-                        //                        ret.y += math.Number.parse(style.marginTop, 0);
-                        //                        ret.x -= math.Number.parse(style.paddingLeft, 0);
-                        //                        ret.y -= math.Number.parse(style.paddingTop, 0);
-                    }
                     ret.x -= element.parentElement.offsetLeft;
                     ret.y -= element.parentElement.offsetTop;
                 }
                 else {
-                    //                    ret.x -= element.parentElement.offsetLeft;
-                    //                    ret.y -= element.parentElement.offsetTop;
-                    //                     console.log("AHHH", element);
-                    
                     ret.x -= par.offsetLeft;
                     ret.y -= par.offsetTop;
-                    
-                    //                    console.log(element);
-                
-                    //                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
-                    //                ret.y += math.Number.parse(parentStyle.marginTop, 0);
-                
-                    //                                ret.x += par.clientLeft;
-                    //                                ret.y += par.clientTop;
-                
-                    //                                ret.x += par.clientLeft;
-                    //                                ret.y += par.clientTop;
-                
-                    //                ret.x -= math.Number.parse(style.paddingLeft, 0);
-                    //                ret.y -= math.Number.parse(style.paddingTop, 0);
-
-                    //                                ret.x += math.Number.parse(parentStyle.marginLeft, 0);
-                    //                                ret.y += math.Number.parse(parentStyle.marginTop, 0);
-                    //                
-                    //                                ret.x -= math.Number.parse(style.paddingLeft, 0);
-                    //                                ret.y -= math.Number.parse(style.paddingTop, 0);
-                
-                    //                ret.x -= element.parentElement.offsetLeft;
-                    //                ret.y -= element.parentElement.offsetTop;
-                
-                    //                                ret.x -= element.parentElement.clientLeft;
-                    //                                ret.y -= element.parentElement.clientTop;
-                    //                    console.log("AAAA", element.id);
                 }
             }
             else {
