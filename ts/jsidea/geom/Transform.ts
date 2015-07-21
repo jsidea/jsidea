@@ -447,8 +447,8 @@ module jsidea.geom {
 
             //add scroll value only if reference of the element is the window not the body
             //if is really fixed, then just make it fast
-//            if (this.isFixedAssociative(element)) {
-            if (this.isFixed(element)) {
+            if (this.isFixedAssociative(element)) {
+//            if (this.isFixed(element)) {
                 if (this.isWebkit) {
                     ret.x += document.body.scrollLeft;
                     ret.y += document.body.scrollTop;
