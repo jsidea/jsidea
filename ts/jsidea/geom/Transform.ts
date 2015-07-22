@@ -46,12 +46,12 @@ module jsidea.geom {
         private _inverted: boolean = false;
         private _box: geom.BoxModel = new geom.BoxModel();
 
-        constructor(element: HTMLElement, root: HTMLElement = null) {
-            this.update(element, root);
+        constructor(element: HTMLElement) {
+            this.update(element);
         }
 
-        private update(element: HTMLElement, root: HTMLElement = null): void {
-            var chain = Transform.extractStyleChain(element, root);
+        private update(element: HTMLElement): void {
+            var chain = Transform.extractStyleChain(element);
             this._inverted = false;
             this._matrices = Transform.extractAccumulatedMatrices(chain);
             this._box.parse(element, chain.style);
@@ -136,8 +136,8 @@ module jsidea.geom {
             return pt;
         }
 
-        public static extract(element: HTMLElement, root: HTMLElement = null): geom.Transform {
-            return new Transform(element, root);
+        public static extract(element: HTMLElement): geom.Transform {
+            return new Transform(element);
         }
 
         private static extractMatrix(node: INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
@@ -188,9 +188,9 @@ module jsidea.geom {
             return matrix;
         }
 
-        public static extractStyleChain(element: HTMLElement, root: HTMLElement = null): INode {
+        public static extractStyleChain(element: HTMLElement): INode {
             //collect computed styles/nodes up to html/root (including html/root)
-            root = root ? root : document.body;
+            var root = document.body;
             
             //collect from child to root
             var elements: HTMLElement[] = [];
@@ -232,7 +232,7 @@ module jsidea.geom {
                         style = window.getComputedStyle(element);
                     }
                     //maybe not the hard way, just check an set the perspective to none (-> 0 here)
-                    if (style.transform != "none" && style.overflow != "visible") {
+                    if (style.transform != "none" && style.overflow != "visible" && style.perspective != "none") {
                         //webkit ignores perspective set on scroll elements
 
                         //make the element a containing-block

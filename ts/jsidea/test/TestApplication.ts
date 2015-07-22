@@ -137,42 +137,10 @@ module jsidea.test {
             ctx.stroke();
         }
 
-        private getOffestToCrossDoc(f: HTMLElement, aOther: HTMLElement | Window): geom.Point2D {
-            var top: number = 0;
-            var left: number = 0;
-            while (f && f != aOther) {
-                left += f.offsetLeft;
-                top += f.offsetTop;
-                var par = f.parentElement;
-                if (par) {
-                    f = par;
-                }
-                else {
-
-                }
-            }
-            return new geom.Point2D(left, top);
-        }
-
-        private getOffestToCrossDoc2(f: HTMLElement, aOther: HTMLElement | Window): geom.Point2D {
-            var top: number = 0;
-            var left: number = 0;
-            while (f && f != aOther) {
-                left += f.clientLeft;
-                top += f.clientTop;
-                var par = f.parentElement;
-                if (par) {
-                    f = par;
-                }
-                else {
-
-                }
-            }
-            return new geom.Point2D(left, top);
-        }
-
         private logChain(f: HTMLElement): void {
             var node = geom.Transform.extractStyleChain(f);
+            if (node)
+                node = node.root;
             while (node) {
                 geom.Transform.getOffset(node);
                 var ofp = <HTMLElement> node.element.offsetParent;
@@ -192,87 +160,8 @@ module jsidea.test {
                     text.Text.conc(18, " ", "POSITION", node.style.position)
                 ]).join(" ");
                 console.log(res);
-                node = node.parent;
+                node = node.child;
             }
-        }
-
-        private getOffestToCrossDoc3(f: HTMLElement, aOther: HTMLElement | Window): geom.Point2D {
-            var top: number = 0;
-            var left: number = 0;
-            var z = 0;
-            while (f && f != aOther) {
-
-                //                top = 0;
-                //                left = 0;
-                
-                if (f.parentElement != document.body) {
-                    left -= f.parentElement.scrollLeft;
-                    top -= f.parentElement.scrollTop;
-                }
-
-                var parentStyle = window.getComputedStyle(f.parentElement);
-                var style = window.getComputedStyle(f);
-                if (TestApplication.isFirefox) {
-                    //                    left += math.Number.parse(parentStyle.borderLeftWidth, 0);
-                    //                    top += math.Number.parse(parentStyle.borderTopWidth, 0);
-                
-                    //                    left += math.Number.parse(parentStyle.borderLeftWidth, 0);
-                    //                    top += math.Number.parse(parentStyle.borderTopWidth, 0);
-                    
-                    
-                    
-                    left += f.offsetLeft;
-                    top += f.offsetTop;
-
-                    //                    left += f.clientLeft;
-                    //                    top += f.clientTop;
-                    //                    
-                    //                    left -= f.parentElement.clientLeft;
-                    //                    top -= f.parentElement.clientTop;
-                    //
-                    //                    left += math.Number.parse(parentStyle.borderLeftWidth, 0);
-                    //                    top += math.Number.parse(parentStyle.borderTopWidth, 0);
-
-                    //                    left -= math.Number.parse(parentStyle.paddingLeft, 0);
-                    //                    top -= math.Number.parse(parentStyle.paddingTop, 0);
-                    
-                    //                    left -= math.Number.parse(style.paddingLeft, 0);
-                    //                    top -= math.Number.parse(style.paddingTop, 0);
-                    
-                    //                    left += math.Number.parse(style.borderLeftWidth, 0);
-                    //                    top += math.Number.parse(style.borderTopWidth, 0);
-                    
-                    //                    left += math.Number.parse(parentStyle.borderLeftWidth, 0);
-                    //                    top += math.Number.parse(parentStyle.borderTopWidth, 0);
-                    
-                    //                    left += math.Number.parse(parentStyle.borderLeftWidth, 0);
-                    //                    top += math.Number.parse(parentStyle.borderTopWidth, 0);
-                }
-                else {
-
-                    left += f.offsetLeft;
-                    top += f.offsetTop;
-
-                    //
-                    //                    left += math.Number.parse(parentStyle.paddingLeft, 0);
-                    //                    top += math.Number.parse(parentStyle.paddingTop, 0);
-                    
-                    //                    left += math.Number.parse(parentStyle.marginLeft, 0);
-                    //                    top += math.Number.parse(parentStyle.marginTop, 0);
-                }
-
-                if (++z > 1)
-                    break;
-
-                var par = f.parentElement;
-                if (par) {
-                    f = par;
-                }
-                else {
-
-                }
-            }
-            return new geom.Point2D(left, top);
         }
 
         private testObserver(): void {
