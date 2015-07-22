@@ -172,32 +172,26 @@ module jsidea.test {
         }
 
         private logChain(f: HTMLElement): void {
-            var res = "LOG-CHAIN\n";
-            while (f) {
-                var st = window.getComputedStyle(f);
-                var sn = geom.Transform.getParentScroll(f._node);
-                var s = sn ? sn.element : null;
-                var calced = geom.Transform.getParentOffset(f._node);
-                var calcedOff = calced ? calced.element : null;
-                var ofp = <HTMLElement> f.offsetParent;
-                res += ([
-                    text.Text.conc(10, " ", f.id ? f.id : f.nodeName),
-                    text.Text.conc(30, " ", "PARENT", f.offsetParent ? (ofp.id ? ofp.id : ofp.nodeName) : "NONE", "->", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
-                    text.Text.conc(24, " ", "OFFSET", f.offsetLeft, f.offsetTop),
-                    text.Text.conc(24, " ", "OFFSET_C", s ? (s.id ? s.id : s.nodeName) : "NONE"),
-//                    text.Text.conc(24, " ", "OFFSET_F", geom.Transform.getOffsetCorrection(f._node, new geom.Point2D(f.offsetLeft, f.offsetTop)).x, geom.Transform.getOffsetCorrection(f._node, new geom.Point2D(f.offsetLeft, f.offsetTop)).y),
-                    text.Text.conc(20, " ", "MARGIN", st.marginLeft, st.marginTop),
-                    text.Text.conc(20, " ", "BORDER", st.borderLeftWidth, st.borderTopWidth),
-                    text.Text.conc(20, " ", "PADDING", st.paddingLeft, st.paddingTop),
-                    //                    text.Text.conc(14, " ", "SCROLL", f.scrollLeft, f.scrollTop, geom.Transform.extractScrollReal(f).x, geom.Transform.extractScrollReal(f).y),
-                    //                    text.Text.conc(28, " ", "OVERFLOW", st.overflow, st.boxSizing),
-                    //                    text.Text.conc(20, " ", "BOUNDS", f.getBoundingClientRect().left, f.getBoundingClientRect().top),
-                    text.Text.conc(20, " ", "POSITION", st.position)
+            var node = geom.Transform.extractStyleChain(f);
+            while (node) {
+                geom.Transform.getOffset(node);
+                var ofp = <HTMLElement> node.element.offsetParent;
+                var calcedOff = node.offsetParent ? node.offsetParent.element : null;
+                var res = ([
+                    text.Text.conc(10, " ", node.element.id ? node.element.id : node.element.nodeName),
+                    text.Text.conc(20, " ", "PARENT", ofp ? (ofp.id ? ofp.id : ofp.nodeName) : "NONE"),
+                    text.Text.conc(20, " ", "PARENT_C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
+                    text.Text.conc(20, " ", "OFFSET", node.offsetLeft, node.offsetTop),
+                    text.Text.conc(20, " ", "OFFSET_C", node.offsetX, node.offsetY),
+                    text.Text.conc(20, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
+                    text.Text.conc(20, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
+                    text.Text.conc(20, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),
+                    text.Text.conc(20, " ", "OVERFLOW", node.style.overflow),
+                    text.Text.conc(20, " ", "POSITION", node.style.position)
                 ]).join(" ");
-                res += "\n";
-                f = f.parentElement;
+                console.log(res);
+                node = node.parent;
             }
-            console.log(res);
         }
 
         private getOffestToCrossDoc3(f: HTMLElement, aOther: HTMLElement | Window): geom.Point2D {
