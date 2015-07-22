@@ -14,6 +14,8 @@ module jsidea.geom {
         element: HTMLElement;
         offsetX: number;
         offsetY: number;
+        scrollOffsetX: number;
+        scrollOffsetY: number;
         offsetLeft: number;
         offsetTop: number;
         clientLeft: number;
@@ -278,6 +280,8 @@ module jsidea.geom {
                     leaf: null,
                     offsetX: 0,
                     offsetY: 0,
+                    scrollOffsetX: 0,
+                    scrollOffsetY: 0,
                     isAccumulatable: true,
                     isFixed: style.position == "fixed",
                     isRelative: style.position == "relative",
@@ -340,6 +344,17 @@ module jsidea.geom {
                 node.offsetParent = this.getParentOffset(node);
                 node.parentScroll = this.getParentScroll(node);
                 node.isAccumulatable = this.getIsAccumulatable(node);
+                node = node.parent;
+            }
+            
+            //add scroll offsets
+            node = leafNode;
+            while (node) {
+                //if you subtract the scroll from the accumlated/summed offset
+                //you get the real offset to window (initial-containing-block)
+                var sc = this.getScrollOffset2(node);
+                node.scrollOffsetX = sc.x;
+                node.scrollOffsetY = sc.y;
                 node = node.parent;
             }
 
@@ -486,7 +501,7 @@ module jsidea.geom {
             return true;
         }
 
-        private static getScrollOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        private static getScrollOffset2(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node || !node.parent)
                 return ret;
 
@@ -507,12 +522,9 @@ module jsidea.geom {
             //the offset of void/null is 0 0
             if (!node)
                 return ret;
-
-            //if you subtract the scroll from the accumlated/summed offset
-            //you get the real offset to window (initial-containing-block)
-            var sc = this.getScrollOffset(node);
-            ret.x -= sc.x;
-            ret.y -= sc.y;
+            
+            ret.x -= node.scrollOffsetX;
+            ret.y -= node.scrollOffsetY;
 
             //add scroll value only if reference of the element is the window not the body
             if (node.isStickedAssociative) {
@@ -589,6 +601,12 @@ module jsidea.geom {
             if (node.offsetParent.style.boxSizing != "border-box") {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
+            }
+            if(node.isAbsolute && node.parent.isStatic)
+            {
+                ret.x += node.offsetParent.clientLeft;
+                ret.y += node.offsetParent.clientTop;
+//                ret.x +=     
             }
 
             return ret;

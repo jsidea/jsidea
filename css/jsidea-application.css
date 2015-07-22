@@ -90,7 +90,7 @@ canvas {
 	height: 512px;
 	border: 55px solid #FFFF00;
 	margin: 30px;
-	/* overflow: scroll; */
+	overflow: scroll;
 	padding: 15px;
 	/* transform: translateX(0); */
 	/* transform: translateX(0); */
@@ -132,6 +132,8 @@ canvas {
 	/*the next two lines should have no effect on the position, because the element is set toe static*/
 	left: 200px;
 	top:100px;
+	
+	overflow: scroll;
 	
 	/* transform: translateX(0); */
 	/* transform: rotate(25deg); */
@@ -177,12 +179,12 @@ canvas {
 	width: 128px;
 	height: 128px;
 	cursor: pointer;
-	overflow: scroll;
+	/* overflow: scroll; */
 	/* transform: translateX(0); */
 	/* transform: translateX(0); */
 	/* transform: translateX(100px); */
 	/* transform: translateZ(-800px) rotate(70deg); */
-	box-sizing: border-box;
+	/* box-sizing: border-box; */
 }
 
 
@@ -192,6 +194,7 @@ canvas {
 	width: 256px;
 	height: 256px;
 	margin: 20px;
+	/* box-sizing: border-box; */
 	/* left: 0px; */
 	/* left: 100px; */
 	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
