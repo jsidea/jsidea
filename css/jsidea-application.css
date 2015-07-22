@@ -14,7 +14,7 @@ body * {
 	/* transform-style: flat; */
 	/* perspective: 600px; */
 	/* transform-style: flat; */
-	box-sizing: border-box;
+	/* box-sizing: border-box; */
 }
 
 body {
@@ -31,6 +31,82 @@ body {
 	/* border: 100px solid #FF00FF; */
 	/* padding: 50px; */
 	/* position: absolute; */
+	
+}
+
+/* TEST 0 */
+.test-0 #view {
+	position: absolute;
+}
+
+.test-0 #content {
+	position: absolute;
+}
+
+.test-0 #a-cont {
+	position: absolute;
+}
+
+.test-0 #b-cont {
+	position: absolute;
+}
+
+.test-0 #c-cont {
+	position: absolute;
+}
+
+.test-0 #d-cont {
+	position: absolute;
+}
+
+/* TEST 1 */
+.test-1 #view {
+	position: static;
+}
+
+.test-1 #content {
+	position: static;
+}
+
+.test-1 #a-cont {
+	position: absolute;
+}
+
+.test-1 #b-cont {
+	position: static;
+}
+
+.test-1 #c-cont {
+	position: absolute;
+}
+
+.test-1 #d-cont {
+	position: fixed;
+}
+
+/* TEST 2 */
+.test-2 #view {
+	position: fixed;
+}
+
+.test-2 #content {
+	position: static;
+}
+
+.test-2 #a-cont {
+	position: static;
+}
+
+.test-2 #b-cont {
+	position: fixed;
+}
+
+.test-2 #c-cont {
+	position: static;
+}
+
+.test-2 #d-cont {
+	position: absolute;
 }
 
 canvas {
@@ -50,8 +126,7 @@ canvas {
 	background-color: rgba(0, 0, 0, 0.2);
 	transition: all 1s;
 	pointer-events: none;
-	
-	box-sizing: border-box;
+	/* box-sizing: border-box; */
 }
 
 /* canvas:hover {
@@ -60,7 +135,6 @@ canvas {
 	padding: 0px;
 	border: 20px solid #FFF;
 } */
-
 #view {
 	position: fixed;
 	width: 512px;
@@ -68,10 +142,8 @@ canvas {
 	/* left: 100px;
 	top: 100px; */
 	border: 65px solid #FF00FF;
-	
 	/* perspective: 400px; */
 	/* transform-style: preserve-3d; */
-	
 	/* transform: translateX(0); */
 	/* transform: rotate(45deg); */
 	/* transform: rotate(30deg); */
@@ -80,21 +152,18 @@ canvas {
 	overflow: hidden; */
 	/* transform: translateX(0); */
 	/* transform: translateZ(-20px) rotate(30deg); */
-	
 	/* transform: translateX(0); */
 	/* perspective: 200px; */
 	/* transform-style: preserve-3d; */
-	
 	overflow: scroll;
 	/* box-sizing: border-box; */
 	/* box-sizing: border-box; */
 }
 
 #content {
-	position: static;
 	width: 512px;
 	height: 512px;
-	border: 55px solid #FFFF00;
+	border: 15px solid #FFFF00;
 	margin: 30px;
 	/* overflow: scroll; */
 	padding: 15px;
@@ -103,14 +172,14 @@ canvas {
 	/* transform: translateX(0); */
 	/* transform: translateX(0); */
 	/* left: 200px; */
-	
+
 	/* transform: translateZ(-20px) rotateY(-5deg); */
-	
+
 	/* perspective: 100px; */
 	/* transform: translateX(0); */
 	/* perspective: 400px; */
 	/* transform-style: preserve-3d; */
-	
+
 	/* transform: translateZ(-20px) rotateY(30deg);
 	transform-style: preserve-3d;
 	
@@ -118,14 +187,13 @@ canvas {
 	/* transform-style: preserve-3d; */
 	/* transform: translateX(0); */
 	/* overflow: hidden; */
-	
+
 	/* perspective: 100px; */
-	
+
 	/* box-sizing: border-box; */
 }
 
 #a-cont {
-	position: static;
 	border: 45px solid #00FFFF;
 	width: 512px;
 	height: 512px;
@@ -137,16 +205,12 @@ canvas {
 	/* transform-style: preserve-3d;
 	perspective: 600px; */
 	/* transform: translateX(0); */
-	
 	/* transform-style: preserve-3d;
 	transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
-	
 	/*the next two lines should have no effect on the position, because the element is set toe static*/
 	left: 200px;
-	top:100px;
-	
+	top: 100px;
 	overflow: scroll;
-	
 	/* transform: translateX(0); */
 	/* transform: rotate(25deg); */
 	margin: 10px;
@@ -155,19 +219,18 @@ canvas {
 }
 
 #b-cont {
-	position: fixed;
 	border: 35px solid #0000FF;
 	width: 512px;
 	padding: 45px;
 	margin: 20px;
-	
+
 	/* box-sizing: border-box; */
-	
+
 	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
-	
+
 	/* transform-style: preserve-3d; */
 	/* transform: translateX(200px) rotate(30deg); */
-	
+
 	/* transform: translateX(0); */
 	/* overflow: scroll; */
 	/* overflow: hidden; */
@@ -182,7 +245,6 @@ canvas {
 }
 
 #c-cont {
-	position: static;
 	/* overflow: hidden; */
 	/* margin: 10px; */
 	padding: 20px;
@@ -199,9 +261,7 @@ canvas {
 	/* box-sizing: border-box; */
 }
 
-
 #d-cont {
-	position: absolute;
 	border: 15px solid #883366;
 	width: 256px;
 	height: 256px;
@@ -219,7 +279,6 @@ canvas {
 	/* margin: 45px; */
 	/* padding: 20px; */
 	/* overflow: scroll; */
-	
 }
 
 /* #d-cont:after {

@@ -623,6 +623,27 @@ module jsidea.geom {
             return ret;
         }
 
+        public static getParentBlock(node: INode): INode {
+            if (!node || node.isBody)
+                return null;
+
+            if (this.isIE) {
+                return node.offsetParent;
+            }
+
+            if (node.isStatic || node.isRelative)
+                return node.parent;
+
+            var html = document.body.parentElement;
+            while ((node = node.parent) && node.parent) {
+                //                if(style.position == "relative" || style.position == "absolute" || style.position == "fixed")
+                if (!node.isStatic || node.isTransformed || node.style.transformStyle == "preserve-3d" || node.isScrollable)
+                    return node;
+            }
+
+            return null;
+        }
+
         private static getOffsetCorrection(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (this.isWebkit) {
                 this.correctWebkitOffset(node, ret);
@@ -645,25 +666,176 @@ module jsidea.geom {
             if (!node || !node.offsetParent)
                 return ret;
 
+
+
+            //            if (
+            //                !node.offsetParent.isAbsolute
+            ////                && node.parent != node.offsetParent
+            ////                && !(node.isStatic && node.offsetParent.isStatic)
+            //                ) {
+                
+            //            ret.x += node.clientLeft;
+            //            ret.y += node.clientTop;
+            
+            //            var nodeP = this.getParentBlock(node);
+                
+            if (
+                //                node.parent != node.offsetParent
+                //                node.isAbsolute && (node.parent != node.offsetParent || node.parent.isAbsolute)
+                node.isAbsolute
+                ) {
+                //                ret.x += node.offsetParent.clientLeft;
+                //                ret.y += node.offsetParent.clientTop;
+                //                ret.x += node.clientLeft;
+                //                ret.y += node.clientTop;
+            }
+
+            if (
+                //                node.parent != node.offsetParent
+                //                node.isAbsolute && (node.parent.isScrollable && !node.parent.isBody)
+                node.isAbsolute
+                ) {
+                //                ret.x += node.parent.clientLeft;
+                //                ret.y += node.parent.clientTop;
+            }
+
+            //            if (node.leaf == node) {
+            //                ret.x += node.parent.clientLeft;
+            //                ret.y += node.parent.clientTop;
+            //            ret.x += node.offsetParent.clientLeft;
+            //            ret.y += node.offsetParent.clientTop;
+            
+            //            ret.x += node.offsetParent.clientLeft;
+            //            ret.y += node.offsetParent.clientTop;
+            
+            ret.x += node.offsetParent.clientLeft;
+            ret.y += node.offsetParent.clientTop;
+            
+            if (
+                node.isAbsolute
+//                && node.offsetParent.isStatic
+                && node.offsetParent.isScrollable
+            //                && !node.parent.isScrollable 
+            //                && !node.parent.parent.isScrollable
+                ) {
+                ret.x += node.offsetParent.clientLeft;
+                ret.y += node.offsetParent.clientTop;
+//                console.log(node.element.id);
+            }
+
+
+            if (
+                node.isAbsolute
+                && node.parent.isStatic
+                && node.parent.offsetParent == node.offsetParent
+            //                && !node.parent.isScrollable 
+            //                && !node.parent.parent.isScrollable
+                ) {
+                //                ret.x += node.offsetParent.clientLeft;
+                //                ret.y += node.offsetParent.clientTop;        
+            }
+
+            if (node.isAbsolute && node.parent.isStatic && node.parent.parent && node.parent.parent.isAbsolute) {
+                //                ret.x -= node.offsetParent.clientLeft;
+                //                ret.y -= node.offsetParent.clientTop;
+            }
+
+            if (node.parent != node.offsetParent) {
+                //                ret.x += node.offsetParent.clientLeft;
+                //                ret.y += node.offsetParent.clientTop;
+                
+            }
+            else {
+                //                ret.x += node.offsetParent.clientLeft;
+                //                ret.y += node.offsetParent.clientTop;
+                //                ret.x += node.parent.clientLeft;
+                //                ret.y += node.parent.clientTop;
+            }
+            //            }
+            
+            //            }
+            
+            //            if (
+            //                !node.isStatic
+            //                && node.parent != node.offsetParent
+            ////                && !(node.isStatic && node.offsetParent.isStatic)
+            //                ) {
+            //                ret.x += node.offsetParent.clientLeft;
+            //                ret.y += node.offsetParent.clientTop;
+            //            }
+
+
+            return ret;
+
+
             if (node.offsetParent.style.boxSizing != "border-box") {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
             }
 
-            if (node.parent != node.offsetParent && !(node.isStatic && node.parent.isStatic)) {
+
+            if (
+                node.parent != node.offsetParent
+                && !(node.isStatic && node.parent.isStatic)
+                ) {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
             }
-            
-            if (node.parent != node.offsetParent && node.isRelative) {
+
+            if (
+                node.parent != node.offsetParent
+                && node.isRelative
+                ) {
                 ret.x -= node.offsetParent.clientLeft;
                 ret.y -= node.offsetParent.clientTop;
             }
-            
-            if (node.isAbsolute && node.parent.isStatic && node.offsetParent.isAbsolute) {
+
+            if (
+                node.isAbsolute
+                && node.parent.isStatic
+                && node.parent.offsetParent == node.offsetParent
+                && node.offsetParent.isAbsolute
+                ) {
+                //                ret.x -= node.offsetParent.clientLeft;
+                //                ret.y -= node.offsetParent.clientTop;
+            }
+
+            if (
+                node.isAbsolute
+                && node.parent.isStatic
+                && node.parent.offsetParent == node.offsetParent
+                && node.offsetParent.isFixed
+                ) {
                 ret.x -= node.offsetParent.clientLeft;
                 ret.y -= node.offsetParent.clientTop;
             }
+
+            if (
+                node.isAbsolute
+                && node.parent.isStatic
+                && node.parent.offsetParent == node.offsetParent
+                && node.offsetParent.isFixed
+                ) {
+                //                if (
+                //                node.element.id == "b-cont"
+                //                ) {
+                ret.x += node.offsetParent.clientLeft;
+                ret.y += node.offsetParent.clientTop;
+                //                console.log(node.element.id);
+            }
+
+
+
+
+
+            if (
+                node.isAbsolute
+                && node.parent.isStatic
+                && (node.offsetParent.isAbsolute || node.offsetParent.isFixed)) {
+                //                ret.x -= node.offsetParent.clientLeft;
+                //                ret.y -= node.offsetParent.clientTop;
+            }
+
 
             if (node.isStatic && node.parent.isStatic) {
                 //                ret.x -= node.offsetParent.clientLeft;
