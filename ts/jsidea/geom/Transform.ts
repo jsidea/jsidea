@@ -201,7 +201,7 @@ module jsidea.geom {
                     isRelative: style.position == "relative",
                     isAbsolute: style.position == "absolute",
                     isStatic: style.position == "static",
-                    isScrollable: style.position != "visible",
+                    isScrollable: style.overflow != "visible",
                     isSticked: false,
                     isFixedAssociative: false,
                     isFixedToAbsolute: false,
