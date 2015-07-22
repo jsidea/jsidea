@@ -523,7 +523,6 @@ module jsidea.geom {
             //wow, and the offsets are correct
             //if the element is really fixed
             if (node.isSticked) {
-                //            if (node.isFixed) {
                 ret.x += node.offsetLeft;
                 ret.y += node.offsetTop;
 
