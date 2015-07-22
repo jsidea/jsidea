@@ -31,6 +31,7 @@ module jsidea.geom {
         isFixedToAbsolute: boolean;
         style: CSSStyleDeclaration;
         lookup: INode[];
+        isAccumulatable: boolean;
     }
     export class Transform {
 
@@ -267,6 +268,7 @@ module jsidea.geom {
                     leaf: null,
                     offsetX: 0,
                     offsetY: 0,
+                    isAccumulatable: true,
                     isFixed: style.position == "fixed",
                     isRelative: style.position == "relative",
                     isAbsolute: style.position == "absolute",
@@ -327,6 +329,7 @@ module jsidea.geom {
                 node.isStickedAssociative = this.getIsStickedAssociative(node);
                 node.offsetParent = this.getParentOffset(node);
                 node.parentScroll = this.getParentScroll(node);
+                node.isAccumulatable = this.getIsAccumulatable(node);
                 node = node.parent;
             }
 
@@ -343,7 +346,8 @@ module jsidea.geom {
                 //if last is not null, last becomes the base for the transformation
                 //its like appending the current node.transform (parent-transform) to the last transform (child-transform)
                 var m: geom.Matrix3D = this.extractMatrix(node, last);
-                if (node.parent && this.isAccumulatable(node)) {
+//                if (node.parent && this.isAccumulatable(node)) {
+                if (node.parent && node.isAccumulatable) {
                     last = m;
                 }
                 else {
@@ -362,7 +366,7 @@ module jsidea.geom {
             return matrices;
         }
 
-        private static isAccumulatable(node: INode): boolean {
+        private static getIsAccumulatable(node: INode): boolean {
             //in any case, if an element has only 2d-transforms or its the document-root item
             //the transform can be accumulated to the parent transform
             if (!node.parent || node.style.transform.indexOf("matrix3d") < 0)
@@ -385,7 +389,7 @@ module jsidea.geom {
             //there is this case where webkit ignores transform-style: flat. 
             //So when the elements parent has preserve-3d and the element itself has no transform set.
             if (!preserve3d && this.isWebkit && parent.style.transform == "none" && parent.parent)
-                preserve3d = this.isAccumulatable(parent.parent);
+                preserve3d = this.getIsAccumulatable(parent.parent);
 
             return preserve3d;
         }
