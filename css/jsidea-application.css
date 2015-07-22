@@ -65,8 +65,8 @@ canvas {
 	height: 512px;
 	/* left: 100px;
 	top: 100px; */
-	border: 40px solid #FF00FF;
-	transform: translateX(0);
+	border: 65px solid #FF00FF;
+	/* transform: translateX(0); */
 	/* transform: rotate(45deg); */
 	/* transform: rotate(30deg); */
 	/* transform: translateZ(-20px) rotateY(30deg);
@@ -82,7 +82,7 @@ canvas {
 	position: static;
 	width: 512px;
 	height: 512px;
-	border: 30px solid #FFFF00;
+	border: 55px solid #FFFF00;
 	margin: 30px;
 	overflow: scroll;
 	padding: 15px;
@@ -100,20 +100,25 @@ canvas {
 
 #a-cont {
 	position: static;
-	border: 35px solid #00FFFF;
+	border: 45px solid #00FFFF;
 	width: 512px;
 	height: 512px;
+	/* left: 100px; */
 	/* transform-style: preserve-3d;
 	perspective: 600px; */
 	/* perspective-origin: 128px 128px; */
 	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
 	/* transform-style: preserve-3d;
 	perspective: 600px; */
-	/* left: 64px; */
-	/* transform: translateX(0); */
+	
+	/*the next two lines should have no effect on the position, because the element is set toe static*/
+	left: 200px;
+	top:100px;
+	
+	transform: translateX(0);
 	/* transform: rotate(25deg); */
 	margin: 10px;
-	padding: 25px;
+	padding: 60px;
 }
 
 #b-cont {
@@ -121,7 +126,7 @@ canvas {
 	border: 35px solid #0000FF;
 	width: 512px;
 	padding: 45px;
-	margin: 35px;
+	margin: 20px;
 	/* transform: translateX(0); */
 	/* overflow: scroll; */
 	/* overflow: hidden; */
@@ -136,11 +141,12 @@ canvas {
 }
 
 #c-cont {
-	position: static;
+	position: absolute;
 	/* overflow: hidden; */
 	/* margin: 10px; */
-	padding: 10px;
-	border: 20px solid #FF0000;
+	padding: 20px;
+	margin: 10px;
+	border: 25px solid #FF0000;
 	width: 128px;
 	height: 128px;
 	cursor: pointer;
@@ -151,10 +157,11 @@ canvas {
 
 
 #d-cont {
-	position: fixed;
-	border: 40px solid #883366;
+	position: absolute;
+	border: 15px solid #883366;
 	width: 256px;
 	height: 256px;
+	margin: 20px;
 	/* left: 0px; */
 	/* left: 100px; */
 	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */

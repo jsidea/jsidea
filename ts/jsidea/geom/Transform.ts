@@ -6,6 +6,8 @@ module jsidea.geom {
     export interface INodeStyle {
         child: INodeStyle;
         parent: INodeStyle;
+        root: INodeStyle;
+        leaf: INodeStyle;
         offsetParent: INodeStyle;
         parentScroll: INodeStyle;
         element: HTMLElement;
@@ -20,6 +22,7 @@ module jsidea.geom {
         isStatic: boolean;
         isScrollable: boolean;
         isFixed: boolean;
+        isBody: boolean;
         isSticked: boolean;
         isTransformed: boolean;
         isFixedAssociative: boolean;
@@ -188,6 +191,16 @@ module jsidea.geom {
             var leaf: INodeStyle = null;
             while (element && element != root.parentElement) {
                 var style = window.getComputedStyle(element);
+                
+                //webkit bugfix 
+                if(this.isWebkit && style.transform != "none" && (style.position == "static" || style.position == "auto"))
+                {
+                    element.style.position = "relative";
+                    element.style.left = "auto";
+                    element.style.top = "auto";
+                    style = window.getComputedStyle(element);
+                }
+                
                 var node: INodeStyle = {
                     element: element,
                     style: style,
@@ -195,6 +208,8 @@ module jsidea.geom {
                     offsetParent: null,
                     parentScroll: null,
                     child: lastNode,
+                    root: null,
+                    leaf: null,
                     offsetX: 0,
                     offsetY: 0,
                     isFixed: style.position == "fixed",
@@ -202,6 +217,7 @@ module jsidea.geom {
                     isAbsolute: style.position == "absolute",
                     isStatic: style.position == "static",
                     isScrollable: style.overflow != "visible",
+                    isBody: element == document.body,
                     isSticked: false,
                     isFixedAssociative: false,
                     isFixedToAbsolute: false,
@@ -220,13 +236,17 @@ module jsidea.geom {
                 //bind nodes from child to parent
                 if (lastNode)
                     lastNode.parent = node;
+                node.leaf = leaf;
                 lastNode = node;
                 element = element.parentElement;
             }
-
+            var rootNode = lastNode;
+            
+            
             //set "isFixed" and "isFixedToAbsolut"
             node = leaf;
             while (node) {
+                node.root = rootNode;
                 node.isSticked = this.getIsSticked(node);
                 node.isFixedToAbsolute = node.isFixed && !node.isSticked;
                 node = node.parent;
@@ -330,14 +350,9 @@ module jsidea.geom {
         }
 
         private static getParentScroll(node: INodeStyle): INodeStyle {
-            if (!node || !node.parent || node.element == document.body.parentElement)
+            //important: if the node is really sticked, then there could not be any scrolling
+            if (!node || node.isSticked || !node.parent)
                 return null;
-
-            if (node.isSticked) {
-                //                if (node.isFixed) {
-                //                console.log("IS REALLY FIXED", node.element);
-                return null;
-            }
 
             var excludeStaticParent = node.isAbsolute;
             var leaf: INodeStyle = node;
@@ -349,7 +364,9 @@ module jsidea.geom {
                 if (excludeStaticParent && node.isStatic && !node.isTransformed) {
 
                 }
-                else if (node.isScrollable) {
+                //if the element is really sticked, i cannot not be scrolled up there
+                //so stop here
+                else if (node.isScrollable || node.isSticked) {
                     scrollParent = node;
                     break;
                 }
@@ -357,14 +374,7 @@ module jsidea.geom {
             }
 
             scrollParent = !scrollParent ? null : scrollParent;
-            //            if (leaf.isFixedToAbsolute) {
-            //                if (leaf.parent.isFixed)
-            //                    return scrollParent;
-            //                else {
-            //                    var z = this.getParentScroll(scrollParent);
-            //                    return z ? z.parent : null;
-            //                }
-            //            }
+
             return scrollParent;
         }
 
@@ -423,9 +433,12 @@ module jsidea.geom {
 
             //if you subtract the scroll from the accumlated/summed offset
             //you get the real offset to window (initial-containing-block)
+            
+            //            if (!node.isSticked) {
             var sc = this.getScrollOffset(node);
             ret.x -= sc.x;
-            ret.y -= sc.y;            
+            ret.y -= sc.y;
+            //            }            
 
             //add scroll value only if reference of the element is the window not the body
             if (node.isFixedAssociative) {
@@ -468,12 +481,6 @@ module jsidea.geom {
                 //then the offsets are also wrong... arghhh)
                 //correct them here
                 this.getOffsetCorrection(node, ret);
-
-                //go up to parentOffset and subtract its borderLeft/clientLeft and borderTop/clientTop
-                //                var par = node.offsetParent;
-                //                ret.x += par ? par.clientLeft : 0;
-                //                ret.y += par ? par.clientTop : 0;
-                
                 node = node.offsetParent;
             }
 
@@ -505,170 +512,19 @@ module jsidea.geom {
         private static correctWebkitOffset(node: INodeStyle, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node || !node.offsetParent)
                 return ret;
-            //            ret.x += node.offsetParent.clientLeft;
-            //            ret.y += node.offsetParent.clientTop;
             
-            //            if(node.element.id == "c-cont")
-            //            {
-            //                ret.x += node.parent.clientLeft;
-            //                ret.y += node.parent.clientTop;    
-            //            }
-            
-            //            if(node.isStatic)// && node.parent.isFixed)// && node.offsetParent.element == node.element.offsetParent)
-            //            {
-            //                ret.x += node.parent.clientLeft;
-            //                ret.y += node.parent.clientTop;            
-            //            }
-            
-            
-            if (node.offsetParent.element == node.element.offsetParent) {
-
-                if (node.isStatic)// && node.parent.isFixed)// && node.offsetParent.element == node.element.offsetParent)
-                {
-                    ret.x += node.parent.clientLeft;
-                    ret.y += node.parent.clientTop;
-                }
-
-                return ret;
-            }
-
-
-            if (!node.element.offsetParent && !node.isStatic) {
-                ret.x -= node.offsetParent.offsetLeft;
-                ret.y -= node.offsetParent.offsetTop;
-            }
-
-            if (!node.element.offsetParent && node.isFixed) {
-
-            }
-
-
-            return ret;
-
-            //            if (true || node.isFixedToAbsolute) {
-            //                var pt = new geom.Point2D(node.offsetLeft, node.offsetTop);
-            //                this.correctWebkitOffset(node.offsetParent, pt);
-            //                ret.x -= pt.x;
-            //                ret.y -= pt.y;
-            //            ret.x -= node.offsetParent.clientLeft;
-            //            ret.y -= node.offsetParent.clientTop;
-
-            //            if (node.element.id == "a-cont") {
-            if (node.isFixedToAbsolute && !node.parent.isFixedToAbsolute) {
-                ret.x -= node.parent.offsetLeft;
-                ret.y -= node.parent.offsetTop;
-            }
-
-            //            if (node.element.id == "c-cont") {
-            if (node.isStatic) {
-                ret.x += node.parent.clientLeft;
-                ret.y += node.parent.clientTop;
-            }
-            
-            //            if (node.element.id == "d-cont") {
-            if (node.isFixedToAbsolute && !node.parent.isFixedToAbsolute && node.parent.isStatic) {
+            if(!node.offsetParent.isStatic)
+            {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
-                ret.x -= node.offsetParent.offsetLeft;
-                ret.y -= node.offsetParent.offsetTop;
-                ret.x += math.Number.parse(node.parent.style.paddingLeft, 0);
-                ret.y += math.Number.parse(node.parent.style.paddingTop, 0);
             }
+
+            //if there is not bug to fix
+            if (node.offsetParent.element == node.element.offsetParent)
+                return ret;
             
-            //            if (node.isFixedToAbsolute && !node.offsetParent.isFixedToAbsolute) {
-            //                ret.x -= node.offsetParent.offsetLeft;
-            //                ret.y -= node.offsetParent.offsetTop;
-            //            }
-            
-            return ret;
-
-            var op = <HTMLElement> node.element.offsetParent;
-            var z = node.offsetParent;
-            while (z && z.element != op) {
-
-                //                var pt = new geom.Point2D(z.offsetLeft, z.offsetTop);
-                //                this.correctWebkitOffset(z, pt);
-                //                ret.x -= pt.x;
-                //                ret.y -= pt.y;
-                //                ret.x -= z.clientLeft;
-                //                ret.y -= z.clientTop;
-                    
-                //                    ret.x -= z.offsetLeft;
-                //                    ret.y -= z.offsetTop;
-                    
-                z = z.offsetParent;
-            }
-                
-            //                //                                ret.x += node.offsetParent.offsetLeft;
-            //                //                                ret.y += node.offsetParent.offsetTop;
-            //            }
-            //            else {
-            //                //                console.log(node);    
-            //            }
-            //            if (!node.isFixedToAbsolute) {
-            //                ret.x -= node.offsetParent.clientLeft;
-            //                ret.y -= node.offsetParent.clientTop;
-            //            }
-            //                node.offsetParent = null;
-            //            }
-            
-            //            return ret;
-            
-
-
-            //            if (node.isAbsolute && node.offsetParent) {
-            //                ret.x -= node.offsetParent.clientLeft;
-            //                ret.y -= node.offsetParent.clientTop;
-            //            }
-
-
-            if (node.isFixedToAbsolute) {
-                ret.x -= node.offsetParent.clientLeft;
-                ret.y -= node.offsetParent.clientTop;
-                if (!node.parent.isStatic) {
-                    ret.x -= node.parent.offsetLeft;
-                    ret.y -= node.parent.offsetTop;
-                }
-                else {
-                    //                    if (node.parentOffset.isTransformed) {
-                    ret.x -= node.offsetParent.offsetLeft;
-                    ret.y -= node.offsetParent.offsetTop;
-                    //                    }
-                }
-                //                ret.x += node.parentOffset.clientLeft;
-                //                ret.y += node.parentOffset.clientTop;
-                return ret;
-            }
-            else if (node.isAbsolute && node.parent.isFixed)
-                return ret;
-            else if (node.isFixed && node.parent.isStatic)
-                return ret;
-            else if (node.isFixed && node.parent.isAbsolute)
-                return ret;
-            else if (node.isFixed && node.parent.isFixed)
-                return ret;
-            else if (node.offsetParent && node.isAbsolute) {
-                ret.x -= node.offsetParent.clientLeft;
-                ret.y -= node.offsetParent.clientTop;
-                ret.x += node.element.offsetParent.clientLeft;
-                ret.y += node.element.offsetParent.clientTop;
-            }
-            else if (node.offsetParent && node.isStatic || node.isRelative) {
-                ret.x -= node.offsetParent.clientLeft;
-                ret.y -= node.offsetParent.clientTop;
-                ret.x -= node.offsetParent.offsetLeft;
-                ret.y -= node.offsetParent.offsetTop;
-            }
-            else if (node.offsetParent && node.isStatic && node.element.offsetParent == node.element.parentElement) {
-                ret.x -= node.offsetParent.clientLeft;
-                ret.y -= node.offsetParent.clientTop;
-                ret.x -= math.Number.parse(node.parent.style.marginLeft, 0);
-                ret.y -= math.Number.parse(node.parent.style.marginTop, 0);
-            }
-            else {
-                //console.log("WEBKIT-NO-BUG", element);
-            }
-            return ret;
+            //hmmmmm
+            console.warn("The given offsetParent is maybe wrong.");
         }
 
         private static correctFirefoxOffset(node: INodeStyle, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
