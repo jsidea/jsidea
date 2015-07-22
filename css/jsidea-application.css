@@ -75,10 +75,11 @@ canvas {
 	/* transform: rotate(30deg); */
 	/* transform: translateZ(-20px) rotateY(30deg);
 	transform-style: flat;
-	perspective: 200px;
 	overflow: hidden; */
 	/* transform: translateX(0); */
 	/* transform: translateZ(-20px) rotate(30deg); */
+	
+	perspective: 200px;
 	
 	overflow: scroll;
 	box-sizing: border-box;
@@ -90,7 +91,7 @@ canvas {
 	height: 512px;
 	border: 55px solid #FFFF00;
 	margin: 30px;
-	overflow: scroll;
+	/* overflow: scroll; */
 	padding: 15px;
 	/* transform: translateX(0); */
 	/* transform: translateX(0); */
@@ -102,7 +103,7 @@ canvas {
 	
 	/* perspective: 100px; */
 	/* transform: translateX(0); */
-	perspective: 400px;
+	/* perspective: 400px; */
 	/* transform-style: preserve-3d; */
 	
 	/* transform: translateZ(-20px) rotateY(30deg);

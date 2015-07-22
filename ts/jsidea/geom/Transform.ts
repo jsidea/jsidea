@@ -218,27 +218,29 @@ module jsidea.geom {
                 element = elements[i];
 
                 var style = window.getComputedStyle(element);
-                var pers = math.Number.parse(style.perspective, 0);
+                var perspective = math.Number.parse(style.perspective, 0);
                 if (this.isFirefox) {
                     if (isFixed && style.position == "fixed") {
                         //make the element a containing-block
                         element.style.position = "absolute";
+                        
+                        //refresh style
+                        style = window.getComputedStyle(element);
+                        console.warn("FIXED: Fixed to absolute. Fixed in a fixed container.");
                     }
                     
-                    //                    if (preserved3d && style.position == "fixed") {
-                    //                        //make the element a containing-block
-                    //                        element.style.position = "absolute";
-                    //                        
-                    //                        //refresh style
-                    //                        style = window.getComputedStyle(element);
-                    //                    }
+                    if (preserved3d && style.position == "fixed") {
+                        //make the element a containing-block
+                        element.style.position = "absolute";
+                        
+                        //refresh style
+                        style = window.getComputedStyle(element);
+                        console.warn("FIXED: Fixed to absolute. Fixed in a 3d-context becomes absolute positioned.");
+                    }
                 }
                 //webkit bugfix 
                 if (this.isWebkit) {
-
-
-                    if ((pers || style.transformStyle == "preserve-3d") && style.transform == "none") {
-                        //                    if (pers && style.transform == "none") {
+                    if ((perspective || style.transformStyle == "preserve-3d") && style.transform == "none") {
                         //webkit bug with offset 100000
                         //Fixed elements as an anchestor of an preserve-3d elemenent
                         //without transform set
@@ -246,13 +248,12 @@ module jsidea.geom {
                         //and transform is not set
                         //than it becomes very strange
                         //this parent element with
-
                         //make the element a containing-block
                         element.style.transform = "translateX(0)";
                         
                         //refresh style
                         style = window.getComputedStyle(element);
-                        console.log("FIXED");
+                        console.warn("FIXED: Preserve-3d without transform. Transform set to \"translateX(0)\".");
                     }
 
                     if (preserved3d && style.position == "fixed") {
@@ -261,19 +262,18 @@ module jsidea.geom {
                         
                         //refresh style
                         style = window.getComputedStyle(element);
-                        
-                        //                        console.log("AHHH");
+                        console.warn("FIXED: Fixed position on 3d-context. Set from fixed to absolute");
                     }
                     
                     //maybe not the hard way, just check an set the perspective to none (-> 0 here)
                     if (style.transform != "none" && style.overflow != "visible" && style.perspective != "none") {
                         //webkit ignores perspective set on scroll elements
-
                         //make the element a containing-block
                         element.style.perspective = "none";
                         
                         //refresh style
                         style = window.getComputedStyle(element);
+                        console.warn("FIXED: Disable perspective on overflow elements.");
                     }
                     if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
                         //make static relative
@@ -285,6 +285,7 @@ module jsidea.geom {
                     
                         //refresh style
                         style = window.getComputedStyle(element);
+                        console.warn("FIXED: Transform on static element. Element becomes relative and top/left becomes auto.");
                     }
                     else if (isTransformedAssociative && style.position == "fixed") {
                         //webkit ignores fixed elements in an transformed context
@@ -294,6 +295,7 @@ module jsidea.geom {
                         
                         //refresh style
                         style = window.getComputedStyle(element);
+                        console.warn("FIXED: Fixed to absolute. Fixed in a fixed container");
                     }
                 }
 
@@ -303,7 +305,7 @@ module jsidea.geom {
                     index: lookup.length,
                     lookup: lookup,
                     element: element,
-                    isPreserved3d: style.transformStyle == "preserve-3d",
+                    isPreserved3d: style.transformStyle == "preserve-3d" || perspective > 0,
                     style: style,
                     parent: null,
                     offsetParent: null,
@@ -341,11 +343,8 @@ module jsidea.geom {
 
                 if (!isFixed && style.position == "fixed")
                     isFixed = true;
-
-                //                if(node.element.id == "content")
-                //                    console.log(style.transformStyle);
                 
-                if (!preserved3d && style.transformStyle == "preserve-3d")
+                if (!preserved3d && style.transformStyle == "preserve-3d" || perspective > 0)
                     preserved3d = true;
 
                 //for better handling
@@ -374,6 +373,10 @@ module jsidea.geom {
                 node.child = lookup[node.index + 1];
 
                 node.isSticked = this.getIsSticked(node);
+                if(node.isSticked)
+                {
+//                    console.log("STICKED", node.element.id);    
+                }
                 node.isFixedToAbsolute = node.isFixed && !node.isSticked;
                 node = node.parent;
             }
@@ -593,6 +596,8 @@ module jsidea.geom {
                 ret.y += node.offsetTop;
 
                 this.getOffsetCorrection(node, ret);
+                
+//                console.log("AHH", node.element.id);
                 
                 //set for easy access
                 node.offsetX = ret.x;
