@@ -409,10 +409,13 @@ module jsidea.geom {
             //if the element is in an transform-context
             //the parent cannot be skipped by only evaluating
             //the position value only
-            var excludeStaticParent = node.isAbsolute && !node.parent.isTransformedAssociative;
+            var excludeStaticParent = node.isAbsolute && !node.isTransformedAssociative;
             var leafNode: INode = node;
 
-            node = node.parent;
+//            if (node.isStatic)
+//                node = node.offsetParent;
+//            else
+                node = node.parent;
 
             while (node) {
                 //when can you skip it
@@ -421,10 +424,10 @@ module jsidea.geom {
                 }
                 //if the element is really sticked, it cannot not be scrolled up there
                 //so stop here
-                else if (node.isScrollable || node.isSticked) {
-                    if(node.isStatic && leafNode.isAbsolute)
-                        return node.parent;
-                    else
+                else if (node.isScrollable || node.isSticked || node.isAbsolute) {
+                    //                    if(node.isStatic && leafNode.isAbsolute)
+                    //                        return node.parent;
+                    //                    else
                     return node;
                 }
                 node = node.parent;
@@ -450,7 +453,7 @@ module jsidea.geom {
             //ie does it right
             if (this.isIE)
                 return node.isFixed;
-            
+
             while (node = node.parent) {
                 //                if (!node.isStatic || node.isTransformed)
                 if (node.isTransformed)// || node.isFixed)
