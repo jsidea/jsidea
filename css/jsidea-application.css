@@ -60,7 +60,7 @@ canvas {
 } */
 
 #view {
-	position: fixed;
+	position: static;
 	width: 512px;
 	height: 512px;
 	/* left: 100px;
@@ -99,7 +99,7 @@ canvas {
 }
 
 #a-cont {
-	position: fixed;
+	position: static;
 	border: 35px solid #00FFFF;
 	width: 512px;
 	height: 512px;
@@ -117,7 +117,7 @@ canvas {
 }
 
 #b-cont {
-	position: fixed;
+	position: static;
 	border: 35px solid #0000FF;
 	width: 512px;
 	padding: 45px;
