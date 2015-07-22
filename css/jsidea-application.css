@@ -61,7 +61,7 @@ body {
 
 /* TEST 1 */
 .test-1 #view {
-	position: static;
+	position: absolute;
 }
 
 .test-1 #content {
@@ -106,6 +106,31 @@ body {
 }
 
 .test-2 #d-cont {
+	position: absolute;
+}
+
+/* TEST 3 */
+.test-3 #view {
+	position: fixed;
+}
+
+.test-3 #content {
+	position: absolute;
+}
+
+.test-3 #a-cont {
+	position: absolute;
+}
+
+.test-3 #b-cont {
+	position: fixed;
+}
+
+.test-3 #c-cont {
+	position: static;
+}
+
+.test-3 #d-cont {
 	position: absolute;
 }
 
