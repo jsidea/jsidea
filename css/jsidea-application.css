@@ -100,8 +100,10 @@ canvas {
 	
 	/* transform: translateZ(-20px) rotateY(-5deg); */
 	
-	/* perspective: 100px;
-	transform-style: preserve-3d; */
+	/* perspective: 100px; */
+	/* transform: translateX(0); */
+	/* perspective: 400px; */
+	transform-style: preserve-3d;
 	
 	/* transform: translateZ(-20px) rotateY(30deg);
 	transform-style: preserve-3d;

@@ -33,6 +33,8 @@ module jsidea.geom {
         isFixedToAbsolute: boolean;
         style: CSSStyleDeclaration;
         lookup: INode[];
+        perspective: number;
+        isPreserved3d: boolean;
         isAccumulatable: boolean;
     }
     export class Transform {
@@ -209,24 +211,34 @@ module jsidea.geom {
             //and this order prevents it (root to child)
             var lookup: INode[] = [];
             var isTransformedAssociative = false;
+            var preserved3d = false;
             var l = elements.length;
             var isFixed = false;
             for (var i = l - 1; i >= 0; --i) {
                 element = elements[i];
 
                 var style = window.getComputedStyle(element);
-                
-                if(this.isFirefox)
-                {
-                    if(isFixed && style.position == "fixed")
-                    {
+                var pers = math.Number.parse(style.perspective, 0);
+                if (this.isFirefox) {
+                    if (isFixed && style.position == "fixed") {
                         //make the element a containing-block
                         element.style.position = "absolute";
-                    }    
+                    }
+                    
+//                    if (preserved3d && style.position == "fixed") {
+//                        //make the element a containing-block
+//                        element.style.position = "absolute";
+//                        
+//                        //refresh style
+//                        style = window.getComputedStyle(element);
+//                    }
                 }
                 //webkit bugfix 
                 if (this.isWebkit) {
-                    if (style.transformStyle == "preserve-3d" && style.transform == "none") {
+
+
+//                    if (style.transformStyle == "preserve-3d" && style.transform == "none") {
+                        if (pers && style.transform == "none") {
                         //webkit bug with offset 100000
                         //Fixed elements as an anchestor of an preserve-3d elemenent
                         //without transform set
@@ -240,7 +252,19 @@ module jsidea.geom {
                         
                         //refresh style
                         style = window.getComputedStyle(element);
+                        console.log("FIXED");
                     }
+
+                    if (preserved3d && style.position == "fixed") {
+                        //make the element a containing-block
+                        element.style.position = "absolute";
+                        
+                        //refresh style
+                        style = window.getComputedStyle(element);
+                        
+                        //                        console.log("AHHH");
+                    }
+                    
                     //maybe not the hard way, just check an set the perspective to none (-> 0 here)
                     if (style.transform != "none" && style.overflow != "visible" && style.perspective != "none") {
                         //webkit ignores perspective set on scroll elements
@@ -251,17 +275,17 @@ module jsidea.geom {
                         //refresh style
                         style = window.getComputedStyle(element);
                     }
-                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
-                        //make static relative
-                        //do it in this order should
-                        //prevent re-layouting
-                        element.style.left = "auto";
-                        element.style.top = "auto";
-                        element.style.position = "relative";
-                    
-                        //refresh style
-                        style = window.getComputedStyle(element);
-                    }
+//                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
+//                        //make static relative
+//                        //do it in this order should
+//                        //prevent re-layouting
+//                        element.style.left = "auto";
+//                        element.style.top = "auto";
+//                        element.style.position = "relative";
+//                    
+//                        //refresh style
+//                        style = window.getComputedStyle(element);
+//                    }
                     else if (isTransformedAssociative && style.position == "fixed") {
                         //webkit ignores fixed elements in an transformed context
                         //making them absolute does not change anything visual
@@ -279,6 +303,7 @@ module jsidea.geom {
                     index: lookup.length,
                     lookup: lookup,
                     element: element,
+                    isPreserved3d: style.transformStyle == "preserve-3d",
                     style: style,
                     parent: null,
                     offsetParent: null,
@@ -286,6 +311,7 @@ module jsidea.geom {
                     child: null,
                     root: null,
                     leaf: null,
+                    perspective: 0,
                     offsetX: 0,
                     offsetY: 0,
                     scrollOffsetX: 0,
@@ -312,9 +338,15 @@ module jsidea.geom {
                 //the following elements are in transformed-context
                 if (!isTransformedAssociative && style.transform != "none")
                     isTransformedAssociative = true;
-                
-                if(!isFixed && style.position == "fixed")
+
+                if (!isFixed && style.position == "fixed")
                     isFixed = true;
+
+                //                if(node.element.id == "content")
+                //                    console.log(style.transformStyle);
+                
+                if (!preserved3d && style.transformStyle == "preserve-3d")
+                    preserved3d = true;
 
                 //for better handling
                 //TODO: garbage collection
@@ -449,7 +481,7 @@ module jsidea.geom {
                 return null;
 
             while (node = node.parent) {
-                if (!node.isStatic || node.isTransformed || node.style.transformStyle == "preserve-3d")
+                if (!node.isStatic || node.isTransformed || node.isPreserved3d)
                     return node;
             }
 
@@ -472,7 +504,7 @@ module jsidea.geom {
 
             while (node) {
                 //when can you skip it
-                if (excludeStaticParent && node.isStatic && !node.isTransformed) {
+                if (excludeStaticParent && node.isStatic && !node.isTransformed){// && !node.isPreserved3d) {
 
                 }
                 //if the element is really sticked, it cannot not be scrolled up there
@@ -506,7 +538,7 @@ module jsidea.geom {
 
             while (node = node.parent) {
                 //                if (!node.isStatic || node.isTransformed)
-                if (node.isTransformed)// || node.isFixed)
+                if (node.isTransformed || node.isPreserved3d)// || node.isFixed)
                     return false;
             }
             return true;
@@ -533,7 +565,7 @@ module jsidea.geom {
             //the offset of void/null is 0 0
             if (!node)
                 return ret;
-            
+
             ret.x -= node.scrollOffsetX;
             ret.y -= node.scrollOffsetY;
 
@@ -613,13 +645,11 @@ module jsidea.geom {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
             }
-            if(node.isAbsolute && node.parent.isStatic)
-            {
+            if (node.isAbsolute && node.parent.isStatic) {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
             }
-            if(node.isAbsolute && node.parent.isSticked)
-            {
+            if (node.isAbsolute && node.parent.isSticked) {
                 ret.x += node.parent.clientLeft;
                 ret.y += node.parent.clientTop;
             }
