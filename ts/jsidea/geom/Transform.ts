@@ -442,9 +442,6 @@ module jsidea.geom {
             var excludeStaticParent = node.isAbsolute && !node.isTransformedAssociative;
             var leafNode: INode = node;
 
-            //            if (node.isStatic)
-            //                node = node.offsetParent;
-            //            else
             node = node.parent;
 
             while (node) {
@@ -584,12 +581,15 @@ module jsidea.geom {
             ret.x += node.offsetParent.clientLeft;
             ret.y += node.offsetParent.clientTop;
         }
-        
+
         private static correctFirefoxOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node || !node.offsetParent)
                 return ret;
-            ret.x += node.offsetParent.clientLeft;
-            ret.y += node.offsetParent.clientTop;
+
+            if (node.offsetParent.style.boxSizing != "border-box") {
+                ret.x += node.offsetParent.clientLeft;
+                ret.y += node.offsetParent.clientTop;
+            }
 
             return ret;
         }
@@ -614,6 +614,6 @@ module jsidea.geom {
             //when it comes to the right offsetParent and the offsetTop/offsetLeft
             //values
             console.warn("The given offsetParent is maybe wrong.");
-        }        
+        }
     }
 }

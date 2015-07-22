@@ -81,6 +81,7 @@ canvas {
 	/* transform: translateZ(-20px) rotate(30deg); */
 	
 	overflow: scroll;
+	box-sizing: border-box;
 }
 
 #content {
@@ -125,9 +126,8 @@ canvas {
 	perspective: 600px; */
 	/* transform: translateX(0); */
 	
-	transform-style: preserve-3d;
-	
-	transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg);
+	/* transform-style: preserve-3d;
+	transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
 	
 	/*the next two lines should have no effect on the position, because the element is set toe static*/
 	left: 200px;
@@ -137,6 +137,7 @@ canvas {
 	/* transform: rotate(25deg); */
 	margin: 10px;
 	padding: 60px;
+	box-sizing: border-box;
 }
 
 #b-cont {
@@ -146,7 +147,9 @@ canvas {
 	padding: 45px;
 	margin: 20px;
 	
-	transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg);
+	box-sizing: border-box;
+	
+	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
 	
 	/* transform-style: preserve-3d; */
 	/* transform: translateX(200px) rotate(30deg); */
@@ -179,6 +182,7 @@ canvas {
 	/* transform: translateX(0); */
 	/* transform: translateX(100px); */
 	/* transform: translateZ(-800px) rotate(70deg); */
+	box-sizing: border-box;
 }
 
 
@@ -200,6 +204,7 @@ canvas {
 	/* margin: 45px; */
 	/* padding: 20px; */
 	/* overflow: scroll; */
+	
 }
 
 /* #d-cont:after {
