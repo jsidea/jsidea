@@ -1,15 +1,16 @@
 interface HTMLElement {
-    _node: jsidea.geom.INodeStyle;
+    _node: jsidea.geom.INode;
 }
 
 module jsidea.geom {
-    export interface INodeStyle {
-        child: INodeStyle;
-        parent: INodeStyle;
-        root: INodeStyle;
-        leaf: INodeStyle;
-        offsetParent: INodeStyle;
-        parentScroll: INodeStyle;
+    export interface INode {
+        child: INode;
+        parent: INode;
+        root: INode;
+        leaf: INode;
+        index: number;
+        offsetParent: INode;
+        parentScroll: INode;
         element: HTMLElement;
         offsetX: number;
         offsetY: number;
@@ -28,6 +29,7 @@ module jsidea.geom {
         isFixedAssociative: boolean;
         isFixedToAbsolute: boolean;
         style: CSSStyleDeclaration;
+        lookup: INode[];
     }
     export class Transform {
 
@@ -136,7 +138,7 @@ module jsidea.geom {
             return new Transform(element, root);
         }
 
-        private static extractMatrix(node: INodeStyle, matrix: geom.Matrix3D = null): geom.Matrix3D {
+        private static extractMatrix(node: INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
             if (!matrix)
                 matrix = new geom.Matrix3D();
             if (!node)
@@ -184,30 +186,53 @@ module jsidea.geom {
             return matrix;
         }
 
-        public static extractStyleChain(element: HTMLElement, root: HTMLElement = null): INodeStyle {
+        public static extractStyleChain(element: HTMLElement, root: HTMLElement = null): INode {
             //collect computed styles/nodes up to html/root (including html/root)
-            root = root ? root : document.body;//document.body.parentElement
-            var lastNode: INodeStyle = null;
-            var leaf: INodeStyle = null;
+            root = root ? root : document.body;
+            
+            //collect from child to root
+            var elements: HTMLElement[] = [];
             while (element && element != root.parentElement) {
+                elements.push(element);
+                element = element.parentElement;
+            }
+
+            var l = elements.length;
+            
+            //run from root to child
+            //this should prevent that if the parent element
+            //has the webkit-bug and an element changed
+            //from static to relative position
+            //the offsets of the possible children are wrong
+            //and this order prevents it (root to child)
+            var lookup: INode[] = [];
+            for (var i = l - 1; i >= 0; --i) {
+                element = elements[i];
+
                 var style = window.getComputedStyle(element);
                 
                 //webkit bugfix 
-                if(this.isWebkit && style.transform != "none" && (style.position == "static" || style.position == "auto"))
-                {
-                    element.style.position = "relative";
+                if (this.isWebkit && style.transform != "none" && (style.position == "static" || style.position == "auto")) {
+                    //make static relative
+                    //do it in this order should
+                    //prevent re-layouting
                     element.style.left = "auto";
                     element.style.top = "auto";
+                    element.style.position = "relative";
+                    
+                    //and refresh style
                     style = window.getComputedStyle(element);
                 }
-                
-                var node: INodeStyle = {
+
+                var node: INode = {
+                    index: lookup.length,
+                    lookup: lookup,
                     element: element,
                     style: style,
                     parent: null,
                     offsetParent: null,
                     parentScroll: null,
-                    child: lastNode,
+                    child: null,
                     root: null,
                     leaf: null,
                     offsetX: 0,
@@ -231,22 +256,28 @@ module jsidea.geom {
                 //for better handling
                 //TODO: garbage collection
                 element._node = node;
-                if (!leaf)
-                    leaf = node;
-                //bind nodes from child to parent
-                if (lastNode)
-                    lastNode.parent = node;
-                node.leaf = leaf;
-                lastNode = node;
-                element = element.parentElement;
+
+                //the lookup should be sorted from root to child
+                //NOT vice versa
+                lookup.push(node);
             }
-            var rootNode = lastNode;
-            
             
             //set "isFixed" and "isFixedToAbsolut"
-            node = leaf;
+            var rootNode = lookup[0];
+            var leafNode = lookup[lookup.length - 1];
+            
+            //set the references and some properties
+            //be careful the the functions
+            //do not need the node-properties
+            //which are not already set
+            node = leafNode;
             while (node) {
+                //the node references
                 node.root = rootNode;
+                node.leaf = leafNode;
+                node.parent = lookup[node.index - 1];
+                node.child = lookup[node.index + 1];
+                
                 node.isSticked = this.getIsSticked(node);
                 node.isFixedToAbsolute = node.isFixed && !node.isSticked;
                 node = node.parent;
@@ -255,7 +286,7 @@ module jsidea.geom {
             //set "isFixedAssociative"
             //the "isFixed" properties need to be set before
             //so this is a antoher loop/path
-            node = leaf;
+            node = leafNode;
             while (node) {
                 node.isFixedAssociative = this.getIsFixedAssociative(node);
                 node.offsetParent = this.getParentOffset(node);
@@ -263,10 +294,10 @@ module jsidea.geom {
                 node = node.parent;
             }
 
-            return leaf;
+            return leafNode;
         }
 
-        private static extractAccumulatedMatrices(node: INodeStyle): geom.Matrix3D[] {
+        private static extractAccumulatedMatrices(node: INode): geom.Matrix3D[] {
             //collect matrices up to root
             //accumulate if possible
             var matrices: geom.Matrix3D[] = [];
@@ -295,7 +326,7 @@ module jsidea.geom {
             return matrices;
         }
 
-        private static isAccumulatable(node: INodeStyle): boolean {
+        private static isAccumulatable(node: INode): boolean {
             //in any case, if an element has only 2d-transforms or its the document-root item
             //the transform can be accumulated to the parent transform
             if (!node.parent || node.style.transform.indexOf("matrix3d") < 0)
@@ -324,7 +355,7 @@ module jsidea.geom {
         }
 
         //returns the local position the direct parent
-        private static getPosition(node: INodeStyle): geom.Point2D {
+        private static getPosition(node: INode): geom.Point2D {
             var off = this.getOffset(node);
             if (node.isSticked)
                 return off;
@@ -333,7 +364,7 @@ module jsidea.geom {
         }
         
         //TEST-AREA
-        private static getParentOffset(node: INodeStyle): INodeStyle {
+        private static getParentOffset(node: INode): INode {
             if (!node || node.element == document.body)// || node.element == document.body.parentElement)
                 return null;
 
@@ -349,22 +380,22 @@ module jsidea.geom {
             return null;
         }
 
-        private static getParentScroll(node: INodeStyle): INodeStyle {
+        private static getParentScroll(node: INode): INode {
             //important: if the node is really sticked, then there could not be any scrolling
             if (!node || node.isSticked || !node.parent)
                 return null;
 
             var excludeStaticParent = node.isAbsolute;
-            var leaf: INodeStyle = node;
+            var leaf: INode = node;
 
             node = node.parent;
 
-            var scrollParent: INodeStyle = null;
+            var scrollParent: INode = null;
             while (node) {
                 if (excludeStaticParent && node.isStatic && !node.isTransformed) {
 
                 }
-                //if the element is really sticked, i cannot not be scrolled up there
+                //if the element is really sticked, it cannot not be scrolled up there
                 //so stop here
                 else if (node.isScrollable || node.isSticked) {
                     scrollParent = node;
@@ -378,10 +409,7 @@ module jsidea.geom {
             return scrollParent;
         }
 
-        private static getIsFixedAssociative(node: INodeStyle): boolean {
-            //            if (this.isIE)
-            //                return node.isSticked;
-
+        private static getIsFixedAssociative(node: INode): boolean {
             while (node) {
                 if (node.isSticked)
                     return true;
@@ -390,7 +418,7 @@ module jsidea.geom {
             return false;
         }
 
-        private static getIsSticked(node: INodeStyle): boolean {
+        private static getIsSticked(node: INode): boolean {
             //just skip if the element itself has not fixed
             if (!node.isFixed)
                 return false;
@@ -406,9 +434,8 @@ module jsidea.geom {
             }
             return true;
         }
-        
-        //FOR WEBKIT AND IE11 (MAYBE firefox too)
-        private static getScrollOffset(node: INodeStyle, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+
+        private static getScrollOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node || !node.parent)
                 return ret;
 
@@ -422,7 +449,7 @@ module jsidea.geom {
             return ret;
         }
 
-        public static getOffset(node: INodeStyle, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        public static getOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             ret.x = 0;
             ret.y = 0;
 
@@ -491,7 +518,7 @@ module jsidea.geom {
             return ret;
         }
 
-        private static getOffsetCorrection(node: INodeStyle, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        private static getOffsetCorrection(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (this.isWebkit) {
                 this.correctWebkitOffset(node, ret);
             } else if (this.isFirefox) {
@@ -502,19 +529,18 @@ module jsidea.geom {
             return ret;
         }
 
-        private static correctIEOffset(node: INodeStyle, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        private static correctIEOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node || !node.offsetParent)
                 return ret;
             ret.x += node.offsetParent.clientLeft;
             ret.y += node.offsetParent.clientTop;
         }
 
-        private static correctWebkitOffset(node: INodeStyle, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        private static correctWebkitOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node || !node.offsetParent)
                 return ret;
-            
-            if(!node.offsetParent.isStatic)
-            {
+
+            if (!node.offsetParent.isStatic) {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
             }
@@ -523,11 +549,13 @@ module jsidea.geom {
             if (node.offsetParent.element == node.element.offsetParent)
                 return ret;
             
-            //hmmmmm
+            //Why is chrome does not keep care of css-transform on static elements
+            //when it comes to the right offsetParent and the offsetTop/offsetLeft
+            //values
             console.warn("The given offsetParent is maybe wrong.");
         }
 
-        private static correctFirefoxOffset(node: INodeStyle, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        private static correctFirefoxOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (node.offsetParent && node.isAbsolute) {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
