@@ -356,7 +356,7 @@ module jsidea.geom {
                 //if last is not null, last becomes the base for the transformation
                 //its like appending the current node.transform (parent-transform) to the last transform (child-transform)
                 var m: geom.Matrix3D = this.extractMatrix(node, last);
-//                if (node.parent && this.isAccumulatable(node)) {
+                //                if (node.parent && this.isAccumulatable(node)) {
                 if (node.parent && node.isAccumulatable) {
                     last = m;
                 }
@@ -584,6 +584,15 @@ module jsidea.geom {
             ret.x += node.offsetParent.clientLeft;
             ret.y += node.offsetParent.clientTop;
         }
+        
+        private static correctFirefoxOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            if (!node || !node.offsetParent)
+                return ret;
+            ret.x += node.offsetParent.clientLeft;
+            ret.y += node.offsetParent.clientTop;
+
+            return ret;
+        }
 
         private static correctWebkitOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node)
@@ -605,37 +614,6 @@ module jsidea.geom {
             //when it comes to the right offsetParent and the offsetTop/offsetLeft
             //values
             console.warn("The given offsetParent is maybe wrong.");
-        }
-
-        private static correctFirefoxOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            if (node.offsetParent && node.isAbsolute) {
-                ret.x += node.offsetParent.clientLeft;
-                ret.y += node.offsetParent.clientTop;
-            }
-            else if (node.parent && node.isFixed && node.parent.isFixed) {
-                ret.x -= node.parent.offsetLeft;
-                ret.y -= node.parent.offsetTop;
-                ret.x -= node.parent.clientLeft;
-                ret.y -= node.parent.clientTop;
-            }
-            //else if (node.parentOffset && node.parent && node.isFixed && !node.isSticked) {
-            else if (node.offsetParent && node.parent && node.isFixedToAbsolute) {
-
-                if (node.parent.isRelative || node.parent.isAbsolute) {
-                    ret.x -= node.parent.offsetLeft;
-                    ret.y -= node.parent.offsetTop;
-                    ret.x -= node.parent.clientLeft;
-                    ret.y -= node.parent.clientTop;
-                }
-                else if (node.parent != node.offsetParent && node.offsetParent.isStatic) {
-                    ret.x += node.offsetParent.clientLeft;
-                    ret.y += node.offsetParent.clientTop;
-                }
-            }
-            else {
-                //console.log("FIREFOX-NO-BUG", element);
-            }
-            return ret;
-        }
+        }        
     }
 }
