@@ -26,7 +26,8 @@ module jsidea.geom {
         isBody: boolean;
         isSticked: boolean;
         isTransformed: boolean;
-        isFixedAssociative: boolean;
+        isTransformedAssociative: boolean;
+        isStickedAssociative: boolean;
         isFixedToAbsolute: boolean;
         style: CSSStyleDeclaration;
         lookup: INode[];
@@ -196,8 +197,6 @@ module jsidea.geom {
                 elements.push(element);
                 element = element.parentElement;
             }
-
-            var l = elements.length;
             
             //run from root to child
             //this should prevent that if the parent element
@@ -206,24 +205,39 @@ module jsidea.geom {
             //the offsets of the possible children are wrong
             //and this order prevents it (root to child)
             var lookup: INode[] = [];
+            var isTransformedAssociative = false;
+            var l = elements.length;
             for (var i = l - 1; i >= 0; --i) {
                 element = elements[i];
 
                 var style = window.getComputedStyle(element);
                 
                 //webkit bugfix 
-                if (this.isWebkit && style.transform != "none" && (style.position == "static" || style.position == "auto")) {
-                    //make static relative
-                    //do it in this order should
-                    //prevent re-layouting
-                    element.style.left = "auto";
-                    element.style.top = "auto";
-                    element.style.position = "relative";
+                if (this.isWebkit) {
+                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
+                        //make static relative
+                        //do it in this order should
+                        //prevent re-layouting
+                        element.style.left = "auto";
+                        element.style.top = "auto";
+                        element.style.position = "relative";
                     
-                    //and refresh style
-                    style = window.getComputedStyle(element);
+                        //refresh style
+                        style = window.getComputedStyle(element);
+                    }
+                    else if (isTransformedAssociative && style.position == "fixed") {
+                        //webkit ignores fixed elements in an transformed context
+                        //making them absolute does not change anything visual
+                        //but the offsets and so on becomes correct
+                        element.style.position = "absolute";
+                        
+                        //refresh style
+                        style = window.getComputedStyle(element);
+                    }
                 }
 
+                //create the node-element
+                //and set so many values as possible
                 var node: INode = {
                     index: lookup.length,
                     lookup: lookup,
@@ -244,14 +258,20 @@ module jsidea.geom {
                     isScrollable: style.overflow != "visible",
                     isBody: element == document.body,
                     isSticked: false,
-                    isFixedAssociative: false,
+                    isStickedAssociative: false,
                     isFixedToAbsolute: false,
                     offsetLeft: element.offsetLeft,
                     offsetTop: element.offsetTop,
                     clientLeft: element.clientLeft,
                     clientTop: element.clientTop,
-                    isTransformed: style.transform != "none"
+                    isTransformed: style.transform != "none",
+                    isTransformedAssociative: isTransformedAssociative
                 };
+                
+                //if the element has transform
+                //the following elements are in transformed-context
+                if (!isTransformedAssociative && style.transform != "none")
+                    isTransformedAssociative = true;
 
                 //for better handling
                 //TODO: garbage collection
@@ -277,7 +297,7 @@ module jsidea.geom {
                 node.leaf = leafNode;
                 node.parent = lookup[node.index - 1];
                 node.child = lookup[node.index + 1];
-                
+
                 node.isSticked = this.getIsSticked(node);
                 node.isFixedToAbsolute = node.isFixed && !node.isSticked;
                 node = node.parent;
@@ -288,7 +308,7 @@ module jsidea.geom {
             //so this is a antoher loop/path
             node = leafNode;
             while (node) {
-                node.isFixedAssociative = this.getIsFixedAssociative(node);
+                node.isStickedAssociative = this.getIsStickedAssociative(node);
                 node.offsetParent = this.getParentOffset(node);
                 node.parentScroll = this.getParentScroll(node);
                 node = node.parent;
@@ -365,7 +385,7 @@ module jsidea.geom {
         
         //TEST-AREA
         private static getParentOffset(node: INode): INode {
-            if (!node || node.element == document.body)// || node.element == document.body.parentElement)
+            if (!node || node.isBody)// || node.element == document.body.parentElement)
                 return null;
 
             //            if (node.isFixed)
@@ -385,31 +405,35 @@ module jsidea.geom {
             if (!node || node.isSticked || !node.parent)
                 return null;
 
-            var excludeStaticParent = node.isAbsolute;
-            var leaf: INode = node;
+            //this makes the trick
+            //if the element is in an transform-context
+            //the parent cannot be skipped by only evaluating
+            //the position value only
+            var excludeStaticParent = node.isAbsolute && !node.parent.isTransformedAssociative;
+            var leafNode: INode = node;
 
             node = node.parent;
 
-            var scrollParent: INode = null;
             while (node) {
+                //when can you skip it
                 if (excludeStaticParent && node.isStatic && !node.isTransformed) {
 
                 }
                 //if the element is really sticked, it cannot not be scrolled up there
                 //so stop here
                 else if (node.isScrollable || node.isSticked) {
-                    scrollParent = node;
-                    break;
+                    if(node.isStatic && leafNode.isAbsolute)
+                        return node.parent;
+                    else
+                    return node;
                 }
                 node = node.parent;
             }
 
-            scrollParent = !scrollParent ? null : scrollParent;
-
-            return scrollParent;
+            return null;
         }
 
-        private static getIsFixedAssociative(node: INode): boolean {
+        private static getIsStickedAssociative(node: INode): boolean {
             while (node) {
                 if (node.isSticked)
                     return true;
@@ -426,7 +450,7 @@ module jsidea.geom {
             //ie does it right
             if (this.isIE)
                 return node.isFixed;
-
+            
             while (node = node.parent) {
                 //                if (!node.isStatic || node.isTransformed)
                 if (node.isTransformed)// || node.isFixed)
@@ -453,22 +477,18 @@ module jsidea.geom {
             ret.x = 0;
             ret.y = 0;
 
-            if (!node) {
-
+            //the offset of void/null is 0 0
+            if (!node)
                 return ret;
-            }
 
             //if you subtract the scroll from the accumlated/summed offset
             //you get the real offset to window (initial-containing-block)
-            
-            //            if (!node.isSticked) {
             var sc = this.getScrollOffset(node);
             ret.x -= sc.x;
             ret.y -= sc.y;
-            //            }            
 
             //add scroll value only if reference of the element is the window not the body
-            if (node.isFixedAssociative) {
+            if (node.isStickedAssociative) {
                 if (this.isWebkit) {
                     ret.x += document.body.scrollLeft;
                     ret.y += document.body.scrollTop;
@@ -499,7 +519,7 @@ module jsidea.geom {
                 return ret;
             }
 
-            var leaf = node;
+            var leafNode = node;
             while (node) {
                 ret.x += node.offsetLeft;
                 ret.y += node.offsetTop;
@@ -512,8 +532,8 @@ module jsidea.geom {
             }
 
             //set for easy access
-            leaf.offsetX = ret.x;
-            leaf.offsetY = ret.y;
+            leafNode.offsetX = ret.x;
+            leafNode.offsetY = ret.y;
 
             return ret;
         }

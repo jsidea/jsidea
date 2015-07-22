@@ -115,7 +115,7 @@ canvas {
 	left: 200px;
 	top:100px;
 	
-	transform: translateX(0);
+	/* transform: translateX(0); */
 	/* transform: rotate(25deg); */
 	margin: 10px;
 	padding: 60px;
