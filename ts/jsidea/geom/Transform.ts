@@ -231,6 +231,16 @@ module jsidea.geom {
                         //refresh style
                         style = window.getComputedStyle(element);
                     }
+                    //maybe not the hard way, just check an set the perspective to none (-> 0 here)
+                    if (style.transform != "none" && style.overflow != "visible") {
+                        //webkit ignores perspective set on scroll elements
+
+                        //make the element a containing-block
+                        element.style.perspective = "none";
+                        
+                        //refresh style
+                        style = window.getComputedStyle(element);
+                    }
                     if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
                         //make static relative
                         //do it in this order should
