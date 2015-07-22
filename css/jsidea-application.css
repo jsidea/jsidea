@@ -79,7 +79,9 @@ canvas {
 	/* transform: translateX(0); */
 	/* transform: translateZ(-20px) rotate(30deg); */
 	
-	perspective: 200px;
+	/* transform: translateX(0); */
+	/* perspective: 200px; */
+	/* transform-style: preserve-3d; */
 	
 	overflow: scroll;
 	box-sizing: border-box;

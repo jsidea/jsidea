@@ -651,8 +651,8 @@ module jsidea.geom {
                 ret.y += node.offsetParent.clientTop;
             }
             if (node.isAbsolute && node.parent.isStatic) {
-                ret.x += node.offsetParent.clientLeft;
-                ret.y += node.offsetParent.clientTop;
+//                ret.x += node.offsetParent.clientLeft;
+//                ret.y += node.offsetParent.clientTop;
             }
             if (node.isAbsolute && node.parent.isSticked) {
                 ret.x += node.parent.clientLeft;
