@@ -85,7 +85,7 @@ canvas {
 }
 
 #content {
-	position: fixed;
+	position: static;
 	width: 512px;
 	height: 512px;
 	border: 55px solid #FFFF00;
@@ -100,8 +100,8 @@ canvas {
 	
 	/* transform: translateZ(-20px) rotateY(-5deg); */
 	
-	perspective: 100px;
-	transform-style: preserve-3d;
+	/* perspective: 100px;
+	transform-style: preserve-3d; */
 	
 	/* transform: translateZ(-20px) rotateY(30deg);
 	transform-style: preserve-3d;
@@ -113,7 +113,7 @@ canvas {
 }
 
 #a-cont {
-	position: static;
+	position: fixed;
 	border: 45px solid #00FFFF;
 	width: 512px;
 	height: 512px;
@@ -143,7 +143,7 @@ canvas {
 }
 
 #b-cont {
-	position: static;
+	position: relative;
 	border: 35px solid #0000FF;
 	width: 512px;
 	padding: 45px;
@@ -189,7 +189,7 @@ canvas {
 
 
 #d-cont {
-	position: absolute;
+	position: relative;
 	border: 15px solid #883366;
 	width: 256px;
 	height: 256px;

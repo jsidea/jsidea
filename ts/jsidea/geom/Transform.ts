@@ -210,14 +210,22 @@ module jsidea.geom {
             var lookup: INode[] = [];
             var isTransformedAssociative = false;
             var l = elements.length;
+            var isFixed = false;
             for (var i = l - 1; i >= 0; --i) {
                 element = elements[i];
 
                 var style = window.getComputedStyle(element);
                 
+                if(this.isFirefox)
+                {
+                    if(isFixed && style.position == "fixed")
+                    {
+                        //make the element a containing-block
+                        element.style.position = "absolute";
+                    }    
+                }
                 //webkit bugfix 
                 if (this.isWebkit) {
-
                     if (style.transformStyle == "preserve-3d" && style.transform == "none") {
                         //webkit bug with offset 100000
                         //Fixed elements as an anchestor of an preserve-3d elemenent
@@ -304,6 +312,9 @@ module jsidea.geom {
                 //the following elements are in transformed-context
                 if (!isTransformedAssociative && style.transform != "none")
                     isTransformedAssociative = true;
+                
+                if(!isFixed && style.position == "fixed")
+                    isFixed = true;
 
                 //for better handling
                 //TODO: garbage collection
@@ -438,7 +449,7 @@ module jsidea.geom {
                 return null;
 
             while (node = node.parent) {
-                if (!node.isStatic || node.isTransformed)
+                if (!node.isStatic || node.isTransformed || node.style.transformStyle == "preserve-3d")
                     return node;
             }
 
@@ -606,7 +617,11 @@ module jsidea.geom {
             {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
-//                ret.x +=     
+            }
+            if(node.isAbsolute && node.parent.isSticked)
+            {
+                ret.x += node.parent.clientLeft;
+                ret.y += node.parent.clientTop;
             }
 
             return ret;
