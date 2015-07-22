@@ -214,6 +214,22 @@ module jsidea.geom {
                 
                 //webkit bugfix 
                 if (this.isWebkit) {
+
+                    if (style.transformStyle == "preserve-3d" && style.transform == "none") {
+                        //webkit bug with offset 100000
+                        //Fixed elements as an anchestor of an preserve-3d elemenent
+                        //without transform set
+                        //if preserve-3d is set 
+                        //and transform is not set
+                        //than it becomes very strange
+                        //this parent element with
+
+                        //make the element a containing-block
+                        element.style.transform = "translateX(0)";
+                        
+                        //refresh style
+                        style = window.getComputedStyle(element);
+                    }
                     if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
                         //make static relative
                         //do it in this order should
@@ -412,10 +428,10 @@ module jsidea.geom {
             var excludeStaticParent = node.isAbsolute && !node.isTransformedAssociative;
             var leafNode: INode = node;
 
-//            if (node.isStatic)
-//                node = node.offsetParent;
-//            else
-                node = node.parent;
+            //            if (node.isStatic)
+            //                node = node.offsetParent;
+            //            else
+            node = node.parent;
 
             while (node) {
                 //when can you skip it
@@ -424,10 +440,7 @@ module jsidea.geom {
                 }
                 //if the element is really sticked, it cannot not be scrolled up there
                 //so stop here
-                else if (node.isScrollable || node.isSticked || node.isAbsolute) {
-                    //                    if(node.isStatic && leafNode.isAbsolute)
-                    //                        return node.parent;
-                    //                    else
+                else if (node.isScrollable || node.isSticked || (node.isAbsolute || node.isFixed)) {
                     return node;
                 }
                 node = node.parent;
@@ -560,8 +573,11 @@ module jsidea.geom {
         }
 
         private static correctWebkitOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            if (!node || !node.offsetParent)
+            if (!node)
                 return ret;
+
+            if (!node.offsetParent)
+                return;
 
             if (!node.offsetParent.isStatic) {
                 ret.x += node.offsetParent.clientLeft;
