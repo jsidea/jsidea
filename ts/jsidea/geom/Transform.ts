@@ -228,7 +228,7 @@ module jsidea.geom {
                         style = window.getComputedStyle(element);
                         console.warn("FIXED: Fixed to absolute. Fixed in a fixed container.");
                     }
-                    
+
                     if (preserved3d && style.position == "fixed") {
                         //make the element a containing-block
                         element.style.position = "absolute";
@@ -343,7 +343,7 @@ module jsidea.geom {
 
                 if (!isFixed && style.position == "fixed")
                     isFixed = true;
-                
+
                 if (!preserved3d && style.transformStyle == "preserve-3d" || perspective > 0)
                     preserved3d = true;
 
@@ -373,9 +373,8 @@ module jsidea.geom {
                 node.child = lookup[node.index + 1];
 
                 node.isSticked = this.getIsSticked(node);
-                if(node.isSticked)
-                {
-//                    console.log("STICKED", node.element.id);    
+                if (node.isSticked) {
+                    //                    console.log("STICKED", node.element.id);    
                 }
                 node.isFixedToAbsolute = node.isFixed && !node.isSticked;
                 node = node.parent;
@@ -597,7 +596,7 @@ module jsidea.geom {
 
                 this.getOffsetCorrection(node, ret);
                 
-//                console.log("AHH", node.element.id);
+                //                console.log("AHH", node.element.id);
                 
                 //set for easy access
                 node.offsetX = ret.x;
@@ -650,14 +649,59 @@ module jsidea.geom {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
             }
+
+            if (node.parent != node.offsetParent && !(node.isStatic && node.parent.isStatic)) {
+                ret.x += node.offsetParent.clientLeft;
+                ret.y += node.offsetParent.clientTop;
+            }
+            
+            if (node.parent != node.offsetParent && node.isRelative) {
+                ret.x -= node.offsetParent.clientLeft;
+                ret.y -= node.offsetParent.clientTop;
+            }
+            
+            if (node.isAbsolute && node.parent.isStatic && node.offsetParent.isAbsolute) {
+                ret.x -= node.offsetParent.clientLeft;
+                ret.y -= node.offsetParent.clientTop;
+            }
+
+            if (node.isStatic && node.parent.isStatic) {
+                //                ret.x -= node.offsetParent.clientLeft;
+                //                ret.y -= node.offsetParent.clientTop;
+            }
+
+
             if (node.isAbsolute && node.parent.isStatic) {
-//                ret.x += node.offsetParent.clientLeft;
-//                ret.y += node.offsetParent.clientTop;
+                //                ret.x += node.offsetParent.clientLeft;
+                //                ret.y += node.offsetParent.clientTop;
             }
-            if (node.isAbsolute && node.parent.isSticked) {
-                ret.x += node.parent.clientLeft;
-                ret.y += node.parent.clientTop;
+            if (node.isAbsolute && node.offsetParent.isSticked && node.offsetParent.style.boxSizing == "border-box") {
+                
+                //                ret.x += node.offsetParent.clientLeft;
+                //                ret.y += node.offsetParent.clientTop;
+                
+                //                ret.x += node.parent.clientLeft;
+                //                ret.y += node.parent.clientTop;
             }
+
+            if (node.isAbsolute && node.parent.isAbsolute && node.parent == node.offsetParent && node.offsetParent.style.boxSizing == "border-box") {// && node.style.boxSizing != "border-box") {
+                //                ret.x += node.offsetParent.clientLeft;
+                //                ret.y += node.offsetParent.clientTop;
+            }
+
+            if (node.isAbsolute && node.parent.isRelative) {// && node.style.boxSizing != "border-box") {
+                //                ret.x -= node.offsetParent.clientLeft;
+                //                ret.y -= node.offsetParent.clientTop;
+            }
+            
+            //if there is not bug to fix
+            if (node.offsetParent.element == node.element.offsetParent)
+                return ret;
+            
+            //Why is chrome does not keep care of css-transform on static elements
+            //when it comes to the right offsetParent and the offsetTop/offsetLeft
+            //values
+            console.warn("The given offsetParent is maybe wrong.");
 
             return ret;
         }

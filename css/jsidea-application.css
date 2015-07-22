@@ -14,7 +14,7 @@ body * {
 	/* transform-style: flat; */
 	/* perspective: 600px; */
 	/* transform-style: flat; */
-	/* box-sizing: border-box; */
+	box-sizing: border-box;
 }
 
 body {
@@ -50,6 +50,8 @@ canvas {
 	background-color: rgba(0, 0, 0, 0.2);
 	transition: all 1s;
 	pointer-events: none;
+	
+	box-sizing: border-box;
 }
 
 /* canvas:hover {
@@ -60,7 +62,7 @@ canvas {
 } */
 
 #view {
-	position: absolute;
+	position: fixed;
 	width: 512px;
 	height: 512px;
 	/* left: 100px;
@@ -84,7 +86,8 @@ canvas {
 	/* transform-style: preserve-3d; */
 	
 	overflow: scroll;
-	box-sizing: border-box;
+	/* box-sizing: border-box; */
+	/* box-sizing: border-box; */
 }
 
 #content {
@@ -115,10 +118,14 @@ canvas {
 	/* transform-style: preserve-3d; */
 	/* transform: translateX(0); */
 	/* overflow: hidden; */
+	
+	/* perspective: 100px; */
+	
+	/* box-sizing: border-box; */
 }
 
 #a-cont {
-	position: fixed;
+	position: static;
 	border: 45px solid #00FFFF;
 	width: 512px;
 	height: 512px;
@@ -144,17 +151,17 @@ canvas {
 	/* transform: rotate(25deg); */
 	margin: 10px;
 	padding: 60px;
-	box-sizing: border-box;
+	/* box-sizing: border-box; */
 }
 
 #b-cont {
-	position: relative;
+	position: fixed;
 	border: 35px solid #0000FF;
 	width: 512px;
 	padding: 45px;
 	margin: 20px;
 	
-	box-sizing: border-box;
+	/* box-sizing: border-box; */
 	
 	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
 	
@@ -194,7 +201,7 @@ canvas {
 
 
 #d-cont {
-	position: relative;
+	position: absolute;
 	border: 15px solid #883366;
 	width: 256px;
 	height: 256px;
