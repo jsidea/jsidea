@@ -225,20 +225,20 @@ module jsidea.geom {
                         element.style.position = "absolute";
                     }
                     
-//                    if (preserved3d && style.position == "fixed") {
-//                        //make the element a containing-block
-//                        element.style.position = "absolute";
-//                        
-//                        //refresh style
-//                        style = window.getComputedStyle(element);
-//                    }
+                    //                    if (preserved3d && style.position == "fixed") {
+                    //                        //make the element a containing-block
+                    //                        element.style.position = "absolute";
+                    //                        
+                    //                        //refresh style
+                    //                        style = window.getComputedStyle(element);
+                    //                    }
                 }
                 //webkit bugfix 
                 if (this.isWebkit) {
 
 
-//                    if (style.transformStyle == "preserve-3d" && style.transform == "none") {
-                        if (pers && style.transform == "none") {
+                    if ((pers || style.transformStyle == "preserve-3d") && style.transform == "none") {
+                        //                    if (pers && style.transform == "none") {
                         //webkit bug with offset 100000
                         //Fixed elements as an anchestor of an preserve-3d elemenent
                         //without transform set
@@ -275,17 +275,17 @@ module jsidea.geom {
                         //refresh style
                         style = window.getComputedStyle(element);
                     }
-//                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
-//                        //make static relative
-//                        //do it in this order should
-//                        //prevent re-layouting
-//                        element.style.left = "auto";
-//                        element.style.top = "auto";
-//                        element.style.position = "relative";
-//                    
-//                        //refresh style
-//                        style = window.getComputedStyle(element);
-//                    }
+                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
+                        //make static relative
+                        //do it in this order should
+                        //prevent re-layouting
+                        element.style.left = "auto";
+                        element.style.top = "auto";
+                        element.style.position = "relative";
+                    
+                        //refresh style
+                        style = window.getComputedStyle(element);
+                    }
                     else if (isTransformedAssociative && style.position == "fixed") {
                         //webkit ignores fixed elements in an transformed context
                         //making them absolute does not change anything visual
@@ -504,7 +504,7 @@ module jsidea.geom {
 
             while (node) {
                 //when can you skip it
-                if (excludeStaticParent && node.isStatic && !node.isTransformed){// && !node.isPreserved3d) {
+                if (excludeStaticParent && node.isStatic && !node.isTransformed) {// && !node.isPreserved3d) {
 
                 }
                 //if the element is really sticked, it cannot not be scrolled up there
