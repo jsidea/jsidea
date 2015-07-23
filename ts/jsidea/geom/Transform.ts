@@ -355,41 +355,24 @@ module jsidea.geom {
             var leafNode = nodes[nodes.length - 1];
             
             //set the references and some properties
-            //be careful the the functions
+            //be careful that the functions
             //do not need the node-properties
             //which are not already set
-            node = leafNode;
+            node = rootNode;
             while (node) {
                 //the node references
                 node.root = rootNode;
                 node.parent = nodes[node.depth - 1];
                 node.child = nodes[node.depth + 1];
-
                 node.isSticked = this.getIsSticked(node);
-                node = node.parent;
-            }
-
-            //set "isFixedAssociative"
-            //the "isFixed" properties need to be set before
-            //so this is a antoher loop/path
-            node = leafNode;
-            while (node) {
                 node.isStickedChild = this.getIsStickedChild(node);
                 node.offsetParent = this.getParentOffset(node);
                 node.parentScroll = this.getParentScroll(node);
                 node.isAccumulatable = this.getIsAccumulatable(node);
-                node = node.parent;
-            }
-            
-            //add scroll offsets
-            node = leafNode;
-            while (node) {
-                //if you subtract the scroll from the accumlated/summed offset
-                //you get the real offset to window (initial-containing-block)
                 var sc = this.getScrollOffset(node);
                 node.scrollOffsetX = sc.x;
                 node.scrollOffsetY = sc.y;
-                node = node.parent;
+                node = node.child;
             }
 
             return leafNode;
@@ -529,6 +512,8 @@ module jsidea.geom {
             return true;
         }
 
+        //if you subtract the scroll from the accumlated/summed offset
+        //you get the real offset to window (initial-containing-block)
         private static getScrollOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node || !node.parent)
                 return ret;
@@ -619,8 +604,18 @@ module jsidea.geom {
         }
 
         private static correctFirefoxOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            if (!node || !node.offsetParent)
+            //no node no value
+            if (!node)
                 return ret;
+            
+            if (!node.offsetParent) {
+                //hmmmm
+                if (node.isStatic) {
+                    ret.x += node.root.clientLeft;
+                    ret.y += node.root.clientTop;
+                }
+                return ret;
+            }
 
             if (node.style.boxSizing != "border-box") {
                 ret.x += node.offsetParent.clientLeft;

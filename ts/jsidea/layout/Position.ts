@@ -6,7 +6,7 @@ module jsidea.layout {
         py?: any;
     }
     export class Position {
-//        private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
+        private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
 
         private _box: geom.BoxModel = new geom.BoxModel();
 
@@ -58,6 +58,13 @@ module jsidea.layout {
             var atOriginX: number = math.Number.parseRelation(this.from.px, sizeOffset.x, 0);
             var atOriginY: number = math.Number.parseRelation(this.from.py, sizeOffset.y, 0);
 
+            //the pageX pageY is wrong firefox?
+            if(Position.isFirefox && fromElement == document.body)
+            {
+                atOffsetX += fromElement.clientLeft;
+                atOffsetY += fromElement.clientTop;
+            }            
+            
             //the transfrom from "from" to visual
             var lc = geom.Transform.extract(fromElement).localToLocal(
                 visual,
@@ -68,6 +75,7 @@ module jsidea.layout {
                 this.fromBox);
             lc.x += myOffsetX - myOriginX;
             lc.y += myOffsetY - myOriginY;
+            
 
             var m = geom.Matrix3D.extract(visual);
             var pt = m.project(lc);

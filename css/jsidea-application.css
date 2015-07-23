@@ -1,38 +1,4 @@
-html,body {
-	margin: 0;
-	padding: 0;
-	width: 100%;
-	height: 100%;
-	position: absolute;
-}
 
-body * {
-	/* box-sizing: border-box;
-	left: -2px;
-	top: -2px; */
-	/* box-sizing: border-box; */
-	/* transform-style: flat; */
-	/* perspective: 600px; */
-	/* transform-style: flat; */
-	/* box-sizing: border-box; */
-}
-
-body {
-	/* transform-origin: 0px 0px;
-	perspective-origin: 0 0;
-	transform-style: flat; */
-	/* transform-style: flat; */
-	/* perspective: 600px;
-	overflow: hidden;
-	perspective-origin: 0px 0px; */
-	/* transform-style: preserve-3d; */
-	/* transform-style: preserve-3d;
-	transform: translateX(128px) rotate(30deg); */
-	/* border: 100px solid #FF00FF; */
-	/* padding: 50px; */
-	/* position: absolute; */
-	
-}
 
 /* TEST 0 */
 .test-0 #view {
@@ -111,19 +77,19 @@ body {
 
 /* TEST 3 */
 .test-3 #view {
-	position: fixed;
+	position: static;
 }
 
 .test-3 #content {
-	position: absolute;
+	position: static;
 }
 
 .test-3 #a-cont {
-	position: absolute;
+	position: static;
 }
 
 .test-3 #b-cont {
-	position: fixed;
+	position: static;
 }
 
 .test-3 #c-cont {
@@ -132,6 +98,42 @@ body {
 
 .test-3 #d-cont {
 	position: absolute;
+}
+
+html,body {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	/* position: absolute; */
+}
+
+body * {
+	/* box-sizing: border-box;
+	left: -2px;
+	top: -2px; */
+	/* box-sizing: border-box; */
+	/* transform-style: flat; */
+	/* perspective: 600px; */
+	/* transform-style: flat; */
+	/* box-sizing: border-box; */
+}
+
+body {
+	/* transform-origin: 0px 0px;
+	perspective-origin: 0 0;
+	transform-style: flat; */
+	/* transform-style: flat; */
+	/* perspective: 600px;
+	overflow: hidden;
+	perspective-origin: 0px 0px; */
+	/* transform-style: preserve-3d; */
+	/* transform-style: preserve-3d;
+	transform: translateX(128px) rotate(30deg); */
+	/* border: 100px solid #FF00FF; */
+	/* padding: 50px; */
+	/* position: absolute; */
+	border: 25px solid #EEEEEE;
 }
 
 canvas {
