@@ -34,7 +34,7 @@ module jsidea.test {
             var can = document.createElement("canvas");
             can.id = "can";
             can.width = 800;
-            can.height = 400;
+            can.height = 800;
             var ctx = can.getContext("2d");
 
             var a = document.createElement("div");
@@ -89,7 +89,7 @@ module jsidea.test {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
-                pos.apply(d);
+//                pos.apply(d);
             });
         }
 
@@ -125,7 +125,7 @@ module jsidea.test {
             c = gloToLoc.globalToLocal(c.x, c.y);
             d = gloToLoc.globalToLocal(d.x, d.y);
 
-            //            console.log("TIME TO CALC 4 POINTS", (new Date()).getTime() - tim);
+//            console.log("TIME TO CALC 4 POINTS",(new Date()).getTime() - tim);
 
             ctx.beginPath();
             ctx.setLineDash([4, 4]);
@@ -162,10 +162,10 @@ module jsidea.test {
                 var res = ([
                     text.Text.conc(10, " ", node.element.id ? node.element.id : node.element.nodeName),
                     text.Text.conc(18, " ", "PARENT", ofp ? (ofp.id ? ofp.id : ofp.nodeName) : "NONE"),
-//                    text.Text.conc(18, " ", "PARENT_C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
-//                    //                    text.Text.conc(18, " ", "PARENT_B", calcedPar ? (calcedPar.id ? calcedPar.id : calcedPar.nodeName) : "NONE"),
-//                    text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
-//                    text.Text.conc(18, " ", "OFFSET_C", node.offsetX, node.offsetY),
+                    //                    text.Text.conc(18, " ", "PARENT_C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
+                    //                    //                    text.Text.conc(18, " ", "PARENT_B", calcedPar ? (calcedPar.id ? calcedPar.id : calcedPar.nodeName) : "NONE"),
+                    //                    text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
+                    //                    text.Text.conc(18, " ", "OFFSET_C", node.offsetX, node.offsetY),
                     text.Text.conc(18, " ", "DISPLAY", node.style.display),
                     text.Text.conc(18, " ", "SCROLL_C", scaleOff ? (scaleOff.id ? scaleOff.id : scaleOff.nodeName) : "NONE"),
                     //                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),

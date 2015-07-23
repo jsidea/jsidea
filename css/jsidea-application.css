@@ -169,7 +169,7 @@ canvas {
 	left: 0;
 	/* pointer-events: none; */
 	width: 800px;
-	height: 400px;
+	height: 800px;
 	/* transform: rotate(45deg);
 	transform-origin: 0px 0px;
 	margin: 10px;
@@ -208,7 +208,7 @@ canvas {
 	/* transform-style: preserve-3d; */
 	/* perspective: 200px; */
 	/* transform: translateZ(-20px) rotateY(30deg); */
-	overflow: scroll;
+	/* overflow: scroll; */
 	/* box-sizing: border-box; */
 	/* box-sizing: border-box; */
 }
@@ -272,7 +272,7 @@ canvas {
 	margin: 10px;
 	padding: 60px;
 	/* box-sizing: border-box; */
-	transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg);
+	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
 	/* transform: rotate(25deg); */
 }
 
@@ -300,6 +300,7 @@ canvas {
 	transform: translateZ(-20px) rotateY(15deg);
 	perspective: 300px; */
 	/* transform: translateZ(-20px) rotateY(15deg) rotate(-20deg); */
+	transform: rotate(10deg);
 }
 
 #c-cont {
@@ -311,12 +312,18 @@ canvas {
 	width: 128px;
 	height: 128px;
 	cursor: pointer;
+	
+	
+	
 	/* overflow: scroll; */
 	/* transform: translateX(0); */
 	/* transform: translateX(0); */
 	/* transform: translateX(100px); */
 	/* transform: translateZ(-800px) rotate(70deg); */
 	/* box-sizing: border-box; */
+	
+	transform-origin: 128px 0px;
+	transform: translateX(64px) rotate(40deg) translateX(64px);
 }
 
 #d-cont {
@@ -324,8 +331,11 @@ canvas {
 	width: 256px;
 	height: 256px;
 	margin: 20px;
+	transform-origin: 0px 0px;
 	
-	transform: rotate(40deg);
+	transform: rotate(45deg) translateX(64px);
+	
+	/* left: 64px; */
 	
 	/* box-sizing: border-box; */
 	/* left: 0px; */

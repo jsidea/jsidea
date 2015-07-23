@@ -16,6 +16,7 @@ module jsidea.layout {
         public toBox: string = "border";
         public fromBox: string = "padding";
         public useTransform: boolean = true;
+        public transformMode: string = "box";
 
         constructor() {
         }
@@ -57,14 +58,6 @@ module jsidea.layout {
             var atOffsetY: number = math.Number.parseRelation(this.from.y, sizeOffset.y, 0);
             var atOriginX: number = math.Number.parseRelation(this.from.px, sizeOffset.x, 0);
             var atOriginY: number = math.Number.parseRelation(this.from.py, sizeOffset.y, 0);
-
-            //the pageX pageY is wrong firefox?
-            //---->>> should be included/solved in geom.Transform
-//            if(Position.isFirefox && fromElement == document.body)
-//            {
-//                atOffsetX += fromElement.clientLeft;
-//                atOffsetY += fromElement.clientTop;
-//            }            
             
             //the transfrom from "from" to visual
             var lc = geom.Transform.extract(fromElement).localToLocal(
@@ -76,7 +69,15 @@ module jsidea.layout {
                 this.fromBox);
             lc.x += myOffsetX - myOriginX;
             lc.y += myOffsetY - myOriginY;
-            
+
+            if (this.transformMode == "box") {
+                
+                
+                
+                
+                
+                return;
+            }
 
             var m = geom.Matrix3D.extract(visual);
             var pt = m.project(lc);

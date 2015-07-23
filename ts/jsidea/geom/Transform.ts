@@ -45,16 +45,60 @@ module jsidea.geom {
         private _matrices: geom.Matrix3D[] = [];
         private _inverted: boolean = false;
         private _box: geom.BoxModel = new geom.BoxModel();
+        private _mode: string = "2d";
 
         constructor(element: HTMLElement) {
             this.update(element);
         }
 
         private update(element: HTMLElement): void {
-            var chain = Transform.extractStyleChain(element);
-            this._inverted = false;
-            this._matrices = Transform.extractAccumulatedMatrices(chain);
-            this._box.parse(element, chain.style);
+            if (this._mode == "3d") {
+                var chain = Transform.extractStyleChain(element);
+                this._inverted = false;
+                this._matrices = Transform.extractAccumulatedMatrices(chain);
+                this._box.parse(element, chain.style);
+            }
+            else if (this._mode == "2d") {
+                var style = window.getComputedStyle(element);
+                var globalBounds = element.getBoundingClientRect();
+                var mat = new geom.Matrix3D();
+
+                var tElement = element;
+                while(tElement && tElement != document.body.parentElement)
+                {
+                    if(tElement.style.transform != "none")
+                        mat.append(geom.Matrix3D.extract(tElement));
+                    tElement = tElement.parentElement;
+                }
+                
+                var localBounds = this.localBoundingBox(element, mat);
+                mat.appendPositionRaw(-localBounds.x, -localBounds.y, 0);
+                
+                mat.appendPositionRaw(globalBounds.left, globalBounds.top, 0);
+                this._matrices = [mat];
+                this._inverted = false;
+                this._box.parse(element, style);
+            }
+        }
+
+        private localBoundingBox(element: HTMLElement, mat: geom.Matrix3D, ret = new geom.Box2D()): geom.Box2D {
+            var ptA = new geom.Point3D(0, 0);
+            var ptB = new geom.Point3D(element.offsetWidth, 0);
+            var ptC = new geom.Point3D(element.offsetWidth, element.offsetHeight);
+            var ptD = new geom.Point3D(0, element.offsetHeight);
+
+            mat.project(ptA, ptA);
+            mat.project(ptB, ptB);
+            mat.project(ptC, ptC);
+            mat.project(ptD, ptD);
+
+            var x = Math.min(ptA.x, ptB.x, ptC.x, ptD.x);
+            var y = Math.min(ptA.y, ptB.y, ptC.y, ptD.y);
+            var width = Math.max(ptA.x, ptB.x, ptC.x, ptD.x) - x;
+            var height = Math.max(ptA.y, ptB.y, ptC.y, ptD.y) - y;
+
+            return ret.setTo(x, y, width, height);
+
         }
 
         private invert(): void {
