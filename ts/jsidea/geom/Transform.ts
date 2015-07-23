@@ -32,6 +32,7 @@ module jsidea.geom {
         isStickedChild: boolean;
         perspective: number;
         isPreserved3d: boolean;
+        isBorderBox: boolean;
         isAccumulatable: boolean;
     }
     export class Transform {
@@ -174,7 +175,7 @@ module jsidea.geom {
             //-------
             //perspective
             //-------
-            var perspective = node.parent.perspective;//math.Number.parse(parentStyle.perspective, 0);
+            var perspective = node.parent.perspective;
             if (!perspective)
                 return matrix;
 
@@ -216,14 +217,9 @@ module jsidea.geom {
                 element = elements[i];
 
                 var style = window.getComputedStyle(element);
-                
-                
-                
+
                 var perspective = math.Number.parse(style.perspective, 0);
                 if (this.isFirefox) {
-                    
-                    perspective = 0; 
-                    
                     if (preserved3d && style.position == "fixed") {
                         //make the element a containing-block
                         element.style.position = "absolute";
@@ -233,9 +229,8 @@ module jsidea.geom {
                         console.warn("FIXED: Fixed to absolute. Fixed in a 3d-context becomes absolute positioned.");
                     }
                     
-//                        console.log(isInlined);
-                    if(style.display == "inline" && !(style.perspective == "none" && style.transform == "none"))
-                    {
+                    //                        console.log(isInlined);
+                    if (style.display == "inline" && !(style.perspective == "none" && style.transform == "none")) {
                         //make the element a containing-block
                         element.style.perspective = "none";
                         element.style.transform = "none";
@@ -245,14 +240,14 @@ module jsidea.geom {
                         console.warn("FIXED: Inline elements cannot not have transform applied.");
                     }
 
-//                    if (isFixed && style.position == "fixed") {
-//                        //make the element a containing-block
-//                        element.style.position = "absolute";
-//                        
-//                        //refresh style
-//                        style = window.getComputedStyle(element);
-//                        console.warn("FIXED: Fixed to absolute. Fixed in a fixed container.");
-//                    }
+                    //                    if (isFixed && style.position == "fixed") {
+                    //                        //make the element a containing-block
+                    //                        element.style.position = "absolute";
+                    //                        
+                    //                        //refresh style
+                    //                        style = window.getComputedStyle(element);
+                    //                        console.warn("FIXED: Fixed to absolute. Fixed in a fixed container.");
+                    //                    }
                 }
                 //webkit bugfix 
                 if (this.isWebkit) {
@@ -285,11 +280,11 @@ module jsidea.geom {
                     if (style.transform != "none" && style.overflow != "visible" && style.perspective != "none") {
                         //webkit ignores perspective set on scroll elements
                         //make the element a containing-block
-//                        element.style.perspective = "none";
-//                        
-//                        //refresh style
-//                        style = window.getComputedStyle(element);
-//                        console.warn("FIXED: Disable perspective on overflow elements.");
+                        //                        element.style.perspective = "none";
+                        //                        
+                        //                        //refresh style
+                        //                        style = window.getComputedStyle(element);
+                        //                        console.warn("FIXED: Disable perspective on overflow elements.");
                         
                         perspective = 0;
                     }
@@ -340,6 +335,7 @@ module jsidea.geom {
                     isAbsolute: style.position == "absolute",
                     isStatic: style.position == "static",
                     isScrollable: style.overflow != "visible",
+                    isBorderBox: style.boxSizing == "border-box",
                     isBody: element == document.body,
                     isSticked: false,
                     isStickedChild: false,
@@ -362,8 +358,8 @@ module jsidea.geom {
                 if (!preserved3d && node.isPreserved3d)
                     preserved3d = true;
                 
-//                if(!isInlined && node.style.display == "inline")
-//                    isInlined = true;    
+                //                if(!isInlined && node.style.display == "inline")
+                //                    isInlined = true;    
 
                 //for better handling
                 //TODO: garbage collection
@@ -390,7 +386,7 @@ module jsidea.geom {
                 node.child = nodes[node.depth + 1];
                 node.isSticked = this.getIsSticked(node);
                 node.isStickedChild = this.getIsStickedChild(node);
-                node.offsetParent = this.getParentOffset(node);
+                node.offsetParent = this.getOffsetParent(node);
                 node.parentScroll = this.getParentScroll(node);
                 node.isAccumulatable = this.getIsAccumulatable(node);
                 var sc = this.getScrollOffset(node);
@@ -435,7 +431,7 @@ module jsidea.geom {
         private static getIsAccumulatable(node: INode): boolean {
             //in any case, if an element has only 2d-transforms or its the document-root item
             //the transform can be accumulated to the parent transform
-            if (!node.parent || node.style.transform.indexOf("matrix3d") < 0)
+            if (node.isBody || node.style.transform.indexOf("matrix3d") < 0)
                 return true;
 
             var parent = node.parent;
@@ -449,12 +445,12 @@ module jsidea.geom {
             //Firefox does NOT reflect the "grouping"-overrides and this is how its concepted.
             //But what about the "opacity"-property. Opacity does not override the preserve-3d (not always, webkit does under some conditions).
             //http://dev.w3.org/csswg/css-transforms/#grouping-property-values
-            if (preserve3d && parent.style.overflow != "visible")
+            if (preserve3d && parent.isScrollable)
                 preserve3d = false;
             
             //there is this case where webkit ignores transform-style: flat. 
             //So when the elements parent has preserve-3d and the element itself has no transform set.
-            if (!preserve3d && this.isWebkit && parent.style.transform == "none" && parent.parent)
+            if (!preserve3d && this.isWebkit && !parent.isTransformed && !parent.isBody)
                 preserve3d = this.getIsAccumulatable(parent.parent);
 
             return preserve3d;
@@ -470,7 +466,7 @@ module jsidea.geom {
         }
         
         //TEST-AREA
-        private static getParentOffset(node: INode): INode {
+        private static getOffsetParent(node: INode): INode {
             if (!node || node.isBody || node.isSticked)
                 return null;
 
@@ -563,7 +559,7 @@ module jsidea.geom {
             }
             return ret;
         }
-
+        
         public static getOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             ret.x = 0;
             ret.y = 0;
@@ -580,7 +576,6 @@ module jsidea.geom {
             //if the element is really fixed
             if (node.isSticked) {
                 this.getCorrectOffset(node, ret);
-                
                 //set for easy access
                 node.offsetX = ret.x;
                 node.offsetY = ret.y;
@@ -631,7 +626,7 @@ module jsidea.geom {
             //no node no value
             if (!node)
                 return ret;
-            
+
             if (!node.offsetParent) {
                 //hmmmm
                 if (node.isStatic) {
@@ -641,7 +636,7 @@ module jsidea.geom {
                 return ret;
             }
 
-            if (node.style.boxSizing != "border-box") {
+            if (!node.isBorderBox) {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
             }

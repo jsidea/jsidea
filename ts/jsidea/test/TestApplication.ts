@@ -89,7 +89,7 @@ module jsidea.test {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
-//                pos.apply(d);
+                pos.apply(d);
             });
         }
 

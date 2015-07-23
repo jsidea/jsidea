@@ -141,7 +141,7 @@ body * {
 	/* transform-style: flat; */
 	/* perspective: 600px; */
 	/* transform-style: flat; */
-	/* box-sizing: border-box; */
+	box-sizing: border-box;
 }
 
 body {
@@ -324,6 +324,9 @@ canvas {
 	width: 256px;
 	height: 256px;
 	margin: 20px;
+	
+	transform: rotate(40deg);
+	
 	/* box-sizing: border-box; */
 	/* left: 0px; */
 	/* left: 100px; */
