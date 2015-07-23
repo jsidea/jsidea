@@ -174,7 +174,7 @@ module jsidea.geom {
             //-------
             //perspective
             //-------
-            var perspective = math.Number.parse(parentStyle.perspective, 0);
+            var perspective = node.parent.perspective;//math.Number.parse(parentStyle.perspective, 0);
             if (!perspective)
                 return matrix;
 
@@ -211,12 +211,19 @@ module jsidea.geom {
             var preserved3d = false;
             var l = elements.length;
             var isFixed = false;
+            var isInlined = false;
             for (var i = l - 1; i >= 0; --i) {
                 element = elements[i];
 
                 var style = window.getComputedStyle(element);
+                
+                
+                
                 var perspective = math.Number.parse(style.perspective, 0);
                 if (this.isFirefox) {
+                    
+                    perspective = 0; 
+                    
                     if (preserved3d && style.position == "fixed") {
                         //make the element a containing-block
                         element.style.position = "absolute";
@@ -225,15 +232,27 @@ module jsidea.geom {
                         style = window.getComputedStyle(element);
                         console.warn("FIXED: Fixed to absolute. Fixed in a 3d-context becomes absolute positioned.");
                     }
-
-                    if (isFixed && style.position == "fixed") {
+                    
+//                        console.log(isInlined);
+                    if(style.display == "inline" && !(style.perspective == "none" && style.transform == "none"))
+                    {
                         //make the element a containing-block
-                        element.style.position = "absolute";
+                        element.style.perspective = "none";
+                        element.style.transform = "none";
                         
                         //refresh style
                         style = window.getComputedStyle(element);
-                        console.warn("FIXED: Fixed to absolute. Fixed in a fixed container.");
+                        console.warn("FIXED: Inline elements cannot not have transform applied.");
                     }
+
+//                    if (isFixed && style.position == "fixed") {
+//                        //make the element a containing-block
+//                        element.style.position = "absolute";
+//                        
+//                        //refresh style
+//                        style = window.getComputedStyle(element);
+//                        console.warn("FIXED: Fixed to absolute. Fixed in a fixed container.");
+//                    }
                 }
                 //webkit bugfix 
                 if (this.isWebkit) {
@@ -266,11 +285,13 @@ module jsidea.geom {
                     if (style.transform != "none" && style.overflow != "visible" && style.perspective != "none") {
                         //webkit ignores perspective set on scroll elements
                         //make the element a containing-block
-                        element.style.perspective = "none";
+//                        element.style.perspective = "none";
+//                        
+//                        //refresh style
+//                        style = window.getComputedStyle(element);
+//                        console.warn("FIXED: Disable perspective on overflow elements.");
                         
-                        //refresh style
-                        style = window.getComputedStyle(element);
-                        console.warn("FIXED: Disable perspective on overflow elements.");
+                        perspective = 0;
                     }
                     if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
                         //make static relative
@@ -308,7 +329,7 @@ module jsidea.geom {
                     offsetParent: null,
                     parentScroll: null,
                     child: null,
-                    perspective: 0,
+                    perspective: perspective,
                     offsetX: 0,
                     offsetY: 0,
                     scrollOffsetX: 0,
@@ -340,6 +361,9 @@ module jsidea.geom {
 
                 if (!preserved3d && node.isPreserved3d)
                     preserved3d = true;
+                
+//                if(!isInlined && node.style.display == "inline")
+//                    isInlined = true;    
 
                 //for better handling
                 //TODO: garbage collection

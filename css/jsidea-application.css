@@ -2,7 +2,7 @@
 
 /* TEST 0 */
 .test-0 #view {
-	position: absolute;
+	position: static;
 }
 
 .test-0 #content {
@@ -10,7 +10,7 @@
 }
 
 .test-0 #a-cont {
-	position: absolute;
+	position: static;
 }
 
 .test-0 #b-cont {
@@ -18,7 +18,7 @@
 }
 
 .test-0 #c-cont {
-	position: absolute;
+	position: static;
 }
 
 .test-0 #d-cont {
@@ -27,7 +27,7 @@
 
 /* TEST 1 */
 .test-1 #view {
-	position: absolute;
+	position: static;
 }
 
 .test-1 #content {
@@ -35,7 +35,7 @@
 }
 
 .test-1 #a-cont {
-	position: absolute;
+	position: static;
 }
 
 .test-1 #b-cont {
@@ -43,7 +43,7 @@
 }
 
 .test-1 #c-cont {
-	position: absolute;
+	position: static;
 }
 
 .test-1 #d-cont {
@@ -52,7 +52,7 @@
 
 /* TEST 2 */
 .test-2 #view {
-	position: fixed;
+	position: static;
 }
 
 .test-2 #content {
@@ -64,7 +64,7 @@
 }
 
 .test-2 #b-cont {
-	position: fixed;
+	position: static;
 }
 
 .test-2 #c-cont {
@@ -98,6 +98,31 @@
 
 .test-3 #d-cont {
 	position: absolute;
+}
+
+/* TEST 4 */
+.test-4 #view {
+	position: static;
+}
+
+.test-4 #content {
+	position: static;
+}
+
+.test-4 #a-cont {
+	position: static;
+}
+
+.test-4 #b-cont {
+	position: static;
+}
+
+.test-4 #c-cont {
+	position: static;
+}
+
+.test-4 #d-cont {
+	position: fixed;
 }
 
 html,body {
@@ -163,7 +188,6 @@ canvas {
 	border: 20px solid #FFF;
 } */
 #view {
-	position: fixed;
 	width: 512px;
 	height: 512px;
 	/* left: 100px;
@@ -182,6 +206,8 @@ canvas {
 	/* transform: translateX(0); */
 	/* perspective: 200px; */
 	/* transform-style: preserve-3d; */
+	/* perspective: 200px; */
+	/* transform: translateZ(-20px) rotateY(30deg); */
 	overflow: scroll;
 	/* box-sizing: border-box; */
 	/* box-sizing: border-box; */
@@ -201,6 +227,7 @@ canvas {
 	/* left: 200px; */
 
 	/* transform: translateZ(-20px) rotateY(-5deg); */
+	/* transform: rotate(25deg); */
 
 	/* perspective: 100px; */
 	/* transform: translateX(0); */
@@ -218,6 +245,8 @@ canvas {
 	/* perspective: 100px; */
 
 	/* box-sizing: border-box; */
+	perspective: 100px;
+	transform-style: preserve-3d;
 }
 
 #a-cont {
@@ -243,6 +272,8 @@ canvas {
 	margin: 10px;
 	padding: 60px;
 	/* box-sizing: border-box; */
+	transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg);
+	/* transform: rotate(25deg); */
 }
 
 #b-cont {
