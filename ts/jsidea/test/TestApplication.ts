@@ -34,7 +34,7 @@ module jsidea.test {
             var can = document.createElement("canvas");
             can.id = "can";
             can.width = 800;
-            can.height = 800;
+            can.height = 400;
             var ctx = can.getContext("2d");
 
             var a = document.createElement("div");
@@ -94,12 +94,9 @@ module jsidea.test {
         }
 
         private drawOffsetChain(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
-
-            while (e) {
+            while (e && e.parentElement != document.body.parentElement) {
                 var sc = geom.Transform.extractStyleChain(e);
-                var off = geom.Transform.getOffset(sc);
-                //            console.log(off.x, off.y);
-                this.drawCross(ctx, off.x, off.y);
+                this.drawCross(ctx, sc.offset.x, sc.offset.y);
                 e = e.parentElement;
             }
         }
@@ -157,7 +154,6 @@ module jsidea.test {
             if (node)
                 node = node.root;
             while (node) {
-                geom.Transform.getOffset(node);
                 var ofp = <HTMLElement> node.element.offsetParent;
                 var calcedOff = node.offsetParent ? node.offsetParent.element : null;
                 //                var calced = geom.Transform.getParentBlock(node);

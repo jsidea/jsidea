@@ -12,10 +12,8 @@ module jsidea.geom {
         child: INode;
         parent: INode;
         depth: number;
-        offsetX: number;
-        offsetY: number;
-        scrollOffsetX: number;
-        scrollOffsetY: number;
+        offset: geom.Point2D;
+        scrollOffset: geom.Point2D;
         offsetLeft: number;
         offsetTop: number;
         clientLeft: number;
@@ -127,10 +125,10 @@ module jsidea.geom {
             this._box.point(pt, "border", fromBox);            
             
             //unproject from child to parent
-            var nodes: geom.Matrix3D[] = this._matrices;
-            var l = nodes.length;
+            var matrices: geom.Matrix3D[] = this._matrices;
+            var l = matrices.length;
             for (var i = 0; i < l; ++i)
-                pt = nodes[i].unproject(pt, pt);
+                pt = matrices[i].unproject(pt, pt);
             
             //apply box model transformations
             this._box.point(pt, toBox, "border");
@@ -193,6 +191,10 @@ module jsidea.geom {
         public static extractStyleChain(element: HTMLElement): INode {
             //collect computed styles/nodes up to html/root (including html/root)
             var root = document.body;
+
+            //TODO: what about HTML-element ownerDocument.documentElement
+            if (element == root.parentElement)
+                return null;
             
             //collect from child to root
             var elements: HTMLElement[] = [];
@@ -325,10 +327,8 @@ module jsidea.geom {
                     parentScroll: null,
                     child: null,
                     perspective: perspective,
-                    offsetX: 0,
-                    offsetY: 0,
-                    scrollOffsetX: 0,
-                    scrollOffsetY: 0,
+                    offset: null,
+                    scrollOffset: null,
                     isAccumulatable: true,
                     isFixed: style.position == "fixed",
                     isRelative: style.position == "relative",
@@ -389,9 +389,9 @@ module jsidea.geom {
                 node.offsetParent = this.getOffsetParent(node);
                 node.parentScroll = this.getParentScroll(node);
                 node.isAccumulatable = this.getIsAccumulatable(node);
-                var sc = this.getScrollOffset(node);
-                node.scrollOffsetX = sc.x;
-                node.scrollOffsetY = sc.y;
+                node.scrollOffset = this.getScrollOffset(node);
+                node.offset = this.getOffset(node);
+
                 node = node.child;
             }
 
@@ -408,7 +408,6 @@ module jsidea.geom {
                 //if last is not null, last becomes the base for the transformation
                 //its like appending the current node.transform (parent-transform) to the last transform (child-transform)
                 var m: geom.Matrix3D = this.extractMatrix(node, last);
-                //                if (node.parent && this.isAccumulatable(node)) {
                 if (node.parent && node.isAccumulatable) {
                     last = m;
                 }
@@ -457,12 +456,10 @@ module jsidea.geom {
         }
 
         //returns the local position the direct parent
-        private static getPosition(node: INode): geom.Point2D {
-            var off = this.getOffset(node);
-            if (node.isSticked)
-                return off;
-            var off2 = this.getOffset(node.parent ? node.parent : null);
-            return off.sub(off2);
+        private static getPosition(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+            if (node.isSticked || node.isBody)
+                return ret.setTo(node.offset.x, node.offset.y);
+            return ret.setTo(node.offset.x - node.parent.offset.x, node.offset.y - node.parent.offset.y);
         }
         
         //TEST-AREA
@@ -489,6 +486,7 @@ module jsidea.geom {
             var excludeStaticParent = node.isAbsolute && !node.isTransformedChild;
             var leafNode: INode = node;
 
+            //the first possible parent-scroll element is the direct parent
             node = node.parent;
 
             while (node) {
@@ -559,8 +557,8 @@ module jsidea.geom {
             }
             return ret;
         }
-        
-        public static getOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+
+        private static getOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             ret.x = 0;
             ret.y = 0;
 
@@ -568,17 +566,14 @@ module jsidea.geom {
             if (!node)
                 return ret;
 
-            ret.x -= node.scrollOffsetX;
-            ret.y -= node.scrollOffsetY;
+            ret.x -= node.scrollOffset.x;
+            ret.y -= node.scrollOffset.y;
             
             //if is really fixed, then just make it fast
             //wow, and the offsets are correct
             //if the element is really fixed
             if (node.isSticked) {
                 this.getCorrectOffset(node, ret);
-                //set for easy access
-                node.offsetX = ret.x;
-                node.offsetY = ret.y;
                 return ret;
             }
 
@@ -590,11 +585,6 @@ module jsidea.geom {
                 this.getCorrectOffset(node, ret);
                 node = node.offsetParent;
             }
-
-            //set for easy access
-            leafNode.offsetX = ret.x;
-            leafNode.offsetY = ret.y;
-
             return ret;
         }
 
