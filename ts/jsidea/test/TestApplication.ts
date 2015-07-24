@@ -57,15 +57,10 @@ module jsidea.test {
             //            d.appendChild(e);
 
             var pos = new layout.Position();
-            pos.to.x = "-100%";
-            pos.to.y = "-100%";
-            pos.toBox = "border";
-            pos.fromBox = "border";
-            
-            //            console.log(this.getOffestToCrossDoc(a, document.body));
-            //            console.log(this.getOffestToCrossDoc2(a, document.body));
-            //            console.log(this.getOffestToCrossDoc3(a, document.body));
-            
+            pos.to.x = "100%";
+            pos.to.y = "100%";
+            pos.toBox = geom.BoxModel.BORDER;
+            pos.useTransform = false;
 
             document.addEventListener("click",(evt) => {
 //                this.logChain(d);
@@ -89,7 +84,7 @@ module jsidea.test {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
-//                pos.apply(d);
+                pos.apply(d);
             });
         }
 

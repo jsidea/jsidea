@@ -44,5 +44,10 @@ module jsidea {
         public static _PREPEND_SKEW_2D = new geom.Matrix2D();
         public static _APPEND_SKEW_RAW_2D = new geom.Point2D();
         public static _PREPEND_SKEW_RAW_2D = new geom.Point2D();
+        
+        //jsidea.layout.Position
+        public static _APPLY_POSITION = new geom.Matrix3D();
+        public static _APPLY_POSITION_SIZE_FROM = new geom.Point2D();
+        public static _APPLY_POSITION_SIZE_TO = new geom.Point2D();
     }
 }

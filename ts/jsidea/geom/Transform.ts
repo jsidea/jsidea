@@ -1,47 +1,56 @@
 module jsidea.geom {
     export class Transform {
 
+        public static MODE_3D: string = "3d";
+        public static MODE_2D: string = "2d";
+        public static MODE_BOX: string = "box";
+        public static MODE_AUTO: string = "auto";
+
         private static _lookup = new model.Dictonary<HTMLElement, { mode: string; bounds: geom.Box2D }>();
 
-        public toBox: string = "border";
-        public fromBox: string = "border";
+        public toBox: string = geom.BoxModel.BORDER;
+        public fromBox: string = geom.BoxModel.BORDER;
 
         private _matrices: geom.Matrix3D[] = [];
         private _inverted: boolean = false;
         private _box: geom.BoxModel = new geom.BoxModel();
 
-        constructor(element: HTMLElement) {
-            this.update(element);
+        constructor() {
         }
 
         public static create(element: HTMLElement): geom.Transform {
-            return new Transform(element);
+            var t = new Transform();
+            t.update(element);
+            return t;
         }
 
-        private update(element: HTMLElement, mode: string = "auto"): void {
+        public clear(): void {
+            this._matrices = [];
+            this._inverted = false;
+            this._box.clear();
+        }
+
+        public update(element: HTMLElement, mode: string = Transform.MODE_AUTO): void {
+            if (!element)
+                return this.clear();
+
             var globalBounds: geom.Box2D = null;
-            if (mode == "auto") {
+            if (mode == Transform.MODE_AUTO) {
                 var lookedUpMode = Transform._lookup.getValue(element);
                 globalBounds = geom.Box2D.createBoundingBox(element);
 
                 //just use the lookup if the element does not moved
                 //in chrome/webkit you can check of exact-equality,
-                //in firefox not
+                //in firefox not (twipsy hipsy)
                 if (lookedUpMode && globalBounds.equals(lookedUpMode.bounds, 0.3))
                     mode = lookedUpMode.mode;
                 else {
                     mode = Transform.getMode(element);
                     Transform._lookup.setValue(element, { mode: mode, bounds: globalBounds });
-                    
-//                    if (lookedUpMode) {
-//                        console.log("MODE LOOKED UP", lookedUpMode);
-//                        console.log(globalBounds.toString())
-//                        console.log(lookedUpMode.bounds.toString());
-//                    } 
                 }
             }
 
-            if (mode == "3d") {
+            if (mode == Transform.MODE_3D) {
                 this._inverted = false;
                 var styles = layout.StyleChain.create(element);
                 this._matrices = Transform.extractAccumulatedMatrices(styles.node);
@@ -49,7 +58,7 @@ module jsidea.geom {
             }
             //runs if there is now perspective involved
             //the elements can have 3d-transformations also
-            else if (mode == "2d" || mode == "box") {
+            else if (mode == Transform.MODE_2D || mode == Transform.MODE_BOX) {
                 this._inverted = false;
 
                 var style = window.getComputedStyle(element);
@@ -57,10 +66,10 @@ module jsidea.geom {
 
                 var matrix = new geom.Matrix3D();
 
-                if (mode == "2d") {
+                if (mode == Transform.MODE_2D) {
                     var tElement = element;
                     while (tElement && tElement != document.body.parentElement) {
-                        matrix.append(geom.Matrix3D.extract(tElement));
+                        matrix.append(geom.Matrix3D.create(tElement));
                         tElement = tElement.parentElement;
                     }
                     var localBounds = matrix.bounds(0, 0, element.offsetWidth, element.offsetHeight);
@@ -81,33 +90,33 @@ module jsidea.geom {
                 this._matrices[i].invert();
         }
 
-        public localToLocalPoint(to: HTMLElement, pt: geom.Point3D, toBox: string = "auto", fromBox: string = "auto"): jsidea.geom.Point3D {
+        public localToLocalPoint(to: HTMLElement, pt: geom.Point3D, toBox: string = geom.BoxModel.AUTO, fromBox: string = geom.BoxModel.AUTO): jsidea.geom.Point3D {
             return this.localToLocal(to, pt.x, pt.y, pt.z, toBox, fromBox);
         }
 
-        public localToLocal(to: HTMLElement, x: number, y: number, z: number = 0, toBox: string = "auto", fromBox: string = "auto"): jsidea.geom.Point3D {
+        public localToLocal(to: HTMLElement, x: number, y: number, z: number = 0, toBox: string = geom.BoxModel.AUTO, fromBox: string = geom.BoxModel.AUTO): jsidea.geom.Point3D {
             //check if to contains element
             //check if element contains to
             //if so shorten the way here
-            var gl = this.localToGlobal(x, y, z, "border", fromBox);
-            return Transform.create(to).globalToLocalPoint(gl, toBox, "border");
+            var gl = this.localToGlobal(x, y, z, geom.BoxModel.BORDER, fromBox);
+            return Transform.create(to).globalToLocalPoint(gl, toBox, geom.BoxModel.BORDER);
         }
 
-        public globalToLocalPoint(pt: geom.Point3D, toBox: string = "auto", fromBox: string = "auto"): jsidea.geom.Point3D {
+        public globalToLocalPoint(pt: geom.Point3D, toBox: string = geom.BoxModel.AUTO, fromBox: string = geom.BoxModel.AUTO): jsidea.geom.Point3D {
             return this.globalToLocal(pt.x, pt.y, pt.z, toBox, fromBox);
         }
 
-        public globalToLocal(x: number, y: number, z: number = 0, toBox: string = "auto", fromBox: string = "auto"): jsidea.geom.Point3D {
+        public globalToLocal(x: number, y: number, z: number = 0, toBox: string = geom.BoxModel.AUTO, fromBox: string = geom.BoxModel.AUTO): jsidea.geom.Point3D {
             //we need the globalToLocal matrices
             if (!this._inverted)
                 this.invert();
             
             //apply box model transformations
-            if (toBox == "auto")
+            if (toBox == geom.BoxModel.AUTO)
                 toBox = this.toBox;
-            if (fromBox == "auto")
+            if (fromBox == geom.BoxModel.AUTO)
                 fromBox = this.fromBox;
-            this._box.point(pt, "border", fromBox);
+            this._box.point(pt, geom.BoxModel.BORDER, fromBox);
             
             //project from parent to child
             var nodes: geom.Matrix3D[] = this._matrices;
@@ -117,16 +126,16 @@ module jsidea.geom {
                 pt = nodes[i].unproject(pt, pt);
 
             //apply box model transformations
-            this._box.point(pt, toBox, "border");
+            this._box.point(pt, toBox, geom.BoxModel.BORDER);
 
             return pt;
         }
 
-        public localToGlobalPoint(pt: geom.Point3D, toBox: string = "auto", fromBox: string = "auto"): jsidea.geom.Point3D {
+        public localToGlobalPoint(pt: geom.Point3D, toBox: string = geom.BoxModel.AUTO, fromBox: string = geom.BoxModel.AUTO): jsidea.geom.Point3D {
             return this.localToGlobal(pt.x, pt.y, pt.z, toBox, fromBox);
         }
 
-        public localToGlobal(x: number, y: number, z: number = 0, toBox: string = "auto", fromBox: string = "auto"): jsidea.geom.Point3D {
+        public localToGlobal(x: number, y: number, z: number = 0, toBox: string = geom.BoxModel.AUTO, fromBox: string = geom.BoxModel.AUTO): jsidea.geom.Point3D {
             //we need the localToGlobal matrices
             if (this._inverted)
                 this.invert();
@@ -134,11 +143,11 @@ module jsidea.geom {
             var pt = new geom.Point3D(x, y, z);
             
             //apply box model transformations
-            if (toBox == "auto")
+            if (toBox == geom.BoxModel.AUTO)
                 toBox = this.toBox;
-            if (fromBox == "auto")
+            if (fromBox == geom.BoxModel.AUTO)
                 fromBox = this.fromBox;
-            this._box.point(pt, "border", fromBox);            
+            this._box.point(pt, geom.BoxModel.BORDER, fromBox);            
             
             //unproject from child to parent
             var matrices: geom.Matrix3D[] = this._matrices;
@@ -147,7 +156,7 @@ module jsidea.geom {
                 pt = matrices[i].project(pt, pt);
             
             //apply box model transformations
-            this._box.point(pt, toBox, "border");
+            this._box.point(pt, toBox, geom.BoxModel.BORDER);
 
             return pt;
         }
@@ -157,12 +166,12 @@ module jsidea.geom {
             while (element && element != document.body.parentElement) {
                 var style = window.getComputedStyle(element);
                 if (style.perspective != "none")
-                    return "3d";
+                    return Transform.MODE_3D;
                 if (style.transform != "none")
                     isTransformed = true;
                 element = element.parentElement;
             }
-            return isTransformed ? "2d" : "box";
+            return isTransformed ? Transform.MODE_2D : Transform.MODE_BOX;
         }
 
         private static extractMatrix(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {

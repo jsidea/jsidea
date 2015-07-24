@@ -77,7 +77,7 @@
 
 /* TEST 3 */
 .test-3 #view {
-	position: fixed;
+	position: absolute;
 }
 
 .test-3 #content {
@@ -89,11 +89,11 @@
 }
 
 .test-3 #b-cont {
-	position: static;
+	position: absolute;
 }
 
 .test-3 #c-cont {
-	position: static;
+	position: absolute;
 }
 
 .test-3 #d-cont {
@@ -249,7 +249,7 @@ canvas {
 	
 	left: 100px;
 	border: 20px solid #FFF000;
-	/* perspective: 200px; */
+	perspective: 600px;
 	perspective-origin: 128px 128px;
 	transform-style: preserve-3d;
 }
@@ -273,14 +273,18 @@ canvas {
 	/*the next two lines should have no effect on the position, because the element is set toe static*/
 	left: 100px;
 	top: 100px;
-	overflow: scroll;
+	/* overflow: scroll; */
 	/* transform: translateX(0); */
 	/* transform: rotate(25deg); */
 	margin: 20px;
 	padding: 100px;
 	/* box-sizing: border-box; */
-	transform-origin: 0px 0px;
+	transform-origin: 256px 0px;
 	transform: translateZ(0px) rotateY(-30deg)  rotate(45deg);
+	
+	perspective: 600px;
+	perspective-origin: 128px 128px;
+	transform-style: preserve-3d;
 	/* transform: rotate(25deg); */
 }
 
@@ -311,6 +315,10 @@ canvas {
 	/* transform: translateZ(-20px) rotateY(15deg) rotate(-20deg); */
 	transform-origin: 0px 0px;
 	transform: rotate(10deg);
+	
+	perspective: 400px;
+	/* perspective-origin: 256px 64px; */
+	/* transform-style: preserve-3d; */
 }
 
 #c-cont {
@@ -323,6 +331,7 @@ canvas {
 	height: 128px;
 	cursor: pointer;
 	
+	transform: translateZ(0px) rotateY(-30deg)  rotate(45deg);
 	
 	
 	/* overflow: scroll; */
@@ -342,6 +351,7 @@ canvas {
 	height: 256px;
 	margin: 20px;
 	transform-origin: 0px 0px;
+	padding: 50px;
 	
 	transform: rotate(45deg) translateX(64px);
 	

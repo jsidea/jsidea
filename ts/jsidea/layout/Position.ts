@@ -1,24 +1,28 @@
 module jsidea.layout {
     export interface IPositionValue {
-        x?: any;
-        y?: any;
-        px?: any;
-        py?: any;
+        x?: number | string;
+        y?: number | string;
+        offsetX?: number | string;
+        offsetY?: number | string;
     }
     export class Position {
-        private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
-
         private _box: geom.BoxModel = new geom.BoxModel();
 
         public to: IPositionValue = {};
         public from: IPositionValue = {};
         public fromElement: HTMLElement = null;
-        public toBox: string = "border";
-        public fromBox: string = "padding";
+        public toBox: string = geom.BoxModel.BORDER;
+        public fromBox: string = geom.BoxModel.BORDER;
         public useTransform: boolean = true;
-        public transformMode: string = "box";
+        public transformMode: string = geom.Transform.MODE_AUTO;
+        private _transform: geom.Transform = new geom.Transform();
 
         constructor() {
+
+        }
+
+        public static create(): Position {
+            return new Position();
         }
 
         public clone(): Position {
@@ -32,71 +36,52 @@ module jsidea.layout {
             return p;
         }
 
-        public apply(visual: HTMLElement): void {
-            if (!visual)
+        public apply(element: HTMLElement): void {
+            if (!element)
                 return;
 
             //retrieve of-element
             var fromElement = this.fromElement ? this.fromElement : document.body;
             
             //transform box-models of visual
-            this._box.parse(visual);
-            var sizeVisual = new geom.Point2D(visual.offsetWidth, visual.offsetHeight);
-            this._box.size(sizeVisual, this.toBox, "border");
-
-            var myOriginX: number = math.Number.parseRelation(this.to.px, sizeVisual.x, 0);
-            var myOriginY: number = math.Number.parseRelation(this.to.py, sizeVisual.y, 0);
-            var myOffsetX: number = math.Number.parseRelation(this.to.x, sizeVisual.x, 0);
-            var myOffsetY: number = math.Number.parseRelation(this.to.y, sizeVisual.y, 0);
+            this._box.parse(element);
+            var sizeTo = Buffer._APPLY_POSITION_SIZE_TO.setTo(element.offsetWidth, element.offsetHeight);
+            this._box.size(sizeTo, this.toBox, geom.BoxModel.BORDER);
+            var toX: number = math.Number.parseRelation(this.to.x, sizeTo.x, 0) + math.Number.parseRelation(this.to.offsetX, sizeTo.x, 0);
+            var toY: number = math.Number.parseRelation(this.to.y, sizeTo.y, 0) + math.Number.parseRelation(this.to.offsetY, sizeTo.y, 0);
 
             //transform box-models of from
             this._box.parse(fromElement);
-            var sizeOffset = new geom.Point2D(fromElement.offsetWidth, fromElement.offsetHeight);
-            this._box.size(sizeOffset, this.fromBox, "border");
-
-            var atOffsetX: number = math.Number.parseRelation(this.from.x, sizeOffset.x, 0);
-            var atOffsetY: number = math.Number.parseRelation(this.from.y, sizeOffset.y, 0);
-            var atOriginX: number = math.Number.parseRelation(this.from.px, sizeOffset.x, 0);
-            var atOriginY: number = math.Number.parseRelation(this.from.py, sizeOffset.y, 0);
+            var sizeFrom = Buffer._APPLY_POSITION_SIZE_FROM.setTo(fromElement.offsetWidth, fromElement.offsetHeight);
+            this._box.size(sizeFrom, this.fromBox, geom.BoxModel.BORDER);
+            var fromX: number = math.Number.parseRelation(this.from.x, sizeFrom.x, 0) + math.Number.parseRelation(this.from.offsetX, sizeFrom.x, 0);
+            var fromY: number = math.Number.parseRelation(this.from.y, sizeFrom.y, 0) + math.Number.parseRelation(this.from.offsetY, sizeFrom.y, 0);
             
             //the transfrom from "from" to visual
-            var lc = geom.Transform.create(fromElement).localToLocal(
-                visual,
-                atOffsetX - atOriginX,
-                atOffsetY - atOriginY,
+            this._transform.update(fromElement, this.transformMode);
+            var lc = this._transform.localToLocal(
+                element,
+                fromX,
+                fromY,
                 0,
                 this.toBox,
                 this.fromBox);
-            lc.x += myOffsetX - myOriginX;
-            lc.y += myOffsetY - myOriginY;
+            lc.x -= toX;
+            lc.y -= toY;
 
-            if (this.transformMode == "box") {
-                
-                
-                
-                
-                
-                return;
-            }
-
-            var m = geom.Matrix3D.extract(visual);
+            var m = geom.Matrix3D.create(element, Buffer._APPLY_POSITION);
             var pt = m.unproject(lc);
 
             if (this.useTransform) {
                 m.m41 = pt.x;
                 m.m42 = pt.y;
-                visual.style.transform = m.getCSS();
-                
-                //----------->>>>>>>>>> BUG DISAPPEARED????
-                //in firefox you can grab the matrix3D and change its position
-                //and than just re-apply. But webkit and ie11 kills it.
-                //visual.style.transform = Position.isFirefox ? m.getCSS() : m.getCSS2D();
+                element.style.transform = m.getCSS();
             }
             else {
-                var oldLeft = math.Number.parse(visual.style.left, 0);//visual.offsetLeft;
-                var oldTop = math.Number.parse(visual.style.top, 0);//visual.offsetTop;
-                visual.style.left = Math.round(oldLeft + pt.x) + "px";
-                visual.style.top = Math.round(oldTop + pt.y) + "px";
+                pt.x += math.Number.parse(element.style.left, 0) - m.m41;
+                pt.y += math.Number.parse(element.style.top, 0) - m.m42;
+                element.style.left = Math.round(pt.x) + "px";
+                element.style.top = Math.round(pt.y) + "px";
             }
         }
 
@@ -106,12 +91,12 @@ module jsidea.layout {
             this.from = null;
         }
 
-        public qualifiedClassName(): string {
+        public static qualifiedClassName(): string {
             return "jsidea.layout.Position";
         }
 
         public toString(): string {
-            return "[" + this.qualifiedClassName() + "]";
+            return "[" + Position.qualifiedClassName() + "]";
         }
     }
 }
