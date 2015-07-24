@@ -159,6 +159,7 @@ body {
 	/* padding: 50px; */
 	/* position: absolute; */
 	border: 25px solid #EEEEEE;
+	transform: translateX(128px);
 }
 
 canvas {
@@ -319,7 +320,7 @@ canvas {
 	perspective: 300px; */
 	/* transform: translateZ(-20px) rotateY(15deg) rotate(-20deg); */
 	transform-origin: 0px 0px;
-	transform: rotate(45deg);
+	transform: rotateY(45deg) rotate(45deg);
 	
 	/* perspective: 300px; */
 	/* perspective-origin: 64px 128px;
@@ -338,7 +339,7 @@ canvas {
 	height: 128px;
 	cursor: pointer;
 	
-	transform: rotateY(-30deg)  rotate(45deg);
+	transform: rotate(45deg);
 	
 	transform-origin: 0px 0px;
 	/* overflow: scroll; */

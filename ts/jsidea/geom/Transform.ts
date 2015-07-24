@@ -7,14 +7,12 @@ module jsidea.geom {
         public static MODE_AUTO: string = "auto";
 
         private static _lookup = new model.Dictonary<HTMLElement, { mode: string; bounds: geom.Box2D }>();
-        private static _selector3d: string = null;
-        private static _selector2d: string = null;
 
         public element: HTMLElement;
         public toBox: string = layout.BoxModel.BORDER;
         public fromBox: string = layout.BoxModel.BORDER;
-        public sceneTransform: geom.Matrix3D[] = [];//new geom.Matrix3D();
-        public inverseSceneTransform: geom.Matrix3D[] = [];//new geom.Matrix3D();
+        public sceneTransform: geom.Matrix3D[] = [];
+        public inverseSceneTransform: geom.Matrix3D[] = [];
         public box: layout.BoxModel = new layout.BoxModel();
 
         constructor(element: HTMLElement = null, mode: string = Transform.MODE_AUTO) {
@@ -33,7 +31,7 @@ module jsidea.geom {
             this.element = element;
             
             //FORCE FOR TESTING
-            mode = Transform.MODE_3D;
+//            mode = Transform.MODE_2D;
 
             var globalBounds: geom.Box2D = null;
             if (mode == Transform.MODE_AUTO) {
@@ -164,8 +162,11 @@ module jsidea.geom {
             this.box.point(ret, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);            
             
             //unproject from child to parent
-            for (var i = 0; i < this.sceneTransform.length; ++i)
+            var l = this.sceneTransform.length;
+            for (var i = 0; i < l; ++i)
                 ret = this.sceneTransform[i].project(ret, ret);
+            if(l > 1)
+            console.log(l);
             
             //apply to-box model transformations
             this.box.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
@@ -177,7 +178,7 @@ module jsidea.geom {
             var isTransformed = false;
             while (element && element != document.body.parentElement) {
                 var style = window.getComputedStyle(element);
-                if (style.perspective != "none")
+                if (style.perspective != "none" || style.transform.indexOf("matrix3d") >= 0)
                     return Transform.MODE_3D;
                 if (style.transform != "none")
                     isTransformed = true;
@@ -185,53 +186,6 @@ module jsidea.geom {
             }
             return isTransformed ? Transform.MODE_2D : Transform.MODE_BOX;
         }
-        
-        //        private static refreshSelectors(): void {
-        //            var selectors2d: string[] = [];
-        //            var selectors3d: string[] = [];
-        //            for (var i = 0; i < document.styleSheets.length; ++i) {
-        //                var ss = document.styleSheets[i];
-        //                if (ss.disabled)
-        //                    continue;
-        //                var rules: CSSRuleList = (<any>ss).cssRules || (<any>ss).rules;
-        //                for (var j = 0; j < rules.length; ++j) {
-        //                    var rule: CSSRule = rules[j];
-        //                    if (rule.type == CSSRule.STYLE_RULE) {
-        //                        var cssText = rule.cssText;
-        //                        if (cssText.indexOf("transform:") >= 0) {
-        //                            selectors2d.push(cssText.substring(0, cssText.indexOf("{") - 1));
-        //                            selectors2d.push(cssText.substring(0, cssText.indexOf("{") - 1) + " *");
-        //                        }
-        //                        if (cssText.indexOf("perspective:") >= 0) {
-        //                            var property = "perspective:";
-        //                            var index = cssText.indexOf(property);
-        //                            var end = cssText.indexOf(";", index);
-        //                            var value = math.Number.parse(cssText.substring(index + property.length, end - 1), 0);
-        //                            if (value > 0)
-        //                                selectors3d.push(cssText.substring(0, cssText.indexOf("{") - 1) + " *");
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //            this._selector3d = selectors3d.join(",");
-        //            this._selector2d = selectors2d.join(",");
-        //        }
-
-        //        private static getModeLite(element: HTMLElement): string {
-        //            
-        //            if(this._selector2d === null)
-        //                this.refreshSelectors();
-        //            
-        //            var isTransformed = false;
-        //            while (element && element != document.body.parentElement) {
-        //                if (element.style.perspective || element.matchesSelector(this._selector3d))
-        //                    return Transform.MODE_3D;
-        //                if (element.style.transform || element.matchesSelector(this._selector2d))
-        //                    isTransformed = true;
-        //                element = element.parentElement;
-        //            }
-        //            return isTransformed ? Transform.MODE_2D : Transform.MODE_BOX;
-        //        }
 
         private static extractMatrix(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
             if (!matrix)

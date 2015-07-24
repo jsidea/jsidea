@@ -473,6 +473,8 @@ module jsidea.layout {
         }
 
         private static getIsAccumulatable(node: INode): boolean {
+//            return true;
+            
             //in any case, if an element has only 2d-transforms or its the document-root item
             //the transform can be accumulated to the parent transform
             if (node.isBody || node.style.transform.indexOf("matrix3d") < 0)

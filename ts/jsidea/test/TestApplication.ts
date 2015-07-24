@@ -72,6 +72,7 @@ module jsidea.test {
 
             document.addEventListener("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
+//                pt = geom.Transform.create(document.body).globalToLocalPoint(pt);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
                 pos.apply(d);
