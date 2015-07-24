@@ -624,6 +624,8 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendPerspective(perspective: number): Matrix3D {
+            if(!perspective)
+            return this;
             return this.append(Matrix3D.makePerspective(perspective, Buffer._APPEND_PERSPECTIVE_3D));
         }
 

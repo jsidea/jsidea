@@ -68,21 +68,21 @@ module jsidea.test {
             
 
             document.addEventListener("click",(evt) => {
-                this.logChain(d);
+//                this.logChain(d);
             });
 
-            document.addEventListener("tick",(evt) => {
+            document.addEventListener("click",(evt) => {
                 ctx.clearRect(0, 0, can.width, can.height);
 
-                this.drawBoundingBox(ctx, con);
+//                this.drawBoundingBox(ctx, con);
                 this.drawBoundingBox(ctx, a);
-                this.drawBoundingBox(ctx, b);
-                this.drawBoundingBox(ctx, c);
-                this.drawBoundingBox(ctx, d);
-                this.drawBoundingBox(ctx, vie);
-                this.drawBoundingBox(ctx, can);
+//                this.drawBoundingBox(ctx, b);
+//                this.drawBoundingBox(ctx, c);
+//                this.drawBoundingBox(ctx, d);
+//                this.drawBoundingBox(ctx, vie);
+//                this.drawBoundingBox(ctx, can);
 
-                this.drawOffsetChain(ctx, d);
+//                this.drawOffsetChain(ctx, d);
             });
 
             document.addEventListener("mousemove",(evt) => {

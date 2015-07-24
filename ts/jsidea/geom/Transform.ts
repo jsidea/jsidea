@@ -45,7 +45,7 @@ module jsidea.geom {
         private _matrices: geom.Matrix3D[] = [];
         private _inverted: boolean = false;
         private _box: geom.BoxModel = new geom.BoxModel();
-        private _mode: string = "2d";
+        private _mode: string = "3d";
 
         constructor(element: HTMLElement) {
             this.update(element);
@@ -58,27 +58,100 @@ module jsidea.geom {
                 this._matrices = Transform.extractAccumulatedMatrices(chain);
                 this._box.parse(element, chain.style);
             }
+            //runs if there is now perspective involved
+            //the elements can have 3d-transformations also
             else if (this._mode == "2d") {
                 var style = window.getComputedStyle(element);
                 var globalBounds = element.getBoundingClientRect();
                 var mat = new geom.Matrix3D();
 
                 var tElement = element;
-                while(tElement && tElement != document.body.parentElement)
-                {
-                    if(tElement.style.transform != "none")
+                while (tElement && tElement != document.body.parentElement) {
+                    if (tElement.style.transform != "none")
                         mat.append(geom.Matrix3D.extract(tElement));
                     tElement = tElement.parentElement;
                 }
-                
+
                 var localBounds = this.localBoundingBox(element, mat);
                 mat.appendPositionRaw(-localBounds.x, -localBounds.y, 0);
-                
+
                 mat.appendPositionRaw(globalBounds.left, globalBounds.top, 0);
                 this._matrices = [mat];
                 this._inverted = false;
                 this._box.parse(element, style);
             }
+            else if (this._mode == "3d-lite") {
+                var style = window.getComputedStyle(element);
+                var globalBounds = element.getBoundingClientRect();
+                var mat = new geom.Matrix3D();
+
+                var tElement = element;
+                var list: { element: HTMLElement; style: CSSStyleDeclaration }[] = [];
+                while (tElement && tElement != document.body.parentElement) {
+                    var tStyle = window.getComputedStyle(tElement);
+                    list.push({ element: tElement, style: tStyle });
+                    tElement = tElement.parentElement;
+                    }
+                
+                var pers = new geom.Matrix3D();
+                for(var i = list.length - 1; i >= 0; --i)
+                {
+                    tElement = list[i].element;
+                    tStyle = list[i].style;
+                    var parentStyle = list[i + 1] ? list[i + 1].style : null;//tElement.parentElement ? window.getComputedStyle(tElement.parentElement) : null;
+                    
+                    if (tStyle.transform != "none")
+                        mat.appendCSS(tStyle.transform);
+                    if (parentStyle && parentStyle.perspective) {
+                        
+                        
+                        var perspective = math.Number.parse(parentStyle.perspective, 0);
+                        var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
+                        var perspectiveOriginX = math.Number.parseRelation(perspectiveOrigin[0], tElement.parentElement.offsetWidth, 0);
+                        var perspectiveOriginY = math.Number.parseRelation(perspectiveOrigin[1], tElement.parentElement.offsetHeight, 0);
+
+                        perspectiveOriginX -= 200;
+                        perspectiveOriginY -= 200;
+                        
+                        pers.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
+                        pers.appendPerspective(perspective);
+                        pers.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
+                        
+//                        mat.appendPositionRaw(50, 0, 0);
+                    }
+                }
+
+//                mat.invert();
+                mat.append(pers);
+//                mat.invert();
+                
+                var localBounds = this.localBoundingBox2(element, mat);
+                mat.appendPositionRaw(-localBounds.x, -localBounds.y, 0);
+                mat.appendPositionRaw(globalBounds.left, globalBounds.top, 0);
+
+                this._matrices = [mat];
+                this._inverted = false;
+                this._box.parse(element, style);
+            }
+        }
+        
+        private localBoundingBox2(element: HTMLElement, mat: geom.Matrix3D, ret = new geom.Box2D()): geom.Box2D {
+            var ptA = new geom.Point3D(0, 0);
+            var ptB = new geom.Point3D(element.offsetWidth, 0);
+            var ptC = new geom.Point3D(element.offsetWidth, element.offsetHeight);
+            var ptD = new geom.Point3D(0, element.offsetHeight);
+
+            mat.unproject(ptA, ptA);
+            mat.unproject(ptB, ptB);
+            mat.unproject(ptC, ptC);
+            mat.unproject(ptD, ptD);
+
+            var x = Math.min(ptA.x, ptB.x, ptC.x, ptD.x);
+            var y = Math.min(ptA.y, ptB.y, ptC.y, ptD.y);
+            var width = Math.max(ptA.x, ptB.x, ptC.x, ptD.x) - x;
+            var height = Math.max(ptA.y, ptB.y, ptC.y, ptD.y) - y;
+
+            return ret.setTo(x, y, width, height);
         }
 
         private localBoundingBox(element: HTMLElement, mat: geom.Matrix3D, ret = new geom.Box2D()): geom.Box2D {
@@ -87,10 +160,10 @@ module jsidea.geom {
             var ptC = new geom.Point3D(element.offsetWidth, element.offsetHeight);
             var ptD = new geom.Point3D(0, element.offsetHeight);
 
-            mat.project(ptA, ptA);
-            mat.project(ptB, ptB);
-            mat.project(ptC, ptC);
-            mat.project(ptD, ptD);
+            mat.unproject(ptA, ptA);
+            mat.unproject(ptB, ptB);
+            mat.unproject(ptC, ptC);
+            mat.unproject(ptD, ptD);
 
             var x = Math.min(ptA.x, ptB.x, ptC.x, ptD.x);
             var y = Math.min(ptA.y, ptB.y, ptC.y, ptD.y);
@@ -98,7 +171,6 @@ module jsidea.geom {
             var height = Math.max(ptA.y, ptB.y, ptC.y, ptD.y) - y;
 
             return ret.setTo(x, y, width, height);
-
         }
 
         private invert(): void {
