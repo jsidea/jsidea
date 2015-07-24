@@ -231,28 +231,23 @@ module jsidea.geom {
             var z = point.x * this.m13 + point.y * this.m23 + this.m43;
             var w = point.x * this.m14 + point.y * this.m24 + this.m44;
 
-
             var qx = x + this.m31;
             var qy = y + this.m32;
             var qz = z + this.m33;
             var qw = w + this.m34;
 
+            if (w == 0)
+                w = 0.0001;
             x /= w;
             y /= w;
             z /= w;
 
-
-
+            if (qw == 0)
+                qw = 0.0001;
             qx /= qw;
             qy /= qw;
             qz /= qw;
 
-            if (w == 0 || qw == 0) {
-                console.warn("MATRIX project has value of w == 0 found.");
-            }
-
-            //            z *= -1;
-            
             var t = -z / (qz - z);
             x += t * (qx - x);
             y += t * (qy - y);
@@ -262,30 +257,31 @@ module jsidea.geom {
 
         //from homegeneous (euclid) to cartesian FLATTENED!!!! like a projection
         public project(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
-            var w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + this.m44;
+            var z = point.z;
+            var w = point.x * this.m14 + point.y * this.m24 + z * this.m34 + this.m44;
+            var x = point.x * this.m11 + point.y * this.m21 + z * this.m31 + this.m41;
+            var y = point.x * this.m12 + point.y * this.m22 + z * this.m32 + this.m42;
             
+            if (w == 0) {
+                w = 0.0001; 
+            }
             
-            
-//            if(w < 0
-            
-            var x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41;
-            var y = point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + this.m42;
-
-
-//            if (w < 0)
-//                w *= -1;
-
             x /= w;
             y /= w;
-            
 
-            if (w == 0) {
-                console.warn("MATRIX unproject has value of w == 0 found.");
+            //lets call it "hasenfuss"
+            //look at the developer tools of firefox and chrome -> 
+            //ff and chrome do it wrong: the highlighted bounding box failed to be correct
+            if (w < 0) {
+                x -= this.m41;
+                y -= this.m42;
+                x *= 1 / w;
+                y *= 1 / w;
+                x += this.m41;
+                y += this.m42;
             }
-
-            console.log(x, y, point.z, w);
-
-            return ret.setTo(x, y, point.z, w);
+            
+            return ret.setTo(x, y, z, w);
         }
         
         //from homegeneous (euclid) to cartesian
