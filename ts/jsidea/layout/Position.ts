@@ -60,7 +60,7 @@ module jsidea.layout {
             var atOriginY: number = math.Number.parseRelation(this.from.py, sizeOffset.y, 0);
             
             //the transfrom from "from" to visual
-            var lc = geom.Transform.extract(fromElement).localToLocal(
+            var lc = geom.Transform.create(fromElement).localToLocal(
                 visual,
                 atOffsetX - atOriginX,
                 atOffsetY - atOriginY,

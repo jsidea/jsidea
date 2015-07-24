@@ -36,6 +36,13 @@ module jsidea.geom {
             this.height = value.height;
         }
 
+        public equals(value: IRectangleValue, difference: number = 0): boolean {
+            return Math.abs(this.x - value.x) <= difference
+                && Math.abs(this.y - value.y) <= difference
+                && Math.abs(this.width - value.width) <= difference
+                && Math.abs(this.height - value.height) <= difference;
+        }
+
         public contains(x: number, y: number): boolean {
             return x >= this.x
                 && x <= (this.x + this.width)
@@ -51,6 +58,14 @@ module jsidea.geom {
                 )
                 return false;
             return true;
+        }
+
+        public copyFromCientRect(rect: ClientRect): Box2D {
+            this.x = rect.left;
+            this.y = rect.top;
+            this.width = rect.width;
+            this.height = rect.height;
+            return this;
         }
 
         public intersects(r: IRectangleValue): boolean {
@@ -73,6 +88,19 @@ module jsidea.geom {
         ////                bnds.width,
         ////                bnds.height);
         //        }
+        
+        public static createBoundingBox(element: HTMLElement, ret: Box2D = new Box2D()): Box2D {
+            ret.copyFromCientRect(element.getBoundingClientRect());
+            if (system.Caps.isWebkit) {
+                ret.x += document.body.scrollLeft;
+                ret.y += document.body.scrollTop;
+            }
+            else {
+                ret.x += document.documentElement.scrollLeft;
+                ret.y += document.documentElement.scrollTop;
+            }
+            return ret;
+        }
 
         public dispose(): void {
         }

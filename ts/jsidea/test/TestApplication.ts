@@ -95,7 +95,7 @@ module jsidea.test {
 
         private drawOffsetChain(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
             while (e && e.parentElement != document.body.parentElement) {
-                var sc = geom.Transform.extractStyleChain(e);
+                var sc = layout.StyleChain.create(e).node;
                 this.drawCross(ctx, sc.offset.x, sc.offset.y);
                 e = e.parentElement;
             }
@@ -112,13 +112,13 @@ module jsidea.test {
 
             var tim = (new Date()).getTime();
 
-            var locToGlo = geom.Transform.extract(e);
+            var locToGlo = geom.Transform.create(e);
             a = locToGlo.localToGlobal(a.x, a.y);
             b = locToGlo.localToGlobal(b.x, b.y);
             c = locToGlo.localToGlobal(c.x, c.y);
             d = locToGlo.localToGlobal(d.x, d.y);
 
-            var gloToLoc = geom.Transform.extract(can);
+            var gloToLoc = geom.Transform.create(can);
             gloToLoc.toBox = "canvas";
             a = gloToLoc.globalToLocal(a.x, a.y);
             b = gloToLoc.globalToLocal(b.x, b.y);
@@ -150,7 +150,7 @@ module jsidea.test {
         }
 
         private logChain(f: HTMLElement): void {
-            var node = geom.Transform.extractStyleChain(f);
+            var node = layout.StyleChain.create(f).node;
             if (node)
                 node = node.root;
             while (node) {
@@ -215,9 +215,9 @@ interface JQuery {
 
 (function($) {
     $.fn.globalToLocal = function(x: number, y: number, z: number = 0) {
-        return jsidea.geom.Transform.extract(this[0]).globalToLocal(x, y, z);
+        return jsidea.geom.Transform.create(this[0]).globalToLocal(x, y, z);
     };
     $.fn.localToGlobal = function(x: number, y: number, z: number = 0) {
-        return jsidea.geom.Transform.extract(this[0]).localToGlobal(x, y, z);
+        return jsidea.geom.Transform.create(this[0]).localToGlobal(x, y, z);
     };
 } (jQuery));

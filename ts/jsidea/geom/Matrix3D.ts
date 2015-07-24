@@ -261,17 +261,17 @@ module jsidea.geom {
             var w = point.x * this.m14 + point.y * this.m24 + z * this.m34 + this.m44;
             var x = point.x * this.m11 + point.y * this.m21 + z * this.m31 + this.m41;
             var y = point.x * this.m12 + point.y * this.m22 + z * this.m32 + this.m42;
-            
-            if (w == 0) {
-                w = 0.0001; 
-            }
-            
+
+            if (w == 0)
+                w = 0.0001;
+
             x /= w;
             y /= w;
 
             //lets call it "hasenfuss"
             //look at the developer tools of firefox and chrome -> 
             //ff and chrome do it wrong: the highlighted bounding box failed to be correct
+            //getBoundingClientRect
             if (w < 0) {
                 x -= this.m41;
                 y -= this.m42;
@@ -280,7 +280,7 @@ module jsidea.geom {
                 x += this.m41;
                 y += this.m42;
             }
-            
+
             return ret.setTo(x, y, z, w);
         }
         
@@ -290,6 +290,9 @@ module jsidea.geom {
             var y = point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + this.m42;
             var z = point.x * this.m13 + point.y * this.m23 + point.z * this.m33 + this.m43;
             var w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + this.m44;
+
+            if (w == 0)
+                w = 0.0001;
 
             x /= w;
             y /= w;
@@ -879,6 +882,25 @@ module jsidea.geom {
         //            var ac = c.sub(a);
         //            return ac.cross(ab);
         //        }
+        
+        public bounds(x:number, y:number, width: number, height: number, ret = new geom.Box2D()): geom.Box2D {
+            var ptA = new geom.Point3D(x, y);
+            var ptB = new geom.Point3D(x + width, y);
+            var ptC = new geom.Point3D(x + width, y + height);
+            var ptD = new geom.Point3D(x, y + height);
+
+            this.project(ptA, ptA);
+            this.project(ptB, ptB);
+            this.project(ptC, ptC);
+            this.project(ptD, ptD);
+
+            var x = Math.min(ptA.x, ptB.x, ptC.x, ptD.x);
+            var y = Math.min(ptA.y, ptB.y, ptC.y, ptD.y);
+            var width = Math.max(ptA.x, ptB.x, ptC.x, ptD.x) - x;
+            var height = Math.max(ptA.y, ptB.y, ptC.y, ptD.y) - y;
+
+            return ret.setTo(x, y, width, height);
+        }
 
         public qualifiedClassName(): string {
             return "jsidea.geom.Matrix3D";
