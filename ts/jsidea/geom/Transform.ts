@@ -13,8 +13,8 @@ module jsidea.geom {
         public element: HTMLElement;
         public toBox: string = layout.BoxModel.BORDER;
         public fromBox: string = layout.BoxModel.BORDER;
-        public sceneTransform: geom.Matrix3D = new geom.Matrix3D();
-        public inverseSceneTransform: geom.Matrix3D = new geom.Matrix3D();
+        public sceneTransform: geom.Matrix3D[] = [];//new geom.Matrix3D();
+        public inverseSceneTransform: geom.Matrix3D[] = [];//new geom.Matrix3D();
         public box: layout.BoxModel = new layout.BoxModel();
 
         constructor(element: HTMLElement = null, mode: string = Transform.MODE_AUTO) {
@@ -31,6 +31,9 @@ module jsidea.geom {
                 return this.clear();
 
             this.element = element;
+            
+            //FORCE FOR TESTING
+            mode = Transform.MODE_3D;
 
             var globalBounds: geom.Box2D = null;
             if (mode == Transform.MODE_AUTO) {
@@ -50,7 +53,7 @@ module jsidea.geom {
 
             if (mode == Transform.MODE_3D) {
                 var styles = layout.StyleChain.create(element);
-                this.sceneTransform = Transform.extractAccumulatedMatrix(styles.node, this.sceneTransform);
+                this.sceneTransform = Transform.extractAccumulatedMatrices(styles.node);
                 this.box.update(element, styles.node.style);
             }
             //runs if there is no perspective involved
@@ -59,7 +62,7 @@ module jsidea.geom {
                 var style = window.getComputedStyle(element);
                 globalBounds = globalBounds ? globalBounds : geom.Box2D.createBoundingBox(element);
 
-                var matrix = this.sceneTransform.identity();
+                var matrix = new geom.Matrix3D();
 
                 //skip the transformation part for non accumulated transformed
                 //elements.
@@ -77,15 +80,25 @@ module jsidea.geom {
 
                 matrix.appendPositionRaw(globalBounds.x, globalBounds.y, 0);
 
+                this.sceneTransform = [matrix];
+
                 this.box.update(element, style);
             }
 
-            this.inverseSceneTransform.copyFrom(this.sceneTransform).invert();
+            //create inverse
+            this.inverseSceneTransform = this.sceneTransform.slice(0, this.sceneTransform.length);
+            for (var i = 0; i < this.inverseSceneTransform.length; ++i) {
+                var cl = this.inverseSceneTransform[i].clone();
+                cl.invert();
+                this.inverseSceneTransform[i] = cl;
+            }
+            this.inverseSceneTransform.reverse();
         }
 
         public clear(): void {
             this.element = null;
-            this.sceneTransform.identity();
+            this.sceneTransform = [];
+            this.inverseSceneTransform = [];
             this.box.clear();
         }
 
@@ -121,7 +134,8 @@ module jsidea.geom {
             this.box.point(pt, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);
             
             //project from parent to child
-            pt = this.inverseSceneTransform.unproject(pt, pt);
+            for (var i = 0; i < this.inverseSceneTransform.length; ++i)
+                pt = this.inverseSceneTransform[i].unproject(pt, pt);
 
             //apply box model transformations
             this.box.point(pt, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
@@ -150,7 +164,8 @@ module jsidea.geom {
             this.box.point(ret, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);            
             
             //unproject from child to parent
-            ret = this.sceneTransform.project(ret, ret);
+            for (var i = 0; i < this.sceneTransform.length; ++i)
+                ret = this.sceneTransform[i].project(ret, ret);
             
             //apply to-box model transformations
             this.box.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
@@ -265,18 +280,34 @@ module jsidea.geom {
             return matrix;
         }
 
-        //collect matrices up to root
-        private static extractAccumulatedMatrix(node: layout.INode, ret: geom.Matrix3D = new geom.Matrix3D()): geom.Matrix3D {
-            ret.identity();
+        private static extractAccumulatedMatrices(node: layout.INode): geom.Matrix3D[] {
+            //collect matrices up to root
+            //accumulate if possible
+            var matrices: geom.Matrix3D[] = [];
+            var last: geom.Matrix3D = null;
             while (node.parent) {
+                
                 //if last is not null, last becomes the base for the transformation
                 //its like appending the current node.transform (parent-transform) to the last transform (child-transform)
-                this.extractMatrix(node, ret);
-                if (node && node.isSticked)
+                var m: geom.Matrix3D = this.extractMatrix(node, last);
+                //                if (node.parent && this.isAccumulatable(node)) {
+                if (node.parent && node.isAccumulatable) {
+                    last = m;
+                }
+                else {
+                    last = null;
+                    matrices.push(m);
+                }
+
+                if (node && node.isSticked) {
                     break;
+                }
+
                 node = node.parent;
             }
-            return ret;
+            if (last)
+                matrices.push(last);
+            return matrices;
         }
 
         public static qualifiedClassName: string = "jsidea.geom.Transform";

@@ -29,6 +29,7 @@ module jsidea.layout {
         perspective: number;
         isPreserved3d: boolean;
         isBorderBox: boolean;
+        isAccumulatable: boolean;
     }
 
     export class StyleChain {
@@ -37,22 +38,20 @@ module jsidea.layout {
 
         constructor() {
         }
-        
+
         public static create(element: HTMLElement): StyleChain {
             var chain = new StyleChain();
             chain.update(element);
             return chain;
         }
-        
-        public update(element:HTMLElement):StyleChain
-        {
-            if(!element)
-                return this.clear();    
-            this.node = StyleChain.extractStyleChain(element);    
-        }       
-        
-        public clear():StyleChain
-        {
+
+        public update(element: HTMLElement): StyleChain {
+            if (!element)
+                return this.clear();
+            this.node = StyleChain.extractStyleChain(element);
+        }
+
+        public clear(): StyleChain {
             this.node = null;
             return this;
         }
@@ -192,6 +191,7 @@ module jsidea.layout {
                     parentScroll: null,
                     position: null,
                     child: null,
+                    isAccumulatable: true,
                     perspective: perspective,
                     isPerspectiveChild: isPerspectiveChild,
                     offset: null,
@@ -250,6 +250,7 @@ module jsidea.layout {
                 node.isStickedChild = this.getIsStickedChild(node);
                 node.offsetParent = this.getOffsetParent(node);
                 node.parentScroll = this.getParentScroll(node);
+                node.isAccumulatable = this.getIsAccumulatable(node);
                 node.scrollOffset = this.getScrollOffset(node);
                 node.offset = this.getOffset(node);
                 node.position = this.getPosition(node);
@@ -469,6 +470,34 @@ module jsidea.layout {
             //Why is chrome does not keep care of css-transform on static elements
             //when it comes to the right offsetParent and the offsetTop/offsetLeft values
             console.warn("The given offsetParent is maybe wrong.");
+        }
+
+        private static getIsAccumulatable(node: INode): boolean {
+            //in any case, if an element has only 2d-transforms or its the document-root item
+            //the transform can be accumulated to the parent transform
+            if (node.isBody || node.style.transform.indexOf("matrix3d") < 0)
+                return true;
+
+            var parent = node.parent;
+            if (parent.style.transformStyle == "flat")
+                return false;
+
+            //if the parent is preserve-3d than it normally should be accumlatable, but ...
+            var preserve3d = parent.style.transformStyle == "preserve-3d";
+            
+            //tricky stuff: only firefox does reflect/compute the "correct" transformStyle value.
+            //Firefox does NOT reflect the "grouping"-overrides and this is how its concepted.
+            //But what about the "opacity"-property. Opacity does not override the preserve-3d (not always, webkit does under some conditions).
+            //http://dev.w3.org/csswg/css-transforms/#grouping-property-values
+            if (preserve3d && parent.isScrollable)
+                preserve3d = false;
+            
+            //there is this case where webkit ignores transform-style: flat. 
+            //So when the elements parent has preserve-3d and the element itself has no transform set.
+            if (!preserve3d && system.Caps.isWebkit && !parent.isTransformed && !parent.isBody)
+                preserve3d = this.getIsAccumulatable(parent.parent);
+
+            return preserve3d;
         }
     }
 }

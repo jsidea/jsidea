@@ -179,7 +179,7 @@ canvas {
 	transition: all 1s;
 	pointer-events: none;
 	
-	transform: rotate(45deg);
+	/* transform: rotate(45deg); */
 	/* box-sizing: border-box; */
 }
 
@@ -195,6 +195,7 @@ canvas {
 	/* left: 100px;
 	top: 100px; */
 	border: 55px solid #FF00FF;
+	/* perspective: 300px; */
 	/* perspective: 400px; */
 	/* transform-style: preserve-3d; */
 	/* transform: translateX(0); */
@@ -213,6 +214,8 @@ canvas {
 	/* overflow: scroll; */
 	/* box-sizing: border-box; */
 	/* box-sizing: border-box; */
+	/* perspective: 400px; */
+	/* transform-style: preserve-3d; */
 }
 
 #content {
@@ -251,9 +254,9 @@ canvas {
 	
 	left: 100px;
 	border: 20px solid #FFF000;
-	perspective-origin: 128px 128px;
+	/* perspective-origin: 128px 128px;
 	transform-style: preserve-3d;
-	perspective: 600px;
+	perspective: 600px; */
 }
 
 #a-cont {
@@ -281,12 +284,12 @@ canvas {
 	margin: 20px;
 	padding: 100px;
 	/* box-sizing: border-box; */
-	transform-origin: 256px 0px;
-	transform: translateZ(0px) rotateY(-30deg)  rotate(45deg);
+	transform-origin: 0px 0px;
+	transform: rotateY(-45deg)  rotate(45deg);
 	
 	/* perspective: 600px; */
-	perspective-origin: 128px 128px;
-	transform-style: preserve-3d;
+	/* perspective-origin: 128px 128px;
+	transform-style: preserve-3d; */
 	/* transform: rotate(25deg); */
 }
 
@@ -316,11 +319,11 @@ canvas {
 	perspective: 300px; */
 	/* transform: translateZ(-20px) rotateY(15deg) rotate(-20deg); */
 	transform-origin: 0px 0px;
-	transform: rotate(10deg);
+	transform: rotate(45deg);
 	
 	/* perspective: 300px; */
-	perspective-origin: 64px 128px;
-	transform-style: flat;
+	/* perspective-origin: 64px 128px;
+	transform-style: flat; */
 	/* perspective-origin: 256px 64px; */
 	/* transform-style: preserve-3d; */
 }
@@ -335,19 +338,19 @@ canvas {
 	height: 128px;
 	cursor: pointer;
 	
-	transform: translateZ(0px) rotateY(-30deg)  rotate(45deg);
+	transform: rotateY(-30deg)  rotate(45deg);
 	
-	
-	overflow: scroll;
+	transform-origin: 0px 0px;
+	/* overflow: scroll; */
 	/* transform: translateX(0); */
 	/* transform: translateX(0); */
 	/* transform: translateX(100px); */
 	/* transform: translateZ(-800px) rotate(70deg); */
 	/* box-sizing: border-box; */
 	
-	transform-style: preserve-3d;
+	/* transform-style: preserve-3d;
 	transform-origin: 0px 0px;
-	transform: rotate(25deg);
+	transform: rotate(25deg); */
 }
 
 #d-cont {
