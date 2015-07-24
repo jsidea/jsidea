@@ -141,10 +141,10 @@ module jsidea.geom {
             var ptC = new geom.Point3D(element.offsetWidth, element.offsetHeight);
             var ptD = new geom.Point3D(0, element.offsetHeight);
 
-            mat.unproject(ptA, ptA);
-            mat.unproject(ptB, ptB);
-            mat.unproject(ptC, ptC);
-            mat.unproject(ptD, ptD);
+            mat.project(ptA, ptA);
+            mat.project(ptB, ptB);
+            mat.project(ptC, ptC);
+            mat.project(ptD, ptD);
 
             var x = Math.min(ptA.x, ptB.x, ptC.x, ptD.x);
             var y = Math.min(ptA.y, ptB.y, ptC.y, ptD.y);
@@ -160,10 +160,10 @@ module jsidea.geom {
             var ptC = new geom.Point3D(element.offsetWidth, element.offsetHeight);
             var ptD = new geom.Point3D(0, element.offsetHeight);
 
-            mat.unproject(ptA, ptA);
-            mat.unproject(ptB, ptB);
-            mat.unproject(ptC, ptC);
-            mat.unproject(ptD, ptD);
+            mat.project(ptA, ptA);
+            mat.project(ptB, ptB);
+            mat.project(ptC, ptC);
+            mat.project(ptD, ptD);
 
             var x = Math.min(ptA.x, ptB.x, ptC.x, ptD.x);
             var y = Math.min(ptA.y, ptB.y, ptC.y, ptD.y);
@@ -214,7 +214,7 @@ module jsidea.geom {
             var pt = new geom.Point3D(x, y, z);
             var l = nodes.length;
             for (var i = 0; i < l; ++i)
-                pt = nodes[i].project(pt, pt);
+                pt = nodes[i].unproject(pt, pt);
 
             //apply box model transformations
             this._box.point(pt, toBox, "border");
@@ -244,7 +244,7 @@ module jsidea.geom {
             var matrices: geom.Matrix3D[] = this._matrices;
             var l = matrices.length;
             for (var i = 0; i < l; ++i)
-                pt = matrices[i].unproject(pt, pt);
+                pt = matrices[i].project(pt, pt);
             
             //apply box model transformations
             this._box.point(pt, toBox, "border");

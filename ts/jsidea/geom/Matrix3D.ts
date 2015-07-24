@@ -221,15 +221,16 @@ module jsidea.geom {
         }
 
         public invertProject(point: IPoint2DValue, ret: Point3D = new Point3D()): Point3D {
-            return Buffer._INVERT_PROJECT_3D.copyFrom(this).invert().project(point, ret);
+            return Buffer._INVERT_PROJECT_3D.copyFrom(this).invert().unproject(point, ret);
         }
         
         //based on http://code.metager.de/source/xref/mozilla/B2G/gecko/gfx/thebes/gfx3DMatrix.cpp#651
-        public project(point: IPoint2DValue, ret: Point3D = new Point3D()): Point3D {
+        public unproject(point: IPoint2DValue, ret: Point3D = new Point3D()): Point3D {
             var x = point.x * this.m11 + point.y * this.m21 + this.m41;
             var y = point.x * this.m12 + point.y * this.m22 + this.m42;
             var z = point.x * this.m13 + point.y * this.m23 + this.m43;
             var w = point.x * this.m14 + point.y * this.m24 + this.m44;
+
 
             var qx = x + this.m31;
             var qy = y + this.m32;
@@ -240,10 +241,18 @@ module jsidea.geom {
             y /= w;
             z /= w;
 
+
+
             qx /= qw;
             qy /= qw;
             qz /= qw;
 
+            if (w == 0 || qw == 0) {
+                console.warn("MATRIX project has value of w == 0 found.");
+            }
+
+            //            z *= -1;
+            
             var t = -z / (qz - z);
             x += t * (qx - x);
             y += t * (qy - y);
@@ -252,13 +261,29 @@ module jsidea.geom {
         }
 
         //from homegeneous (euclid) to cartesian FLATTENED!!!! like a projection
-        public unproject(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
+        public project(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
+            var w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + this.m44;
+            
+            
+            
+//            if(w < 0
+            
             var x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41;
             var y = point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + this.m42;
-            var w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + this.m44;
+
+
+//            if (w < 0)
+//                w *= -1;
 
             x /= w;
             y /= w;
+            
+
+            if (w == 0) {
+                console.warn("MATRIX unproject has value of w == 0 found.");
+            }
+
+            console.log(x, y, point.z, w);
 
             return ret.setTo(x, y, point.z, w);
         }
@@ -624,8 +649,8 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendPerspective(perspective: number): Matrix3D {
-            if(!perspective)
-            return this;
+            if (!perspective)
+                return this;
             return this.append(Matrix3D.makePerspective(perspective, Buffer._APPEND_PERSPECTIVE_3D));
         }
 
@@ -718,7 +743,7 @@ module jsidea.geom {
             this.scalar(1 / det);
             return this;
         }
-        
+
         public getCSS2D(fractionalDigits: number = 6): string {
             return "matrix("
                 + this.m11.toFixed(fractionalDigits) + ","
@@ -1021,7 +1046,7 @@ module jsidea.geom {
 
             return ret;
         }
-        
+
         public static extract(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
             if (visual.ownerDocument)
                 return ret.setCSS(window.getComputedStyle(visual).transform);

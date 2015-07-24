@@ -245,7 +245,8 @@ canvas {
 	/* perspective: 100px; */
 
 	/* box-sizing: border-box; */
-	perspective: 104px;
+	/* perspective: 200px; */
+	perspective: 100px;
 	
 	perspective-origin: 256px 128px;
 	transform-style: preserve-3d;
@@ -277,7 +278,7 @@ canvas {
 	padding: 60px;
 	/* box-sizing: border-box; */
 	transform-origin: 0px 0px;
-	transform: translateZ(-20px) rotateY(-30deg)  rotate(45deg);
+	transform: translateZ(0px) rotateY(-30deg)  rotate(45deg);
 	/* transform: rotate(25deg); */
 }
 

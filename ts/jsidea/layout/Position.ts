@@ -80,7 +80,7 @@ module jsidea.layout {
             }
 
             var m = geom.Matrix3D.extract(visual);
-            var pt = m.project(lc);
+            var pt = m.unproject(lc);
 
             if (this.useTransform) {
                 m.m41 = pt.x;
