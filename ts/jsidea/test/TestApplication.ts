@@ -1,8 +1,5 @@
 module jsidea.test {
     export class TestApplication extends jsidea.core.Application {
-
-        private static isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
-
         constructor() {
             super();
         }
@@ -20,11 +17,9 @@ module jsidea.test {
             document.body.className = "test-3";
 
             document.onkeyup = (e) => {
-
-                //                console.log("KEY UP");
+                //console.log("KEY UP");
                 if (e.keyCode != 37)
                     return;
-
                 te++;
                 if (te > 3)
                     te = 0;
@@ -51,19 +46,14 @@ module jsidea.test {
             c.appendChild(d);
             con.appendChild(a);
             document.body.appendChild(can);
-            
-            //            var e = document.createElement("div");
-            //            e.id = "e-cont";
-            //            d.appendChild(e);
 
             var pos = new layout.Position();
             pos.to.x = "100%";
             pos.to.y = "100%";
-            pos.toBox = geom.BoxModel.BORDER;
-            pos.useTransform = false;
+            pos.toBox = layout.BoxModel.BORDER;
+            pos.useTransform = true;
 
             document.addEventListener("click",(evt) => {
-//                this.logChain(d);
             });
 
             document.addEventListener("click",(evt) => {
@@ -77,7 +67,7 @@ module jsidea.test {
                 this.drawBoundingBox(ctx, vie);
                 this.drawBoundingBox(ctx, can);
 
-//                this.drawOffsetChain(ctx, d);
+                //                this.drawOffsetChain(ctx, d);
             });
 
             document.addEventListener("mousemove",(evt) => {
@@ -107,18 +97,46 @@ module jsidea.test {
 
             var tim = (new Date()).getTime();
 
-            var locToGlo = geom.Transform.create(e);
-            a = locToGlo.localToGlobal(a.x, a.y);
-            b = locToGlo.localToGlobal(b.x, b.y);
-            c = locToGlo.localToGlobal(c.x, c.y);
-            d = locToGlo.localToGlobal(d.x, d.y);
+            //            var locToGlo = geom.Transform.create(e);
+            //            locToGlo.fromBox = layout.BoxModel.BORDER;
+            //            locToGlo.toBox = layout.BoxModel.CANVAS;
+            //            a = locToGlo.localToLocal(can, a.x, a.y);
+            //            b = locToGlo.localToLocal(can, b.x, b.y);
+            //            c = locToGlo.localToLocal(can, c.x, c.y);
+            //            d = locToGlo.localToLocal(can, d.x, d.y);
+            
+            var from = geom.Transform.create(e);
+            from.fromBox = layout.BoxModel.BORDER;
 
-            var gloToLoc = geom.Transform.create(can);
-            gloToLoc.toBox = "canvas";
-            a = gloToLoc.globalToLocal(a.x, a.y);
-            b = gloToLoc.globalToLocal(b.x, b.y);
-            c = gloToLoc.globalToLocal(c.x, c.y);
-            d = gloToLoc.globalToLocal(d.x, d.y);
+            var to = geom.Transform.create(can);
+            to.toBox = layout.BoxModel.CANVAS;
+
+            a = from.localToLocal(to, a.x, a.y);
+            b = from.localToLocal(to, b.x, b.y);
+            c = from.localToLocal(to, c.x, c.y);
+            d = from.localToLocal(to, d.x, d.y);           
+            
+
+            //            var locToGlo = geom.Transform.create(e);
+            //            a = locToGlo.project(a.x, a.y);
+            //            b = locToGlo.project(b.x, b.y);
+            //            c = locToGlo.project(c.x, c.y);
+            //            d = locToGlo.project(d.x, d.y);
+            //
+            //            var gloToLoc = geom.Transform.create(can);
+            //            gloToLoc.toBox = "canvas";
+            //            a = gloToLoc.unproject(a.x, a.y);
+            //            b = gloToLoc.unproject(b.x, b.y);
+            //            c = gloToLoc.unproject(c.x, c.y);
+            //            d = gloToLoc.unproject(d.x, d.y);
+            
+            
+            
+            
+            //            a = gloToLoc.unproject(a.x, a.y);
+            //            b = gloToLoc.unproject(b.x, b.y);
+            //            c = gloToLoc.unproject(c.x, c.y);
+            //            d = gloToLoc.unproject(d.x, d.y);
 
 //            console.log("TIME TO CALC 4 POINTS",(new Date()).getTime() - tim);
 

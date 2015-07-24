@@ -1,7 +1,3 @@
-//interface HTMLElement {
-//    _node: jsidea.layout.INode;
-//}
-
 module jsidea.layout {
     export interface INode {
         style: CSSStyleDeclaration;
@@ -29,25 +25,38 @@ module jsidea.layout {
         isStickedChild: boolean;
         isTransformed: boolean;
         isTransformedChild: boolean;
-        hasPerspective: boolean;
+        isPerspectiveChild: boolean;
         perspective: number;
         isPreserved3d: boolean;
         isBorderBox: boolean;
-        isAccumulatable: boolean;
     }
 
     export class StyleChain {
 
         public node: INode = null;
 
-        constructor(public element: HTMLElement) {
-            this.node = StyleChain.extractStyleChain(element);
-        }
-
-        public static create(element: HTMLElement): StyleChain {
-            return new StyleChain(element);
+        constructor() {
         }
         
+        public static create(element: HTMLElement): StyleChain {
+            var chain = new StyleChain();
+            chain.update(element);
+            return chain;
+        }
+        
+        public update(element:HTMLElement):StyleChain
+        {
+            if(!element)
+                return this.clear();    
+            this.node = StyleChain.extractStyleChain(element);    
+        }       
+        
+        public clear():StyleChain
+        {
+            this.node = null;
+            return this;
+        }
+
         public static qualifiedClassName(): string {
             return "jsidea.layout.StyleChain";
         }
@@ -82,8 +91,7 @@ module jsidea.layout {
             var preserved3d = false;
             var l = elements.length;
             var isFixed = false;
-            var isInlined = false;
-            var hasPerspective = false;
+            var isPerspectiveChild = false;
             for (var i = l - 1; i >= 0; --i) {
                 element = elements[i];
 
@@ -99,8 +107,6 @@ module jsidea.layout {
                         style = window.getComputedStyle(element);
                         console.warn("FIXED: Fixed to absolute. Fixed in a 3d-context becomes absolute positioned.");
                     }
-                    
-                    //                        console.log(isInlined);
                     if (style.display == "inline" && !(style.perspective == "none" && style.transform == "none")) {
                         //make the element a containing-block
                         element.style.perspective = "none";
@@ -137,7 +143,6 @@ module jsidea.layout {
                         style = window.getComputedStyle(element);
                         console.warn("FIXED: Preserve-3d without transform. Transform set to \"translateX(0)\".");
                     }
-
                     if (preserved3d && style.position == "fixed") {
                         //make the element a containing-block
                         element.style.position = "absolute";
@@ -145,19 +150,6 @@ module jsidea.layout {
                         //refresh style
                         style = window.getComputedStyle(element);
                         console.warn("FIXED: Fixed position on element in 3d-context. Set from fixed to absolute.");
-                    }
-                    
-                    //maybe not the hard way, just check an set the perspective to none (-> 0 here)
-                    if (style.transform != "none" && style.overflow != "visible" && style.perspective != "none") {
-                        //webkit ignores perspective set on scroll elements
-                        //make the element a containing-block
-                        //                        element.style.perspective = "none";
-                        //                        
-                        //                        //refresh style
-                        //                        style = window.getComputedStyle(element);
-                        //                        console.warn("FIXED: Disable perspective on overflow elements.");
-                        
-                        perspective = 0;
                     }
                     if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
                         //make static relative
@@ -182,6 +174,10 @@ module jsidea.layout {
                         console.warn("FIXED: Fixed to absolute. Fixed in a fixed container");
                     }
                 }
+                
+                //webkit ignores perspective set on scroll elements
+                if (system.Caps.isWebkit && style.transform != "none" && style.overflow != "visible" && style.perspective != "none")
+                    perspective = 0;
 
                 //create the node-element
                 //and set so many values as possible
@@ -197,10 +193,9 @@ module jsidea.layout {
                     position: null,
                     child: null,
                     perspective: perspective,
-                    hasPerspective: hasPerspective,
+                    isPerspectiveChild: isPerspectiveChild,
                     offset: null,
                     scrollOffset: null,
-                    isAccumulatable: true,
                     isFixed: style.position == "fixed",
                     isRelative: style.position == "relative",
                     isAbsolute: style.position == "absolute",
@@ -228,16 +223,9 @@ module jsidea.layout {
 
                 if (!preserved3d && node.isPreserved3d)
                     preserved3d = true;
-                
-                if(!hasPerspective && node.perspective > 0)
-                    hasPerspective = true;
-                
-                //                if(!isInlined && node.style.display == "inline")
-                //                    isInlined = true;    
 
-                //for better handling
-                //TODO: garbage collection
-//                element._node = node;
+                if (!isPerspectiveChild && node.perspective > 0)
+                    isPerspectiveChild = true;
 
                 //the lookup should be sorted from root to child
                 //NOT vice versa
@@ -262,7 +250,6 @@ module jsidea.layout {
                 node.isStickedChild = this.getIsStickedChild(node);
                 node.offsetParent = this.getOffsetParent(node);
                 node.parentScroll = this.getParentScroll(node);
-                node.isAccumulatable = this.getIsAccumulatable(node);
                 node.scrollOffset = this.getScrollOffset(node);
                 node.offset = this.getOffset(node);
                 node.position = this.getPosition(node);
@@ -271,36 +258,6 @@ module jsidea.layout {
             }
 
             return leafNode;
-        }
-
-        private static getIsAccumulatable(node: INode): boolean {
-            return true;
-            
-            //in any case, if an element has only 2d-transforms or its the document-root item
-            //the transform can be accumulated to the parent transform
-            if (node.isBody || node.style.transform.indexOf("matrix3d") < 0)
-                return true;
-
-            var parent = node.parent;
-            if (parent.style.transformStyle == "flat")
-                return false;
-
-            //if the parent is preserve-3d than it normally should be accumlatable, but ...
-            var preserve3d = parent.style.transformStyle == "preserve-3d";
-            
-            //tricky stuff: only firefox does reflect/compute the "correct" transformStyle value.
-            //Firefox does NOT reflect the "grouping"-overrides and this is how its concepted.
-            //But what about the "opacity"-property. Opacity does not override the preserve-3d (not always, webkit does under some conditions).
-            //http://dev.w3.org/csswg/css-transforms/#grouping-property-values
-            if (preserve3d && parent.isScrollable)
-                preserve3d = false;
-            
-            //there is this case where webkit ignores transform-style: flat. 
-            //So when the elements parent has preserve-3d and the element itself has no transform set.
-            if (!preserve3d && system.Caps.isWebkit && !parent.isTransformed && !parent.isBody)
-                preserve3d = this.getIsAccumulatable(parent.parent);
-
-            return preserve3d;
         }
 
         //returns the local position the direct parent
@@ -314,7 +271,6 @@ module jsidea.layout {
         private static getOffsetParent(node: INode): INode {
             if (!node || node.isBody || node.isSticked)
                 return null;
-
             while (node = node.parent) {
                 if (!node.isStatic || node.isTransformed || node.isPreserved3d)
                     return node;
@@ -514,6 +470,5 @@ module jsidea.layout {
             //when it comes to the right offsetParent and the offsetTop/offsetLeft values
             console.warn("The given offsetParent is maybe wrong.");
         }
-
     }
 }

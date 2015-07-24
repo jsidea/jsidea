@@ -22,7 +22,7 @@ module jsidea.geom {
     * 
     */
     export class Matrix2D implements IMatrix2DValue {
-        
+
         public m11: number = 1;
         public m12: number = 0;
         public m21: number = 0;
@@ -30,9 +30,17 @@ module jsidea.geom {
         public m31: number = 0;
         public m32: number = 0;
 
-        constructor(data: number[] = null) {
-            if (data)
-                this.setData(data);
+        constructor() {
+        }
+        
+        public static create(element: HTMLElement = null, ret = new Matrix2D()): Matrix2D {
+            if (element && element.ownerDocument)
+                return ret.setCSS(window.getComputedStyle(element).transform);
+            return ret.identity();
+        }
+        
+        public static parse(cssStr: string, ret = new Matrix2D()): Matrix2D {
+            return ret.setCSS(cssStr);
         }
 
         public getData(): number[] {
@@ -531,45 +539,12 @@ module jsidea.geom {
             return this;
         }
 
-        public qualifiedClassName(): string {
-            return "jsidea.geom.Matrix2D";
-        }
-
-        public toString(fractionDigits: number = 3): string {
-            return "[Matrix2D \n"
-                + this.toStringTable(fractionDigits)
-                + "\n]";
-        }
-
-        public toStringTable(fractionDigits: number = 3): string {
-            return "m11=" + this.m11.toFixed(fractionDigits)
-                + "\tm21=" + this.m21.toFixed(fractionDigits)
-                + "\tm31=" + this.m31.toFixed(fractionDigits)
-                + "\nm12=" + this.m12.toFixed(fractionDigits)
-                + "\tm22=" + this.m22.toFixed(fractionDigits)
-                + "\tm32=" + this.m32.toFixed(fractionDigits)
-                + "\nm13=" + (0).toFixed(fractionDigits)
-                + "\tm23=" + (0).toFixed(fractionDigits)
-                + "\tm33=" + (1).toFixed(fractionDigits);
-        }
-
         public getMatrix3D(ret: Matrix3D = new Matrix3D()): Matrix3D {
             return ret.setMatrix2D(this);
         }
 
         public setMatrix3D(target: Matrix3D): Matrix2D {
             return target.getMatrix2D(this);
-        }
-
-        public static extract(visual: HTMLElement, ret = new Matrix2D()): Matrix2D {
-            if (visual.ownerDocument)
-                return ret.setCSS(window.getComputedStyle(visual).transform);
-            ret.identity();
-            return ret;
-        }
-
-        public static parse(cssStr: string, ret = new Matrix2D()): Matrix2D {
-            return ret.setCSS(cssStr);
         }
 
         public static multiply(a: IMatrix2DValue, b: IMatrix2DValue, ret: Matrix2D = new Matrix2D()): Matrix2D {
@@ -582,5 +557,24 @@ module jsidea.geom {
             data[5] = b.m31 * a.m12 + b.m32 * a.m22 + a.m32;
             return ret.setData(data);
         }
+        
+        public toStringTable(fractionDigits: number = 3): string {
+            return "m11=" + this.m11.toFixed(fractionDigits)
+                + "\tm21=" + this.m21.toFixed(fractionDigits)
+                + "\tm31=" + this.m31.toFixed(fractionDigits)
+                + "\nm12=" + this.m12.toFixed(fractionDigits)
+                + "\tm22=" + this.m22.toFixed(fractionDigits)
+                + "\tm32=" + this.m32.toFixed(fractionDigits)
+                + "\nm13=" + (0).toFixed(fractionDigits)
+                + "\tm23=" + (0).toFixed(fractionDigits)
+                + "\tm33=" + (1).toFixed(fractionDigits);
+        }
+        
+        public static qualifiedClassName: string = "jsidea.geom.Matrix2D";
+        public toString(fractionDigits: number = 3): string {
+            return "[" + Matrix2D.qualifiedClassName + " \n"
+                + this.toStringTable(fractionDigits)
+                + "\n]";
+        }        
     }
 }

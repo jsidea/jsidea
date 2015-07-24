@@ -60,7 +60,7 @@ module jsidea.geom {
             return true;
         }
 
-        public copyFromCientRect(rect: ClientRect): Box2D {
+        public copyFromClientRect(rect: ClientRect): Box2D {
             this.x = rect.left;
             this.y = rect.top;
             this.width = rect.width;
@@ -90,7 +90,7 @@ module jsidea.geom {
         //        }
         
         public static createBoundingBox(element: HTMLElement, ret: Box2D = new Box2D()): Box2D {
-            ret.copyFromCientRect(element.getBoundingClientRect());
+            ret.copyFromClientRect(element.getBoundingClientRect());
             if (system.Caps.isWebkit) {
                 ret.x += document.body.scrollLeft;
                 ret.y += document.body.scrollTop;
@@ -105,12 +105,9 @@ module jsidea.geom {
         public dispose(): void {
         }
 
-        public qualifiedClassName(): string {
-            return "jsidea.geom.Box2D";
-        }
-
+        public static qualifiedClassName: string = "jsidea.geom.Box2D";
         public toString(): string {
-            return "[" + this.qualifiedClassName()
+            return "[" + Box2D.qualifiedClassName
                 + " x=" + this.x
                 + " y=" + this.y
                 + " width=" + this.width

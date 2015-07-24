@@ -53,9 +53,16 @@ module jsidea.geom {
         public m43: number = 0;
         public m44: number = 1;
 
-        constructor(data: number[] = null) {
-            if (data)
-                this.setData(data);
+        constructor() {
+//            if (data)
+//                this.setData(data);
+        }
+        
+        public static create(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
+            if (visual.ownerDocument)
+                return ret.setCSS(window.getComputedStyle(visual).transform);
+            ret.identity();
+            return ret;
         }
 
         public getData(): number[] {
@@ -220,7 +227,7 @@ module jsidea.geom {
             return this.deltaTransform(Buffer._DELTA_TRANSFORM_RAW_3D.setTo(x, y, z), ret);
         }
 
-        public invertProject(point: IPoint2DValue, ret: Point3D = new Point3D()): Point3D {
+        public unprojectInverted(point: IPoint2DValue, ret: Point3D = new Point3D()): Point3D {
             return Buffer._INVERT_PROJECT_3D.copyFrom(this).invert().unproject(point, ret);
         }
         
@@ -253,6 +260,10 @@ module jsidea.geom {
             y += t * (qy - y);
 
             return ret.setTo(x, y, z, w);
+        }
+
+        public projectInverted(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
+            return Buffer._INVERT_PROJECT_3D.copyFrom(this).invert().project(point, ret);
         }
 
         //from homegeneous (euclid) to cartesian FLATTENED!!!! like a projection
@@ -883,7 +894,7 @@ module jsidea.geom {
         //            return ac.cross(ab);
         //        }
         
-        public bounds(x:number, y:number, width: number, height: number, ret = new geom.Box2D()): geom.Box2D {
+        public bounds(x: number, y: number, width: number, height: number, ret = new geom.Box2D()): geom.Box2D {
             var ptA = new geom.Point3D(x, y);
             var ptB = new geom.Point3D(x + width, y);
             var ptC = new geom.Point3D(x + width, y + height);
@@ -900,16 +911,6 @@ module jsidea.geom {
             var height = Math.max(ptA.y, ptB.y, ptC.y, ptD.y) - y;
 
             return ret.setTo(x, y, width, height);
-        }
-
-        public qualifiedClassName(): string {
-            return "jsidea.geom.Matrix3D";
-        }
-
-        public toString(fractionDigits: number = 3): string {
-            return "[Matrix3D \n"
-                + this.toStringTable(fractionDigits)
-                + "\n]";
         }
 
         public toStringTable(fractionDigits: number = 3): string {
@@ -1065,11 +1066,13 @@ module jsidea.geom {
             return ret;
         }
 
-        public static create(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
-            if (visual.ownerDocument)
-                return ret.setCSS(window.getComputedStyle(visual).transform);
-            ret.identity();
-            return ret;
+        
+        
+        public static qualifiedClassName: string = "jsidea.geom.Matrix3D";
+        public toString(fractionDigits: number = 3): string {
+            return "[" + Matrix3D.qualifiedClassName + " \n"
+                + this.toStringTable(fractionDigits)
+                + "\n]";
         }
     }
 }

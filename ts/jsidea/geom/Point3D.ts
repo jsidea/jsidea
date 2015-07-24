@@ -16,6 +16,14 @@ module jsidea.geom {
             public w: number = 1) {
         }
 
+        public static create(
+            x: number = 0,
+            y: number = 0,
+            z: number = 0,
+            w: number = 1): Point3D {
+            return new Point3D(x, y, z, w);
+        }
+
         public getData(): number[] {
             return [this.x, this.y, this.z];
         }
@@ -81,8 +89,8 @@ module jsidea.geom {
             this.w = w;
             return this;
         }
-        
-        public cross(x:number, y:number, z:number): Point3D {
+
+        public cross(x: number, y: number, z: number): Point3D {
             var px = this.x;
             var py = this.y;
             var pz = this.z;
@@ -100,7 +108,7 @@ module jsidea.geom {
             this.y = z * pt.x - x * pt.z;
             this.z = x * pt.y - y * pt.x;
             return this;
-        }        
+        }
 
         public crossSet(a: IPoint3DValue, b: IPoint3DValue): Point3D {
             var ax = a.x;
@@ -114,7 +122,7 @@ module jsidea.geom {
             this.z = ax * by - ay * bx;
             return this;
         }
-        
+
         public mul(x: number, y: number, z: number): Point3D {
             this.x *= x;
             this.y *= y;
@@ -127,7 +135,7 @@ module jsidea.geom {
             this.y *= pt.y;
             this.z *= pt.z;
             return this;
-        }        
+        }
 
         public mulSet(factorA: IPoint3DValue, factorB: IPoint3DValue): Point3D {
             this.x = factorA.x * factorB.x;
@@ -135,7 +143,7 @@ module jsidea.geom {
             this.z = factorA.z * factorB.z;
             return this;
         }
-        
+
         public div(x: number, y: number, z: number): Point3D {
             this.x /= x;
             this.y /= y;
@@ -169,12 +177,12 @@ module jsidea.geom {
             this.x = scale * (this.x - perspectiveOrigin.x) + perspectiveOrigin.x;
             this.y = scale * (this.y - perspectiveOrigin.y) + perspectiveOrigin.y;
             return this;
-        }        
+        }
 
         public dot(x: number, y: number, z: number): number {
             return this.x * x + this.y * y + this.z * z;
         }
-        
+
         public dotPoint(pt: IPoint3DValue): number {
             return this.x * pt.x + this.y * pt.y + this.z * pt.z;
         }
@@ -185,7 +193,7 @@ module jsidea.geom {
             this.z += z;
             return this;
         }
-        
+
         public addPoint(pt: IPoint3DValue): Point3D {
             this.x += pt.x;
             this.y += pt.y;
@@ -199,7 +207,7 @@ module jsidea.geom {
             this.z = sumA.z + sumB.z;
             return this;
         }
-        
+
         public sub(x: number, y: number, z: number): Point3D {
             this.x -= x;
             this.y -= y;
@@ -212,7 +220,7 @@ module jsidea.geom {
             this.y -= subtrahend.y;
             this.z -= subtrahend.z;
             return this;
-        }        
+        }
 
         public subSet(minuend: IPoint3DValue, subtrahend: IPoint3DValue): Point3D {
             this.x = minuend.x - subtrahend.x;
@@ -223,18 +231,6 @@ module jsidea.geom {
 
         public clone(): Point3D {
             return new Point3D(this.x, this.y, this.z, this.w);
-        }
-
-        public qualifiedClassName(): string {
-            return "jsidea.geom.Point3D";
-        }
-
-        public toString(): string {
-            return "[" + this.qualifiedClassName() +
-                " x=" + this.x +
-                " y=" + this.y +
-                " z=" + this.z +
-                " w=" + this.w + "]";
         }
 
         public static interpolate(v0: IPoint3DValue, v1: IPoint3DValue, f: number): Point3D {
@@ -262,6 +258,15 @@ module jsidea.geom {
         public static reflect(vector: IPoint3DValue, normal: IPoint3DValue): Point3D {
             var dp: number = vector.x * normal.x + vector.y * normal.y + vector.z * normal.z;
             return new Point3D(vector.x - 2 * dp * normal.x, vector.y - 2 * dp * normal.y, vector.z - 2 * dp * normal.z);
+        }
+        
+        public static qualifiedClassName: string = "jsidea.geom.Point3D";
+        public toString(): string {
+            return "[" + Point3D.qualifiedClassName +
+                " x=" + this.x +
+                " y=" + this.y +
+                " z=" + this.z +
+                " w=" + this.w + "]";
         }
     }
 }

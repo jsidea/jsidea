@@ -1,4 +1,4 @@
-module jsidea.geom {
+module jsidea.layout {
     export class BoxModel {
         public static MARGIN: string = "margin";
         public static BORDER: string = "border";
@@ -24,10 +24,18 @@ module jsidea.geom {
 
         private _element: HTMLElement;
 
-        constructor() {
+        constructor(element: HTMLElement = null, style: CSSStyleDeclaration = null) {
+            if (element)
+                this.update(element, style);
         }
 
-        public parse(element: HTMLElement, style: CSSStyleDeclaration = null): void {
+        public static create(element: HTMLElement = null, style: CSSStyleDeclaration = null): BoxModel {
+            return new BoxModel(element, style);
+        }
+
+        public update(element: HTMLElement, style: CSSStyleDeclaration = null): BoxModel {
+            if (!element)
+                return this.clear();
             if (!style)
                 style = window.getComputedStyle(element);
 
@@ -47,13 +55,15 @@ module jsidea.geom {
             this.borderRight = math.Number.parse(style.borderRightWidth, 0);
             this.borderBottom = math.Number.parse(style.borderBottomWidth, 0);
             this.borderLeft = math.Number.parse(style.borderLeftWidth, 0);
+
+            return this;
         }
 
         public clone(): BoxModel {
             return new BoxModel();
         }
 
-        public clear(): void {
+        public clear(): BoxModel {
             this.marginTop = 0;
             this.marginRight = 0;
             this.marginBottom = 0;
@@ -68,6 +78,8 @@ module jsidea.geom {
             this.borderRight = 0;
             this.borderBottom = 0;
             this.borderLeft = 0;
+
+            return this;
         }
 
         public size(size: geom.IPoint2DValue, toBox: string, fromBox: string = BoxModel.BORDER): geom.IPoint2DValue {
@@ -78,7 +90,7 @@ module jsidea.geom {
             return this.convertSize(size, toBox, false);
         }
 
-        public point(pt: geom.IPoint2DValue, toBox: string, fromBox: string = BoxModel.BORDER): IPoint2DValue {
+        public point(pt: geom.IPoint2DValue, toBox: string, fromBox: string = BoxModel.BORDER): geom.IPoint2DValue {
             if (toBox == fromBox)
                 return pt;
             if (fromBox != BoxModel.BORDER)
@@ -87,7 +99,7 @@ module jsidea.geom {
         }
         
         //converts sizes from or to border-box
-        private convertSize(size: geom.IPoint2DValue, toBox: string, convertFromBoxTo: boolean): IPoint2DValue {
+        private convertSize(size: geom.IPoint2DValue, toBox: string, convertFromBoxTo: boolean): geom.IPoint2DValue {
             if (toBox != BoxModel.BORDER) {
                 var px = 0;
                 var py = 0;
@@ -130,7 +142,7 @@ module jsidea.geom {
         }
 
         //converts points from or to border-box
-        private convertPoint(pt: geom.IPoint2DValue, toBox: string, convertFromBoxTo: boolean): IPoint2DValue {
+        private convertPoint(pt: geom.IPoint2DValue, toBox: string, convertFromBoxTo: boolean): geom.IPoint2DValue {
             if (toBox != BoxModel.BORDER) {
                 var px = 0;
                 var py = 0;

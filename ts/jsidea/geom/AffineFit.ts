@@ -33,7 +33,8 @@ module jsidea.geom {
             }
 
             var sol: number[][] = this.solve(from_pt, to_pt);
-            return new Matrix2D(
+            var matrix = new geom.Matrix2D();
+            return matrix.setData(
                 [//column_0
                     sol[0][0],
                     sol[0][1],
@@ -66,7 +67,8 @@ module jsidea.geom {
             }
 
             var sol: number[][] = this.solve(from_pt, to_pt);
-            return new Matrix3D(
+            var matrix = new geom.Matrix3D();
+            return matrix.setData(
                 [
                     //column_0
                     sol[0][0],
@@ -242,6 +244,11 @@ module jsidea.geom {
             }
 
             return true;
+        }
+
+        public static qualifiedClassName: string = "jsidea.geom.AffineFit";
+        public toString(): string {
+            return "[" + AffineFit.qualifiedClassName + "]";
         }
     }
 }

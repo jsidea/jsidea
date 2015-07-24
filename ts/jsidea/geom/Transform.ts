@@ -7,32 +7,30 @@ module jsidea.geom {
         public static MODE_AUTO: string = "auto";
 
         private static _lookup = new model.Dictonary<HTMLElement, { mode: string; bounds: geom.Box2D }>();
+        private static _selector3d: string = null;
+        private static _selector2d: string = null;
 
-        public toBox: string = geom.BoxModel.BORDER;
-        public fromBox: string = geom.BoxModel.BORDER;
+        public element: HTMLElement;
+        public toBox: string = layout.BoxModel.BORDER;
+        public fromBox: string = layout.BoxModel.BORDER;
+        public sceneTransform: geom.Matrix3D = new geom.Matrix3D();
+        public inverseSceneTransform: geom.Matrix3D = new geom.Matrix3D();
+        public box: layout.BoxModel = new layout.BoxModel();
 
-        private _matrices: geom.Matrix3D[] = [];
-        private _inverted: boolean = false;
-        private _box: geom.BoxModel = new geom.BoxModel();
-
-        constructor() {
+        constructor(element: HTMLElement = null, mode: string = Transform.MODE_AUTO) {
+            if (element)
+                this.update(element, mode);
         }
 
-        public static create(element: HTMLElement): geom.Transform {
-            var t = new Transform();
-            t.update(element);
-            return t;
-        }
-
-        public clear(): void {
-            this._matrices = [];
-            this._inverted = false;
-            this._box.clear();
+        public static create(element: HTMLElement, mode: string = Transform.MODE_AUTO): geom.Transform {
+            return new Transform(element, mode);
         }
 
         public update(element: HTMLElement, mode: string = Transform.MODE_AUTO): void {
             if (!element)
                 return this.clear();
+
+            this.element = element;
 
             var globalBounds: geom.Box2D = null;
             if (mode == Transform.MODE_AUTO) {
@@ -51,21 +49,22 @@ module jsidea.geom {
             }
 
             if (mode == Transform.MODE_3D) {
-                this._inverted = false;
                 var styles = layout.StyleChain.create(element);
-                this._matrices = Transform.extractAccumulatedMatrices(styles.node);
-                this._box.parse(element, styles.node.style);
+                this.sceneTransform = Transform.extractAccumulatedMatrix(styles.node, this.sceneTransform);
+                this.box.update(element, styles.node.style);
             }
-            //runs if there is now perspective involved
-            //the elements can have 3d-transformations also
+            //runs if there is no perspective involved
+            //the elements can have 3d-transformation also
             else if (mode == Transform.MODE_2D || mode == Transform.MODE_BOX) {
-                this._inverted = false;
-
                 var style = window.getComputedStyle(element);
                 globalBounds = globalBounds ? globalBounds : geom.Box2D.createBoundingBox(element);
 
-                var matrix = new geom.Matrix3D();
+                var matrix = this.sceneTransform.identity();
 
+                //skip the transformation part for non accumulated transformed
+                //elements.
+                //the 2d mode need the transformations matrices but not the
+                //wrong offsetLeft/offsetTop values
                 if (mode == Transform.MODE_2D) {
                     var tElement = element;
                     while (tElement && tElement != document.body.parentElement) {
@@ -77,88 +76,86 @@ module jsidea.geom {
                 }
 
                 matrix.appendPositionRaw(globalBounds.x, globalBounds.y, 0);
-                this._matrices = [matrix];
-                this._box.parse(element, style);
+
+                this.box.update(element, style);
             }
+
+            this.inverseSceneTransform.copyFrom(this.sceneTransform).invert();
         }
 
-        private invert(): void {
-            this._inverted = !this._inverted;
-            this._matrices.reverse();
-            var l = this._matrices.length;
-            for (var i = 0; i < l; ++i)
-                this._matrices[i].invert();
+        public clear(): void {
+            this.element = null;
+            this.sceneTransform.identity();
+            this.box.clear();
         }
 
-        public localToLocalPoint(to: HTMLElement, pt: geom.Point3D, toBox: string = geom.BoxModel.AUTO, fromBox: string = geom.BoxModel.AUTO): jsidea.geom.Point3D {
+        public localToLocalElement(to: HTMLElement, x: number, y: number, z: number = 0, toBox: string = layout.BoxModel.AUTO, fromBox: string = layout.BoxModel.AUTO): jsidea.geom.Point3D {
+            return this.localToLocal(Transform.create(to), x, y, z, toBox, fromBox);
+        }
+
+        public localToLocalPoint(to: Transform, pt: geom.Point3D, toBox: string = layout.BoxModel.AUTO, fromBox: string = layout.BoxModel.AUTO): jsidea.geom.Point3D {
             return this.localToLocal(to, pt.x, pt.y, pt.z, toBox, fromBox);
         }
 
-        public localToLocal(to: HTMLElement, x: number, y: number, z: number = 0, toBox: string = geom.BoxModel.AUTO, fromBox: string = geom.BoxModel.AUTO): jsidea.geom.Point3D {
-            //check if to contains element
-            //check if element contains to
-            //if so shorten the way here
-            var gl = this.localToGlobal(x, y, z, geom.BoxModel.BORDER, fromBox);
-            return Transform.create(to).globalToLocalPoint(gl, toBox, geom.BoxModel.BORDER);
+        public localToLocal(to: Transform, x: number, y: number, z: number = 0, toBox: string = layout.BoxModel.AUTO, fromBox: string = layout.BoxModel.AUTO): jsidea.geom.Point3D {
+            var gl = this.localToGlobal(x, y, z, layout.BoxModel.BORDER, fromBox);
+            return to.globalToLocalPoint(gl, toBox, layout.BoxModel.BORDER);
         }
 
-        public globalToLocalPoint(pt: geom.Point3D, toBox: string = geom.BoxModel.AUTO, fromBox: string = geom.BoxModel.AUTO): jsidea.geom.Point3D {
-            return this.globalToLocal(pt.x, pt.y, pt.z, toBox, fromBox);
+        public globalToLocalPoint(
+            point: geom.Point3D,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO): jsidea.geom.Point3D {
+            return this.globalToLocal(point.x, point.y, point.z, toBox, fromBox);
         }
 
-        public globalToLocal(x: number, y: number, z: number = 0, toBox: string = geom.BoxModel.AUTO, fromBox: string = geom.BoxModel.AUTO): jsidea.geom.Point3D {
-            //we need the globalToLocal matrices
-            if (!this._inverted)
-                this.invert();
+        public globalToLocal(
+            x: number,
+            y: number,
+            z: number = 0,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO): jsidea.geom.Point3D {
+            var pt = new geom.Point3D(x, y, z);
             
             //apply box model transformations
-            if (toBox == geom.BoxModel.AUTO)
-                toBox = this.toBox;
-            if (fromBox == geom.BoxModel.AUTO)
-                fromBox = this.fromBox;
-            this._box.point(pt, geom.BoxModel.BORDER, fromBox);
+            this.box.point(pt, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);
             
             //project from parent to child
-            var nodes: geom.Matrix3D[] = this._matrices;
-            var pt = new geom.Point3D(x, y, z);
-            var l = nodes.length;
-            for (var i = 0; i < l; ++i)
-                pt = nodes[i].unproject(pt, pt);
+            pt = this.inverseSceneTransform.unproject(pt, pt);
 
             //apply box model transformations
-            this._box.point(pt, toBox, geom.BoxModel.BORDER);
+            this.box.point(pt, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
 
             return pt;
         }
 
-        public localToGlobalPoint(pt: geom.Point3D, toBox: string = geom.BoxModel.AUTO, fromBox: string = geom.BoxModel.AUTO): jsidea.geom.Point3D {
-            return this.localToGlobal(pt.x, pt.y, pt.z, toBox, fromBox);
+        public localToGlobalPoint(
+            point: geom.Point3D,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO): jsidea.geom.Point3D {
+            return this.localToGlobal(point.x, point.y, point.z, toBox, fromBox);
         }
 
-        public localToGlobal(x: number, y: number, z: number = 0, toBox: string = geom.BoxModel.AUTO, fromBox: string = geom.BoxModel.AUTO): jsidea.geom.Point3D {
-            //we need the localToGlobal matrices
-            if (this._inverted)
-                this.invert();
+        public localToGlobal(
+            x: number,
+            y: number,
+            z: number = 0,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO,
+            ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
 
-            var pt = new geom.Point3D(x, y, z);
+            ret.setTo(x, y, z);
             
-            //apply box model transformations
-            if (toBox == geom.BoxModel.AUTO)
-                toBox = this.toBox;
-            if (fromBox == geom.BoxModel.AUTO)
-                fromBox = this.fromBox;
-            this._box.point(pt, geom.BoxModel.BORDER, fromBox);            
+            //apply from-box model transformations
+            this.box.point(ret, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);            
             
             //unproject from child to parent
-            var matrices: geom.Matrix3D[] = this._matrices;
-            var l = matrices.length;
-            for (var i = 0; i < l; ++i)
-                pt = matrices[i].project(pt, pt);
+            ret = this.sceneTransform.project(ret, ret);
             
-            //apply box model transformations
-            this._box.point(pt, toBox, geom.BoxModel.BORDER);
+            //apply to-box model transformations
+            this.box.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
 
-            return pt;
+            return ret;
         }
 
         private static getMode(element: HTMLElement): string {
@@ -173,6 +170,53 @@ module jsidea.geom {
             }
             return isTransformed ? Transform.MODE_2D : Transform.MODE_BOX;
         }
+        
+        //        private static refreshSelectors(): void {
+        //            var selectors2d: string[] = [];
+        //            var selectors3d: string[] = [];
+        //            for (var i = 0; i < document.styleSheets.length; ++i) {
+        //                var ss = document.styleSheets[i];
+        //                if (ss.disabled)
+        //                    continue;
+        //                var rules: CSSRuleList = (<any>ss).cssRules || (<any>ss).rules;
+        //                for (var j = 0; j < rules.length; ++j) {
+        //                    var rule: CSSRule = rules[j];
+        //                    if (rule.type == CSSRule.STYLE_RULE) {
+        //                        var cssText = rule.cssText;
+        //                        if (cssText.indexOf("transform:") >= 0) {
+        //                            selectors2d.push(cssText.substring(0, cssText.indexOf("{") - 1));
+        //                            selectors2d.push(cssText.substring(0, cssText.indexOf("{") - 1) + " *");
+        //                        }
+        //                        if (cssText.indexOf("perspective:") >= 0) {
+        //                            var property = "perspective:";
+        //                            var index = cssText.indexOf(property);
+        //                            var end = cssText.indexOf(";", index);
+        //                            var value = math.Number.parse(cssText.substring(index + property.length, end - 1), 0);
+        //                            if (value > 0)
+        //                                selectors3d.push(cssText.substring(0, cssText.indexOf("{") - 1) + " *");
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //            this._selector3d = selectors3d.join(",");
+        //            this._selector2d = selectors2d.join(",");
+        //        }
+
+        //        private static getModeLite(element: HTMLElement): string {
+        //            
+        //            if(this._selector2d === null)
+        //                this.refreshSelectors();
+        //            
+        //            var isTransformed = false;
+        //            while (element && element != document.body.parentElement) {
+        //                if (element.style.perspective || element.matchesSelector(this._selector3d))
+        //                    return Transform.MODE_3D;
+        //                if (element.style.transform || element.matchesSelector(this._selector2d))
+        //                    isTransformed = true;
+        //                element = element.parentElement;
+        //            }
+        //            return isTransformed ? Transform.MODE_2D : Transform.MODE_BOX;
+        //        }
 
         private static extractMatrix(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
             if (!matrix)
@@ -192,6 +236,7 @@ module jsidea.geom {
             var originY = math.Number.parseRelation(origin[1], element.offsetHeight, 0);
             var originZ = math.Number.parseRelation(origin[2], 0, 0);
 
+            //not vice versa: not adding than subtracting like some docs mentioned
             matrix.appendPositionRaw(-originX, -originY, -originZ);
             matrix.appendCSS(style.transform);
             matrix.appendPositionRaw(originX, originY, originZ);
@@ -199,10 +244,8 @@ module jsidea.geom {
             //------
             //offset
             //------
-            var position = node.position;//
-
             //append the offset to the transform-matrix
-            matrix.appendPositionRaw(position.x, position.y, 0);
+            matrix.appendPositionRaw(node.position.x, node.position.y, 0);
             
             //-------
             //perspective
@@ -222,33 +265,23 @@ module jsidea.geom {
             return matrix;
         }
 
-        private static extractAccumulatedMatrices(node: layout.INode): geom.Matrix3D[] {
-            //collect matrices up to root
-            //accumulate if possible
-            var matrices: geom.Matrix3D[] = [];
-            var last: geom.Matrix3D = null;
+        //collect matrices up to root
+        private static extractAccumulatedMatrix(node: layout.INode, ret: geom.Matrix3D = new geom.Matrix3D()): geom.Matrix3D {
+            ret.identity();
             while (node.parent) {
-                
                 //if last is not null, last becomes the base for the transformation
                 //its like appending the current node.transform (parent-transform) to the last transform (child-transform)
-                var m: geom.Matrix3D = this.extractMatrix(node, last);
-                if (node.parent && node.isAccumulatable) {
-                    last = m;
-                }
-                else {
-                    last = null;
-                    matrices.push(m);
-                }
-
-                if (node && node.isSticked) {
+                this.extractMatrix(node, ret);
+                if (node && node.isSticked)
                     break;
-                }
-
                 node = node.parent;
             }
-            if (last)
-                matrices.push(last);
-            return matrices;
+            return ret;
+        }
+
+        public static qualifiedClassName: string = "jsidea.geom.Transform";
+        public toString(): string {
+            return "[" + Transform.qualifiedClassName + "]";
         }
     }
 }
