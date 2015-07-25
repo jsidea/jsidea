@@ -458,7 +458,7 @@ module jsidea.layout {
             if (!node || !node.offsetParent)
                 return ret;
 
-            if (!node.offsetParent.isStatic) {
+            if (!node.offsetParent.isStatic && !node.offsetParent.isBody) {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
             }

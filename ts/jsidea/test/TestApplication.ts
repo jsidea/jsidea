@@ -72,7 +72,10 @@ module jsidea.test {
 
             document.addEventListener("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
-//                pt = geom.Transform.create(document.body).globalToLocalPoint(pt);
+                //from window to body
+//                console.log(pt.x, pt.y);
+                
+                pt = geom.Transform.create(document.body).globalToLocalPoint(pt);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
                 pos.apply(d);
@@ -139,7 +142,7 @@ module jsidea.test {
             //            c = gloToLoc.unproject(c.x, c.y);
             //            d = gloToLoc.unproject(d.x, d.y);
 
-//            console.log("TIME TO CALC 4 POINTS",(new Date()).getTime() - tim);
+            //            console.log("TIME TO CALC 4 POINTS",(new Date()).getTime() - tim);
 
             ctx.beginPath();
             ctx.setLineDash([4, 4]);

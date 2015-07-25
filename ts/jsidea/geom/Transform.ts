@@ -31,7 +31,7 @@ module jsidea.geom {
             this.element = element;
             
             //FORCE FOR TESTING
-//            mode = Transform.MODE_2D;
+            //            mode = Transform.MODE_2D;
 
             var globalBounds: geom.Box2D = null;
             if (mode == Transform.MODE_AUTO) {
@@ -165,8 +165,8 @@ module jsidea.geom {
             var l = this.sceneTransform.length;
             for (var i = 0; i < l; ++i)
                 ret = this.sceneTransform[i].project(ret, ret);
-            if(l > 1)
-            console.log(l);
+//            if (l > 1)
+//                console.log(l);
             
             //apply to-box model transformations
             this.box.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
@@ -195,7 +195,6 @@ module jsidea.geom {
 
             var element: HTMLElement = node.element;
             var style: CSSStyleDeclaration = node.style;
-            var parentStyle: CSSStyleDeclaration = node.parent.style;
             
             //------
             //transform
@@ -219,10 +218,13 @@ module jsidea.geom {
             //-------
             //perspective
             //-------
+            if (!node.parent)
+                return matrix;
             var perspective = node.parent.perspective;
             if (!perspective)
                 return matrix;
 
+            var parentStyle: CSSStyleDeclaration = node.parent.style;
             var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
             var perspectiveOriginX = math.Number.parseRelation(perspectiveOrigin[0], element.parentElement.offsetWidth, 0);
             var perspectiveOriginY = math.Number.parseRelation(perspectiveOrigin[1], element.parentElement.offsetHeight, 0);
@@ -239,24 +241,20 @@ module jsidea.geom {
             //accumulate if possible
             var matrices: geom.Matrix3D[] = [];
             var last: geom.Matrix3D = null;
-            while (node.parent) {
-                
+            while (node) {
                 //if last is not null, last becomes the base for the transformation
                 //its like appending the current node.transform (parent-transform) to the last transform (child-transform)
                 var m: geom.Matrix3D = this.extractMatrix(node, last);
-                //                if (node.parent && this.isAccumulatable(node)) {
-                if (node.parent && node.isAccumulatable) {
+                if (node.isAccumulatable) {
                     last = m;
                 }
                 else {
                     last = null;
                     matrices.push(m);
                 }
-
                 if (node && node.isSticked) {
                     break;
                 }
-
                 node = node.parent;
             }
             if (last)
