@@ -31,7 +31,7 @@ module jsidea.geom {
             this.element = element;
             
             //FORCE FOR TESTING
-            //            mode = Transform.MODE_2D;
+            mode = Transform.MODE_3D;
 
             var globalBounds: geom.Box2D = null;
             if (mode == Transform.MODE_AUTO) {
@@ -165,8 +165,8 @@ module jsidea.geom {
             var l = this.sceneTransform.length;
             for (var i = 0; i < l; ++i)
                 ret = this.sceneTransform[i].project(ret, ret);
-//            if (l > 1)
-//                console.log(l);
+            //            if (l > 1)
+            //                console.log(l);
             
             //apply to-box model transformations
             this.box.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);

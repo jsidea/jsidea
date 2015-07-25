@@ -77,27 +77,27 @@
 
 /* TEST 3 */
 .test-3 #view {
-	position: absolute;
+	position: fixed;
 }
 
 .test-3 #content {
-	position: absolute;
+	position: fixed;
 }
 
 .test-3 #a-cont {
-	position: absolute;
+	position: fixed;
 }
 
 .test-3 #b-cont {
-	position: absolute;
+	position: fixed;
 }
 
 .test-3 #c-cont {
-	position: absolute;
+	position: fixed;
 }
 
 .test-3 #d-cont {
-	position: absolute;
+	position: fixed;
 }
 
 /* TEST 4 */
@@ -159,7 +159,9 @@ body {
 	/* padding: 50px; */
 	/* position: absolute; */
 	border: 25px solid #EEEEEE;
-	transform: translateX(128px);
+	/* transform: rotate(10deg); */
+	/* transform: translateX(128px); */
+	transform: rotate(10deg);
 }
 
 canvas {
@@ -286,7 +288,8 @@ canvas {
 	padding: 100px;
 	/* box-sizing: border-box; */
 	transform-origin: 0px 0px;
-	transform: rotateY(-45deg)  rotate(45deg);
+	/* transform: rotateY(-45deg)  rotate(45deg); */
+	transform: translateX(128px);
 	
 	/* perspective: 600px; */
 	/* perspective-origin: 128px 128px;

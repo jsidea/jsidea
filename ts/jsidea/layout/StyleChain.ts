@@ -119,7 +119,7 @@ module jsidea.layout {
                     //                    if (isFixed && style.position == "fixed") {
                     //                        //make the element a containing-block
                     //                        element.style.position = "absolute";
-                    //                        
+                    //                                            
                     //                        //refresh style
                     //                        style = window.getComputedStyle(element);
                     //                        console.warn("FIXED: Fixed to absolute. Fixed in a fixed container.");
@@ -162,16 +162,17 @@ module jsidea.layout {
                         style = window.getComputedStyle(element);
                         console.warn("FIXED: Transform on static element. Element becomes relative and top/left becomes auto.");
                     }
-                    else if (isTransformedChild && style.position == "fixed") {
-                        //webkit ignores fixed elements in an transformed context
-                        //making them absolute does not change anything visual
-                        //but the offsets and so on becomes correct
-                        element.style.position = "absolute";
-                        
-                        //refresh style
-                        style = window.getComputedStyle(element);
-                        console.warn("FIXED: Fixed to absolute. Fixed in a fixed container");
-                    }
+                    //                    else if (isTransformedChild && style.position == "fixed") {
+                    //                    if (isTransformedChild && style.position == "fixed") {
+                    //                        //webkit ignores fixed elements in an transformed context
+                    //                        //making them absolute does not change anything visual
+                    //                        //but the offsets and so on becomes correct
+                    //                        element.style.position = "absolute";
+                    //                        
+                    //                        //refresh style
+                    //                        style = window.getComputedStyle(element);
+                    //                        console.warn("FIXED: Fixed to absolute. Fixed in a fixed container");
+                    //                    }
                 }
                 
                 //webkit ignores perspective set on scroll elements
@@ -212,6 +213,11 @@ module jsidea.layout {
                     isTransformed: style.transform != "none",
                     isTransformedChild: isTransformedChild
                 };
+
+                if (node.isBody) {
+                    //                    node.offsetLeft = -node.clientLeft;
+                    //                    node.offsetTop = -node.clientTop;    
+                }
                 
                 //if the element has transform
                 //the following elements are in transformed-context
@@ -227,6 +233,8 @@ module jsidea.layout {
                 if (!isPerspectiveChild && node.perspective > 0)
                     isPerspectiveChild = true;
 
+//                element._node = node;
+                
                 //the lookup should be sorted from root to child
                 //NOT vice versa
                 nodes.push(node);
@@ -270,11 +278,49 @@ module jsidea.layout {
         
         //TEST-AREA
         private static getOffsetParent(node: INode): INode {
+
+            //            if (system.Caps.isFirefox)
+            //                return node.element.offsetParent ? node.element.offsetParent._node : null;
+
+            var isFixed = node.isFixed;
+            var isTransformedChild = node.isTransformedChild;
+
+            //if its forced to have another parent
+            if (isFixed && !node.isSticked) {
+                while (node = node.parent) {
+                    if (!(node.isFixed && !node.isSticked && !node.isTransformed))
+                        return node;
+                }
+                return null;
+            }
+
+
+
             if (!node || node.isBody || node.isSticked)
                 return null;
             while (node = node.parent) {
-                if (!node.isStatic || node.isTransformed || node.isPreserved3d)
+                if (!node.isStatic || node.isTransformed || node.isPreserved3d)// || (isFixed && node.isFixed))
+                {
+                    //                    if (node.isFixed && !node.isTransformedChild && !node.isSticked) {
+                    //                    }
+                    //                    else
                     return node;
+                }
+            }
+            return null;
+        }
+
+        private static getOffsetParent2(node: INode): INode {
+
+            //            if (system.Caps.isFirefox)
+            //                return node.element.offsetParent ? node.element.offsetParent._node : null;
+            if (!node || node.isBody || node.isSticked)
+                return null;
+            while (node = node.parent) {
+                if (!node.isStatic || node.isTransformed || node.isPreserved3d)// || (isFixed && node.isFixed))
+                {
+                    return node;
+                }
             }
             return null;
         }
@@ -459,6 +505,11 @@ module jsidea.layout {
                 return ret;
 
             if (!node.offsetParent.isStatic && !node.offsetParent.isBody) {
+
+//                if (node.isFixed && !node.isSticked && !node.offsetParent.isBody)
+                if (node.isFixed && !node.isSticked && node.parent == node.offsetParent)
+                    return ret;
+
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
             }
@@ -467,39 +518,27 @@ module jsidea.layout {
             if (node.offsetParent.element == node.element.offsetParent)
                 return ret;
             
+            
             //Why is chrome does not keep care of css-transform on static elements
             //when it comes to the right offsetParent and the offsetTop/offsetLeft values
-            console.warn("The given offsetParent is maybe wrong.");
+            //            console.warn("The given offsetParent is maybe wrong.");
         }
 
         private static getIsAccumulatable(node: INode): boolean {
-//            return true;
-            
             //in any case, if an element has only 2d-transforms or its the document-root item
             //the transform can be accumulated to the parent transform
             if (node.isBody || node.style.transform.indexOf("matrix3d") < 0)
                 return true;
 
             var parent = node.parent;
-            if (parent.style.transformStyle == "flat")
-                return false;
-
-            //if the parent is preserve-3d than it normally should be accumlatable, but ...
-            var preserve3d = parent.style.transformStyle == "preserve-3d";
-            
             //tricky stuff: only firefox does reflect/compute the "correct" transformStyle value.
             //Firefox does NOT reflect the "grouping"-overrides and this is how its concepted.
             //But what about the "opacity"-property. Opacity does not override the preserve-3d (not always, webkit does under some conditions).
             //http://dev.w3.org/csswg/css-transforms/#grouping-property-values
-            if (preserve3d && parent.isScrollable)
-                preserve3d = false;
-            
-            //there is this case where webkit ignores transform-style: flat. 
-            //So when the elements parent has preserve-3d and the element itself has no transform set.
-            if (!preserve3d && system.Caps.isWebkit && !parent.isTransformed && !parent.isBody)
-                preserve3d = this.getIsAccumulatable(parent.parent);
+            if (parent.style.transformStyle == "flat" || parent.isScrollable)
+                return false;
 
-            return preserve3d;
+            return true;
         }
     }
 }
