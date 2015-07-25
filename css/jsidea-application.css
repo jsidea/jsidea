@@ -223,7 +223,7 @@ canvas {
 	/* box-sizing: border-box; */
 	/* box-sizing: border-box; */
 	/* perspective: 400px; */
-	/* transform-style: preserve-3d; */
+	transform-style: preserve-3d;
 }
 
 #content {
