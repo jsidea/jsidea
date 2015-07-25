@@ -84,7 +84,7 @@
 }
 
 .test-3 #content {
-	position: static;
+	position: fixed;
 }
 
 .test-3 #a-cont {
@@ -92,8 +92,7 @@
 }
 
 .test-3 #b-cont {
-	position: static;
-	overflow:scroll;
+	position: fixed;
 }
 
 .test-3 #c-cont {
@@ -101,7 +100,7 @@
 }
 
 .test-3 #d-cont {
-	position: static;
+	position: fixed;
 }
 
 /* TEST 4 */
@@ -224,7 +223,7 @@ canvas {
 	/* box-sizing: border-box; */
 	/* box-sizing: border-box; */
 	/* perspective: 400px; */
-	transform-style: preserve-3d;
+	/* transform-style: preserve-3d; */
 }
 
 #content {

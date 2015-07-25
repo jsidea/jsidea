@@ -178,7 +178,7 @@ module jsidea.geom {
             var isTransformed = false;
             while (element && element != document.body.parentElement) {
                 var style = window.getComputedStyle(element);
-                if (style.perspective != "none" || style.transform.indexOf("matrix3d") >= 0)
+                if (style.perspective != "none")// || style.transform.indexOf("matrix3d") >= 0)
                     return Transform.MODE_3D;
                 if (style.transform != "none")
                     isTransformed = true;
