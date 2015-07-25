@@ -79,7 +79,7 @@ module jsidea.test {
                 pt = geom.Transform.create(document.body).globalToLocalPoint(pt);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
-                pos.apply(d);
+//                pos.apply(d);
             });
         }
 
@@ -185,7 +185,8 @@ module jsidea.test {
                     text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
                     text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
                     text.Text.conc(18, " ", "DISPLAY", node.style.display),
-                    text.Text.conc(18, " ", "SCROLL_C", scaleOff ? (scaleOff.id ? scaleOff.id : scaleOff.nodeName) : "NONE"),
+                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed),
+//                    text.Text.conc(18, " ", "SCROLL_C", scaleOff ? (scaleOff.id ? scaleOff.id : scaleOff.nodeName) : "NONE"),
                     //                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
                     text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
                     //                    text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),

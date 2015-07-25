@@ -81,7 +81,7 @@
 }
 
 .test-3 #content {
-	position: fixed;
+	position: static;
 }
 
 .test-3 #a-cont {
@@ -89,7 +89,7 @@
 }
 
 .test-3 #b-cont {
-	position: fixed;
+	position: static;
 }
 
 .test-3 #c-cont {
@@ -97,7 +97,7 @@
 }
 
 .test-3 #d-cont {
-	position: fixed;
+	position: static;
 }
 
 /* TEST 4 */

@@ -1,3 +1,6 @@
+interface Element {
+    _node: jsidea.layout.INode;
+}
 module jsidea.layout {
     export interface INode {
         style: CSSStyleDeclaration;
@@ -233,7 +236,7 @@ module jsidea.layout {
                 if (!isPerspectiveChild && node.perspective > 0)
                     isPerspectiveChild = true;
 
-//                element._node = node;
+                element._node = node;
                 
                 //the lookup should be sorted from root to child
                 //NOT vice versa
@@ -288,8 +291,18 @@ module jsidea.layout {
             //if its forced to have another parent
             if (isFixed && !node.isSticked) {
                 while (node = node.parent) {
-                    if (!(node.isFixed && !node.isSticked && !node.isTransformed))
+                    if (node.isBody)
                         return node;
+                    if (node.isStatic) {
+                        if (node.isTransformed)
+                            return node;
+                        else
+                            continue;
+                    }
+                    if (node.isFixed && !node.isSticked) {
+                        continue;
+                    }
+                    return node;
                 }
                 return null;
             }
@@ -310,10 +323,11 @@ module jsidea.layout {
             return null;
         }
 
-        private static getOffsetParent2(node: INode): INode {
+        private static getOffsetParent_BACKUP(node: INode): INode {
 
             //            if (system.Caps.isFirefox)
             //                return node.element.offsetParent ? node.element.offsetParent._node : null;
+            
             if (!node || node.isBody || node.isSticked)
                 return null;
             while (node = node.parent) {
@@ -506,7 +520,7 @@ module jsidea.layout {
 
             if (!node.offsetParent.isStatic && !node.offsetParent.isBody) {
 
-//                if (node.isFixed && !node.isSticked && !node.offsetParent.isBody)
+                //                if (node.isFixed && !node.isSticked && !node.offsetParent.isBody)
                 if (node.isFixed && !node.isSticked && node.parent == node.offsetParent)
                     return ret;
 
