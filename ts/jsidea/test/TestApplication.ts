@@ -14,7 +14,7 @@ module jsidea.test {
             var vie = document.getElementById("view");
 
             var te = 0;
-            document.body.className = "test-3";
+            document.body.className = "test-0";
 
             document.onkeyup = (e) => {
                 //console.log("KEY UP");

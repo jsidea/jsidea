@@ -118,6 +118,19 @@ module jsidea.layout {
                         style = window.getComputedStyle(element);
                         console.warn("FIXED: Inline elements cannot not have transform applied.");
                     }
+                    
+//                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
+//                        //make static relative
+//                        //do it in this order should
+//                        //prevent re-layouting
+//                        element.style.left = "auto";
+//                        element.style.top = "auto";
+//                        element.style.position = "relative";
+//                    
+//                        //refresh style
+//                        style = window.getComputedStyle(element);
+//                        console.warn("FIXED: Transform on static element. Element becomes relative and top/left becomes auto.");
+//                    }
 
                     //                    if (isFixed && style.position == "fixed") {
                     //                        //make the element a containing-block
@@ -294,7 +307,7 @@ module jsidea.layout {
                     if (node.isBody)
                         return node;
                     if (node.isStatic) {
-                        if (node.isTransformed)
+                        if (node.isTransformed || node.isPreserved3d)
                             return node;
                         else
                             continue;
@@ -497,12 +510,18 @@ module jsidea.layout {
             }
 
             if (
-                node.isAbsolute
+                (node.isAbsolute || (node.isFixed && !node.isSticked))
                 && node.offsetParent.isScrollable
                 ) {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
             }
+            
+//            if(node.element.id == "c-cont")
+//            {
+//                ret.x += node.offsetParent.clientLeft;
+//                ret.y += node.offsetParent.clientTop;    
+//            }
             
             //if there is not bug to fix
             if (node.offsetParent.element == node.element.offsetParent)
@@ -535,7 +554,7 @@ module jsidea.layout {
             
             //Why is chrome does not keep care of css-transform on static elements
             //when it comes to the right offsetParent and the offsetTop/offsetLeft values
-            //            console.warn("The given offsetParent is maybe wrong.");
+//            console.warn("The given offsetParent is maybe wrong.");
         }
 
         private static getIsAccumulatable(node: INode): boolean {
