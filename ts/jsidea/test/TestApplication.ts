@@ -13,8 +13,8 @@ module jsidea.test {
             var con = document.getElementById("content");
             var vie = document.getElementById("view");
 
-            var max = 6;
-            var te = max;
+            var max = 8;
+            var te = 3;
             document.body.className = "test-" + te;
             
             var draw = () => {

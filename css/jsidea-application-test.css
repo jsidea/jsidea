@@ -192,3 +192,60 @@
 .test-6 #d-cont {
 	position: fixed;
 }
+
+/* TEST 7 */
+.test-7 #view {
+	position: fixed;
+	overflow: scroll;
+}
+
+.test-7 #content {
+	position: absolute;
+	overflow: scroll;
+}
+
+.test-7 #a-cont {
+	position: fixed;
+	overflow: scroll;
+}
+
+.test-7 #b-cont {
+	position: static;
+	overflow: scroll;
+}
+
+.test-7 #c-cont {
+	position: fixed;
+}
+
+.test-7 #d-cont {
+	position: absolute;
+}
+
+/* TEST 8 */
+.test-8 #view {
+	position: fixed;
+}
+
+.test-8 #content {
+	position: absolute;
+	overflow: scroll;
+}
+
+.test-8 #a-cont {
+	position: fixed;
+	overflow: scroll;
+}
+
+.test-8 #b-cont {
+	position: static;
+}
+
+.test-8 #c-cont {
+	position: fixed;
+	overflow: scroll;
+}
+
+.test-8 #d-cont {
+	position: fixed;
+}

@@ -599,23 +599,46 @@ module jsidea.layout {
                 //parentOffsetRaw is null
                 //so we have to return the full-offset
                 if (!node.offsetParentRaw) {
-                    if (node.isLeaf && (node.parent.isStatic || node.parent.isRelative || node.parent.isAbsolute)) {
-//                        if (node.element.id)
-//                            console.log(node.element.id);
-                        ret.x += node.parent.offsetUnscrolled.x;
-                        ret.y += node.parent.offsetUnscrolled.y;
-                        return ret;
-                    }
-                    var n = node;
-                    while ((n = n.relation) && !n.isBody) {
-                        //                        if (n.element.id)
-                        //                            console.log(n.element.id);
-                        ret.x += n.offsetLeft;
-                        ret.y += n.offsetTop;
-                        if (n.isPreserved3d || n.isStatic || node.parent.isRelative || node.parent.isAbsolute) {
-                            break;
-                        }
-                    }
+                    
+                    ret.x += node.relation.offsetUnscrolled.x;
+                    ret.y += node.relation.offsetUnscrolled.y;
+
+//                    if (node.element.id == "c-cont" || node.element.id == "d-cont" || node.isLeaf && (node.parent.isStatic || node.parent.isRelative || node.parent.isAbsolute)) {
+//                        //                        if (node.element.id)
+//                        //                            console.log(node.element.id);
+//                        ret.x += node.parent.offsetUnscrolled.x;
+//                        ret.y += node.parent.offsetUnscrolled.y;
+//                        return ret;
+//                    }
+//                    var n = node;
+//                    while ((n = n.relation) && !n.isBody) {
+//                        //                        if (n.element.id)
+//                        //                            console.log(n.element.id);
+//                        ret.x += n.offsetLeft;
+//                        ret.y += n.offsetTop;
+//                        if (n.isPreserved3d || n.isStatic || node.parent.isRelative || node.parent.isAbsolute) {
+//                            break;
+//                        }
+//                    }
+                    
+                    
+                    //                    if (node.element.id == "c-cont" || node.element.id == "d-cont" || node.isLeaf && (node.parent.isStatic || node.parent.isRelative || node.parent.isAbsolute)) {
+                    ////                        if (node.element.id)
+                    ////                            console.log(node.element.id);
+                    //                        ret.x += node.parent.offsetUnscrolled.x;
+                    //                        ret.y += node.parent.offsetUnscrolled.y;
+                    //                        return ret;
+                    //                    }
+                    //                    var n = node;
+                    //                    while ((n = n.relation) && !n.isBody) {
+                    //                        //                        if (n.element.id)
+                    //                        //                            console.log(n.element.id);
+                    //                        ret.x += n.offsetLeft;
+                    //                        ret.y += n.offsetTop;
+                    //                        if (n.isPreserved3d || n.isStatic || node.parent.isRelative || node.parent.isAbsolute) {
+                    //                            break;
+                    //                        }
+                    //                    }
 
                     //                    if (node.element.id == "view") {
                     //                        //ret.x += 114;
