@@ -389,19 +389,18 @@ module jsidea.layout {
             if (!node || node.isSticked || !node.parent)
                 return null;
 
+            //TODO FIND THE BUG
             //if its forced to have another parent
             if (node.isFixedWrong)
                 return node.offsetParent;
 
             var excludeStaticParent = node.isAbsolute;
             var isTransformedChild = node.isTransformedChild;
-            while ((node = node.parent) && node.parent && !node.parent.isBody) {
+            while ((node = node.parent) && node.parent) {// && !node.parent.isBody
                 if (node.isBody || node.isSticked)//isSticked is maybe to mouch
                     return node;
-                if (excludeStaticParent && node.isStatic)
+                if (excludeStaticParent && (node.isStatic && !node.isTransformed))
                     continue;
-//                if ((node.isScrollable && excludeStaticParent) && (node.isTransformed || !node.isStatic))
-//                    return node;
                 return node;
             }
             return null;
