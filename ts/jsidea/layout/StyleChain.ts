@@ -9,6 +9,7 @@ module jsidea.layout {
         offsetParentRaw: INode;
         parentScroll: INode;
         root: INode;
+        isLeaf: boolean;
         child: INode;
         parent: INode;
         relation: INode;
@@ -29,6 +30,7 @@ module jsidea.layout {
         isStatic: boolean;
         isScrollable: boolean;
         isFixed: boolean;
+        isFixedChild: boolean;
         isFixedWrong: boolean;
         isBody: boolean;
         isSticked: boolean;
@@ -108,12 +110,17 @@ module jsidea.layout {
                 var style = window.getComputedStyle(element);
 
                 var perspective = math.Number.parse(style.perspective, 0);
-                var isPreserved3d = (style.transformStyle == "preserve-3d" || perspective > 0)
-                    || (system.Caps.isWebkit && element.id == "b-cont")
-                    || (system.Caps.isWebkit && element.id == "a-cont")
-                    || (system.Caps.isWebkit && element.id == "content")
-                    || (system.Caps.isWebkit && element.id == "view")
-                    ;
+                
+                //webkit ignores perspective set on scroll elements
+                if (system.Caps.isWebkit && style.transform != "none" && style.overflow != "visible" && style.perspective != "none")
+                    perspective = 0;
+
+                var isPreserved3d = (style.transformStyle == "preserve-3d" || perspective > 0);
+                //                    || (system.Caps.isWebkit && element.id == "b-cont")
+                //                    || (system.Caps.isWebkit && element.id == "a-cont")
+                //                    || (system.Caps.isWebkit && element.id == "content")
+                //                    || (system.Caps.isWebkit && element.id == "view")
+                ;
                 if (system.Caps.isFirefox) {
                     //                    if (preserved3d && style.position == "fixed") {
                     //                        //make the element a containing-block
@@ -123,15 +130,16 @@ module jsidea.layout {
                     //                        style = window.getComputedStyle(element);
                     //                        console.warn("FIXED: Fixed to absolute. Fixed in a 3d-context becomes absolute positioned.");
                     //                    }
-                    if (style.display == "inline" && !(style.perspective == "none" && style.transform == "none")) {
-                        //make the element a containing-block
-                        element.style.perspective = "none";
-                        element.style.transform = "none";
-                        
-                        //refresh style
-                        style = window.getComputedStyle(element);
-                        console.warn("FIXED: Inline elements cannot not have transform applied.");
-                    }
+                    
+                    //                    if (style.display == "inline" && !(style.perspective == "none" && style.transform == "none")) {
+                    //                        //make the element a containing-block
+                    //                        element.style.perspective = "none";
+                    //                        element.style.transform = "none";
+                    //                        
+                    //                        //refresh style
+                    //                        style = window.getComputedStyle(element);
+                    //                        console.warn("FIXED: Inline elements cannot not have transform applied.");
+                    //                    }
                     
                     //                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
                     //                        //make static relative
@@ -220,9 +228,7 @@ module jsidea.layout {
                     //                    }
                 }
                 
-                //webkit ignores perspective set on scroll elements
-                if (system.Caps.isWebkit && style.transform != "none" && style.overflow != "visible" && style.perspective != "none")
-                    perspective = 0;
+                
 
                 //create the node-element
                 //and set so many values as possible
@@ -248,6 +254,8 @@ module jsidea.layout {
                     scrollOffset: null,
                     isFixed: style.position == "fixed",
                     isFixedWrong: false,
+                    isLeaf: element.children.length == 0,
+                    isFixedChild: isFixed,
                     isRelative: style.position == "relative",
                     isAbsolute: style.position == "absolute",
                     isStatic: style.position == "static",
@@ -566,10 +574,9 @@ module jsidea.layout {
             if (!node.parent || node.isSticked)
                 return null;
             while (node = node.parent) {
-                if (node.isPreserved3d || node.isTransformed)
-                {
-//                    if(node.isStatic)
-//                        continue;
+                if (node.isPreserved3d || node.isTransformed) {
+                    //                    if(node.isStatic)
+                    //                        continue;
                     return node;
                 }
             }
@@ -592,19 +599,20 @@ module jsidea.layout {
                 //parentOffsetRaw is null
                 //so we have to return the full-offset
                 if (!node.offsetParentRaw) {
-                    if(node.parent.isStatic)
-                    {
-                        ret.x +=  node.parent.offsetUnscrolled.x;
-                        ret.y +=  node.parent.offsetUnscrolled.y;
+                    if (node.isLeaf && (node.parent.isStatic || node.parent.isRelative || node.parent.isAbsolute)) {
+//                        if (node.element.id)
+//                            console.log(node.element.id);
+                        ret.x += node.parent.offsetUnscrolled.x;
+                        ret.y += node.parent.offsetUnscrolled.y;
                         return ret;
                     }
                     var n = node;
                     while ((n = n.relation) && !n.isBody) {
-                        if (n.element.id)
-                            console.log(n.element.id);
+                        //                        if (n.element.id)
+                        //                            console.log(n.element.id);
                         ret.x += n.offsetLeft;
                         ret.y += n.offsetTop;
-                        if (n.isPreserved3d || n.isStatic) {
+                        if (n.isPreserved3d || n.isStatic || node.parent.isRelative || node.parent.isAbsolute) {
                             break;
                         }
                     }

@@ -13,18 +13,39 @@ module jsidea.test {
             var con = document.getElementById("content");
             var vie = document.getElementById("view");
 
-            var te = 0;
-            document.body.className = "test-4";
+            var max = 6;
+            var te = max;
+            document.body.className = "test-" + te;
+            
+            var draw = () => {
+                ctx.clearRect(0, 0, can.width, can.height);
+
+                this.drawBoundingBox(ctx, con);
+                this.drawBoundingBox(ctx, a);
+                this.drawBoundingBox(ctx, b);
+                this.drawBoundingBox(ctx, c);
+                this.drawBoundingBox(ctx, d);
+                this.drawBoundingBox(ctx, vie);
+                this.drawBoundingBox(ctx, can);
+
+                //                this.drawOffsetChain(ctx, d);
+            };
 
             document.onkeyup = (e) => {
                 //console.log("KEY UP");
-                if (e.keyCode != 37)
-                    return;
-                te++;
-                if (te > 4)
-                    te = 0;
-                document.body.className = "test-" + te;
-                console.log("TEST-" + te);
+                if (e.keyCode == 37 || e.keyCode == 39) {
+                    if (e.keyCode == 37)
+                        te--;
+                    else
+                        te++;
+                    if (te > max)
+                        te = 0;
+                    else if (te < 0)
+                        te = max;
+                    document.body.className = "test-" + te;
+                    console.log("TEST-" + te);
+                    draw();
+                }
             };
 
             var can = document.createElement("canvas");
@@ -58,29 +79,17 @@ module jsidea.test {
                 this.logChain(d);
             });
 
-            document.addEventListener("click",(evt) => {
-                ctx.clearRect(0, 0, can.width, can.height);
-
-                this.drawBoundingBox(ctx, con);
-                this.drawBoundingBox(ctx, a);
-                this.drawBoundingBox(ctx, b);
-                this.drawBoundingBox(ctx, c);
-                this.drawBoundingBox(ctx, d);
-                this.drawBoundingBox(ctx, vie);
-                this.drawBoundingBox(ctx, can);
-
-                //                this.drawOffsetChain(ctx, d);
-            });
+            document.addEventListener("click", draw);
 
             document.addEventListener("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
                 //from window to body
                 //                console.log(pt.x, pt.y);
                 
-//                pt = geom.Transform.create(document.body).globalToLocalPoint(pt);
-//                pos.from.x = pt.x;
-//                pos.from.y = pt.y;
-//                pos.apply(d);
+                //                pt = geom.Transform.create(document.body).globalToLocalPoint(pt);
+                //                pos.from.x = pt.x;
+                //                pos.from.y = pt.y;
+                //                pos.apply(d);
             });
         }
 
@@ -182,7 +191,7 @@ module jsidea.test {
                     text.Text.conc(10, " ", node.element.id ? node.element.id : node.element.nodeName),
                     text.Text.conc(18, " ", "PARENT", ofp ? (ofp.id ? ofp.id : ofp.nodeName) : "NONE"),
                     text.Text.conc(18, " ", "PARENT_C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
-//                    text.Text.conc(18, " ", "SCROLL_C", scaleOff ? (scaleOff.id ? scaleOff.id : scaleOff.nodeName) : "NONE"),
+                    //                    text.Text.conc(18, " ", "SCROLL_C", scaleOff ? (scaleOff.id ? scaleOff.id : scaleOff.nodeName) : "NONE"),
                     //                    text.Text.conc(18, " ", "PARENT_B", calcedPar ? (calcedPar.id ? calcedPar.id : calcedPar.nodeName) : "NONE"),
                     text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
                     text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),

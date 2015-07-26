@@ -1,0 +1,194 @@
+/* TEST 0 */
+.test-0 #view {
+	position: static;
+}
+
+.test-0 #content {
+	position: absolute;
+}
+
+.test-0 #a-cont {
+	position: static;
+	overflow: scroll;
+}
+
+.test-0 #b-cont {
+	position: absolute;
+	overflow: scroll;
+}
+
+.test-0 #c-cont {
+	position: static;
+}
+
+.test-0 #d-cont {
+	position: absolute;
+	overflow: scroll;
+}
+
+/* TEST 1 */
+.test-1 #view {
+	position: static;
+}
+
+.test-1 #content {
+	position: static;
+}
+
+.test-1 #a-cont {
+	position: static;
+}
+
+.test-1 #b-cont {
+	position: static;
+}
+
+.test-1 #c-cont {
+	position: static;
+	overflow: scroll;
+}
+
+.test-1 #d-cont {
+	position: fixed;
+}
+
+/* TEST 2 */
+.test-2 #view {
+	position: static;
+}
+
+.test-2 #content {
+	position: static;
+}
+
+.test-2 #a-cont {
+	position: static;
+}
+
+.test-2 #b-cont {
+	position: static;
+	overflow: scroll;
+}
+
+.test-2 #c-cont {
+	position: static;
+	overflow: scroll;
+}
+
+.test-2 #d-cont {
+	position: absolute;
+	overflow: scroll;
+}
+
+/* TEST 3 */
+.test-3 #view {
+	position: fixed;
+	overflow: scroll;
+}
+
+.test-3 #content {
+	position: fixed;
+}
+
+.test-3 #a-cont {
+	position: fixed;
+	overflow: scroll;
+}
+
+.test-3 #b-cont {
+	position: fixed;
+}
+
+.test-3 #c-cont {
+	position: fixed;
+	overflow: scroll;
+}
+
+.test-3 #d-cont {
+	position: fixed;
+}
+
+/* TEST 4 */
+.test-4 #view {
+	position: static;
+}
+
+.test-4 #content {
+	position: absolute;
+	overflow: scroll;
+}
+
+.test-4 #a-cont {
+	position: static;
+	overflow: scroll;
+}
+
+.test-4 #b-cont {
+	position: static;
+	overflow: scroll;
+}
+
+.test-4 #c-cont {
+	position: static;
+}
+
+.test-4 #d-cont {
+	position: fixed;
+}
+
+/* TEST 5 */
+.test-5 #view {
+	position: static;
+}
+
+.test-5 #content {
+	position: absolute;
+	overflow: scroll;
+}
+
+.test-5 #a-cont {
+	position: static;
+	overflow: scroll;
+}
+
+.test-5 #b-cont {
+	position: static;
+	overflow: scroll;
+}
+
+.test-5 #c-cont {
+	position: absolute;
+}
+
+.test-5 #d-cont {
+	position: fixed;
+}
+
+/* TEST 6 */
+.test-6 #view {
+	position: static;
+	overflow: scroll;
+}
+
+.test-6 #content {
+	position: absolute;
+	overflow: scroll;
+}
+
+.test-6 #a-cont {
+	position: fixed;
+	overflow: scroll;
+}
+
+.test-6 #b-cont {
+	position: fixed;
+	overflow: scroll;
+}
+
+.test-6 #c-cont {
+	position: absolute;
+}
+
+.test-6 #d-cont {
+	position: fixed;
+}
