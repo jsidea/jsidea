@@ -524,7 +524,8 @@ module jsidea.layout {
                 if (!node.offsetParentRaw) {
                     if (
                         !node.isTransformed
-                        && node.offsetParent.offsetParentRaw
+//                        && (node.element.id == "c-cont")
+//                        && node.offsetParent.offsetParentRaw
                         && node.isFixedZombie
                         && node.relation
                         && node.relation.isPreserved3d
@@ -536,8 +537,9 @@ module jsidea.layout {
                         ret.y += node.parent.offsetTop;
                         ret.x += node.parent.parent.offsetLeft;
                         ret.y += node.parent.parent.offsetTop;
+                        
 
-                        //console.log("--- STRANGE OFFSET ---", node.element.id, node.relation.element.id, node.relation.relation.element.id);
+//                        console.log("--- STRANGE OFFSET ---", node.element.id, node.relation.element.id, node.relation.relation.element.id);
                         return ret;
                     }
                     ret.x += node.relation.offsetUnscrolled.x;
