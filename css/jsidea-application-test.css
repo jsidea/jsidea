@@ -106,6 +106,7 @@
 
 .test-3 #d-cont {
 	position: fixed;
+	transform: translateX(0px);
 }
 
 /* TEST 4 */
@@ -116,6 +117,7 @@
 .test-4 #content {
 	position: absolute;
 	overflow: scroll;
+	transform: translateX(0px);
 }
 
 .test-4 #a-cont {
@@ -144,6 +146,7 @@
 .test-5 #content {
 	position: absolute;
 	overflow: scroll;
+	transform: translateX(0px);
 }
 
 .test-5 #a-cont {
@@ -158,6 +161,7 @@
 
 .test-5 #c-cont {
 	position: absolute;
+	transform: translateX(0px);
 }
 
 .test-5 #d-cont {
@@ -168,6 +172,7 @@
 .test-6 #view {
 	position: static;
 	overflow: scroll;
+	transform: translateX(0px);
 }
 
 .test-6 #content {
@@ -187,6 +192,7 @@
 
 .test-6 #c-cont {
 	position: absolute;
+	transform: translateX(0px);
 }
 
 .test-6 #d-cont {
@@ -212,6 +218,7 @@
 .test-7 #b-cont {
 	position: static;
 	overflow: scroll;
+	transform: translateX(0px);
 }
 
 .test-7 #c-cont {
@@ -225,6 +232,7 @@
 /* TEST 8 */
 .test-8 #view {
 	position: fixed;
+	transform: translateX(0px);
 }
 
 .test-8 #content {
@@ -244,6 +252,7 @@
 .test-8 #c-cont {
 	position: fixed;
 	overflow: scroll;
+	transform: translateX(0px);
 }
 
 .test-8 #d-cont {
@@ -254,6 +263,7 @@
 .test-9 #view {
 	position: fixed;
 	overflow: scroll;
+	transform: translateX(0px);
 }
 
 .test-9 #content {
@@ -267,6 +277,7 @@
 
 .test-9 #b-cont {
 	position: fixed;
+	transform: translateX(0px);
 }
 
 .test-9 #c-cont {

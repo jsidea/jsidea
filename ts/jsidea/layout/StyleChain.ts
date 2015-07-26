@@ -608,11 +608,11 @@ module jsidea.layout {
                     //                        return ret;
                     //                    }
 //                    if (node.element.id == "c-cont") {
-                      if (!node.parent.isTransformed && !node.relation.isStatic) {
+                      if (node.isTransformed && node.relation.isPreserved3d && !node.relation.isTransformed && !node.parent.isTransformed && !node.relation.isStatic) {
                         ret.x += node.relation.offsetLeft;
                         ret.y += node.relation.offsetTop;
-//                        console.log("---");
-//                          console.log(node.element.id);
+                        console.log("---");
+                          console.log(node.element.id);
 //                        console.log(node.relation.element.id);
 //                        console.log(node.relation.relation.element.id);
                         return ret;
