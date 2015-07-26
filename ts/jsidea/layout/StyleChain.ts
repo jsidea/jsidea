@@ -120,6 +120,19 @@ module jsidea.layout {
                         console.warn("FIXED: Inline elements cannot not have transform applied.");
                     }
                     
+//                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
+//                        //make static relative
+//                        //do it in this order should
+//                        //prevent re-layouting
+//                        element.style.left = "auto";
+//                        element.style.top = "auto";
+//                        element.style.position = "relative";
+//                    
+//                        //refresh style
+//                        style = window.getComputedStyle(element);
+//                        console.warn("FIXED: Transform on static element. Element becomes relative and top/left becomes auto.");
+//                    }
+                    
                     //                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
                     //                        //make static relative
                     //                        //do it in this order should
@@ -167,18 +180,20 @@ module jsidea.layout {
 //                        style = window.getComputedStyle(element);
 //                        console.warn("FIXED: Fixed position on element in 3d-context. Set from fixed to absolute.");
 //                    }
-                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
-                        //make static relative
-                        //do it in this order should
-                        //prevent re-layouting
-                        element.style.left = "auto";
-                        element.style.top = "auto";
-                        element.style.position = "relative";
                     
-                        //refresh style
-                        style = window.getComputedStyle(element);
-                        console.warn("FIXED: Transform on static element. Element becomes relative and top/left becomes auto.");
-                    }
+                    //COMMENT IN IF NEEDED
+//                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
+//                        //make static relative
+//                        //do it in this order should
+//                        //prevent re-layouting
+//                        element.style.left = "auto";
+//                        element.style.top = "auto";
+//                        element.style.position = "relative";
+//                    
+//                        //refresh style
+//                        style = window.getComputedStyle(element);
+//                        console.warn("FIXED: Transform on static element. Element becomes relative and top/left becomes auto.");
+//                    }
                     //                    else if (isTransformedChild && style.position == "fixed") {
                     //                    if (isTransformedChild && style.position == "fixed") {
                     //                        //webkit ignores fixed elements in an transformed context
@@ -536,6 +551,11 @@ module jsidea.layout {
         private static correctWebkitOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node || !node.offsetParent)
                 return ret;
+            
+            if(node.element.offsetParent && node.offsetParent.element != node.element.offsetParent && node.element.offsetParent == document.body)
+            {
+                return ret;
+            }
 
             if (!node.offsetParent.isStatic && !node.offsetParent.isBody) {
 

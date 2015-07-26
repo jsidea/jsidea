@@ -83,6 +83,7 @@
 /* TEST 3 */
 .test-3 #view {
 	position: fixed;
+	overflow: scroll;
 }
 
 .test-3 #content {
@@ -119,6 +120,7 @@
 
 .test-4 #a-cont {
 	position: static;
+	overflow: scroll;
 }
 
 .test-4 #b-cont {
@@ -265,6 +267,7 @@ canvas {
 	/* perspective-origin: 128px 128px;
 	transform-style: preserve-3d;
 	perspective: 600px; */
+	transform-style: preserve-3d;
 }
 
 #a-cont {
