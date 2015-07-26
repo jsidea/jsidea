@@ -395,11 +395,13 @@ module jsidea.layout {
 
             var excludeStaticParent = node.isAbsolute;
             var isTransformedChild = node.isTransformedChild;
-            while (node = node.parent) {
+            while ((node = node.parent) && node.parent && !node.parent.isBody) {
                 if (node.isBody || node.isSticked)//isSticked is maybe to mouch
                     return node;
-                if (node.isScrollable && (node.isTransformed || !node.isStatic))
-                    return node;
+                if (excludeStaticParent && node.isStatic)
+                    continue;
+//                if ((node.isScrollable && excludeStaticParent) && (node.isTransformed || !node.isStatic))
+//                    return node;
                 return node;
             }
             return null;

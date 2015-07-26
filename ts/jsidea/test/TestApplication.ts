@@ -14,7 +14,7 @@ module jsidea.test {
             var vie = document.getElementById("view");
 
             var max = 11;
-            var te = 4;//8;//2
+            var te = 2;//4;//8;//2
             document.body.className = "test-" + te;
             
             
