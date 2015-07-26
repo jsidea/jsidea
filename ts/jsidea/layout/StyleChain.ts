@@ -109,8 +109,11 @@ module jsidea.layout {
 
                 var perspective = math.Number.parse(style.perspective, 0);
                 var isPreserved3d = (style.transformStyle == "preserve-3d" || perspective > 0)
+                    || (system.Caps.isWebkit && element.id == "b-cont")
                     || (system.Caps.isWebkit && element.id == "a-cont")
-                    || (system.Caps.isWebkit && element.id == "view");
+                    || (system.Caps.isWebkit && element.id == "content")
+                    || (system.Caps.isWebkit && element.id == "view")
+                    ;
                 if (system.Caps.isFirefox) {
                     //                    if (preserved3d && style.position == "fixed") {
                     //                        //make the element a containing-block
@@ -226,8 +229,8 @@ module jsidea.layout {
                 var node: INode = {
                     depth: nodes.length,
                     element: element,
-                    isPreserved3dFixed: isPreserved3d,
                     isPreserved3d: style.transformStyle == "preserve-3d",
+                    isPreserved3dFixed: isPreserved3d,
                     style: style,
                     root: null,
                     relation: null,
@@ -564,7 +567,11 @@ module jsidea.layout {
                 return null;
             while (node = node.parent) {
                 if (node.isPreserved3d || node.isTransformed)
+                {
+//                    if(node.isStatic)
+//                        continue;
                     return node;
+                }
             }
             return null;
         }
@@ -585,11 +592,19 @@ module jsidea.layout {
                 //parentOffsetRaw is null
                 //so we have to return the full-offset
                 if (!node.offsetParentRaw) {
+                    if(node.parent.isStatic)
+                    {
+                        ret.x +=  node.parent.offsetUnscrolled.x;
+                        ret.y +=  node.parent.offsetUnscrolled.y;
+                        return ret;
+                    }
                     var n = node;
-                    while (n = n.relation) {
+                    while ((n = n.relation) && !n.isBody) {
+                        if (n.element.id)
+                            console.log(n.element.id);
                         ret.x += n.offsetLeft;
                         ret.y += n.offsetTop;
-                        if (n.isPreserved3d) {
+                        if (n.isPreserved3d || n.isStatic) {
                             break;
                         }
                     }
