@@ -256,11 +256,6 @@ module jsidea.layout {
                     isTransformed: style.transform != "none",
                     isTransformedChild: isTransformedChild
                 };
-
-                if (node.isBody) {
-                    //                    node.offsetLeft = -node.clientLeft;
-                    //                    node.offsetTop = -node.clientTop;    
-                }
                 
                 //if the element has transform
                 //the following elements are in transformed-context
@@ -324,7 +319,6 @@ module jsidea.layout {
         
         //TEST-AREA
         private static getOffsetParent(node: INode): INode {
-
             //            if (system.Caps.isFirefox)
             //                return node.element.offsetParent ? node.element.offsetParent._node : null;
 
@@ -524,7 +518,6 @@ module jsidea.layout {
                 return ret;
 
             if (!node.offsetParent) {
-                //hmmmm
                 if (node.isStatic) {
                     ret.x += node.root.clientLeft;
                     ret.y += node.root.clientTop;
@@ -545,12 +538,6 @@ module jsidea.layout {
                 ret.y += node.offsetParent.clientTop;
             }
             
-            //            if(node.element.id == "c-cont")
-            //            {
-            //                ret.x += node.offsetParent.clientLeft;
-            //                ret.y += node.offsetParent.clientTop;    
-            //            }
-            
             //if there is not bug to fix
             if (node.offsetParent.element == node.element.offsetParent)
                 return ret;
@@ -565,7 +552,11 @@ module jsidea.layout {
             if (!node || !node.offsetParent)
                 return ret;
 
+            //Why is chrome does not keep care of css-transform on static elements
+            //when it comes to the right offsetParent and the offsetTop/offsetLeft values
             if (node.offsetParentRaw != node.offsetParent) {
+                //console.warn("The given offsetParent is maybe wrong.");
+                
                 //trivial if there is a missing offsetParentRaw
                 //than just add the already calculated "correct" offset here
                 //that is possible because the calculation runs from body -> root
@@ -573,66 +564,23 @@ module jsidea.layout {
                     //offset without scroll
                     //the scroll value is already applied or will be applied
                     //for the target node
-                    //                    ret.x += node.offsetParent.offsetUnscrolled.x;
-                    //                    ret.y += node.offsetParent.offsetUnscrolled.y;
                 }
                 else {
-
-                    //                    ret.x -= node.offsetParentRaw.offsetUnscrolled.x;
-                    //                    ret.y -= node.offsetParentRaw.offsetUnscrolled.y;
                     if (node.isBody || (node.isAbsolute && node.offsetParentRaw.isBody)) {
-                        
-                        //                        ret.x += node.offsetParent.offsetUnscrolled.x;
-                        //                        ret.y += node.offsetParent.offsetUnscrolled.y;
-                        
                     }
                     else {
-
-                        if(node.element.id == "d-cont")
-                        {
-//                            ret.x += node.offsetParent.offsetUnscrolled.x;
-//                            ret.y += node.offsetParent.offsetUnscrolled.y;
-//                            ret.x += node.offsetParentRaw.clientLeft;
-//                            ret.y += node.offsetParentRaw.clientTop;
-                        }
-//                        if (node.isAbsolute && node.offsetParent == node.parent && node.parent.isStatic && (node.parent.isScrollable || node.parent.isPreserved3d)) {
-                        if (node.isAbsolute && node.offsetParent == node.parent && node.parent.isStatic){// && (node.parent.isScrollable || node.parent.isPreserved3d)) {
+                        if (node.isAbsolute && node.offsetParent == node.parent && (node.parent.isStatic && !node.parent.isPreserved3d)){
                             ret.x += node.offsetParentRaw.clientLeft;
                             ret.y += node.offsetParentRaw.clientTop;
-                            console.log(node.element.id);
                         }
                         else {
 
-                            ret.x -= node.offsetParent.offsetUnscrolled.x - node.offsetParentRaw.offsetLeft;// - node.offsetParentRaw.clientLeft - node.offsetParent.clientLeft - node.offsetParentRaw.paddingLeft + node.offsetParent.paddingLeft;
-                            ret.y -= node.offsetParent.offsetUnscrolled.y - node.offsetParentRaw.offsetTop;// - node.offsetParentRaw.clientTop - node.offsetParent.clientLeft - node.offsetParentRaw.paddingTop + node.offsetParent.paddingTop;
+                            ret.x -= node.offsetParent.offsetUnscrolled.x - node.offsetParentRaw.offsetLeft;
+                            ret.y -= node.offsetParent.offsetUnscrolled.y - node.offsetParentRaw.offsetTop;
                             ret.x += node.offsetParentRaw.clientLeft;
                             ret.y += node.offsetParentRaw.clientTop;
                         }
                     }
-
-                    if (node.offsetParent.isStatic && !node.offsetParent.isPreserved3d) {
-                        //                                                ret.x += node.offsetParent.clientLeft;
-                        //                                                ret.y += node.offsetParent.clientTop;
-                    }
-                    
-                    //                    ret.x -= node.offsetParent.offsetLeft- node.offsetParentRaw.offsetLeft;
-                    //                    ret.y -= node.offsetParent.offsetTop - node.offsetParentRaw.offsetTop;
-                    
-                    //                    ret.x += node.offsetParent.clientLeft - node.offsetParentRaw.clientLeft;
-                    //                    ret.y += node.offsetParent.clientLeft - node.offsetParentRaw.clientLeft;
-
-                    //                  
-                    //                    ret.x -= node.offsetParent.clientLeft;
-                    //                    ret.y -= node.offsetParent.clientTop;
-                    
-                    //                    ret.x -= node.offsetParentRaw.clientLeft;
-                    //                    ret.y -= node.offsetParentRaw.clientTop;
-                    ////
-                    //                    ret.x += node.offsetParent.clientLeft;
-                    //                    ret.y += node.offsetParent.clientTop;
-                    
-                    //                    ret.x += node.offsetParentRaw.clientLeft;
-                    //                    ret.y += node.offsetParentRaw.clientTop;
                 }
             }
             else {
@@ -641,21 +589,6 @@ module jsidea.layout {
             }
 
             return ret;
-
-            //if there is not bug to fix
-            if (node.offsetParent.element == node.element.offsetParent)
-                return ret;
-
-            if (!node.element.offsetParent && node.offsetParent && !node.offsetParent.isBody)//isBody is maybe too much
-            {
-                ret.x -= node.offsetParent.clientLeft;
-                ret.y -= node.offsetParent.clientTop;
-            }
-            
-            
-            //Why is chrome does not keep care of css-transform on static elements
-            //when it comes to the right offsetParent and the offsetTop/offsetLeft values
-            //            console.warn("The given offsetParent is maybe wrong.");
         }
 
         private static getIsAccumulatable(node: INode): boolean {

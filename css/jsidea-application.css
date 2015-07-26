@@ -305,6 +305,7 @@ canvas {
 	/* perspective-origin: 128px 128px;
 	transform-style: preserve-3d; */
 	/* transform: rotate(25deg); */
+	transform-style: preserve-3d;
 }
 
 #b-cont {
@@ -336,6 +337,7 @@ canvas {
 	transform-style: flat; */
 	/* perspective-origin: 256px 64px; */
 	/* transform-style: preserve-3d; */
+	transform-style: preserve-3d;
 }
 
 #c-cont {
