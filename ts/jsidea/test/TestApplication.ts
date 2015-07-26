@@ -14,7 +14,7 @@ module jsidea.test {
             var vie = document.getElementById("view");
 
             var te = 0;
-            document.body.className = "test-0";
+            document.body.className = "test-3";
 
             document.onkeyup = (e) => {
                 //console.log("KEY UP");
@@ -182,18 +182,18 @@ module jsidea.test {
                     text.Text.conc(10, " ", node.element.id ? node.element.id : node.element.nodeName),
                     text.Text.conc(18, " ", "PARENT", ofp ? (ofp.id ? ofp.id : ofp.nodeName) : "NONE"),
                     text.Text.conc(18, " ", "PARENT_C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
+//                    text.Text.conc(18, " ", "SCROLL_C", scaleOff ? (scaleOff.id ? scaleOff.id : scaleOff.nodeName) : "NONE"),
                     //                    text.Text.conc(18, " ", "PARENT_B", calcedPar ? (calcedPar.id ? calcedPar.id : calcedPar.nodeName) : "NONE"),
                     text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
                     text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
                     text.Text.conc(18, " ", "DISPLAY", node.style.display),
                     text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed),
-                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3d, node.style.transformStyle, node.element.style.transformStyle),
-//                    text.Text.conc(18, " ", "SCROLL_C", scaleOff ? (scaleOff.id ? scaleOff.id : scaleOff.nodeName) : "NONE"),
+                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dFixed, node.style.transformStyle, node.element.style.transformStyle),
                     //                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
                     text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
                     //                    text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),
                     text.Text.conc(18, " ", "OVERFLOW", node.style.overflow),
-                    text.Text.conc(18, " ", "POSITION", node.style.position)
+                    text.Text.conc(18, " ", "POSITION", node.style.position, node.isFixedWrong)
                 ]).join(" ");
                 console.log(res);
                 node = node.child;

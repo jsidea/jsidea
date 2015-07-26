@@ -11,6 +11,7 @@ module jsidea.layout {
         root: INode;
         child: INode;
         parent: INode;
+        relation: INode;
         depth: number;
         offset: geom.Point2D;
         //offset - scroll 
@@ -36,6 +37,7 @@ module jsidea.layout {
         isTransformedChild: boolean;
         isPerspectiveChild: boolean;
         perspective: number;
+        isPreserved3dFixed: boolean;
         isPreserved3d: boolean;
         isBorderBox: boolean;
         isAccumulatable: boolean;
@@ -106,7 +108,9 @@ module jsidea.layout {
                 var style = window.getComputedStyle(element);
 
                 var perspective = math.Number.parse(style.perspective, 0);
-                var isPreserved3d = (style.transformStyle == "preserve-3d" || perspective > 0) || (system.Caps.isWebkit && element.id == "content");
+                var isPreserved3d = (style.transformStyle == "preserve-3d" || perspective > 0)
+                    || (system.Caps.isWebkit && element.id == "a-cont")
+                    || (system.Caps.isWebkit && element.id == "view");
                 if (system.Caps.isFirefox) {
                     //                    if (preserved3d && style.position == "fixed") {
                     //                        //make the element a containing-block
@@ -222,9 +226,11 @@ module jsidea.layout {
                 var node: INode = {
                     depth: nodes.length,
                     element: element,
-                    isPreserved3d: isPreserved3d,
+                    isPreserved3dFixed: isPreserved3d,
+                    isPreserved3d: style.transformStyle == "preserve-3d",
                     style: style,
                     root: null,
+                    relation: null,
                     parent: null,
                     offsetParent: null,
                     offsetParentRaw: null,
@@ -265,7 +271,7 @@ module jsidea.layout {
                 if (!isFixed && node.isFixed)
                     isFixed = true;
 
-                if (!isPreserved3dChild && node.isPreserved3d)
+                if (!isPreserved3dChild && node.isPreserved3dFixed)
                     isPreserved3dChild = true;
 
                 if (!isPerspectiveChild && node.perspective > 0)
@@ -300,6 +306,7 @@ module jsidea.layout {
                 node.parentScroll = this.getParentScroll(node);
                 node.isAccumulatable = this.getIsAccumulatable(node);
                 node.scrollOffset = this.getScrollOffset(node);
+                node.relation = this.getRelation(node);
                 node.offset = this.getOffset(node);
                 node.offsetUnscrolled = new geom.Point2D(node.offset.x + node.scrollOffset.x, node.offset.y + node.scrollOffset.y);
                 node.position = this.getPosition(node);
@@ -316,6 +323,8 @@ module jsidea.layout {
                 return ret.setTo(node.offset.x, node.offset.y);
             return ret.setTo(node.offset.x - node.parent.offset.x, node.offset.y - node.parent.offset.y);
         }
+
+        
         
         //TEST-AREA
         private static getOffsetParent(node: INode): INode {
@@ -330,7 +339,7 @@ module jsidea.layout {
                     if (node.isBody || node.isSticked)//isSticked is maybe to mouch
                         return node;
                     if (node.isStatic) {
-                        if (node.isTransformed || node.isPreserved3d)
+                        if (node.isTransformed || node.isPreserved3dFixed)
                             return node;
                         else
                             continue;
@@ -338,7 +347,7 @@ module jsidea.layout {
                     //that is the trick
                     //if the element itself is wrongyl-fixed
                     //than this could not be the offset
-                    if (node.isFixedWrong && !node.isTransformed && !node.isPreserved3d) {
+                    if (node.isFixedWrong && !node.isTransformed && !node.isPreserved3dFixed) {
                         continue;
                     }
                     return node;
@@ -349,7 +358,7 @@ module jsidea.layout {
             if (!node || node.isBody || node.isSticked)
                 return null;
             while (node = node.parent) {
-                if (!node.isStatic || node.isTransformed || node.isPreserved3d || node.isSticked)//isSticked is maybe to mouch
+                if (!node.isStatic || node.isTransformed || node.isPreserved3dFixed || node.isSticked)//isSticked is maybe to mouch
                 {
                     return node;
                 }
@@ -365,7 +374,7 @@ module jsidea.layout {
             if (!node || node.isBody || node.isSticked)
                 return null;
             while (node = node.parent) {
-                if (!node.isStatic || node.isTransformed || node.isPreserved3d)// || (isFixed && node.isFixed))
+                if (!node.isStatic || node.isTransformed || node.isPreserved3dFixed)// || (isFixed && node.isFixed))
                 {
                     return node;
                 }
@@ -423,7 +432,7 @@ module jsidea.layout {
                 return node.isFixed;
 
             while (node = node.parent) {
-                if (node.isTransformed || node.isPreserved3d)
+                if (node.isTransformed || node.isPreserved3dFixed)
                     return false;
             }
             return true;
@@ -483,6 +492,8 @@ module jsidea.layout {
                 //correct them here
                 this.getCorrectOffset(node, ret);
                 //                node = node.offsetParentRaw;
+                if (system.Caps.isWebkit && !node.offsetParentRaw)
+                    break;
                 node = node.offsetParent;
             }
             return ret;
@@ -548,6 +559,16 @@ module jsidea.layout {
             return ret;
         }
 
+        private static getRelation(node: INode): INode {
+            if (!node.parent || node.isSticked)
+                return null;
+            while (node = node.parent) {
+                if (node.isPreserved3d || node.isTransformed)
+                    return node;
+            }
+            return null;
+        }
+
         private static correctWebkitOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node || !node.offsetParent)
                 return ret;
@@ -560,21 +581,117 @@ module jsidea.layout {
                 //trivial if there is a missing offsetParentRaw
                 //than just add the already calculated "correct" offset here
                 //that is possible because the calculation runs from body -> root
+                //the offset sum calculation stops for webkit if the 
+                //parentOffsetRaw is null
+                //so we have to return the full-offset
                 if (!node.offsetParentRaw) {
-                    //offset without scroll
-                    //the scroll value is already applied or will be applied
-                    //for the target node
+                    var n = node;
+                    while (n = n.relation) {
+                        ret.x += n.offsetLeft;
+                        ret.y += n.offsetTop;
+                        if (n.isPreserved3d) {
+                            break;
+                        }
+                    }
+
+                    //                    if (node.element.id == "view") {
+                    //                        //ret.x += 114;
+                    //                        //ret.y += 114;
+                    //                        
+                    //                        var n = node;
+                    //                        while (n = n.relation) {
+                    //                            console.log("REL", n.element.id);
+                    //                            ret.x += n.offsetLeft;
+                    //                            ret.y += n.offsetTop;
+                    //                            if (n.isPreserved3dUnfixed) {
+                    //                                break;
+                    //                            }
+                    //                        }
+                    //                    }
+                    //                    if (node.element.id == "content") {
+                    //                        //ret.x += 114;
+                    //                        //ret.y += 114;
+                    //                        
+                    //                        var n = node;
+                    //                        while (n = n.relation) {
+                    //                            console.log("REL", n.element.id);
+                    //                            ret.x += n.offsetLeft;
+                    //                            ret.y += n.offsetTop;
+                    //                            if (n.isPreserved3dUnfixed) {
+                    //                                break;
+                    //                            }
+                    //                        }
+                    //                    }
+                    //                    if (node.element.id == "a-cont") {
+                    //                        //ret.x += 114;
+                    //                        //ret.y += 114;
+                    //                        
+                    //                        var n = node;
+                    //                        while (n = n.relation) {
+                    //                            console.log("REL", n.element.id);
+                    //                            ret.x += n.offsetLeft;
+                    //                            ret.y += n.offsetTop;
+                    //                            if (n.isPreserved3dUnfixed) {
+                    //                                break;
+                    //                            }
+                    //                        }
+                    //                    }
+                    //                    if (node.element.id == "b-cont") {
+                    //                        //ret.x += 114;
+                    //                        //ret.y += 114;
+                    //                        var n = node;
+                    //                        while (n = n.relation) {
+                    //                            console.log("REL", n.element.id);
+                    //                            ret.x += n.offsetLeft;
+                    //                            ret.y += n.offsetTop;
+                    //                            if (n.isPreserved3dUnfixed) {
+                    //                                break;
+                    //                            }
+                    //                        }
+                    //                    }
+                    //                    if (node.element.id == "c-cont") {
+                    //                        //ret.x += 304;
+                    //                        //ret.y += 304;
+                    //                        
+                    //                        var n = node;
+                    //                        while (n = n.relation) {
+                    //                            console.log("REL", n.element.id);
+                    //                            ret.x += n.offsetLeft;
+                    //                            ret.y += n.offsetTop;
+                    //                            if (n.isPreserved3dUnfixed) {
+                    //                                break;
+                    //                            }
+                    //                        }
+                    //                    }
+                    //                    if (node.element.id == "d-cont") {                        
+                    //                        //ret.x += 89 + 304;
+                    //                        //ret.y += 89 + 304;
+                    //                        
+                    //                        var n = node;
+                    //                        while (n = n.relation) {
+                    //                            console.log("REL", n.element.id);
+                    //                            ret.x += n.offsetLeft;
+                    //                            ret.y += n.offsetTop;
+                    //                            if (n.isPreserved3dUnfixed) {
+                    //                                break;
+                    //                            }
+                    //                        }
+                    //                    }
+
                 }
                 else {
                     if (node.isBody || (node.isAbsolute && node.offsetParentRaw.isBody)) {
                     }
                     else {
-                        if (node.isAbsolute && node.offsetParent == node.parent && (node.parent.isStatic && !node.parent.isPreserved3d)){
+                        //                        if (node.isAbsolute && node.offsetParent == node.parent && node.parent.isTransformed) {
+                        if (node.isAbsolute && node.offsetParent == node.parent && (node.parent.isStatic && !node.parent.isPreserved3dFixed)) {//preserved3d is maybe to much
                             ret.x += node.offsetParentRaw.clientLeft;
                             ret.y += node.offsetParentRaw.clientTop;
                         }
                         else {
-
+                            //offset without scroll
+                            //the scroll value is already applied or will be applied
+                            //for the target node
                             ret.x -= node.offsetParent.offsetUnscrolled.x - node.offsetParentRaw.offsetLeft;
                             ret.y -= node.offsetParent.offsetUnscrolled.y - node.offsetParentRaw.offsetTop;
                             ret.x += node.offsetParentRaw.clientLeft;
