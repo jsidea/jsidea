@@ -120,7 +120,7 @@ module jsidea.layout {
                 //                if(system.Caps.isWebkit && isPreserved3d && style.overflow != "visible")
                 //                    isPreserved3d = false;
                 //                    || (system.Caps.isWebkit && element.id == "b-cont")
-//                    || (system.Caps.isWebkit && element.id == "a-cont")
+                //                    || (system.Caps.isWebkit && element.id == "a-cont")
                 //                    || (system.Caps.isWebkit && element.id == "content")
                 //                    || (system.Caps.isWebkit && element.id == "view")
                     ;
@@ -306,6 +306,7 @@ module jsidea.layout {
             //be careful that the functions
             //do not need the node-properties
             //which are not already set
+            //IMPORTANT: the order of the functions is very important for the result
             node = rootNode;
             while (node) {
                 //the node references
@@ -314,8 +315,6 @@ module jsidea.layout {
                 node.child = nodes[node.depth + 1];
                 node.offsetParentRaw = node.element.offsetParent ? node.element.offsetParent._node : null;
                 node.isSticked = this.getIsSticked(node);
-                //                if (node.isSticked)
-                //                    console.log("NODE IS STICKED", node.element.id);
                 node.isFixedWrong = node.isFixed && !node.isSticked;
                 node.isStickedChild = this.getIsStickedChild(node);
                 node.offsetParent = this.getOffsetParent(node);
@@ -339,7 +338,7 @@ module jsidea.layout {
                 return ret.setTo(node.offset.x, node.offset.y);
             return ret.setTo(node.offset.x - node.parent.offset.x, node.offset.y - node.parent.offset.y);
         }
-        
+
         private static getOffsetParent(node: INode): INode {
             //            if (system.Caps.isFirefox)
             //                return node.element.offsetParent ? node.element.offsetParent._node : null;
@@ -365,10 +364,10 @@ module jsidea.layout {
                     if (node.isFixedWrong && !node.isTransformed && !node.isPreserved3dFixed) {
                         continue;
                     }
-                    
+
                     if (!node.isTransformed && !node.isPreserved3d && !node.isPerspectiveChild)
                         continue;
-                    
+
                     return node;
                 }
                 return null;
@@ -385,50 +384,24 @@ module jsidea.layout {
             return null;
         }
 
-        private static getOffsetParent_BACKUP(node: INode): INode {
-
-            if (system.Caps.isFirefox)
-                return node.element.offsetParent ? node.element.offsetParent._node : null;
-
-            if (!node || node.isBody || node.isSticked)
-                return null;
-            while (node = node.parent) {
-                if (!node.isStatic || node.isTransformed || node.isPreserved3dFixed)// || (isFixed && node.isFixed))
-                {
-                    return node;
-                }
-            }
-            return null;
-        }
-
         private static getParentScroll(node: INode): INode {
             //important: if the node is really sticked, then there could not be any scrolling
             if (!node || node.isSticked || !node.parent)
                 return null;
 
-            //this makes the trick
-            //if the element is in an transform-context
-            //the parent cannot be skipped by only evaluating
-            //the position value only
-            var excludeStaticParent = node.isAbsolute && !node.isTransformedChild;
-            var leafNode: INode = node;
+            //if its forced to have another parent
+            if (node.isFixedWrong)
+                return node.offsetParent;
 
-            //the first possible parent-scroll element is the direct parent
-            node = node.parent;
-
-            while (node) {
-                //when can you skip it
-                if (excludeStaticParent && node.isStatic && !node.isTransformed) {// && !node.isPreserved3d) {
-
-                }
-                //if the element is really sticked, it cannot not be scrolled up there
-                //so stop here
-                else if (node.isScrollable || node.isSticked || (node.isAbsolute || node.isFixed)) {
+            var excludeStaticParent = node.isAbsolute;
+            var isTransformedChild = node.isTransformedChild;
+            while (node = node.parent) {
+                if (node.isBody || node.isSticked)//isSticked is maybe to mouch
                     return node;
-                }
-                node = node.parent;
+                if (node.isScrollable && (node.isTransformed || !node.isStatic))
+                    return node;
+                return node;
             }
-
             return null;
         }
 
@@ -630,13 +603,14 @@ module jsidea.layout {
                 else {
                     if (node.isBody || (node.isAbsolute && node.offsetParentRaw.isBody)) {
                         if (node.element.id == "d-cont") {
-//                            ret.x += node.offsetParent.offsetUnscrolled.x;
-//                            ret.y += node.offsetParent.offsetUnscrolled.y;
-//                            console.log("AHHH");
-//                             ret.x += node.offsetParent.offsetUnscrolled.x + node.offsetParentRaw.offsetLeft;
-//                            ret.y += node.offsetParent.offsetUnscrolled.y + node.offsetParentRaw.offsetTop;
-//                            ret.x -= node.offsetParentRaw.clientLeft;
-//                            ret.y -= node.offsetParentRaw.clientTop;
+                            //                            ret.x += node.offsetParent.offsetUnscrolled.x;
+                            //                            ret.y += node.offsetParent.offsetUnscrolled.y;
+                            //                            console.log("AHHH");
+                            //                             ret.x += node.offsetParent.offsetUnscrolled.x + node.offsetParentRaw.offsetLeft;
+                            //                            ret.y += node.offsetParent.offsetUnscrolled.y + node.offsetParentRaw.offsetTop;
+                            //                            ret.x -= node.offsetParentRaw.clientLeft;
+                            //                            ret.y -= node.offsetParentRaw.clientTop;
+                            console.log("AHH", node.parentScroll ? node.parentScroll.element.id : "NULL");
                         }
                     }
                     else {

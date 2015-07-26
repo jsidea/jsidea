@@ -343,15 +343,15 @@
 
 .test-11 #content {
 	position: fixed;
-	overflow: scroll;
-	transform: translateX(0px);
+	/* overflow: scroll; */
 	transform-style: preserve-3d;
+	perspective: 600px;
 }
 
 .test-11 #a-cont {
 	position: fixed;
 	overflow: scroll;
-	transform: translateX(0px);
+	transform: translateZ(-100px);
 	transform-style: preserve-3d;
 }
 
@@ -367,7 +367,7 @@
 	position: fixed;
 	overflow: scroll;
 	transform-style: preserve-3d;
-	transform: translateX(0px);
+	transform: translateZ(-100px);
 }
 
 .test-11 #d-cont {
