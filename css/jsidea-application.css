@@ -114,7 +114,7 @@
 }
 
 .test-4 #content {
-	position: static;
+	position: absolute;
 	overflow: scroll;
 }
 
@@ -174,7 +174,8 @@ body {
 	/* transform: rotate(10deg); */
 	/* transform: translateX(128px); */
 	/* transform: rotate(10deg); */
-	transform: translateX(128px);
+	/* transform: translateX(128px); */
+	transform: translateX(0px);
 }
 
 canvas {
@@ -184,8 +185,8 @@ canvas {
 	top: 0;
 	left: 0;
 	/* pointer-events: none; */
-	width: 800px;
-	height: 800px;
+	width: 1400px;
+	height: 1400px;
 	/* transform: rotate(45deg);
 	transform-origin: 0px 0px;
 	margin: 10px;
@@ -232,6 +233,7 @@ canvas {
 	/* box-sizing: border-box; */
 	/* perspective: 400px; */
 	transform-style: preserve-3d;
+	transform: translateX(0px);
 }
 
 #content {
@@ -268,6 +270,7 @@ canvas {
 	transform-style: preserve-3d;
 	perspective: 600px; */
 	transform-style: preserve-3d;
+	
 }
 
 #a-cont {
@@ -295,7 +298,8 @@ canvas {
 	/* box-sizing: border-box; */
 	transform-origin: 0px 0px;
 	/* transform: rotateY(-45deg)  rotate(45deg); */
-	transform: translateX(128px);
+	/* transform: translateX(128px); */
+	transform: translateX(0px);
 
 	/* perspective: 600px; */
 	/* perspective-origin: 128px 128px;
@@ -324,7 +328,8 @@ canvas {
 	perspective: 300px; */
 	/* transform: translateZ(-20px) rotateY(15deg) rotate(-20deg); */
 	transform-origin: 0px 0px;
-	transform: rotateY(45deg) rotate(45deg);
+	/* transform: rotateY(45deg) rotate(45deg); */
+	transform: translateX(0px);
 
 	/* perspective: 300px; */
 	/* perspective-origin: 64px 128px;
@@ -342,7 +347,7 @@ canvas {
 	width: 128px;
 	height: 128px;
 	cursor: pointer;
-	transform: rotate(45deg);
+	
 	transform-origin: 0px 0px;
 	/* overflow: scroll; */
 	/* transform: translateX(0); */
@@ -354,6 +359,9 @@ canvas {
 	/* transform-style: preserve-3d;
 	transform-origin: 0px 0px;
 	transform: rotate(25deg); */
+	
+	/* transform: rotate(45deg); */
+	transform: translateX(0px);
 }
 
 #d-cont {
@@ -363,7 +371,8 @@ canvas {
 	margin: 20px;
 	transform-origin: 0px 0px;
 	padding: 50px;
-	transform: rotate(45deg) translateX(64px);
+	/* transform: rotate(45deg) translateX(64px); */
+	transform: translateX(0px);
 
 	/* left: 64px; */
 

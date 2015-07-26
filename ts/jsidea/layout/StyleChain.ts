@@ -6,6 +6,7 @@ module jsidea.layout {
         style: CSSStyleDeclaration;
         element: HTMLElement;
         offsetParent: INode;
+        offsetParentRaw: INode;
         parentScroll: INode;
         root: INode;
         child: INode;
@@ -91,7 +92,7 @@ module jsidea.layout {
             //and this order prevents it (root to child)
             var nodes: INode[] = [];
             var isTransformedChild = false;
-            var preserved3d = false;
+            var isPreserved3dChild = false;
             var l = elements.length;
             var isFixed = false;
             var isPerspectiveChild = false;
@@ -101,6 +102,7 @@ module jsidea.layout {
                 var style = window.getComputedStyle(element);
 
                 var perspective = math.Number.parse(style.perspective, 0);
+                var isPreserved3d = (style.transformStyle == "preserve-3d" || perspective > 0) || (system.Caps.isWebkit && element.id == "content");
                 if (system.Caps.isFirefox) {
                     //                    if (preserved3d && style.position == "fixed") {
                     //                        //make the element a containing-block
@@ -120,18 +122,18 @@ module jsidea.layout {
                         console.warn("FIXED: Inline elements cannot not have transform applied.");
                     }
                     
-//                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
-//                        //make static relative
-//                        //do it in this order should
-//                        //prevent re-layouting
-//                        element.style.left = "auto";
-//                        element.style.top = "auto";
-//                        element.style.position = "relative";
-//                    
-//                        //refresh style
-//                        style = window.getComputedStyle(element);
-//                        console.warn("FIXED: Transform on static element. Element becomes relative and top/left becomes auto.");
-//                    }
+                    //                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
+                    //                        //make static relative
+                    //                        //do it in this order should
+                    //                        //prevent re-layouting
+                    //                        element.style.left = "auto";
+                    //                        element.style.top = "auto";
+                    //                        element.style.position = "relative";
+                    //                    
+                    //                        //refresh style
+                    //                        style = window.getComputedStyle(element);
+                    //                        console.warn("FIXED: Transform on static element. Element becomes relative and top/left becomes auto.");
+                    //                    }
                     
                     //                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
                     //                        //make static relative
@@ -157,43 +159,43 @@ module jsidea.layout {
                 }
                 //webkit bugfix 
                 if (system.Caps.isWebkit) {
-//                    if ((perspective || style.transformStyle == "preserve-3d") && style.transform == "none") {
-//                        //webkit bug with offset 100000
-//                        //Fixed elements as an anchestor of an preserve-3d elemenent
-//                        //without transform set
-//                        //if preserve-3d is set 
-//                        //and transform is not set
-//                        //than it becomes very strange
-//                        //this parent element with
-//                        //make the element a containing-block
-//                        element.style.transform = "translateX(0)";
-//                        
-//                        //refresh style
-//                        style = window.getComputedStyle(element);
-//                        console.warn("FIXED: Preserve-3d without transform. Transform set to \"translateX(0)\".");
-//                    }
-//                    if (preserved3d && style.position == "fixed") {
-//                        //make the element a containing-block
-//                        element.style.position = "absolute";
-//                        
-//                        //refresh style
-//                        style = window.getComputedStyle(element);
-//                        console.warn("FIXED: Fixed position on element in 3d-context. Set from fixed to absolute.");
-//                    }
+                    //                    if ((perspective || style.transformStyle == "preserve-3d") && style.transform == "none") {
+                    //                        //webkit bug with offset 100000
+                    //                        //Fixed elements as an anchestor of an preserve-3d elemenent
+                    //                        //without transform set
+                    //                        //if preserve-3d is set 
+                    //                        //and transform is not set
+                    //                        //than it becomes very strange
+                    //                        //this parent element with
+                    //                        //make the element a containing-block
+                    //                        element.style.transform = "translateX(0)";
+                    //                        
+                    //                        //refresh style
+                    //                        style = window.getComputedStyle(element);
+                    //                        console.warn("FIXED: Preserve-3d without transform. Transform set to \"translateX(0)\".");
+                    //                    }
+                    //                    if (preserved3d && style.position == "fixed") {
+                    //                        //make the element a containing-block
+                    //                        element.style.position = "absolute";
+                    //                        
+                    //                        //refresh style
+                    //                        style = window.getComputedStyle(element);
+                    //                        console.warn("FIXED: Fixed position on element in 3d-context. Set from fixed to absolute.");
+                    //                    }
                     
                     //COMMENT IN IF NEEDED
-//                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
-//                        //make static relative
-//                        //do it in this order should
-//                        //prevent re-layouting
-//                        element.style.left = "auto";
-//                        element.style.top = "auto";
-//                        element.style.position = "relative";
-//                    
-//                        //refresh style
-//                        style = window.getComputedStyle(element);
-//                        console.warn("FIXED: Transform on static element. Element becomes relative and top/left becomes auto.");
-//                    }
+                    //                    if (style.transform != "none" && (style.position == "static" || style.position == "auto")) {
+                    //                        //make static relative
+                    //                        //do it in this order should
+                    //                        //prevent re-layouting
+                    //                        element.style.left = "auto";
+                    //                        element.style.top = "auto";
+                    //                        element.style.position = "relative";
+                    //                    
+                    //                        //refresh style
+                    //                        style = window.getComputedStyle(element);
+                    //                        console.warn("FIXED: Transform on static element. Element becomes relative and top/left becomes auto.");
+                    //                    }
                     //                    else if (isTransformedChild && style.position == "fixed") {
                     //                    if (isTransformedChild && style.position == "fixed") {
                     //                        //webkit ignores fixed elements in an transformed context
@@ -216,11 +218,12 @@ module jsidea.layout {
                 var node: INode = {
                     depth: nodes.length,
                     element: element,
-                    isPreserved3d: style.transformStyle == "preserve-3d" || perspective > 0,
+                    isPreserved3d: isPreserved3d,
                     style: style,
                     root: null,
                     parent: null,
                     offsetParent: null,
+                    offsetParentRaw: null,
                     parentScroll: null,
                     position: null,
                     child: null,
@@ -260,8 +263,8 @@ module jsidea.layout {
                 if (!isFixed && node.isFixed)
                     isFixed = true;
 
-                if (!preserved3d && node.isPreserved3d)
-                    preserved3d = true;
+                if (!isPreserved3dChild && node.isPreserved3d)
+                    isPreserved3dChild = true;
 
                 if (!isPerspectiveChild && node.perspective > 0)
                     isPerspectiveChild = true;
@@ -287,6 +290,7 @@ module jsidea.layout {
                 node.root = rootNode;
                 node.parent = nodes[node.depth - 1];
                 node.child = nodes[node.depth + 1];
+                node.offsetParentRaw = node.element.offsetParent ? node.element.offsetParent._node : null;
                 node.isSticked = this.getIsSticked(node);
                 node.isFixedWrong = node.isFixed && !node.isSticked;
                 node.isStickedChild = this.getIsStickedChild(node);
@@ -476,7 +480,7 @@ module jsidea.layout {
                 //then the offsets are also wrong... arghhh)
                 //correct them here
                 this.getCorrectOffset(node, ret);
-                node = node.offsetParent;
+                node = node.offsetParentRaw;
             }
             return ret;
         }
@@ -551,31 +555,36 @@ module jsidea.layout {
         private static correctWebkitOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node || !node.offsetParent)
                 return ret;
-            
-            if(node.element.offsetParent && node.offsetParent.element != node.element.offsetParent && node.element.offsetParent == document.body)
-            {
-                return ret;
+
+            if (node.offsetParentRaw != node.offsetParent) {
+                if (!node.offsetParentRaw) {
+                    ret.x += node.offsetParent.offset.x;
+                    ret.y += node.offsetParent.offset.y;
+                    ret.x += node.offsetParent.scrollOffset.x;
+                    ret.y += node.offsetParent.scrollOffset.y;
+                }
+                else {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
             }
-
-            if (!node.offsetParent.isStatic && !node.offsetParent.isBody) {
-
-                //                if (node.isFixedWrong && !node.offsetParent.isBody)
-                if (node.isFixedWrong && node.parent == node.offsetParent)
-                    return ret;
-
+            else {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
             }
 
+            return ret;
+
             //if there is not bug to fix
             if (node.offsetParent.element == node.element.offsetParent)
                 return ret;
-            
-            if(!node.element.offsetParent && node.offsetParent&& !node.offsetParent.isBody)//isBody is maybe too much
+
+            if (!node.element.offsetParent && node.offsetParent && !node.offsetParent.isBody)//isBody is maybe too much
             {
                 ret.x -= node.offsetParent.clientLeft;
-                ret.y -= node.offsetParent.clientTop;     
+                ret.y -= node.offsetParent.clientTop;
             }
+            
             
             //Why is chrome does not keep care of css-transform on static elements
             //when it comes to the right offsetParent and the offsetTop/offsetLeft values
