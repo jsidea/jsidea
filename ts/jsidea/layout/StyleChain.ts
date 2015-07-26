@@ -599,131 +599,13 @@ module jsidea.layout {
                 //parentOffsetRaw is null
                 //so we have to return the full-offset
                 if (!node.offsetParentRaw) {
-                    
+                    if (node.relation.isFixedWrong && node.isScrollable && node.isTransformed) {
+                        ret.x += node.parent.offsetLeft;
+                        ret.y += node.parent.offsetTop;
+                        return ret;
+                    }
                     ret.x += node.relation.offsetUnscrolled.x;
                     ret.y += node.relation.offsetUnscrolled.y;
-
-//                    if (node.element.id == "c-cont" || node.element.id == "d-cont" || node.isLeaf && (node.parent.isStatic || node.parent.isRelative || node.parent.isAbsolute)) {
-//                        //                        if (node.element.id)
-//                        //                            console.log(node.element.id);
-//                        ret.x += node.parent.offsetUnscrolled.x;
-//                        ret.y += node.parent.offsetUnscrolled.y;
-//                        return ret;
-//                    }
-//                    var n = node;
-//                    while ((n = n.relation) && !n.isBody) {
-//                        //                        if (n.element.id)
-//                        //                            console.log(n.element.id);
-//                        ret.x += n.offsetLeft;
-//                        ret.y += n.offsetTop;
-//                        if (n.isPreserved3d || n.isStatic || node.parent.isRelative || node.parent.isAbsolute) {
-//                            break;
-//                        }
-//                    }
-                    
-                    
-                    //                    if (node.element.id == "c-cont" || node.element.id == "d-cont" || node.isLeaf && (node.parent.isStatic || node.parent.isRelative || node.parent.isAbsolute)) {
-                    ////                        if (node.element.id)
-                    ////                            console.log(node.element.id);
-                    //                        ret.x += node.parent.offsetUnscrolled.x;
-                    //                        ret.y += node.parent.offsetUnscrolled.y;
-                    //                        return ret;
-                    //                    }
-                    //                    var n = node;
-                    //                    while ((n = n.relation) && !n.isBody) {
-                    //                        //                        if (n.element.id)
-                    //                        //                            console.log(n.element.id);
-                    //                        ret.x += n.offsetLeft;
-                    //                        ret.y += n.offsetTop;
-                    //                        if (n.isPreserved3d || n.isStatic || node.parent.isRelative || node.parent.isAbsolute) {
-                    //                            break;
-                    //                        }
-                    //                    }
-
-                    //                    if (node.element.id == "view") {
-                    //                        //ret.x += 114;
-                    //                        //ret.y += 114;
-                    //                        
-                    //                        var n = node;
-                    //                        while (n = n.relation) {
-                    //                            console.log("REL", n.element.id);
-                    //                            ret.x += n.offsetLeft;
-                    //                            ret.y += n.offsetTop;
-                    //                            if (n.isPreserved3dUnfixed) {
-                    //                                break;
-                    //                            }
-                    //                        }
-                    //                    }
-                    //                    if (node.element.id == "content") {
-                    //                        //ret.x += 114;
-                    //                        //ret.y += 114;
-                    //                        
-                    //                        var n = node;
-                    //                        while (n = n.relation) {
-                    //                            console.log("REL", n.element.id);
-                    //                            ret.x += n.offsetLeft;
-                    //                            ret.y += n.offsetTop;
-                    //                            if (n.isPreserved3dUnfixed) {
-                    //                                break;
-                    //                            }
-                    //                        }
-                    //                    }
-                    //                    if (node.element.id == "a-cont") {
-                    //                        //ret.x += 114;
-                    //                        //ret.y += 114;
-                    //                        
-                    //                        var n = node;
-                    //                        while (n = n.relation) {
-                    //                            console.log("REL", n.element.id);
-                    //                            ret.x += n.offsetLeft;
-                    //                            ret.y += n.offsetTop;
-                    //                            if (n.isPreserved3dUnfixed) {
-                    //                                break;
-                    //                            }
-                    //                        }
-                    //                    }
-                    //                    if (node.element.id == "b-cont") {
-                    //                        //ret.x += 114;
-                    //                        //ret.y += 114;
-                    //                        var n = node;
-                    //                        while (n = n.relation) {
-                    //                            console.log("REL", n.element.id);
-                    //                            ret.x += n.offsetLeft;
-                    //                            ret.y += n.offsetTop;
-                    //                            if (n.isPreserved3dUnfixed) {
-                    //                                break;
-                    //                            }
-                    //                        }
-                    //                    }
-                    //                    if (node.element.id == "c-cont") {
-                    //                        //ret.x += 304;
-                    //                        //ret.y += 304;
-                    //                        
-                    //                        var n = node;
-                    //                        while (n = n.relation) {
-                    //                            console.log("REL", n.element.id);
-                    //                            ret.x += n.offsetLeft;
-                    //                            ret.y += n.offsetTop;
-                    //                            if (n.isPreserved3dUnfixed) {
-                    //                                break;
-                    //                            }
-                    //                        }
-                    //                    }
-                    //                    if (node.element.id == "d-cont") {                        
-                    //                        //ret.x += 89 + 304;
-                    //                        //ret.y += 89 + 304;
-                    //                        
-                    //                        var n = node;
-                    //                        while (n = n.relation) {
-                    //                            console.log("REL", n.element.id);
-                    //                            ret.x += n.offsetLeft;
-                    //                            ret.y += n.offsetTop;
-                    //                            if (n.isPreserved3dUnfixed) {
-                    //                                break;
-                    //                            }
-                    //                        }
-                    //                    }
-
                 }
                 else {
                     if (node.isBody || (node.isAbsolute && node.offsetParentRaw.isBody)) {
