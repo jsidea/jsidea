@@ -1,5 +1,3 @@
-
-
 /* TEST 0 */
 .test-0 #view {
 	position: static;
@@ -47,6 +45,7 @@
 
 .test-1 #c-cont {
 	position: static;
+	overflow: scroll;
 }
 
 .test-1 #d-cont {
@@ -68,14 +67,17 @@
 
 .test-2 #b-cont {
 	position: static;
+	overflow: scroll;
 }
 
 .test-2 #c-cont {
 	position: static;
+	overflow: scroll;
 }
 
 .test-2 #d-cont {
 	position: absolute;
+	overflow: scroll;
 }
 
 /* TEST 3 */
@@ -89,6 +91,7 @@
 
 .test-3 #a-cont {
 	position: fixed;
+	overflow: scroll;
 }
 
 .test-3 #b-cont {
@@ -97,6 +100,7 @@
 
 .test-3 #c-cont {
 	position: fixed;
+	overflow: scroll;
 }
 
 .test-3 #d-cont {
@@ -110,7 +114,7 @@
 
 .test-4 #content {
 	position: static;
-	overflow:scroll;
+	overflow: scroll;
 }
 
 .test-4 #a-cont {
@@ -119,7 +123,7 @@
 
 .test-4 #b-cont {
 	position: static;
-	overflow:scroll;
+	overflow: scroll;
 }
 
 .test-4 #c-cont {
@@ -147,6 +151,7 @@ body * {
 	/* perspective: 600px; */
 	/* transform-style: flat; */
 	/* box-sizing: border-box; */
+	
 }
 
 body {
@@ -163,10 +168,11 @@ body {
 	/* border: 100px solid #FF00FF; */
 	/* padding: 50px; */
 	/* position: absolute; */
-	border: 25px solid #EEEEEE;
+	/* border: 25px solid #EEEEEE; */
 	/* transform: rotate(10deg); */
 	/* transform: translateX(128px); */
-	transform: rotate(10deg);
+	/* transform: rotate(10deg); */
+	transform: translateX(128px);
 }
 
 canvas {
@@ -186,7 +192,7 @@ canvas {
 	background-color: rgba(0, 0, 0, 0.2);
 	transition: all 1s;
 	pointer-events: none;
-	
+
 	/* transform: rotate(45deg); */
 	/* box-sizing: border-box; */
 }
@@ -238,15 +244,12 @@ canvas {
 	/* transform: translateX(0); */
 	/* transform: translateX(0); */
 	/* left: 200px; */
-
 	/* transform: translateZ(-20px) rotateY(-5deg); */
 	/* transform: rotate(25deg); */
-
 	/* perspective: 100px; */
 	/* transform: translateX(0); */
 	/* perspective: 400px; */
 	/* transform-style: preserve-3d; */
-
 	/* transform: translateZ(-20px) rotateY(30deg);
 	transform-style: preserve-3d;
 	
@@ -254,12 +257,9 @@ canvas {
 	/* transform-style: preserve-3d; */
 	/* transform: translateX(0); */
 	/* overflow: hidden; */
-
 	/* perspective: 100px; */
-
 	/* box-sizing: border-box; */
 	/* perspective: 200px; */
-	
 	left: 100px;
 	border: 20px solid #FFF000;
 	/* perspective-origin: 128px 128px;
@@ -271,8 +271,6 @@ canvas {
 	border: 45px solid #00FFFF;
 	width: 512px;
 	height: 512px;
-	
-	
 	/* left: 100px; */
 	/* transform-style: preserve-3d;
 	perspective: 600px; */
@@ -295,7 +293,7 @@ canvas {
 	transform-origin: 0px 0px;
 	/* transform: rotateY(-45deg)  rotate(45deg); */
 	transform: translateX(128px);
-	
+
 	/* perspective: 600px; */
 	/* perspective-origin: 128px 128px;
 	transform-style: preserve-3d; */
@@ -307,15 +305,10 @@ canvas {
 	width: 512px;
 	padding: 45px;
 	margin: 20px;
-	
-
 	/* box-sizing: border-box; */
-
 	/* transform: translateZ(-20px) rotateY(-5deg)  rotate(40deg); */
-
 	/* transform-style: preserve-3d; */
 	/* transform: translateX(200px) rotate(30deg); */
-
 	/* transform: translateX(0); */
 	/* overflow: scroll; */
 	/* overflow: hidden; */
@@ -329,7 +322,7 @@ canvas {
 	/* transform: translateZ(-20px) rotateY(15deg) rotate(-20deg); */
 	transform-origin: 0px 0px;
 	transform: rotateY(45deg) rotate(45deg);
-	
+
 	/* perspective: 300px; */
 	/* perspective-origin: 64px 128px;
 	transform-style: flat; */
@@ -346,9 +339,7 @@ canvas {
 	width: 128px;
 	height: 128px;
 	cursor: pointer;
-	
 	transform: rotate(45deg);
-	
 	transform-origin: 0px 0px;
 	/* overflow: scroll; */
 	/* transform: translateX(0); */
@@ -356,7 +347,7 @@ canvas {
 	/* transform: translateX(100px); */
 	/* transform: translateZ(-800px) rotate(70deg); */
 	/* box-sizing: border-box; */
-	
+
 	/* transform-style: preserve-3d;
 	transform-origin: 0px 0px;
 	transform: rotate(25deg); */
@@ -369,11 +360,10 @@ canvas {
 	margin: 20px;
 	transform-origin: 0px 0px;
 	padding: 50px;
-	
 	transform: rotate(45deg) translateX(64px);
-	
+
 	/* left: 64px; */
-	
+
 	/* box-sizing: border-box; */
 	/* left: 0px; */
 	/* left: 100px; */

@@ -21,7 +21,7 @@ module jsidea.test {
                 if (e.keyCode != 37)
                     return;
                 te++;
-                if (te > 3)
+                if (te > 4)
                     te = 0;
                 document.body.className = "test-" + te;
             };
@@ -76,9 +76,9 @@ module jsidea.test {
                 //from window to body
                 //                console.log(pt.x, pt.y);
                 
-                pt = geom.Transform.create(document.body).globalToLocalPoint(pt);
-                pos.from.x = pt.x;
-                pos.from.y = pt.y;
+//                pt = geom.Transform.create(document.body).globalToLocalPoint(pt);
+//                pos.from.x = pt.x;
+//                pos.from.y = pt.y;
 //                pos.apply(d);
             });
         }
