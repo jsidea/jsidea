@@ -374,3 +374,42 @@
 	position: static;
 }
 
+/* TEST 12 */
+.test-12 #view {
+	position: fixed;
+	overflow: scroll;
+	transform: translateX(0px);
+	transform-style: preserve-3d;
+}
+
+.test-12 #content {
+	position: fixed;
+	/* overflow: scroll; */
+	transform-style: preserve-3d;
+	perspective: 600px;
+}
+
+.test-12 #a-cont {
+	position: fixed;
+	overflow: scroll;
+	transform: translateZ(-100px);
+	transform-style: preserve-3d;
+}
+
+.test-12 #b-cont {
+	position: fixed;
+	overflow: scroll;	
+	transform: translateX(0px);
+	transform-style: preserve-3d;
+}
+
+.test-12 #c-cont {
+	position: fixed;
+	/* overflow: scroll; */
+	transform-style: preserve-3d;
+	transform: translateX(0px);
+}
+
+.test-12 #d-cont {
+	position: static;
+}

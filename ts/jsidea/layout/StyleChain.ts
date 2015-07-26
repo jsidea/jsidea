@@ -394,6 +394,36 @@ module jsidea.layout {
             }
             return ret;
         }
+        
+        private static getIsAccumulatable(node: INode): boolean {
+//            return true;
+            
+            //in any case, if an element has only 2d-transforms or its the document-root item
+            //the transform can be accumulated to the parent transform
+            if (node.isBody || node.style.transform.indexOf("matrix3d") < 0)
+                return true;
+
+            var parent = node.parent;
+            //tricky stuff: only firefox does reflect/compute the "correct" transformStyle value.
+            //Firefox does NOT reflect the "grouping"-overrides and this is how its concepted.
+            //But what about the "opacity"-property. Opacity does not override the preserve-3d (not always, webkit does under some conditions).
+            //http://dev.w3.org/csswg/css-transforms/#grouping-property-values
+            if (parent.style.transformStyle == "flat" || parent.isScrollable)
+                return false;
+
+            return true;
+        }
+        
+        private static getRelation(node: INode): INode {
+            if (!node.parent || node.isSticked)
+                return null;
+            while (node = node.parent) {
+                if (node.isPreserved3d || node.isTransformed) {
+                    return node;
+                }
+            }
+            return null;
+        }
 
         private static getCorrectOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node)
@@ -418,71 +448,21 @@ module jsidea.layout {
 
             //bla bla ... if an element ist position "fixed" the offsetParent is always zero ....
             if (node.offsetParent.element != node.element.offsetParent) {
-
-//                if (node.element.id == "c-cont")
                 if (
                     node.isTransformed 
-//                    && node.element.id == "c-cont"
-                    && node.isScrollable 
+                    //                    && node.element.id == "c-cont"
+//                    && node.isScrollable
                     && node.parent
-                    && node.parent.isScrollable 
+//                    && node.parent.isScrollable
                     && node.parent == node.offsetParent
                     && !node.offsetParent.isPreserved3dFixed
                     && node.parent.parent
                     && !node.parent.parent.isPreserved3dFixed
-                ) 
-                {
-                    console.log("ELEMENT", node.element.id);
+                    ) {
+                    //console.log("ELEMENT", node.element.id);
                     ret.x -= node.offsetParent.offsetLeft;
                     ret.y -= node.offsetParent.offsetTop;
                 }
-                
-                //                console.log("WRONG OFFSET PARENT", node.element.id);
-                //                if(node.element.id == "a-cont")
-                //                if(node.parent.isPreserved3dFixed)
-                
-                //                if (node.isPerspectiveChild && node.parent.isPreserved3dFixed) {
-                //                    //                    console.log("hhh", node.element.id, node.parent.isPreserved3d, node.parent.element.id, node.parent.style.transformStyle);
-                //                    ret.x += node.parent.clientLeft;
-                //                    ret.y += node.parent.clientTop;
-                //                }
-                //                if (node.element.id == "b-cont") {
-                //                    //                    ret.x += node.parent.clientLeft;
-                //                    //                    ret.y += node.parent.clientTop;
-                //                    ret.x += node.parent.parent.offset.x;
-                //                    ret.y += node.parent.parent.offset.y;
-                //                    
-                ////                    ret.x += node.parent.offsetLeft;
-                ////                    ret.y += node.parent.offsetTop;
-                //                    
-                ////                    ret.x += node.parent.offsetLeft;
-                ////                    ret.y += node.parent.offsetTop;
-                //                    
-                ////                    ret.x += node.parent.parent.offsetLeft;
-                ////                    ret.y += node.parent.parent.offsetTop;
-                //
-                ////                    ret.x -= node.parent.clientLeft;
-                ////                    ret.y -= node.parent.clientTop;   
-                //                    //                    ret.x += node.parent.offset.x;
-                //                    //                    ret.y += node.parent.offset.y;    
-                //                }
-                //                if (node.element.id == "c-cont") {
-                //                    //                  ret.x += node.parent.parent.offset.x;
-                //                    
-                ////                    ret.x += node.parent.offsetLeft;
-                ////                    ret.y += node.parent.offsetTop;
-                //                    
-                //                    ret.x += node.parent.parent.offset.x;
-                //                    ret.y += node.parent.parent.offset.y;
-                //                    ret.x -= node.parent.clientLeft;
-                //                    ret.y -= node.parent.clientTop;
-                //                    
-                ////                    ret.x += node.parent.parent.offsetLeft;
-                ////                    ret.y += node.parent.parent.offsetTop;
-                //                    
-                ////                    ret.x += node.parent.parent.parent.offset.x;
-                ////                    ret.y += node.parent.parent.parent.offset.y;
-                //                }
                 return ret;
             }
 
@@ -526,17 +506,6 @@ module jsidea.layout {
             return ret;
         }
 
-        private static getRelation(node: INode): INode {
-            if (!node.parent || node.isSticked)
-                return null;
-            while (node = node.parent) {
-                if (node.isPreserved3d || node.isTransformed) {
-                    return node;
-                }
-            }
-            return null;
-        }
-
         private static correctWebkitOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node || !node.offsetParent)
                 return ret;
@@ -576,11 +545,8 @@ module jsidea.layout {
                 }
                 else {
                     if (node.isBody || (node.isAbsolute && node.offsetParentRaw.isBody)) {
-                        //                        if (node.element.id == "d-cont") {
-                        //                        }
                     }
                     else {
-                        //                        if (node.isAbsolute && node.offsetParent == node.parent && node.parent.isTransformed) {
                         if (node.isAbsolute && node.offsetParent == node.parent && (node.parent.isStatic && !node.parent.isPreserved3dFixed)) {//preserved3d is maybe to much
                             ret.x += node.offsetParentRaw.clientLeft;
                             ret.y += node.offsetParentRaw.clientTop;
@@ -603,23 +569,6 @@ module jsidea.layout {
             }
 
             return ret;
-        }
-
-        private static getIsAccumulatable(node: INode): boolean {
-            //in any case, if an element has only 2d-transforms or its the document-root item
-            //the transform can be accumulated to the parent transform
-            if (node.isBody || node.style.transform.indexOf("matrix3d") < 0)
-                return true;
-
-            var parent = node.parent;
-            //tricky stuff: only firefox does reflect/compute the "correct" transformStyle value.
-            //Firefox does NOT reflect the "grouping"-overrides and this is how its concepted.
-            //But what about the "opacity"-property. Opacity does not override the preserve-3d (not always, webkit does under some conditions).
-            //http://dev.w3.org/csswg/css-transforms/#grouping-property-values
-            if (parent.style.transformStyle == "flat" || parent.isScrollable)
-                return false;
-
-            return true;
-        }
+        }        
     }
 }

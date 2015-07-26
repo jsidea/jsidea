@@ -13,12 +13,9 @@ module jsidea.test {
             var con = document.getElementById("content");
             var vie = document.getElementById("view");
 
-            var max = 11;
-            var te = 11;//5;//7;//11 for ie11 testing 5 is scrolling test
-            
+            var max = 12;
+            var te = 10;//5;//7;//11 for ie11 testing 5 is scrolling test
             document.body.className = "test-" + te;
-            
-            
 
             var can = document.createElement("canvas");
             can.id = "can";

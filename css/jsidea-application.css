@@ -77,7 +77,6 @@ canvas {
 	top: 100px;
 	margin: 20px;
 	padding: 100px;
-	transform-origin: 0px 0px;
 }
 
 #b-cont {
@@ -86,7 +85,6 @@ canvas {
 	height: 300px;
 	padding: 45px;
 	margin: 20px;
-	transform-origin: 0px 0px;
 }
 
 #c-cont {
@@ -95,7 +93,6 @@ canvas {
 	border: 25px solid #FF0000;
 	width: 128px;
 	height: 128px;
-	transform-origin: 0px 0px;
 }
 
 #d-cont {
@@ -103,6 +100,5 @@ canvas {
 	width: 256px;
 	height: 256px;
 	margin: 20px;
-	transform-origin: 0px 0px;
 	padding: 50px;
 }
