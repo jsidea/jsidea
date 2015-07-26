@@ -13,16 +13,16 @@ module jsidea.test {
             var con = document.getElementById("content");
             var vie = document.getElementById("view");
 
-            var max = 9;
-            var te = 8;
+            var max = 11;
+            var te = 11;
             document.body.className = "test-" + te;
             
             
 
             var can = document.createElement("canvas");
             can.id = "can";
-            can.width = 800;
-            can.height = 800;
+            can.width = 1920;
+            can.height = 1080;
             var ctx = can.getContext("2d");
 
             var a = document.createElement("div");
@@ -194,20 +194,20 @@ module jsidea.test {
                 var scaleOff = node.parentScroll ? node.parentScroll.element : null;
                 var res = ([
                     text.Text.conc(10, " ", node.element.id ? node.element.id : node.element.nodeName),
-                    text.Text.conc(18, " ", "PARENT", ofp ? (ofp.id ? ofp.id : ofp.nodeName) : "NONE"),
-                    text.Text.conc(18, " ", "PARENT_C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
+                    text.Text.conc(16, " ", "PARENT", ofp ? (ofp.id ? ofp.id : ofp.nodeName) : "NONE"),
+                    text.Text.conc(16, " ", "PARENT_C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
                     //                    text.Text.conc(18, " ", "SCROLL_C", scaleOff ? (scaleOff.id ? scaleOff.id : scaleOff.nodeName) : "NONE"),
                     //                    text.Text.conc(18, " ", "PARENT_B", calcedPar ? (calcedPar.id ? calcedPar.id : calcedPar.nodeName) : "NONE"),
                     text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
                     text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
-                    text.Text.conc(18, " ", "DISPLAY", node.style.display),
+                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
                     text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed),
                     text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dFixed, node.style.transformStyle),
                     //                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
                     text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
                     //                    text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),
                     text.Text.conc(18, " ", "OVERFLOW", node.style.overflow),
-                    text.Text.conc(18, " ", "POSITION", node.style.position, node.isFixedWrong, node.isFixed, node.isSticked)
+                    text.Text.conc(18, " ", "POSITION", node.style.position, node.isSticked)
                 ]).join(" ");
                 console.log(res);
                 node = node.child;

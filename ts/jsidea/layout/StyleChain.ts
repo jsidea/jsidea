@@ -115,12 +115,15 @@ module jsidea.layout {
                 if (system.Caps.isWebkit && style.transform != "none" && style.overflow != "visible" && style.perspective != "none")
                     perspective = 0;
 
-                var isPreserved3d = (style.transformStyle == "preserve-3d" || perspective > 0);
+                var isPreserved3d = (style.transformStyle == "preserve-3d" || perspective > 0)
+                
+                //                if(system.Caps.isWebkit && isPreserved3d && style.overflow != "visible")
+                //                    isPreserved3d = false;
                 //                    || (system.Caps.isWebkit && element.id == "b-cont")
-                //                    || (system.Caps.isWebkit && element.id == "a-cont")
+//                    || (system.Caps.isWebkit && element.id == "a-cont")
                 //                    || (system.Caps.isWebkit && element.id == "content")
                 //                    || (system.Caps.isWebkit && element.id == "view")
-                ;
+                    ;
                 if (system.Caps.isFirefox) {
                     //                    if (preserved3d && style.position == "fixed") {
                     //                        //make the element a containing-block
@@ -336,10 +339,7 @@ module jsidea.layout {
                 return ret.setTo(node.offset.x, node.offset.y);
             return ret.setTo(node.offset.x - node.parent.offset.x, node.offset.y - node.parent.offset.y);
         }
-
         
-        
-        //TEST-AREA
         private static getOffsetParent(node: INode): INode {
             //            if (system.Caps.isFirefox)
             //                return node.element.offsetParent ? node.element.offsetParent._node : null;
@@ -351,18 +351,24 @@ module jsidea.layout {
                 while (node = node.parent) {
                     if (node.isBody || node.isSticked)//isSticked is maybe to mouch
                         return node;
+
                     if (node.isStatic) {
                         if (node.isTransformed || node.isPreserved3dFixed)
                             return node;
                         else
                             continue;
                     }
+                    
                     //that is the trick
                     //if the element itself is wrongyl-fixed
                     //than this could not be the offset
                     if (node.isFixedWrong && !node.isTransformed && !node.isPreserved3dFixed) {
                         continue;
                     }
+                    
+                    if (!node.isTransformed && !node.isPreserved3d && !node.isPerspectiveChild)
+                        continue;
+                    
                     return node;
                 }
                 return null;
@@ -601,20 +607,21 @@ module jsidea.layout {
                 //parentOffsetRaw is null
                 //so we have to return the full-offset
                 if (!node.offsetParentRaw) {
-                    //&& node.isScrollable
-                    //                    if ((node.relation.isFixedWrong && !node.parent.isScrollable && node.isTransformed && node.parent.isPreserved3d && !node.isLeaf)) {
-                    //                        ret.x += node.parent.offsetLeft;
-                    //                        ret.y += node.parent.offsetTop;
-                    //                        return ret;
-                    //                    }
-//                    if (node.element.id == "c-cont") {
-                      if (node.isTransformed && node.relation.isPreserved3d && !node.relation.isTransformed && !node.parent.isTransformed && !node.relation.isStatic) {
-                        ret.x += node.relation.offsetLeft;
-                        ret.y += node.relation.offsetTop;
-                        console.log("---");
-                          console.log(node.element.id);
-//                        console.log(node.relation.element.id);
-//                        console.log(node.relation.relation.element.id);
+                    if (
+                        !node.isTransformed
+                        && node.relation
+                        && node.relation.isPreserved3d
+                        && !node.relation.isTransformed
+                        && node.relation.relation
+                        && node.relation.relation == node.relation.parent
+                        ) {
+                        //                    if (node.element.id == "d-cont") {
+                        ret.x += node.parent.offsetLeft;
+                        ret.y += node.parent.offsetTop;
+                        ret.x += node.parent.parent.offsetLeft;
+                        ret.y += node.parent.parent.offsetTop;
+
+                        console.log("--- STRANGE OFFSET ---", node.element.id, node.relation.element.id, node.relation.relation.element.id);
                         return ret;
                     }
                     ret.x += node.relation.offsetUnscrolled.x;
@@ -622,6 +629,15 @@ module jsidea.layout {
                 }
                 else {
                     if (node.isBody || (node.isAbsolute && node.offsetParentRaw.isBody)) {
+                        if (node.element.id == "d-cont") {
+//                            ret.x += node.offsetParent.offsetUnscrolled.x;
+//                            ret.y += node.offsetParent.offsetUnscrolled.y;
+//                            console.log("AHHH");
+//                             ret.x += node.offsetParent.offsetUnscrolled.x + node.offsetParentRaw.offsetLeft;
+//                            ret.y += node.offsetParent.offsetUnscrolled.y + node.offsetParentRaw.offsetTop;
+//                            ret.x -= node.offsetParentRaw.clientLeft;
+//                            ret.y -= node.offsetParentRaw.clientTop;
+                        }
                     }
                     else {
                         //                        if (node.isAbsolute && node.offsetParent == node.parent && node.parent.isTransformed) {

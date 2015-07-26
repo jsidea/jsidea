@@ -50,6 +50,7 @@
 
 .test-1 #d-cont {
 	position: fixed;
+	transform-style: preserve-3d;
 }
 
 /* TEST 2 */
@@ -59,6 +60,7 @@
 
 .test-2 #content {
 	position: static;
+	transform-style: preserve-3d;
 }
 
 .test-2 #a-cont {
@@ -107,6 +109,7 @@
 .test-3 #d-cont {
 	position: fixed;
 	transform: translateX(0px);
+	transform-style: preserve-3d;
 }
 
 /* TEST 4 */
@@ -152,6 +155,7 @@
 .test-5 #a-cont {
 	position: static;
 	overflow: scroll;
+	transform-style: preserve-3d;
 }
 
 .test-5 #b-cont {
@@ -183,6 +187,7 @@
 .test-6 #a-cont {
 	position: fixed;
 	overflow: scroll;
+	transform-style: preserve-3d;
 }
 
 .test-6 #b-cont {
@@ -208,17 +213,20 @@
 .test-7 #content {
 	position: absolute;
 	overflow: scroll;
+	transform-style: preserve-3d;
 }
 
 .test-7 #a-cont {
 	position: fixed;
 	overflow: scroll;
+	transform-style: preserve-3d;
 }
 
 .test-7 #b-cont {
 	position: static;
 	overflow: scroll;
 	transform: translateX(0px);
+	transform-style: preserve-3d;
 }
 
 .test-7 #c-cont {
@@ -243,6 +251,7 @@
 .test-8 #a-cont {
 	position: fixed;
 	overflow: scroll;
+	transform-style: preserve-3d;
 }
 
 .test-8 #b-cont {
@@ -288,5 +297,80 @@
 .test-9 #d-cont {
 	position: fixed;
 	transform-style: preserve-3d;
+}
+
+
+/* TEST 10 */
+.test-10 #view {
+	position: fixed;
+}
+
+.test-10 #content {
+	position: fixed;
+	transform: translateX(0px);
+	transform-style: preserve-3d;
+}
+
+.test-10 #a-cont {
+	position: fixed;
+	overflow: scroll;
+	transform-style: preserve-3d;
+}
+
+.test-10 #b-cont {
+	position: fixed;
+	transform-style: preserve-3d;
+	transform: translateX(0px);
+}
+
+.test-10 #c-cont {
+	position: fixed;
+	transform-style: preserve-3d;
+	border-width: 40px;
+}
+
+.test-10 #d-cont {
+	position: fixed;
+}
+
+/* TEST 11 */
+.test-11 #view {
+	position: fixed;
+	overflow: scroll;
+	transform: translateX(0px);
+	transform-style: preserve-3d;
+}
+
+.test-11 #content {
+	position: fixed;
+	overflow: scroll;
+	transform: translateX(0px);
+	transform-style: preserve-3d;
+}
+
+.test-11 #a-cont {
+	position: fixed;
+	overflow: scroll;
+	transform: translateX(0px);
+	transform-style: preserve-3d;
+}
+
+.test-11 #b-cont {
+	position: fixed;
+	transform: translateX(0px);
+	transform-style: preserve-3d;
+	overflow: scroll;
+	
+}
+
+.test-11 #c-cont {
+	position: fixed;
+	overflow: scroll;
+	transform-style: preserve-3d;
+	transform: translateX(0px);
+}
+
+.test-11 #d-cont {
+	position: static;
 }
 
