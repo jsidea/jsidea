@@ -249,3 +249,33 @@
 .test-8 #d-cont {
 	position: fixed;
 }
+
+/* TEST 9 */
+.test-9 #view {
+	position: fixed;
+	overflow: scroll;
+}
+
+.test-9 #content {
+	position: fixed;
+}
+
+.test-9 #a-cont {
+	position: fixed;
+	overflow: scroll;
+}
+
+.test-9 #b-cont {
+	position: fixed;
+}
+
+.test-9 #c-cont {
+	position: fixed;
+	transform-style: preserve-3d;
+}
+
+.test-9 #d-cont {
+	position: fixed;
+	transform-style: preserve-3d;
+}
+

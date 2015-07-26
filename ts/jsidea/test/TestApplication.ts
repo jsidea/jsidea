@@ -13,10 +13,42 @@ module jsidea.test {
             var con = document.getElementById("content");
             var vie = document.getElementById("view");
 
-            var max = 8;
-            var te = 3;
+            var max = 9;
+            var te = 8;
             document.body.className = "test-" + te;
             
+            
+
+            var can = document.createElement("canvas");
+            can.id = "can";
+            can.width = 800;
+            can.height = 800;
+            var ctx = can.getContext("2d");
+
+            var a = document.createElement("div");
+            a.id = "a-cont";
+            var b = document.createElement("div");
+            b.id = "b-cont";
+            var c = document.createElement("div");
+            c.id = "c-cont";
+            var d = document.createElement("div");
+            d.id = "d-cont";
+            var xc = document.createElement("div");
+            xc.id = "x-cont";
+
+            a.appendChild(b);
+            b.appendChild(c);
+            c.appendChild(d);
+            con.appendChild(a);
+            document.body.appendChild(can);
+            d.appendChild(xc);
+
+            var pos = new layout.Position();
+            pos.to.x = "100%";
+            pos.to.y = "100%";
+            pos.toBox = layout.BoxModel.BORDER;
+            pos.useTransform = true;
+
             var draw = () => {
                 ctx.clearRect(0, 0, can.width, can.height);
 
@@ -47,34 +79,7 @@ module jsidea.test {
                     draw();
                 }
             };
-
-            var can = document.createElement("canvas");
-            can.id = "can";
-            can.width = 800;
-            can.height = 800;
-            var ctx = can.getContext("2d");
-
-            var a = document.createElement("div");
-            a.id = "a-cont";
-            var b = document.createElement("div");
-            b.id = "b-cont";
-            var c = document.createElement("div");
-            c.id = "c-cont";
-            var d = document.createElement("div");
-            d.id = "d-cont";
-
-            a.appendChild(b);
-            b.appendChild(c);
-            c.appendChild(d);
-            con.appendChild(a);
-            document.body.appendChild(can);
-
-            var pos = new layout.Position();
-            pos.to.x = "100%";
-            pos.to.y = "100%";
-            pos.toBox = layout.BoxModel.BORDER;
-            pos.useTransform = true;
-
+            
             document.addEventListener("click",(evt) => {
                 this.logChain(d);
             });
@@ -202,7 +207,7 @@ module jsidea.test {
                     text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
                     //                    text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),
                     text.Text.conc(18, " ", "OVERFLOW", node.style.overflow),
-                    text.Text.conc(18, " ", "POSITION", node.style.position, node.isFixedWrong)
+                    text.Text.conc(18, " ", "POSITION", node.style.position, node.isFixedWrong, node.isFixed, node.isSticked)
                 ]).join(" ");
                 console.log(res);
                 node = node.child;

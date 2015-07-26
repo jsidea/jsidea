@@ -173,6 +173,7 @@ canvas {
 #b-cont {
 	border: 35px solid #0000FF;
 	width: 512px;
+	height: 300px;
 	padding: 45px;
 	margin: 20px;
 	/* box-sizing: border-box; */
@@ -210,7 +211,7 @@ canvas {
 	border: 25px solid #FF0000;
 	width: 128px;
 	height: 128px;
-	cursor: pointer;
+	/* cursor: pointer; */
 	
 	transform-origin: 0px 0px;
 	/* overflow: scroll; */

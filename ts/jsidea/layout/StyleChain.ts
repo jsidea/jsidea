@@ -311,6 +311,8 @@ module jsidea.layout {
                 node.child = nodes[node.depth + 1];
                 node.offsetParentRaw = node.element.offsetParent ? node.element.offsetParent._node : null;
                 node.isSticked = this.getIsSticked(node);
+                //                if (node.isSticked)
+                //                    console.log("NODE IS STICKED", node.element.id);
                 node.isFixedWrong = node.isFixed && !node.isSticked;
                 node.isStickedChild = this.getIsStickedChild(node);
                 node.offsetParent = this.getOffsetParent(node);
@@ -599,9 +601,20 @@ module jsidea.layout {
                 //parentOffsetRaw is null
                 //so we have to return the full-offset
                 if (!node.offsetParentRaw) {
-                    if (node.relation.isFixedWrong && node.isScrollable && node.isTransformed) {
-                        ret.x += node.parent.offsetLeft;
-                        ret.y += node.parent.offsetTop;
+                    //&& node.isScrollable
+                    //                    if ((node.relation.isFixedWrong && !node.parent.isScrollable && node.isTransformed && node.parent.isPreserved3d && !node.isLeaf)) {
+                    //                        ret.x += node.parent.offsetLeft;
+                    //                        ret.y += node.parent.offsetTop;
+                    //                        return ret;
+                    //                    }
+//                    if (node.element.id == "c-cont") {
+                      if (!node.parent.isTransformed && !node.relation.isStatic) {
+                        ret.x += node.relation.offsetLeft;
+                        ret.y += node.relation.offsetTop;
+//                        console.log("---");
+//                          console.log(node.element.id);
+//                        console.log(node.relation.element.id);
+//                        console.log(node.relation.relation.element.id);
                         return ret;
                     }
                     ret.x += node.relation.offsetUnscrolled.x;
