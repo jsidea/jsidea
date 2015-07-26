@@ -14,7 +14,7 @@ module jsidea.test {
             var vie = document.getElementById("view");
 
             var te = 0;
-            document.body.className = "test-4";
+            document.body.className = "test-0";
 
             document.onkeyup = (e) => {
                 //console.log("KEY UP");
@@ -24,6 +24,7 @@ module jsidea.test {
                 if (te > 4)
                     te = 0;
                 document.body.className = "test-" + te;
+                console.log("TEST-" + te);
             };
 
             var can = document.createElement("canvas");

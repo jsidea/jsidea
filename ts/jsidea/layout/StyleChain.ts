@@ -13,12 +13,16 @@ module jsidea.layout {
         parent: INode;
         depth: number;
         offset: geom.Point2D;
+        //offset - scroll 
+        offsetUnscrolled: geom.Point2D;
         position: geom.Point2D;
         scrollOffset: geom.Point2D;
         offsetLeft: number;
         offsetTop: number;
         clientLeft: number;
         clientTop: number;
+        paddingLeft: number;
+        paddingTop: number;
         isRelative: boolean;
         isAbsolute: boolean;
         isStatic: boolean;
@@ -231,6 +235,7 @@ module jsidea.layout {
                     perspective: perspective,
                     isPerspectiveChild: isPerspectiveChild,
                     offset: null,
+                    offsetUnscrolled: null,
                     scrollOffset: null,
                     isFixed: style.position == "fixed",
                     isFixedWrong: false,
@@ -242,6 +247,8 @@ module jsidea.layout {
                     isBody: element == document.body,
                     isSticked: false,
                     isStickedChild: false,
+                    paddingLeft: math.Number.parse(style.paddingLeft, 0),
+                    paddingTop: math.Number.parse(style.paddingTop, 0),
                     offsetLeft: element.offsetLeft,
                     offsetTop: element.offsetTop,
                     clientLeft: element.clientLeft,
@@ -299,6 +306,7 @@ module jsidea.layout {
                 node.isAccumulatable = this.getIsAccumulatable(node);
                 node.scrollOffset = this.getScrollOffset(node);
                 node.offset = this.getOffset(node);
+                node.offsetUnscrolled = new geom.Point2D(node.offset.x + node.scrollOffset.x, node.offset.y + node.scrollOffset.y);
                 node.position = this.getPosition(node);
 
                 node = node.child;
@@ -480,7 +488,8 @@ module jsidea.layout {
                 //then the offsets are also wrong... arghhh)
                 //correct them here
                 this.getCorrectOffset(node, ret);
-                node = node.offsetParentRaw;
+                //                node = node.offsetParentRaw;
+                node = node.offsetParent;
             }
             return ret;
         }
@@ -557,15 +566,73 @@ module jsidea.layout {
                 return ret;
 
             if (node.offsetParentRaw != node.offsetParent) {
+                //trivial if there is a missing offsetParentRaw
+                //than just add the already calculated "correct" offset here
+                //that is possible because the calculation runs from body -> root
                 if (!node.offsetParentRaw) {
-                    ret.x += node.offsetParent.offset.x;
-                    ret.y += node.offsetParent.offset.y;
-                    ret.x += node.offsetParent.scrollOffset.x;
-                    ret.y += node.offsetParent.scrollOffset.y;
+                    //offset without scroll
+                    //the scroll value is already applied or will be applied
+                    //for the target node
+                    //                    ret.x += node.offsetParent.offsetUnscrolled.x;
+                    //                    ret.y += node.offsetParent.offsetUnscrolled.y;
                 }
                 else {
-                    ret.x += node.offsetParentRaw.clientLeft;
-                    ret.y += node.offsetParentRaw.clientTop;
+
+                    //                    ret.x -= node.offsetParentRaw.offsetUnscrolled.x;
+                    //                    ret.y -= node.offsetParentRaw.offsetUnscrolled.y;
+                    if (node.isBody || (node.isAbsolute && node.offsetParentRaw.isBody)) {
+                        
+                        //                        ret.x += node.offsetParent.offsetUnscrolled.x;
+                        //                        ret.y += node.offsetParent.offsetUnscrolled.y;
+                        
+                    }
+                    else {
+
+                        if(node.element.id == "d-cont")
+                        {
+//                            ret.x += node.offsetParent.offsetUnscrolled.x;
+//                            ret.y += node.offsetParent.offsetUnscrolled.y;
+//                            ret.x += node.offsetParentRaw.clientLeft;
+//                            ret.y += node.offsetParentRaw.clientTop;
+                        }
+//                        if (node.isAbsolute && node.offsetParent == node.parent && node.parent.isStatic && (node.parent.isScrollable || node.parent.isPreserved3d)) {
+                        if (node.isAbsolute && node.offsetParent == node.parent && node.parent.isStatic){// && (node.parent.isScrollable || node.parent.isPreserved3d)) {
+                            ret.x += node.offsetParentRaw.clientLeft;
+                            ret.y += node.offsetParentRaw.clientTop;
+                            console.log(node.element.id);
+                        }
+                        else {
+
+                            ret.x -= node.offsetParent.offsetUnscrolled.x - node.offsetParentRaw.offsetLeft;// - node.offsetParentRaw.clientLeft - node.offsetParent.clientLeft - node.offsetParentRaw.paddingLeft + node.offsetParent.paddingLeft;
+                            ret.y -= node.offsetParent.offsetUnscrolled.y - node.offsetParentRaw.offsetTop;// - node.offsetParentRaw.clientTop - node.offsetParent.clientLeft - node.offsetParentRaw.paddingTop + node.offsetParent.paddingTop;
+                            ret.x += node.offsetParentRaw.clientLeft;
+                            ret.y += node.offsetParentRaw.clientTop;
+                        }
+                    }
+
+                    if (node.offsetParent.isStatic && !node.offsetParent.isPreserved3d) {
+                        //                                                ret.x += node.offsetParent.clientLeft;
+                        //                                                ret.y += node.offsetParent.clientTop;
+                    }
+                    
+                    //                    ret.x -= node.offsetParent.offsetLeft- node.offsetParentRaw.offsetLeft;
+                    //                    ret.y -= node.offsetParent.offsetTop - node.offsetParentRaw.offsetTop;
+                    
+                    //                    ret.x += node.offsetParent.clientLeft - node.offsetParentRaw.clientLeft;
+                    //                    ret.y += node.offsetParent.clientLeft - node.offsetParentRaw.clientLeft;
+
+                    //                  
+                    //                    ret.x -= node.offsetParent.clientLeft;
+                    //                    ret.y -= node.offsetParent.clientTop;
+                    
+                    //                    ret.x -= node.offsetParentRaw.clientLeft;
+                    //                    ret.y -= node.offsetParentRaw.clientTop;
+                    ////
+                    //                    ret.x += node.offsetParent.clientLeft;
+                    //                    ret.y += node.offsetParent.clientTop;
+                    
+                    //                    ret.x += node.offsetParentRaw.clientLeft;
+                    //                    ret.y += node.offsetParentRaw.clientTop;
                 }
             }
             else {
