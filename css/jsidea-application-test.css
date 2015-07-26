@@ -367,7 +367,7 @@
 	position: fixed;
 	overflow: scroll;
 	transform-style: preserve-3d;
-	transform: translateZ(-100px);
+	transform: translateX(0px);
 }
 
 .test-11 #d-cont {

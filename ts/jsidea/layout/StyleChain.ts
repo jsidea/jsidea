@@ -395,9 +395,8 @@ module jsidea.layout {
                 return node.offsetParent;
 
             var excludeStaticParent = node.isAbsolute;
-            var isTransformedChild = node.isTransformedChild;
-            while ((node = node.parent) && node.parent) {// && !node.parent.isBody
-                if (node.isBody || node.isSticked)//isSticked is maybe to mouch
+            while ((node = node.parent) && node.parent) {
+                if (node.isBody || node.isSticked)
                     return node;
                 if (excludeStaticParent && (node.isStatic && !node.isTransformed))
                     continue;
@@ -581,21 +580,23 @@ module jsidea.layout {
                 //parentOffsetRaw is null
                 //so we have to return the full-offset
                 if (!node.offsetParentRaw) {
-                    if (
+                    if ( 
                         !node.isTransformed
+//                        && node.element.id != "d-cont"
+                        && node.offsetParent.offsetParentRaw
+                        && node.isFixedWrong
                         && node.relation
                         && node.relation.isPreserved3d
                         && !node.relation.isTransformed
                         && node.relation.relation
                         && node.relation.relation == node.relation.parent
                         ) {
-                        //                    if (node.element.id == "d-cont") {
                         ret.x += node.parent.offsetLeft;
                         ret.y += node.parent.offsetTop;
                         ret.x += node.parent.parent.offsetLeft;
                         ret.y += node.parent.parent.offsetTop;
 
-                        console.log("--- STRANGE OFFSET ---", node.element.id, node.relation.element.id, node.relation.relation.element.id);
+                        //                      console.log("--- STRANGE OFFSET ---", node.element.id, node.relation.element.id, node.relation.relation.element.id);
                         return ret;
                     }
                     ret.x += node.relation.offsetUnscrolled.x;
@@ -611,7 +612,7 @@ module jsidea.layout {
                             //                            ret.y += node.offsetParent.offsetUnscrolled.y + node.offsetParentRaw.offsetTop;
                             //                            ret.x -= node.offsetParentRaw.clientLeft;
                             //                            ret.y -= node.offsetParentRaw.clientTop;
-                            console.log("AHH", node.parentScroll ? node.parentScroll.element.id : "NULL");
+                            //                            console.log("AHH", node.parentScroll ? node.parentScroll.element.id : "NULL");
                         }
                     }
                     else {
