@@ -209,20 +209,23 @@ module jsidea.geom {
             //------
             //transform
             //------
-            var origin = style.transformOrigin.split(" ");
-            var originX = math.Number.parseRelation(origin[0], element.offsetWidth, 0);
-            var originY = math.Number.parseRelation(origin[1], element.offsetHeight, 0);
-            var originZ = math.Number.parseRelation(origin[2], 0, 0);
+            if (node.isTransformed) {
+                var origin = style.transformOrigin.split(" ");
+                var originX = math.Number.parseRelation(origin[0], element.offsetWidth, 0);
+                var originY = math.Number.parseRelation(origin[1], element.offsetHeight, 0);
+                var originZ = math.Number.parseRelation(origin[2], 0, 0);
 
-            //not vice versa: not adding than subtracting like some docs mentioned
-            matrix.appendPositionRaw(-originX, -originY, -originZ);
-            matrix.appendCSS(style.transform);
-            matrix.appendPositionRaw(originX, originY, originZ);
+                //not vice versa: not adding than subtracting like some docs mentioned
+                matrix.appendPositionRaw(-originX, -originY, -originZ);
+                matrix.appendCSS(style.transform);
+                matrix.appendPositionRaw(originX, originY, originZ);
+            }
             
             //------
             //offset
             //------
-            //append the offset to the transform-matrix
+            //append the position to the transform-matrix
+            //position is relative to the direct parent
             matrix.appendPositionRaw(node.position.x, node.position.y, 0);
             
             //-------
@@ -250,7 +253,7 @@ module jsidea.geom {
             //collect matrices up to root
             //accumulate if possible
             var matrices: geom.Matrix3D[] = [];
-            var last: geom.Matrix3D = null;
+            var last: geom.Matrix3D = new geom.Matrix3D();
             while (node) {
                 //if last is not null, last becomes the base for the transformation
                 //its like appending the current node.transform (parent-transform) to the last transform (child-transform)
@@ -267,7 +270,7 @@ module jsidea.geom {
                 }
                 node = node.parent;
             }
-            if (last)
+            if (last && matrices.indexOf(last) < 0)
                 matrices.push(last);
             return matrices;
         }

@@ -386,13 +386,13 @@
 	position: fixed;
 	/* overflow: scroll; */
 	transform-style: preserve-3d;
-	perspective: 300px;
+	perspective: 200px;
 }
 
 .test-12 #a-cont {
 	position: fixed;
 	overflow: scroll;
-	transform: translateZ(-200px);
+	transform: translateZ(-300px);
 	transform-style: preserve-3d;
 }
 
