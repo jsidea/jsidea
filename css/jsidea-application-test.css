@@ -392,7 +392,7 @@
 .test-12 #a-cont {
 	position: fixed;
 	overflow: scroll;
-	transform: translateZ(-300px);
+	transform: translateZ(-200px);
 	transform-style: preserve-3d;
 }
 
@@ -445,5 +445,41 @@
 }
 
 .test-13 #d-cont {
+	position: fixed;
+}
+
+/* TEST 14 */
+.test-14 #view {
+	position: relative;
+}
+
+.test-14 #content {
+	position: relative;
+	transform: translateX(0px);
+	transform-style: preserve-3d;
+	box-sizing: border-box;
+}
+
+.test-14 #a-cont {
+	position: fixed;
+	overflow: scroll;
+	transform: translateX(0px);
+	transform-style: preserve-3d;
+}
+
+.test-14 #b-cont {
+	position: relative;
+	transform-style: preserve-3d;
+	transform: translateX(0px);
+	box-sizing: border-box;
+}
+
+.test-14 #c-cont {
+	position: relative;
+	transform-style: preserve-3d;
+	border-width: 40px;
+}
+
+.test-14 #d-cont {
 	position: fixed;
 }

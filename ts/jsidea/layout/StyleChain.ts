@@ -101,9 +101,9 @@ module jsidea.layout {
             var nodes: INode[] = [];
             var isTransformedChild = false;
             var isPreserved3dChild = false;
-            var l = elements.length;
             var isFixedChild = false;
             var isPerspectiveChild = false;
+            var l = elements.length;
             for (var i = l - 1; i >= 0; --i) {
                 element = elements[i];
 
@@ -138,9 +138,9 @@ module jsidea.layout {
                     offset: null,
                     offsetUnscrolled: null,
                     scrollOffset: null,
-                    isFixed: style.position == "fixed",
-                    isFixedZombie: false,
                     isLeaf: element.children.length == 0,
+                    isFixedZombie: false,
+                    isFixed: style.position == "fixed",
                     isFixedChild: isFixedChild,
                     isRelative: style.position == "relative",
                     isAbsolute: style.position == "absolute",
@@ -343,7 +343,7 @@ module jsidea.layout {
                 if (system.Caps.isWebkit) {
                     ret.x -= node.element.ownerDocument.body.scrollLeft;
                     ret.y -= node.element.ownerDocument.body.scrollTop;
-                    
+
                 }
                 else {
                     ret.x -= node.element.ownerDocument.documentElement.scrollLeft;
@@ -428,151 +428,49 @@ module jsidea.layout {
             ret.y += node.offsetTop;
 
             if (system.Caps.isWebkit) {
-                this.correctWebkitOffset(node, ret);
+                this.getCorrectOffsetWebkit(node, ret);
             } else if (system.Caps.isFirefox) {
-                this.correctFirefoxOffset(node, ret);
+                this.getCorrectOffsetFirefox(node, ret);
             } else if (system.Caps.isIE) {
-                this.correctIEOffset(node, ret);
+                this.getCorrectOffsetIE(node, ret);
             }
             return ret;
         }
 
-        private static correctIEOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        private static getCorrectOffsetIE(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node || !node.offsetParent || node.isBody)
                 return ret;
 
             //bla bla ... if an element ist position "fixed" the offsetParent is always zero ....
+            //in perspective the getBoundingClientRect() will fail too
             if (node.offsetParent.element != node.element.offsetParent) {
-
-                if (
-                    true
-                    && node.element.id == "a-cont"
-                //                    && node.isTransformed 
-                //                    && node.element.id == "c-cont"
-                //                    && node.isScrollable
-                //                    && node.parent
-                //                    && node.parent.isScrollable
-                //                    && node.parent == node.offsetParent
-                //                    && !node.offsetParent.isPreserved3dFixed
-                //                    && node.parent.parent
-                //                    && !node.parent.parent.isPreserved3dFixed
-                    ) {
-                    //console.log("ELEMENT", node.element.id);
-                    
-                    //                    ret.x += node.parent.parent.offset.x;
-                    //                    ret.y += node.parent.parent.offset.y;
-                    //                    ret.x += node.parent.offset.x;
-                    //                    ret.y += node.parent.offset.y;
-                    
-                    //                    ret.x -= node.parent.parent.clientLeft + 2;
-                    //                    ret.y -= node.parent.parent.clientTop + 2;
-                    
-                    //                    ret.x -= node.offsetParent.clientLeft;
-                    //                    ret.y -= node.offsetParent.clientTop;
-                    
-//                    ret.x -= node.offsetParent.parent.offset.x;
-//                    ret.y -= node.offsetParent.parent.offset.y;
-//                    ret.x -= node.parent.offsetLeft;
-//                    ret.y -= node.parent.offsetTop;
-                    
-//                    ret.x -= 135;
-//                    ret.y -= 135;
-                    
-                    //                    ret.x -= node.parent.clientLeft * 0.5 - 3;
-                    //                    ret.y -= node.parent.clientTop * 0.5 - 3;
-                    //                    ret.x += node.offsetParent.clientLeft;
-                    //                    ret.y += node.offsetParent.clientTop;
-                }
-                
-                //containing-block of b-cont: a-cont
-                if (
-                    true
-                    && node.element.id == "b-cont"
-                //                    && node.isTransformed 
-                //                    && node.element.id == "c-cont"
-                //                    && node.isScrollable
-                //                    && node.parent
-                //                    && node.parent.isScrollable
-                //                    && node.parent == node.offsetParent
-                //                    && !node.offsetParent.isPreserved3dFixed
-                //                    && node.parent.parent
-                //                    && !node.parent.parent.isPreserved3dFixed
-                    ) {
-                    
-//                    ret.x -= 135;
-//                    ret.y -= 135;
-                    
-//                    ret.x -= 95 + 135 + 40 + 55;
-//                    ret.y -= 95 + 135 + 40 + 55;
-                    
-                    //console.log("ELEMENT", node.element.id);
-                    
-                    //                    ret.x += node.parent.parent.offset.x;
-                    //                    ret.y += node.parent.parent.offset.y;
-                    //                    ret.x += node.parent.offset.x;
-                    //                    ret.y += node.parent.offset.y;
-                    
-                    
-                    //                    ret.x += node.offsetParent.clientLeft;
-                    //                    ret.y += node.offsetParent.clientTop;
-                }
-
-
-                //containing-block of c-cont: a-cont 
-                if (
-                    true
-                    && node.element.id == "c-cont"
-                //                    && node.isTransformed 
-                //                    && node.element.id == "c-cont"
-                //                    && node.isScrollable
-                //                    && node.parent
-                //                    && node.parent.isScrollable
-                //                    && node.parent == node.offsetParent
-                //                    && !node.offsetParent.isPreserved3dFixed
-                //                    && node.parent.parent
-                //                    && !node.parent.parent.isPreserved3dFixed
-                    ) {
-                    //console.log("ELEMENT", node.element.id);
-                    
-                    //                    ret.x += node.parent.parent.offset.x;
-                    //                    ret.y += node.parent.parent.offset.y;
-                    
-                    //                    ret.x += node.parent.parent.offset.x;
-                    //                    ret.y += node.parent.parent.offset.y;
-                    
-                    //                  ret.x += node.parent.offset.x;
-                    //                  ret.y += node.parent.offset.y;
-                }
-
                 return ret;
             }
-
-            //            console.log("NORMAL", node.element.id);
 
             ret.x += node.offsetParent.clientLeft;
             ret.y += node.offsetParent.clientTop;
         }
 
-        private static correctFirefoxOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        private static getCorrectOffsetFirefox(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             //no node no value
             if (!node)
                 return ret;
 
             if (!node.offsetParent) {
-                if (node.isStatic) {
+                if (node.isStatic || node.isRelative) {
                     ret.x += node.root.clientLeft;
                     ret.y += node.root.clientTop;
                 }
                 return ret;
             }
 
-            if (!node.isBorderBox) {
+            if (!node.offsetParent.isBorderBox) {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
             }
 
             if (
-                (node.isAbsolute || (node.isFixedZombie))
+                (node.isAbsolute || node.isFixedZombie)
                 && node.offsetParent.isScrollable
                 ) {
                 ret.x += node.offsetParent.clientLeft;
@@ -589,7 +487,7 @@ module jsidea.layout {
             return ret;
         }
 
-        private static correctWebkitOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        private static getCorrectOffsetWebkit(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node || !node.offsetParent)
                 return ret;
 
@@ -641,8 +539,8 @@ module jsidea.layout {
                             //for the target node
                             ret.x -= node.offsetParent.offsetUnscrolled.x - node.offsetParentRaw.offsetLeft;
                             ret.y -= node.offsetParent.offsetUnscrolled.y - node.offsetParentRaw.offsetTop;
-//                            ret.x += node.offsetParentRaw.clientLeft;
-//                            ret.y += node.offsetParentRaw.clientTop;
+                            //                            ret.x += node.offsetParentRaw.clientLeft;
+                            //                            ret.y += node.offsetParentRaw.clientTop;
                         }
                     }
                 }
