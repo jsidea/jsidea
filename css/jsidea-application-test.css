@@ -394,6 +394,7 @@
 	overflow: scroll;
 	transform: translateZ(-200px);
 	transform-style: preserve-3d;
+	box-sizing: border-box;
 }
 
 .test-12 #b-cont {
@@ -430,6 +431,7 @@
 	overflow: scroll;
 	transform: translateX(0px);
 	transform-style: preserve-3d;
+	box-sizing: border-box;
 }
 
 .test-13 #b-cont {
@@ -442,6 +444,7 @@
 	position: fixed;
 	transform-style: preserve-3d;
 	border-width: 40px;
+	box-sizing: border-box;
 }
 
 .test-13 #d-cont {

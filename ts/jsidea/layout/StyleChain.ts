@@ -11,6 +11,7 @@ module jsidea.layout {
         root: INode;
         isLeaf: boolean;
         child: INode;
+        bounds: ClientRect;
         parent: INode;
         relation: INode;
         depth: number;
@@ -119,6 +120,7 @@ module jsidea.layout {
                 //and set so many values as possible
                 var node: INode = {
                     depth: nodes.length,
+                    bounds: element.getBoundingClientRect(),
                     element: element,
                     isPreserved3d: style.transformStyle == "preserve-3d",
                     isPreserved3dChild: isPreserved3dChild,
@@ -209,6 +211,9 @@ module jsidea.layout {
                 node.offsetUnscrolled = new geom.Point2D(node.offset.x + node.scrollOffset.x, node.offset.y + node.scrollOffset.y);
                 node.position = this.getPosition(node);
 
+                //                if(!node.isBody)
+                //                    node.position.setTo(node.bounds.left - node.parent.bounds.left, node.bounds.top - node.parent.bounds.top);
+                
                 node = node.child;
             }
 
@@ -491,6 +496,8 @@ module jsidea.layout {
             if (!node || !node.offsetParent)
                 return ret;
 
+            var tracked = "d-cont";
+
             //Why is chrome does not keep care of css-transform on static elements
             //when it comes to the right offsetParent and the offsetTop/offsetLeft values
             if (node.offsetParentRaw != node.offsetParent) {
@@ -526,28 +533,108 @@ module jsidea.layout {
                     ret.y += node.relation.offsetUnscrolled.y;
                 }
                 else {
-                    if (node.isBody || (node.isAbsolute && node.offsetParentRaw.isBody)) {
+                    if (node.isBody || (!node.isAbsolute && node.offsetParent.isBody)) {
+                        if (node.element.id == tracked)
+                            console.log("A");
                     }
                     else {
-                        if (node.isAbsolute && node.offsetParent == node.parent && (node.parent.isStatic && !node.parent.isPreserved3dOrPerspective)) {//preserved3d is maybe to much
+                        if (
+                            true
+                            && node.isAbsolute
+                            && node.offsetParent == node.parent
+                            && node.parent.isStatic
+                            && !node.parent.isPreserved3dOrPerspective
+                            && !node.parent.isTransformed
+                            ) {
+
+                            if (node.element.id == tracked)
+                                console.log("B");
+                            
+                            //preserved3d is maybe to much
                             ret.x += node.offsetParentRaw.clientLeft;
                             ret.y += node.offsetParentRaw.clientTop;
                         }
                         else {
+                            if (node.element.id == tracked)
+                                console.log("C");
+                            
                             //offset without scroll
                             //the scroll value is already applied or will be applied
                             //for the target node
-                            ret.x -= node.offsetParent.offsetUnscrolled.x - node.offsetParentRaw.offsetLeft;
-                            ret.y -= node.offsetParent.offsetUnscrolled.y - node.offsetParentRaw.offsetTop;
-                            //                            ret.x += node.offsetParentRaw.clientLeft;
-                            //                            ret.y += node.offsetParentRaw.clientTop;
+                            if (!node.isAbsolute) {
+                                ret.x -= node.offsetParent.offsetUnscrolled.x - node.offsetParentRaw.offsetLeft;
+                                ret.y -= node.offsetParent.offsetUnscrolled.y - node.offsetParentRaw.offsetTop;
+                            }
                         }
                     }
                 }
             }
-            else {
-                ret.x += node.offsetParent.clientLeft;
-                ret.y += node.offsetParent.clientTop;
+            else if (node.offsetParentRaw) {
+                if (node.offsetParentRaw.isBody) {
+                    //                    if (node.offsetParentRaw != node.parent && node.offsetParentRaw != node.offsetParent) {
+                    //                        ret.x += node.offsetParentRaw.clientLeft;
+                    //                        ret.y += node.offsetParentRaw.clientTop;
+                    //                    }
+                }
+                //                else if (node.isBorderBox) {
+                //                    ret.x += node.offsetParentRaw.clientLeft;
+                //                    ret.y += node.offsetParentRaw.clientTop;
+                //                }
+                else if (node.isRelative && node.offsetParentRaw.isRelative) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
+                else if (node.isRelative && node.offsetParentRaw.isFixedZombie) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
+                else if (node.isStatic && node.offsetParentRaw.isFixedZombie) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
+                else if (node.isStatic && node.offsetParentRaw.isTransformed) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
+                else if (node.isStatic && node.offsetParentRaw.isAbsolute) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
+                else if (node.isAbsolute && node.offsetParentRaw.isFixedZombie) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
+                else if (node.isAbsolute && node.offsetParentRaw.isScrollable) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
+                else if (node.isAbsolute && node.offsetParentRaw.isAbsolute) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
+                //                if (node.offsetParent.isBody) {
+                //                    if (!node.offsetParent.isTransformed || !node.offsetParent.isBorderBox) {
+                //                        //                        ret.x += node.offsetParent.clientLeft;
+                //                        //                        ret.y += node.offsetParent.clientTop;
+                //                        if (node.element.id == tracked)
+                //                            console.log("D");
+                //                    }
+                //                }
+                //                else {
+                //                    //                    ret.x += node.offsetParent.clientLeft;
+                //                    //                    ret.y += node.offsetParent.clientTop;
+                //                    
+                //                    //                    if (node.offsetParent.isTransformed || node.offsetParent.isBorderBox) {
+                //                    //                        ret.x += node.offsetParent.clientLeft;
+                //                    //                        ret.y += node.offsetParent.clientTop;
+                //                    //                        if (node.element.id == tracked)
+                //                    //                            console.log("E");
+                //                    //                    }
+                //                    //                    else {
+                //                    //                        if (node.element.id == tracked)
+                //                    //                            console.log("F");
+                //                    //                    }
+                //                }
             }
 
             return ret;
