@@ -13,8 +13,8 @@ module jsidea.test {
             var con = document.getElementById("content");
             var vie = document.getElementById("view");
 
-            var max = 12;
-            var te = 10;//5;//7;//11 for ie11 testing 5 is scrolling test
+            var max = 13;
+            var te = 11;//5;//7;//11 for ie11 testing 5 is scrolling test
             document.body.className = "test-" + te;
 
             var can = document.createElement("canvas");
@@ -200,7 +200,7 @@ module jsidea.test {
                     text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
                     text.Text.conc(12, " ", "DISPLAY", node.style.display),
                     text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed),
-                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dFixed, node.perspective),//, node.style.transformStyle),
+                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective, node.perspective),//, node.style.transformStyle),
                     //                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
                     text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
                     //                    text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),

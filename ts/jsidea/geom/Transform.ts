@@ -69,10 +69,20 @@ module jsidea.geom {
                 if (mode == Transform.MODE_2D) {
                     var tElement = element;
                     while (tElement && tElement != document.body.parentElement) {
-                        matrix.append(geom.Matrix3D.create(tElement));
+                        var ma = geom.Matrix3D.create(tElement);
+                        matrix.append(ma);
                         tElement = tElement.parentElement;
                     }
+
                     var localBounds = matrix.bounds(0, 0, element.offsetWidth, element.offsetHeight);
+                    
+                    //if perspective of preserve-3d is on the get getBoundingClientRect
+                    //we need to scale it
+                    var scX = globalBounds.width / localBounds.width;
+                    var scY = globalBounds.height / localBounds.height;
+                    matrix.appendScaleRaw(scX, scY, 1);
+
+                    //re-offset
                     matrix.appendPositionRaw(-localBounds.x, -localBounds.y, 0);
                 }
 
@@ -165,8 +175,8 @@ module jsidea.geom {
             var l = this.sceneTransform.length;
             for (var i = 0; i < l; ++i)
                 ret = this.sceneTransform[i].project(ret, ret);
-            if (l > 1)
-                console.log(l);
+            //            if (l > 1)
+            //                console.log(l);
             
             //apply to-box model transformations
             this.box.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);

@@ -54,13 +54,36 @@ module jsidea.geom {
         public m44: number = 1;
 
         constructor() {
-//            if (data)
-//                this.setData(data);
+            //            if (data)
+            //                this.setData(data);
         }
-        
+
         public static create(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
             if (visual.ownerDocument)
                 return ret.setCSS(window.getComputedStyle(visual).transform);
+            ret.identity();
+            return ret;
+        }
+
+        public static createWithPerspective(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
+            if (visual.ownerDocument) {
+                ret.setCSS(window.getComputedStyle(visual).transform);
+                if (visual.parentElement) {
+                    var parentStyle = window.getComputedStyle(visual.parentElement);
+                    var perspective = math.Number.parse(parentStyle.perspective, 0);
+                    if (!perspective)
+                        return ret;
+
+                    var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
+                    var perspectiveOriginX = math.Number.parseRelation(perspectiveOrigin[0], visual.parentElement.offsetWidth, 0);
+                    var perspectiveOriginY = math.Number.parseRelation(perspectiveOrigin[1], visual.parentElement.offsetHeight, 0);
+
+                    ret.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
+                    ret.appendPerspective(perspective);
+                    ret.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
+                }
+                return ret;
+            }
             ret.identity();
             return ret;
         }
@@ -1066,8 +1089,8 @@ module jsidea.geom {
             return ret;
         }
 
-        
-        
+
+
         public static qualifiedClassName: string = "jsidea.geom.Matrix3D";
         public toString(fractionDigits: number = 3): string {
             return "[" + Matrix3D.qualifiedClassName + " \n"
