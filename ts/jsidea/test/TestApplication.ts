@@ -14,7 +14,7 @@ module jsidea.test {
             var vie = document.getElementById("view");
 
             var max = 15;
-            var te = 12;//5;//7;//11 for ie11 testing 5 is scrolling test
+            var te = 15;//5;//7;//11 for ie11 testing 5 is scrolling test
             document.body.className = "test-" + te;
 
             var can = document.createElement("canvas");
@@ -84,7 +84,10 @@ module jsidea.test {
 
             document.addEventListener("click", draw);
 
-            document.addEventListener("tick",(evt) => {
+            document.addEventListener("mousemove",(evt) => {
+                
+                return;
+                
                 var pt: any = new geom.Point3D(this.pageX, this.pageY);
                 //from window to body
                 if (system.Caps.isWebkit) {
@@ -185,7 +188,7 @@ module jsidea.test {
         private logChain(f: HTMLElement): void {
             var node = layout.StyleChain.create(f).node;
             if (node)
-                node = node.root;
+                node = node.first;
             while (node) {
                 var ofp = <HTMLElement> node.element.offsetParent;
                 var calcedOff = node.offsetParent ? node.offsetParent.element : null;
