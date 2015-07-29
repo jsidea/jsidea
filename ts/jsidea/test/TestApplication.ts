@@ -44,7 +44,7 @@ module jsidea.test {
             var pos = new layout.Position();
             pos.to.x = "100%";
             pos.to.y = "100%";
-//            pos.toBox = layout.BoxModel.BORDER;
+            //            pos.toBox = layout.BoxModel.BORDER;
             pos.useTransform = true;
 
             var draw = () => {
@@ -87,12 +87,14 @@ module jsidea.test {
             document.addEventListener("tick",(evt) => {
                 var pt: any = new geom.Point3D(this.pageX, this.pageY);
                 //from window to body
-                //                console.log(pt.x, pt.y);
-                
-                //                pt = geom.Transform.create(document.body).globalToLocalPoint(pt);
+                if (system.Caps.isWebkit) {
+                    pt.x += document.body.scrollLeft;
+                    pt.y += document.body.scrollTop;
+                }
+                pt = geom.Transform.create(document.body).globalToLocalPoint(pt);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
-                pos.apply(d);
+                pos.apply(c);
             });
         }
 

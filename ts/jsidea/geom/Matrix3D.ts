@@ -54,8 +54,6 @@ module jsidea.geom {
         public m44: number = 1;
 
         constructor() {
-            //            if (data)
-            //                this.setData(data);
         }
 
         public static create(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {

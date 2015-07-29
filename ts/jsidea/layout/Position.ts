@@ -46,6 +46,25 @@ module jsidea.layout {
             if (!element)
                 return;
 
+            var pt = this.calc(element);
+            var m = geom.Matrix3D.create(element, Buffer._APPLY_POSITION);
+            if (this.useTransform) {
+                m.m41 = pt.x;
+                m.m42 = pt.y;
+                element.style.transform = m.getCSS();
+            }
+            else {
+                pt.x += math.Number.parse(element.style.left, 0) - m.m41;
+                pt.y += math.Number.parse(element.style.top, 0) - m.m42;
+                element.style.left = Math.round(pt.x) + "px";
+                element.style.top = Math.round(pt.y) + "px";
+            }
+        }
+
+        public calc(element: HTMLElement): geom.Point3D {
+            if (!element)
+                return;
+
             //retrieve "of"-element
             var fromElement = this.fromElement ? this.fromElement : document.body;
             
@@ -84,25 +103,12 @@ module jsidea.layout {
             var m = geom.Matrix3D.createWithPerspective(element, Buffer._APPLY_POSITION);
             var pt = m.project(lc);
 
-            //clear perspective from parent
-            if (m.getPerspective() > 0)
-                m = geom.Matrix3D.create(element, Buffer._APPLY_POSITION);
-
-            if (this.useTransform) {
-                if (!this.to.lockX)
-                    m.m41 = pt.x;
-                if (!this.to.lockY)
-                    m.m42 = pt.y;
-                element.style.transform = m.getCSS();
-            }
-            else {
-                pt.x += math.Number.parse(element.style.left, 0) - m.m41;
-                pt.y += math.Number.parse(element.style.top, 0) - m.m42;
-                if (!this.to.lockX)
-                    element.style.left = Math.round(pt.x) + "px";
-                if (!this.to.lockY)
-                    element.style.top = Math.round(pt.y) + "px";
-            }
+            if (this.to.lockX)
+                pt.x = m.m41;
+            if (this.to.lockY)
+                pt.y = m.m42;
+            
+            return pt.clone();
         }
 
         public dispose(): void {
