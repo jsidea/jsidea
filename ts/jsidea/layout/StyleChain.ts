@@ -496,7 +496,7 @@ module jsidea.layout {
             if (!node || !node.offsetParent)
                 return ret;
 
-            var tracked = "d-cont";
+            var tracked = "b-cont";
 
             //Why is chrome does not keep care of css-transform on static elements
             //when it comes to the right offsetParent and the offsetTop/offsetLeft values
@@ -570,17 +570,21 @@ module jsidea.layout {
                 }
             }
             else if (node.offsetParentRaw) {
+
                 if (node.offsetParentRaw.isBody) {
-                    //                    if (node.offsetParentRaw != node.parent && node.offsetParentRaw != node.offsetParent) {
-                    //                        ret.x += node.offsetParentRaw.clientLeft;
-                    //                        ret.y += node.offsetParentRaw.clientTop;
-                    //                    }
                 }
-                //                else if (node.isBorderBox) {
-                //                    ret.x += node.offsetParentRaw.clientLeft;
-                //                    ret.y += node.offsetParentRaw.clientTop;
-                //                }
-                else if (node.isRelative && node.offsetParentRaw.isRelative) {
+                else if (node.isFixedZombie) {
+
+                }
+                else if (true) {
+                    if (!node.offsetParentRaw.isStatic) {
+                        ret.x += node.offsetParentRaw.clientLeft;
+                        ret.y += node.offsetParentRaw.clientTop;
+                    }
+
+                }
+                //RELATIVE
+                else if (node.isRelative && node.offsetParentRaw.isSticked) {
                     ret.x += node.offsetParentRaw.clientLeft;
                     ret.y += node.offsetParentRaw.clientTop;
                 }
@@ -588,7 +592,20 @@ module jsidea.layout {
                     ret.x += node.offsetParentRaw.clientLeft;
                     ret.y += node.offsetParentRaw.clientTop;
                 }
+                else if (node.isRelative && node.offsetParentRaw.isRelative) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
+                //STATIC
+                else if (node.isStatic && node.offsetParentRaw.isSticked) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
                 else if (node.isStatic && node.offsetParentRaw.isFixedZombie) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
+                else if (node.isStatic && node.offsetParentRaw.isScrollable) {
                     ret.x += node.offsetParentRaw.clientLeft;
                     ret.y += node.offsetParentRaw.clientTop;
                 }
@@ -600,6 +617,15 @@ module jsidea.layout {
                     ret.x += node.offsetParentRaw.clientLeft;
                     ret.y += node.offsetParentRaw.clientTop;
                 }
+                else if (node.isStatic && node.offsetParentRaw.isRelative) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
+                //ABSOLUTE
+                else if (node.isAbsolute && node.offsetParentRaw.isSticked) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
                 else if (node.isAbsolute && node.offsetParentRaw.isFixedZombie) {
                     ret.x += node.offsetParentRaw.clientLeft;
                     ret.y += node.offsetParentRaw.clientTop;
@@ -608,33 +634,18 @@ module jsidea.layout {
                     ret.x += node.offsetParentRaw.clientLeft;
                     ret.y += node.offsetParentRaw.clientTop;
                 }
+                else if (node.isAbsolute && node.offsetParentRaw.isTransformed) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
                 else if (node.isAbsolute && node.offsetParentRaw.isAbsolute) {
                     ret.x += node.offsetParentRaw.clientLeft;
                     ret.y += node.offsetParentRaw.clientTop;
                 }
-                //                if (node.offsetParent.isBody) {
-                //                    if (!node.offsetParent.isTransformed || !node.offsetParent.isBorderBox) {
-                //                        //                        ret.x += node.offsetParent.clientLeft;
-                //                        //                        ret.y += node.offsetParent.clientTop;
-                //                        if (node.element.id == tracked)
-                //                            console.log("D");
-                //                    }
-                //                }
-                //                else {
-                //                    //                    ret.x += node.offsetParent.clientLeft;
-                //                    //                    ret.y += node.offsetParent.clientTop;
-                //                    
-                //                    //                    if (node.offsetParent.isTransformed || node.offsetParent.isBorderBox) {
-                //                    //                        ret.x += node.offsetParent.clientLeft;
-                //                    //                        ret.y += node.offsetParent.clientTop;
-                //                    //                        if (node.element.id == tracked)
-                //                    //                            console.log("E");
-                //                    //                    }
-                //                    //                    else {
-                //                    //                        if (node.element.id == tracked)
-                //                    //                            console.log("F");
-                //                    //                    }
-                //                }
+                else if (node.isAbsolute && node.offsetParentRaw.isRelative) {
+                    ret.x += node.offsetParentRaw.clientLeft;
+                    ret.y += node.offsetParentRaw.clientTop;
+                }
             }
 
             return ret;
