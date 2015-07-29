@@ -11,6 +11,13 @@ module jsidea.layout {
         parent: INodeLite;
         depth: number;
         isBody: boolean;
+        isHTML: boolean;
+        isTransformed: boolean;
+        isTransformed3D: boolean;
+        isPreserved3d: boolean;
+        isScrollable: boolean;
+        perspective: number;
+        isAccumulatable: boolean;
     }
     export interface INode extends INodeLite {
         //re-cast
@@ -29,7 +36,6 @@ module jsidea.layout {
         offsetTop: number;
         clientLeft: number;
         clientTop: number;
-        perspective: number;
         isRelative: boolean;
         isAbsolute: boolean;
         isStatic: boolean;
@@ -38,16 +44,11 @@ module jsidea.layout {
         isFixedZombie: boolean;
         isSticked: boolean;
         isStickedChild: boolean;
-        isScrollable: boolean;
-        isTransformed: boolean;
-        isTransformed3D: boolean;
         isTransformedChild: boolean;
         isPerspectiveChild: boolean;
         isPreserved3dOrPerspective: boolean;
-        isPreserved3d: boolean;
         isPreserved3dChild: boolean;
         isBorderBox: boolean;
-        isAccumulatable: boolean;
     }
 
     export class StyleChain {
@@ -84,23 +85,33 @@ module jsidea.layout {
 
         private static extractStyleChainLite(element: HTMLElement): INodeLite {
             var body = element.ownerDocument.body;
-
-            if (element == body.parentElement)
-                return null;
+            var html = element.ownerDocument.documentElement;
             
             //collect from child to root
             var nodes: INodeLite[] = [];
-            while (element && element != body.parentElement) {
+            //            while (element && element != body.parentElement) {
+            while (element) {
+                var style = window.getComputedStyle(element);
                 var node: INodeLite = {
                     element: element,
                     first: null,
                     child: null,
                     parent: null,
                     last: null,
+                    isTransformed: style.transform != "none",
+                    isTransformed3D: style.transform.indexOf("matrix3d") >= 0,
+                    isPreserved3d: style.transformStyle == "preserve-3d",
+                    isScrollable: style.overflow != "visible",
                     depth: 0,
+                    perspective: 0,
+                    isHTML: element == html,
                     isBody: element == body,
-                    style: window.getComputedStyle(element),
+                    style: style,
+                    isAccumulatable: true
                 }
+                //webkit ignores perspective set on scroll elements
+                node.perspective = (system.Caps.isWebkit && node.isTransformed && node.isScrollable) ? 0 : math.Number.parse(style.perspective, 0);
+                
                 element._node = <INode> node;
                 nodes.push(node);
                 element = element.parentElement;
@@ -116,6 +127,7 @@ module jsidea.layout {
                 node.depth = depth++;
                 node.child = nodes[(nodes.length - node.depth) - 1];
                 node.parent = nodes[(nodes.length - node.depth) + 1];
+                node.isAccumulatable = this.getIsAccumulatable(node);
                 node = node.child;
             }
 
@@ -141,12 +153,7 @@ module jsidea.layout {
             while (node) {
                 var style = node.style;
                 var element = node.element;
-                
-                node.isScrollable = style.overflow != "visible";
-                node.isTransformed = style.transform != "none";
-                node.isPreserved3d = style.transformStyle == "preserve-3d";
-                //webkit ignores perspective set on scroll elements
-                node.perspective = (system.Caps.isWebkit && node.isTransformed && node.isScrollable) ? 0 : math.Number.parse(style.perspective, 0);
+
                 node.isPreserved3dChild = isPreserved3dChild;
                 node.isPreserved3dOrPerspective = node.isPreserved3d || (node.perspective > 0);
                 node.isPerspectiveChild = isPerspectiveChild;
@@ -161,7 +168,6 @@ module jsidea.layout {
                 node.offsetTop = element.offsetTop;
                 node.clientLeft = element.clientLeft;
                 node.clientTop = element.clientTop;
-                node.isTransformed3D = style.transform.indexOf("matrix3d") >= 0;
                 node.isTransformedChild = isTransformedChild;
                 node.offsetParentRaw = node.element.offsetParent ? node.element.offsetParent._node : null;
                 node.isSticked = this.getIsSticked(node);
@@ -169,7 +175,6 @@ module jsidea.layout {
                 node.isStickedChild = this.getIsStickedChild(node);
                 node.offsetParent = this.getOffsetParent(node);
                 node.parentScroll = system.Caps.isFirefox ? this.getParentScrollFirefox(node) : this.getParentScroll(node);
-                node.isAccumulatable = this.getIsAccumulatable(node);
                 node.scrollOffset = this.getScrollOffset(node);
                 node.offset = this.getOffset(node);
                 node.offsetUnscrolled = new geom.Point2D(node.offset.x + node.scrollOffset.x, node.offset.y + node.scrollOffset.y);
@@ -197,7 +202,7 @@ module jsidea.layout {
 
         //returns the local position the direct parent
         private static getPosition(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            if (node.isSticked || node.isBody)
+            if (node.isSticked || !node.parent)
                 return ret.setTo(node.offset.x, node.offset.y);
             return ret.setTo(node.offset.x - node.parent.offset.x, node.offset.y - node.parent.offset.y);
         }
@@ -234,7 +239,7 @@ module jsidea.layout {
             if (!node || node.isBody || node.isSticked)
                 return null;
             while (node = node.parent) {
-                if (!node.isStatic || node.isTransformed || node.isPreserved3dOrPerspective || node.isSticked)//isSticked is maybe to mouch
+                if (!node.isStatic || node.isTransformed || node.isPreserved3dOrPerspective || node.isSticked)
                 {
                     return node;
                 }
@@ -312,10 +317,18 @@ module jsidea.layout {
         //if you subtract the scroll from the accumlated/summed offset
         //you get the real offset to window (initial-containing-block)
         private static getScrollOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            if (!node || !node.parent)
+            if (!node)
+                return ret;
+            if (node.isHTML && system.Caps.isWebkit) {
+                ret.x -= node.element.ownerDocument.body.scrollLeft;
+                ret.y -= node.element.ownerDocument.body.scrollTop;
+            }
+            if (!node.parent)
                 return ret;
             
             //add scroll value only if reference of the element is the window not the body
+            
+            
             if (node.isStickedChild) {
                 if (system.Caps.isWebkit) {
                     ret.x -= node.element.ownerDocument.body.scrollLeft;
@@ -369,7 +382,7 @@ module jsidea.layout {
             return ret;
         }
 
-        private static getIsAccumulatable(node: INode): boolean {
+        private static getIsAccumulatable(node: INodeLite): boolean {
             //in any case, if an element has only 2d-transforms or its the document-root item
             //the transform can be accumulated to the parent transform
             if (node.isBody || !node.isTransformed3D)
@@ -379,7 +392,7 @@ module jsidea.layout {
             //Firefox does NOT reflect the "grouping"-overrides and this is how its concepted.
             //But what about the "opacity"-property. Opacity does not override the preserve-3d (not always, webkit does under some conditions).
             //http://dev.w3.org/csswg/css-transforms/#grouping-property-values
-            if (!node.parent.isPreserved3d || node.parent.isScrollable)
+            if (!node.parent.isPreserved3d && node.parent.perspective == 0)
                 return false;
 
             return true;
@@ -423,9 +436,9 @@ module jsidea.layout {
                 return ret;
 
             if (!node.offsetParent) {
-                if (node.isStatic || node.isRelative) {
-                    ret.x += node.first.clientLeft;
-                    ret.y += node.first.clientTop;
+                if ((node.isStatic || node.isRelative) && !node.isHTML) {
+                    ret.x += node.element.ownerDocument.body.clientLeft;
+                    ret.y += node.element.ownerDocument.body.clientTop;
                 }
                 return ret;
             }

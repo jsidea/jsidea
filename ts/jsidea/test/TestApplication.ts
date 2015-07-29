@@ -44,18 +44,17 @@ module jsidea.test {
             var pos = new layout.Position();
             pos.to.x = "100%";
             pos.to.y = "100%";
-            //            pos.toBox = layout.BoxModel.BORDER;
             pos.useTransform = true;
 
             var draw = () => {
                 ctx.clearRect(0, 0, can.width, can.height);
 
+                this.drawBoundingBox(ctx, vie);
                 this.drawBoundingBox(ctx, con);
                 this.drawBoundingBox(ctx, a);
                 this.drawBoundingBox(ctx, b);
                 this.drawBoundingBox(ctx, c);
                 this.drawBoundingBox(ctx, d);
-                this.drawBoundingBox(ctx, vie);
                 this.drawBoundingBox(ctx, can);
 
                 //                this.drawOffsetChain(ctx, d);
@@ -74,7 +73,7 @@ module jsidea.test {
                         te = max;
                     document.body.className = "test-" + te;
                     console.log("TEST-" + te);
-                    draw();
+//                    draw();
                 }
             };
 
@@ -85,19 +84,11 @@ module jsidea.test {
             document.addEventListener("click", draw);
 
             document.addEventListener("mousemove",(evt) => {
-                
-                return;
-                
                 var pt: any = new geom.Point3D(this.pageX, this.pageY);
-                //from window to body
-                if (system.Caps.isWebkit) {
-                    pt.x += document.body.scrollLeft;
-                    pt.y += document.body.scrollTop;
-                }
-                pt = geom.Transform.create(document.body).globalToLocalPoint(pt);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
-                pos.apply(c);
+//                pos.apply(d);
+//                draw();
             });
         }
 
@@ -203,7 +194,8 @@ module jsidea.test {
                     //                    text.Text.conc(18, " ", "PARENT_B", calcedPar ? (calcedPar.id ? calcedPar.id : calcedPar.nodeName) : "NONE"),
                     text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
                     text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
-                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
+//                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
+                    text.Text.conc(12, " ", "ACC", node.isAccumulatable),
                     text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed),
                     text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),
                     //                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),

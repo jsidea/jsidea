@@ -1,8 +1,8 @@
 module jsidea.geom {
     export class Transform {
 
-        public static MODE_3D: string = "3d";
-        public static MODE_2D: string = "2d";
+        public static MODE_PERSPECTIVE: string = "perspective";
+        public static MODE_TRANSFORM: string = "transform";
         public static MODE_BOX: string = "box";
         public static MODE_AUTO: string = "auto";
 
@@ -31,7 +31,7 @@ module jsidea.geom {
             this.element = element;
             
             //FORCE FOR TESTING
-            mode = Transform.MODE_3D;
+            mode = Transform.MODE_TRANSFORM;
 
             var globalBounds: geom.Box2D = null;
             if (mode == Transform.MODE_AUTO) {
@@ -49,14 +49,14 @@ module jsidea.geom {
                 }
             }
 
-            if (mode == Transform.MODE_3D) {
-                var styles = layout.StyleChain.create(element);
-                this.sceneTransform = Transform.extractAccumulatedMatrices(styles.node);
-                this.box.update(element, styles.node.style);
+            if (mode == Transform.MODE_PERSPECTIVE) {
+                var chain = layout.StyleChain.create(element);
+                this.sceneTransform = Transform.extractAccumulatedMatrices(chain.node);
+                this.box.update(element, chain.node.style);
             }
             //runs if there is no perspective involved
             //the elements can have 3d-transformation also
-            else if (mode == Transform.MODE_2D || mode == Transform.MODE_BOX) {
+            else if (mode == Transform.MODE_TRANSFORM || mode == Transform.MODE_BOX) {
                 var style = window.getComputedStyle(element);
                 globalBounds = globalBounds ? globalBounds : geom.Box2D.createBoundingBox(element);
 
@@ -66,7 +66,7 @@ module jsidea.geom {
                 //elements.
                 //the 2d mode need the transformations matrices but not the
                 //wrong offsetLeft/offsetTop values
-                if (mode == Transform.MODE_2D) {
+                if (mode == Transform.MODE_TRANSFORM) {
                     var tElement = element;
                     while (tElement && tElement != document.body.parentElement) {
                         var ma = geom.Matrix3D.create(tElement);
@@ -95,11 +95,9 @@ module jsidea.geom {
 
             //create inverse
             this.inverseSceneTransform = this.sceneTransform.slice(0, this.sceneTransform.length);
-            for (var i = 0; i < this.inverseSceneTransform.length; ++i) {
-                var cl = this.inverseSceneTransform[i].clone();
-                cl.invert();
-                this.inverseSceneTransform[i] = cl;
-            }
+            var l = this.inverseSceneTransform.length;
+            for (var i = 0; i < l; ++i)
+                this.inverseSceneTransform[i] = this.inverseSceneTransform[i].clone().invert();
             this.inverseSceneTransform.reverse();
         }
 
@@ -175,8 +173,6 @@ module jsidea.geom {
             var l = this.sceneTransform.length;
             for (var i = 0; i < l; ++i)
                 ret = this.sceneTransform[i].project(ret, ret);
-            //            if (l > 1)
-            //                console.log(l);
             
             //apply to-box model transformations
             this.box.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
@@ -189,12 +185,12 @@ module jsidea.geom {
             while (element && element != document.body.parentElement) {
                 var style = window.getComputedStyle(element);
                 if (style.perspective != "none")// || style.transform.indexOf("matrix3d") >= 0)
-                    return Transform.MODE_3D;
+                    return Transform.MODE_PERSPECTIVE;
                 if (style.transform != "none")
                     isTransformed = true;
                 element = element.parentElement;
             }
-            return isTransformed ? Transform.MODE_2D : Transform.MODE_BOX;
+            return isTransformed ? Transform.MODE_TRANSFORM : Transform.MODE_BOX;
         }
 
         private static extractMatrix(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {

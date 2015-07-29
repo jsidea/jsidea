@@ -63,10 +63,10 @@ module jsidea.layout {
 
         public calc(element: HTMLElement): geom.Point3D {
             if (!element)
-                return;
+                return null;
 
             //retrieve "of"-element
-            var fromElement = this.fromElement ? this.fromElement : document.body;
+            var fromElement = this.fromElement ? this.fromElement : element.ownerDocument.documentElement;
             
             //transform box-models of visual
             this._box.update(element);
