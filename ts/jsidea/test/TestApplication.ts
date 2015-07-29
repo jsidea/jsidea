@@ -13,8 +13,8 @@ module jsidea.test {
             var con = document.getElementById("content");
             var vie = document.getElementById("view");
 
-            var max = 14;
-            var te = 7;//5;//7;//11 for ie11 testing 5 is scrolling test
+            var max = 15;
+            var te = 12;//5;//7;//11 for ie11 testing 5 is scrolling test
             document.body.className = "test-" + te;
 
             var can = document.createElement("canvas");
@@ -44,7 +44,7 @@ module jsidea.test {
             var pos = new layout.Position();
             pos.to.x = "100%";
             pos.to.y = "100%";
-            pos.toBox = layout.BoxModel.BORDER;
+//            pos.toBox = layout.BoxModel.BORDER;
             pos.useTransform = true;
 
             var draw = () => {
@@ -77,22 +77,22 @@ module jsidea.test {
                     draw();
                 }
             };
-            
+
             document.addEventListener("click",(evt) => {
                 this.logChain(d);
             });
 
             document.addEventListener("click", draw);
 
-            document.addEventListener("mousemove",(evt) => {
-                var pt: any = new geom.Point3D(evt.pageX, evt.pageY);
+            document.addEventListener("tick",(evt) => {
+                var pt: any = new geom.Point3D(this.pageX, this.pageY);
                 //from window to body
                 //                console.log(pt.x, pt.y);
                 
                 //                pt = geom.Transform.create(document.body).globalToLocalPoint(pt);
-                //                pos.from.x = pt.x;
-                //                pos.from.y = pt.y;
-                //                pos.apply(d);
+                pos.from.x = pt.x;
+                pos.from.y = pt.y;
+                pos.apply(d);
             });
         }
 
@@ -194,14 +194,14 @@ module jsidea.test {
                     text.Text.conc(10, " ", node.element.id ? node.element.id : node.element.nodeName),
                     text.Text.conc(16, " ", "PARENT", ofp ? (ofp.id ? ofp.id : ofp.nodeName) : "NONE"),
                     text.Text.conc(16, " ", "PARENT_C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
-//                    text.Text.conc(18, " ", "SCROLL_C", scaleOff ? (scaleOff.id ? scaleOff.id : scaleOff.nodeName) : "NONE"),
+                    //                    text.Text.conc(18, " ", "SCROLL_C", scaleOff ? (scaleOff.id ? scaleOff.id : scaleOff.nodeName) : "NONE"),
                     //                    text.Text.conc(18, " ", "PARENT_B", calcedPar ? (calcedPar.id ? calcedPar.id : calcedPar.nodeName) : "NONE"),
                     text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
                     text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
                     text.Text.conc(12, " ", "DISPLAY", node.style.display),
                     text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed),
                     text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),
-//                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
+                    //                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
                     text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
                     //                    text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),
                     text.Text.conc(18, " ", "OVERFLOW", node.style.overflow),

@@ -67,7 +67,6 @@ module jsidea.geom {
 
         public static createWithPerspective(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
             if (visual.ownerDocument) {
-                ret.setCSS(window.getComputedStyle(visual).transform);
                 if (visual.parentElement) {
                     var parentStyle = window.getComputedStyle(visual.parentElement);
                     var perspective = math.Number.parse(parentStyle.perspective, 0);
@@ -82,6 +81,7 @@ module jsidea.geom {
                     ret.appendPerspective(perspective);
                     ret.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
                 }
+                ret.appendCSS(window.getComputedStyle(visual).transform);
                 return ret;
             }
             ret.identity();

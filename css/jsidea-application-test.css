@@ -486,3 +486,40 @@
 .test-14 #d-cont {
 	position: fixed;
 }
+
+/* TEST 15 */
+.test-15 #view {
+	position: relative;
+}
+
+.test-15 #content {
+	position: fixed;
+	transform: translateX(0px);
+	transform-style: preserve-3d;
+	box-sizing: border-box;
+}
+
+.test-15 #a-cont {
+	position: fixed;
+	overflow: scroll;
+	transform: translateX(64px) rotateY(45deg) rotate(25deg);
+	transform-style: flat;
+}
+
+.test-15 #b-cont {
+	position: fixed;
+	transform-style: preserve-3d;
+	transform: translateX(64px) rotateY(45deg) rotate(25deg);
+	
+}
+
+.test-15 #c-cont {
+	position: relative;
+	transform-style: preserve-3d;
+	transform: translateX(64px) rotate(25deg);
+	border-width: 40px;
+}
+
+.test-15 #d-cont {
+	position: fixed;
+}

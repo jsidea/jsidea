@@ -231,20 +231,17 @@ module jsidea.geom {
             //-------
             //perspective
             //-------
-            if (!node.parent)
-                return matrix;
-            var perspective = node.parent.perspective;
-            if (!perspective)
-                return matrix;
+            if (node.parent && node.parent.perspective) {
+                var perspective = node.parent.perspective;
+                var parentStyle: CSSStyleDeclaration = node.parent.style;
+                var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
+                var perspectiveOriginX = math.Number.parseRelation(perspectiveOrigin[0], element.parentElement.offsetWidth, 0);
+                var perspectiveOriginY = math.Number.parseRelation(perspectiveOrigin[1], element.parentElement.offsetHeight, 0);
 
-            var parentStyle: CSSStyleDeclaration = node.parent.style;
-            var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
-            var perspectiveOriginX = math.Number.parseRelation(perspectiveOrigin[0], element.parentElement.offsetWidth, 0);
-            var perspectiveOriginY = math.Number.parseRelation(perspectiveOrigin[1], element.parentElement.offsetHeight, 0);
-
-            matrix.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
-            matrix.appendPerspective(perspective);
-            matrix.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
+                matrix.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
+                matrix.appendPerspective(perspective);
+                matrix.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
+            }
 
             return matrix;
         }

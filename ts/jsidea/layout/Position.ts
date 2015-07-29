@@ -81,8 +81,12 @@ module jsidea.layout {
             lc.x -= toX;
             lc.y -= toY;
 
-            var m = geom.Matrix3D.create(element, Buffer._APPLY_POSITION);
-            var pt = m.unproject(lc);
+            var m = geom.Matrix3D.createWithPerspective(element, Buffer._APPLY_POSITION);
+            var pt = m.project(lc);
+
+            //clear perspective from parent
+            if (m.getPerspective() > 0)
+                m = geom.Matrix3D.create(element, Buffer._APPLY_POSITION);
 
             if (this.useTransform) {
                 if (!this.to.lockX)
