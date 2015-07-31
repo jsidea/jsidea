@@ -51,26 +51,29 @@ module jsidea.layout {
         isBorderBox: boolean;
     }
 
-    export class StyleChain {
-
-        public node: INode = null;
+    export class StyleChain<NodeType> {
+        public node: NodeType = null;
 
         constructor() {
         }
 
-        public static create(element: HTMLElement): StyleChain {
-            var chain = new StyleChain();
-            chain.update(element);
+        public static create(element: HTMLElement): StyleChain<INode> {
+            if (!element)
+                return null;
+            var chain = new StyleChain<INode>();
+            chain.node = StyleChain.extractStyleChain(element);
             return chain;
         }
 
-        public update(element: HTMLElement): StyleChain {
+        public static createLite(element: HTMLElement): StyleChain<INodeLite> {
             if (!element)
-                return this.clear();
-            this.node = StyleChain.extractStyleChain(element);
+                return null;
+            var chain = new StyleChain<INodeLite>();
+            chain.node = StyleChain.extractStyleChainLite(element);
+            return chain;
         }
 
-        public clear(): StyleChain {
+        public clear(): StyleChain<NodeType> {
             this.node = null;
             return this;
         }
@@ -89,7 +92,6 @@ module jsidea.layout {
             
             //collect from child to root
             var nodes: INodeLite[] = [];
-            //            while (element && element != body.parentElement) {
             while (element) {
                 var style = window.getComputedStyle(element);
                 var node: INodeLite = {
@@ -111,7 +113,7 @@ module jsidea.layout {
                 }
                 //webkit ignores perspective set on scroll elements
                 node.perspective = (system.Caps.isWebkit && node.isTransformed && node.isScrollable) ? 0 : math.Number.parse(style.perspective, 0);
-                
+
                 element._node = <INode> node;
                 nodes.push(node);
                 element = element.parentElement;
@@ -134,8 +136,8 @@ module jsidea.layout {
             return last;
         }
 
-        private static extractStyleChain(element: HTMLElement): INode {
-            var chain = this.extractStyleChainLite(element);
+        private static extractStyleChain(element: HTMLElement, chainLite: INodeLite = null): INode {
+            var chain = chainLite ? chainLite : this.extractStyleChainLite(element);
             if (!chain)
                 return null;
             
@@ -239,8 +241,7 @@ module jsidea.layout {
             if (!node || node.isBody || node.isSticked)
                 return null;
             while (node = node.parent) {
-                if (!node.isStatic || node.isTransformed || node.isPreserved3dOrPerspective || node.isSticked)
-                {
+                if (!node.isStatic || node.isTransformed || node.isPreserved3dOrPerspective || node.isSticked) {
                     return node;
                 }
             }
@@ -341,7 +342,7 @@ module jsidea.layout {
             }
 
             //skip body 
-            //the body scroll is only needed for element which are fixed to window
+            //the body scroll is only needed for elemente which are fixed to window
             //so this value is added add the getOffset-function
             while ((node = node.parentScroll) && node.element != document.body) {
                 ret.x += node.element.scrollLeft;
@@ -361,7 +362,7 @@ module jsidea.layout {
             ret.x -= node.scrollOffset.x;
             ret.y -= node.scrollOffset.y;
             
-            //if is really fixed, then just make it fast
+            //if it is really fixed, then just make it fast
             //wow, and the offsets are correct
             //if the element is really fixed
             if (node.isSticked) {

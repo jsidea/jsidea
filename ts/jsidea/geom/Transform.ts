@@ -31,7 +31,7 @@ module jsidea.geom {
             this.element = element;
             
             //FORCE FOR TESTING
-            mode = Transform.MODE_TRANSFORM;
+            mode = Transform.MODE_PERSPECTIVE;
 
             var globalBounds: geom.Box2D = null;
             if (mode == Transform.MODE_AUTO) {
@@ -57,7 +57,6 @@ module jsidea.geom {
             //runs if there is no perspective involved
             //the elements can have 3d-transformation also
             else if (mode == Transform.MODE_TRANSFORM || mode == Transform.MODE_BOX) {
-                var style = window.getComputedStyle(element);
                 globalBounds = globalBounds ? globalBounds : geom.Box2D.createBoundingBox(element);
 
                 var matrix = new geom.Matrix3D();
@@ -68,7 +67,7 @@ module jsidea.geom {
                 //wrong offsetLeft/offsetTop values
                 if (mode == Transform.MODE_TRANSFORM) {
                     var tElement = element;
-                    while (tElement && tElement != document.body.parentElement) {
+                    while (tElement) {
                         var ma = geom.Matrix3D.create(tElement);
                         matrix.append(ma);
                         tElement = tElement.parentElement;
@@ -90,6 +89,7 @@ module jsidea.geom {
 
                 this.sceneTransform = [matrix];
 
+                var style = window.getComputedStyle(element);
                 this.box.update(element, style);
             }
 
@@ -108,24 +108,63 @@ module jsidea.geom {
             this.box.clear();
         }
 
-        public localToLocalElement(to: HTMLElement, x: number, y: number, z: number = 0, toBox: string = layout.BoxModel.AUTO, fromBox: string = layout.BoxModel.AUTO): jsidea.geom.Point3D {
-            return this.localToLocal(Transform.create(to), x, y, z, toBox, fromBox);
+        public localToLocalPoint(
+            to: Transform, pt: geom.Point3D,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO,
+            ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
+
+            return this.localToLocal(to, pt.x, pt.y, pt.z, toBox, fromBox, ret);
         }
 
-        public localToLocalPoint(to: Transform, pt: geom.Point3D, toBox: string = layout.BoxModel.AUTO, fromBox: string = layout.BoxModel.AUTO): jsidea.geom.Point3D {
-            return this.localToLocal(to, pt.x, pt.y, pt.z, toBox, fromBox);
+        public localToLocalQuad(
+            to: Transform,
+            quad: geom.Quad,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO,
+            ret: geom.Quad = new geom.Quad()): geom.Quad {
+
+            this.localToLocalPoint(to, quad.a, toBox, fromBox, ret.a);
+            this.localToLocalPoint(to, quad.b, toBox, fromBox, ret.b);
+            this.localToLocalPoint(to, quad.c, toBox, fromBox, ret.c);
+            this.localToLocalPoint(to, quad.d, toBox, fromBox, ret.d);
+            return ret;
         }
 
-        public localToLocal(to: Transform, x: number, y: number, z: number = 0, toBox: string = layout.BoxModel.AUTO, fromBox: string = layout.BoxModel.AUTO): jsidea.geom.Point3D {
-            var gl = this.localToGlobal(x, y, z, layout.BoxModel.BORDER, fromBox);
-            return to.globalToLocalPoint(gl, toBox, layout.BoxModel.BORDER);
+        public localToLocal(
+            to: Transform,
+            x: number,
+            y: number,
+            z: number = 0,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO,
+            ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
+
+            ret.setTo(x, y, z);
+            var gl = this.localToGlobalPoint(ret, layout.BoxModel.BORDER, fromBox, ret);
+            return to.globalToLocalPoint(gl, toBox, layout.BoxModel.BORDER, ret);
         }
 
         public globalToLocalPoint(
             point: geom.Point3D,
             toBox: string = layout.BoxModel.AUTO,
-            fromBox: string = layout.BoxModel.AUTO): jsidea.geom.Point3D {
-            return this.globalToLocal(point.x, point.y, point.z, toBox, fromBox);
+            fromBox: string = layout.BoxModel.AUTO,
+            ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
+
+            return this.globalToLocal(point.x, point.y, point.z, toBox, fromBox, ret);
+        }
+
+        public globalToLocalQuad(
+            quad: geom.Quad,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO,
+            ret: geom.Quad = new geom.Quad()): geom.Quad {
+
+            this.globalToLocalPoint(quad.a, toBox, fromBox, ret.a);
+            this.globalToLocalPoint(quad.b, toBox, fromBox, ret.b);
+            this.globalToLocalPoint(quad.c, toBox, fromBox, ret.c);
+            this.globalToLocalPoint(quad.d, toBox, fromBox, ret.d);
+            return ret;
         }
 
         public globalToLocal(
@@ -133,27 +172,42 @@ module jsidea.geom {
             y: number,
             z: number = 0,
             toBox: string = layout.BoxModel.AUTO,
-            fromBox: string = layout.BoxModel.AUTO): jsidea.geom.Point3D {
-            var pt = new geom.Point3D(x, y, z);
+            fromBox: string = layout.BoxModel.AUTO,
+            ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
+
+            ret.setTo(x, y, z);
             
             //apply box model transformations
-            this.box.point(pt, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);
+            this.box.point(ret, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);
             
             //project from parent to child
             for (var i = 0; i < this.inverseSceneTransform.length; ++i)
-                pt = this.inverseSceneTransform[i].unproject(pt, pt);
+                ret = this.inverseSceneTransform[i].unproject(ret, ret);
 
             //apply box model transformations
-            this.box.point(pt, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
+            this.box.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
 
-            return pt;
+            return ret;
         }
 
         public localToGlobalPoint(
             point: geom.Point3D,
             toBox: string = layout.BoxModel.AUTO,
-            fromBox: string = layout.BoxModel.AUTO): jsidea.geom.Point3D {
-            return this.localToGlobal(point.x, point.y, point.z, toBox, fromBox);
+            fromBox: string = layout.BoxModel.AUTO,
+            ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
+            return this.localToGlobal(point.x, point.y, point.z, toBox, fromBox, ret);
+        }
+
+        public localToGlobalQuad(
+            quad: geom.Quad,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO,
+            ret: geom.Quad = new geom.Quad()): geom.Quad {
+            this.localToGlobalPoint(quad.a, toBox, fromBox, ret.a);
+            this.localToGlobalPoint(quad.b, toBox, fromBox, ret.b);
+            this.localToGlobalPoint(quad.c, toBox, fromBox, ret.c);
+            this.localToGlobalPoint(quad.d, toBox, fromBox, ret.d);
+            return ret;
         }
 
         public localToGlobal(

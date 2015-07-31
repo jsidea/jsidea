@@ -56,6 +56,18 @@ module jsidea.test {
                 this.drawBoundingBox(ctx, c);
                 this.drawBoundingBox(ctx, d);
                 this.drawBoundingBox(ctx, can);
+                
+//                var transD = geom.Transform.create(d);
+//                var qu = new geom.Quad();
+//                qu.b.x = d.offsetWidth;
+//                qu.c.x = d.offsetWidth;
+//                qu.c.y = d.offsetHeight;
+//                qu.d.y = d.offsetHeight;
+//                var transCan = geom.Transform.create(can);
+//                transCan.toBox = layout.BoxModel.CANVAS;
+//                var quad = transD.localToGlobalQuad(qu);
+//                quad = transCan.globalToLocalQuad(quad);
+//                this.drawQuad(ctx, quad);
 
                 //                this.drawOffsetChain(ctx, d);
             };
@@ -73,7 +85,7 @@ module jsidea.test {
                         te = max;
                     document.body.className = "test-" + te;
                     console.log("TEST-" + te);
-//                    draw();
+                    //                    draw();
                 }
             };
 
@@ -87,8 +99,8 @@ module jsidea.test {
                 var pt: any = new geom.Point3D(this.pageX, this.pageY);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
-//                pos.apply(d);
-//                draw();
+                pos.apply(d);
+                //                draw();
             });
         }
 
@@ -98,6 +110,31 @@ module jsidea.test {
                 this.drawCross(ctx, sc.offset.x, sc.offset.y);
                 e = e.parentElement;
             }
+        }
+
+        private drawQuad(ctx: CanvasRenderingContext2D, quad: geom.Quad): void {
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.moveTo(quad.a.x, quad.a.y);
+            ctx.lineTo(quad.b.x, quad.b.y);
+            ctx.lineTo(quad.c.x, quad.c.y);
+            ctx.lineTo(quad.d.x, quad.d.y);
+            ctx.lineTo(quad.a.x, quad.a.y);
+            ctx.stroke();
+            
+            this.drawBox(ctx, quad.outerBox());
+            this.drawBox(ctx, quad.innerBox());
+        }
+        
+        private drawBox(ctx: CanvasRenderingContext2D, box: geom.Box2D): void {
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.moveTo(box.x, box.y);
+            ctx.lineTo(box.x + box.width, box.y);
+            ctx.lineTo(box.x + box.width, box.y + box.height);
+            ctx.lineTo(box.x, box.y + box.height);
+            ctx.lineTo(box.x, box.y);
+            ctx.stroke();
         }
 
         private drawBoundingBox(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
@@ -194,7 +231,7 @@ module jsidea.test {
                     //                    text.Text.conc(18, " ", "PARENT_B", calcedPar ? (calcedPar.id ? calcedPar.id : calcedPar.nodeName) : "NONE"),
                     text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
                     text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
-//                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
+                    //                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
                     text.Text.conc(12, " ", "ACC", node.isAccumulatable),
                     text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed),
                     text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),

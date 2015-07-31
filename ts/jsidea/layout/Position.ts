@@ -4,8 +4,6 @@ module jsidea.layout {
         y?: number | string;
         offsetX?: number | string;
         offsetY?: number | string;
-        lockX?: boolean;
-        lockY?: boolean;
         minX?: number | string;
         minY?: number | string;
         maxX?: number | string;
@@ -81,11 +79,6 @@ module jsidea.layout {
             this._box.size(sizeFrom, this.fromBox, layout.BoxModel.BORDER);
             var fromX: number = math.Number.parseRelation(this.from.x, sizeFrom.x, 0) + math.Number.parseRelation(this.from.offsetX, sizeFrom.x, 0);
             var fromY: number = math.Number.parseRelation(this.from.y, sizeFrom.y, 0) + math.Number.parseRelation(this.from.offsetY, sizeFrom.y, 0);
-
-            if (this.from.lockX)
-                fromX = math.Number.parseRelation(this.from.offsetX, sizeFrom.x, 0);
-            if (this.from.lockY)
-                fromY = math.Number.parseRelation(this.from.offsetY, sizeFrom.y, 0);
             
             //the transfrom from "from" to visual
             this._from.update(fromElement, this.transformMode);
@@ -97,24 +90,62 @@ module jsidea.layout {
                 0,
                 this.toBox,
                 this.fromBox);
+
             lc.x -= toX;
             lc.y -= toY;
 
-            var m = geom.Matrix3D.createWithPerspective(element, Buffer._APPLY_POSITION);
-            var pt = m.project(lc);
+            var m = Position.createWithPerspective(element, Buffer._APPLY_POSITION);
+            var pt = m.project(lc).clone();
 
-            if (this.to.lockX)
-                pt.x = m.m41;
-            if (this.to.lockY)
-                pt.y = m.m42;
+//            var glc = this._to.localToGlobal(0, 0);
+//            var par = geom.Transform.create(element.parentElement);
+//            var parLc = par.globalToLocal(glc.x, glc.y, 0);
+//            parLc.x = math.Number.clamp(parLc.x, 0, 512);
+//            parLc.y = math.Number.clamp(parLc.y, 0, 512);
+//            var parGl = par.localToGlobal(parLc.x, parLc.y);
+//            var min = this._to.globalToLocal(parGl.x, parGl.y, 0);
+
+            //            min.x -= m.m41;
+//            min.y -= m.m42;
+            //            min.x -= element.offsetLeft;
+            //            min.y -= element.offsetTop;
+            //            var max = par.localToLocal(this._to, 256, 256, 0);
+            //            max.x -= m.m41;
+            //            max.y -= m.m42;
             
-            return pt.clone();
+//            pt.x = math.Number.clamp(pt.x, min.x, 512);
+//            pt.y = math.Number.clamp(pt.y, min.y, 512);
+
+            return pt;
         }
 
         public dispose(): void {
             this.to = null;
             this.from = null;
             this.from = null;
+        }
+
+        private static createWithPerspective(visual: HTMLElement, ret = new geom.Matrix3D()): geom.Matrix3D {
+            if (visual.ownerDocument) {
+                if (visual.parentElement) {
+                    var parentStyle = window.getComputedStyle(visual.parentElement);
+                    var perspective = math.Number.parse(parentStyle.perspective, 0);
+                    if (!perspective)
+                        return ret;
+
+                    var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
+                    var perspectiveOriginX = math.Number.parseRelation(perspectiveOrigin[0], visual.parentElement.offsetWidth, 0);
+                    var perspectiveOriginY = math.Number.parseRelation(perspectiveOrigin[1], visual.parentElement.offsetHeight, 0);
+
+                    ret.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
+                    ret.appendPerspective(perspective);
+                    ret.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
+                }
+                ret.appendCSS(window.getComputedStyle(visual).transform);
+                return ret;
+            }
+            ret.identity();
+            return ret;
         }
 
 

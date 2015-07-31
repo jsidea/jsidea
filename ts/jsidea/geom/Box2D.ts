@@ -36,6 +36,11 @@ module jsidea.geom {
             this.height = value.height;
         }
 
+        public center(ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+
+            return ret.setTo(this.x + this.width * 0.5, this.y + this.width * 0.5);
+        }
+
         public equals(value: IRectangleValue, difference: number = 0): boolean {
             return Math.abs(this.x - value.x) <= difference
                 && Math.abs(this.y - value.y) <= difference

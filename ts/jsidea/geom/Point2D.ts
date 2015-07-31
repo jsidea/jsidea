@@ -187,7 +187,7 @@ module jsidea.geom {
             return ret.setTo(direction.x - 2 * dp * normal.x, direction.y - 2 * dp * normal.y);
         }
 
-        public static intersection(p1: Point2D, p2: Point2D, p3: Point2D, p4: Point2D, ret: Point2D = new Point2D()): Point2D {
+        public static intersection(p1: IPoint2DValue, p2: IPoint2DValue, p3: IPoint2DValue, p4: IPoint2DValue, ret: Point2D = new Point2D()): Point2D {
             var x1: number = p1.x;
             var y1: number = p1.y;
             var x4: number = p4.x;

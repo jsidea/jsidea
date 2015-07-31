@@ -85,6 +85,29 @@ module jsidea.geom {
             ret.identity();
             return ret;
         }
+        
+        public static createWithPerspective2(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
+            if (visual.ownerDocument) {
+                ret.appendCSS(window.getComputedStyle(visual).transform);
+                if (visual.parentElement) {
+                    var parentStyle = window.getComputedStyle(visual.parentElement);
+                    var perspective = math.Number.parse(parentStyle.perspective, 0);
+                    if (!perspective)
+                        return ret;
+
+                    var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
+                    var perspectiveOriginX = math.Number.parseRelation(perspectiveOrigin[0], visual.parentElement.offsetWidth, 0);
+                    var perspectiveOriginY = math.Number.parseRelation(perspectiveOrigin[1], visual.parentElement.offsetHeight, 0);
+
+                    ret.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
+                    ret.appendPerspective(perspective);
+                    ret.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
+                }
+                return ret;
+            }
+            ret.identity();
+            return ret;
+        }
 
         public getData(): number[] {
             return [
