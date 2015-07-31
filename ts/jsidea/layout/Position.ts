@@ -101,17 +101,19 @@ module jsidea.layout {
             //hhmmmmmmm the offset will be wrong in many cases
             //get layout.StyleChain and read that position
             //mmmmm?????? fuck
-            var chain = layout.StyleChain.create(element);
-            var pos = chain.node.position;
+            var bounds = geom.Transform.create(element.parentElement);
+            var node = layout.StyleChain.create(element).node;
+            var container = geom.Transform.create(node.isSticked ? element.ownerDocument.body : element.parentElement);
+            var pos = node.position;
+            pt.addPoint2D(node.position);
+            var glc = container.localToGlobal(pt.x, pt.y, 0);
             
-            var par = geom.Transform.create(chain.node.isSticked ? element.ownerDocument.body : element.parentElement);
-            var bounds = geom.Transform.create(element.parentElement.parentElement);
-            var glc = par.localToGlobal(pt.x + pos.x, pt.y + pos.y, 0);
             var conLc = bounds.globalToLocal(glc.x, glc.y, 0);
             conLc.x = math.Number.clamp(conLc.x, 0, bounds.element.offsetWidth);
             conLc.y = math.Number.clamp(conLc.y, 0, bounds.element.offsetHeight);
             glc = bounds.localToGlobal(conLc.x, conLc.y, 0);
-            var loc = par.globalToLocal(glc.x, glc.y, 0);
+            
+            var loc = container.globalToLocal(glc.x, glc.y, 0);
             pt.x = loc.x - pos.x;
             pt.y = loc.y - pos.y;
             

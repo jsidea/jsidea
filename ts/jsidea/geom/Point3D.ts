@@ -200,6 +200,12 @@ module jsidea.geom {
             this.z += pt.z;
             return this;
         }
+        
+        public addPoint2D(pt: IPoint2DValue): Point3D {
+            this.x += pt.x;
+            this.y += pt.y;
+            return this;
+        }
 
         public addSet(sumA: IPoint3DValue, sumB: IPoint3DValue): Point3D {
             this.x = sumA.x + sumB.x;
