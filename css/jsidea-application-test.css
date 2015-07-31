@@ -502,21 +502,21 @@
 .test-15 #a-cont {
 	position: fixed;
 	overflow: scroll;
-	transform: translateX(64px) rotateY(45deg) rotate(25deg);
+	transform: rotate(10deg);
 	transform-style: flat;
 }
 
 .test-15 #b-cont {
 	position: fixed;
 	transform-style: preserve-3d;
-	transform: translateX(64px) rotateY(45deg) rotate(25deg);
+	transform: rotate(10deg);
 	
 }
 
 .test-15 #c-cont {
 	position: relative;
 	transform-style: preserve-3d;
-	transform: translateX(64px) rotate(25deg);
+	transform: rotate(10deg);
 	border-width: 40px;
 }
 

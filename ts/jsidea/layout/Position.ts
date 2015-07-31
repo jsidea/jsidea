@@ -96,25 +96,40 @@ module jsidea.layout {
 
             var m = Position.createWithPerspective(element, Buffer._APPLY_POSITION);
             var pt = m.project(lc).clone();
-
-//            var glc = this._to.localToGlobal(0, 0);
-//            var par = geom.Transform.create(element.parentElement);
-//            var parLc = par.globalToLocal(glc.x, glc.y, 0);
-//            parLc.x = math.Number.clamp(parLc.x, 0, 512);
-//            parLc.y = math.Number.clamp(parLc.y, 0, 512);
-//            var parGl = par.localToGlobal(parLc.x, parLc.y);
-//            var min = this._to.globalToLocal(parGl.x, parGl.y, 0);
+            
+            var par = geom.Transform.create(element.parentElement);
+            var con = geom.Transform.create(element.parentElement.parentElement);
+            //get the new global position
+            var glc = par.localToGlobal(pt.x + element._node.position.x, pt.y + element._node.position.y, 0);//element._node.position.x
+            var conLc = con.globalToLocal(glc.x, glc.y, 0);
+            conLc.x = math.Number.clamp(conLc.x, 0, con.element.offsetWidth);
+            conLc.y = math.Number.clamp(conLc.y, 0, con.element.offsetHeight);
+            glc = con.localToGlobal(conLc.x, conLc.y, 0);
+            var loc = par.globalToLocal(glc.x, glc.y, 0);
+            pt.x = loc.x - element._node.position.x;
+            pt.y = loc.y - element._node.position.y;
+            
+//            pt = m.project(pt).clone();
+            
+            
+            //            var glc = this._to.localToGlobal(0, 0);
+            //            var par = geom.Transform.create(element.parentElement);
+            //            var parLc = par.globalToLocal(glc.x, glc.y, 0);
+            //            parLc.x = math.Number.clamp(parLc.x, 0, 512);
+            //            parLc.y = math.Number.clamp(parLc.y, 0, 512);
+            //            var parGl = par.localToGlobal(parLc.x, parLc.y);
+            //            var min = this._to.globalToLocal(parGl.x, parGl.y, 0);
 
             //            min.x -= m.m41;
-//            min.y -= m.m42;
+            //            min.y -= m.m42;
             //            min.x -= element.offsetLeft;
             //            min.y -= element.offsetTop;
             //            var max = par.localToLocal(this._to, 256, 256, 0);
             //            max.x -= m.m41;
             //            max.y -= m.m42;
             
-//            pt.x = math.Number.clamp(pt.x, min.x, 512);
-//            pt.y = math.Number.clamp(pt.y, min.y, 512);
+            //            pt.x = math.Number.clamp(pt.x, min.x, 512);
+            //            pt.y = math.Number.clamp(pt.y, min.y, 512);
 
             return pt;
         }
