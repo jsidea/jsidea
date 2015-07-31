@@ -14,6 +14,7 @@ module jsidea.geom {
         public sceneTransform: geom.Matrix3D[] = [];
         public inverseSceneTransform: geom.Matrix3D[] = [];
         public box: layout.BoxModel = new layout.BoxModel();
+        public chain: layout.StyleChain<layout.INode>;
 
         constructor(element: HTMLElement = null, mode: string = Transform.MODE_AUTO) {
             if (element)
