@@ -14,7 +14,7 @@ module jsidea.geom {
         public sceneTransform: geom.Matrix3D[] = [];
         public inverseSceneTransform: geom.Matrix3D[] = [];
         public box: layout.BoxModel = new layout.BoxModel();
-        public chain: layout.StyleChain<layout.INode>;
+//        public chain: layout.StyleChain;
 
         constructor(element: HTMLElement = null, mode: string = Transform.MODE_AUTO) {
             if (element)
@@ -51,9 +51,9 @@ module jsidea.geom {
             }
 
             if (mode == Transform.MODE_PERSPECTIVE) {
-                var chain = layout.StyleChain.create(element);
-                this.sceneTransform = Transform.extractAccumulatedMatrices(chain.node);
-                this.box.update(element, chain.node.style);
+                var node = layout.StyleChain.create(element);
+                this.sceneTransform = Transform.extractAccumulatedMatrices(node);
+                this.box.update(element, node.style);
             }
             //runs if there is no perspective involved
             //the elements can have 3d-transformation also

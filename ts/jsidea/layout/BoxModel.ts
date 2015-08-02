@@ -36,8 +36,9 @@ module jsidea.layout {
         public update(element: HTMLElement, style: CSSStyleDeclaration = null): BoxModel {
             if (!element)
                 return this.clear();
-            if (!style)
+            if (!style) {
                 style = window.getComputedStyle(element);
+            }
 
             this._element = element;
 

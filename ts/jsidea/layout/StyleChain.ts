@@ -51,39 +51,17 @@ module jsidea.layout {
         isBorderBox: boolean;
     }
 
-    export class StyleChain<NodeType> {
-        public node: NodeType = null;
-
-        constructor() {
-        }
-
-        public static create(element: HTMLElement): StyleChain<INode> {
+    export class StyleChain {
+        public static create(element: HTMLElement): INode {
             if (!element)
                 return null;
-            var chain = new StyleChain<INode>();
-            chain.node = StyleChain.extractStyleChain(element);
-            return chain;
+            return StyleChain.extractStyleChain(element);
         }
 
-        public static createLite(element: HTMLElement): StyleChain<INodeLite> {
+        public static createLite(element: HTMLElement): INodeLite {
             if (!element)
                 return null;
-            var chain = new StyleChain<INodeLite>();
-            chain.node = StyleChain.extractStyleChainLite(element);
-            return chain;
-        }
-
-        public clear(): StyleChain<NodeType> {
-            this.node = null;
-            return this;
-        }
-
-        public static qualifiedClassName(): string {
-            return "jsidea.layout.StyleChain";
-        }
-
-        public toString(): string {
-            return "[" + StyleChain.qualifiedClassName() + "]";
+            return StyleChain.extractStyleChainLite(element);
         }
 
         private static extractStyleChainLite(element: HTMLElement): INodeLite {

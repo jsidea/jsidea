@@ -32,7 +32,9 @@ if (!Array.prototype.indexOf) {
 }
 
 //hook
-$(window).ready(() => {
+//$(window).ready(() => {
+document.addEventListener("DOMContentLoaded",() => {
+
     var qualifiedClassName = $("body").attr("data-application");
     if (!qualifiedClassName) {
         return;

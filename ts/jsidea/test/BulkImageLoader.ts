@@ -80,8 +80,8 @@ module jsidea.test {
                     completeCount++;
             var loadingCount = overallCount - completeCount;
             if (overallCount > 0 && overallCount == completeCount) {
-                if (completeCount != this._lastCount)
-                    this.trigger("loaded");
+//                if (completeCount != this._lastCount)
+//                    this.trigger("loaded");
                 this._lastCount = completeCount;
             }
         }

@@ -13,7 +13,7 @@ module jsidea.test {
             super();
 
             this._loader = new BulkImageLoader("http://127.0.0.1/eventfive/jsidea/assets/");
-            this._loader.bind("loaded", (e) => this.handleLoaded(e));
+//            this._loader.bind("loaded", (e) => this.handleLoaded(e));
             for (var i = 0; i < 8; ++i) {
                 this._loader.add("noname-color-" + i + ".png", "_colors" + i);
                 this._loader.add("noname-depth-" + i + ".png", "_depths" + i);
@@ -21,7 +21,7 @@ module jsidea.test {
             this._loader.run();
         }
 
-        private handleLoaded(e: jsidea.events.IEvent): void {
+        private handleLoaded(e: any): void {
             console.log("RESSOURCES AVAILABLE");
 
             var types = ["_colors", "_depths"];

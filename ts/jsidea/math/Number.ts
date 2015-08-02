@@ -9,7 +9,7 @@ module jsidea.math {
                 return value;
             }
             else if (typeof value == "string") {
-                value = jQuery.trim(value);
+                value = (<string>value).trim();
                 if (value.indexOf("%") > 0) {
                     return (math.Number.parse(value.replace("%", ""), defaultValue) / 100) * relativeSize;
                 }
@@ -26,7 +26,7 @@ module jsidea.math {
             }
             return defaultValue;
         }
-        
+
         public static parse(value: any, defaultValue: number): number {
             value = parseFloat(value);
             if (isNaN(value))

@@ -14,7 +14,7 @@ module jsidea.test {
             var vie = document.getElementById("view");
 
             var max = 15;
-            var te = 3;//5;//7;//11 for ie11 testing 5 is scrolling test
+            var te = 15;//5;//7;//11 for ie11 testing 5 is scrolling test
             document.body.className = "test-" + te;
 
             var can = document.createElement("canvas");
@@ -42,8 +42,8 @@ module jsidea.test {
             d.appendChild(xc);
 
             var pos = new layout.Position();
-            pos.to.x = "100%";
-            pos.to.y = "100%";
+            pos.to.x = 0;//"100%";
+            pos.to.y = 0;//"100%";
             pos.useTransform = true;
 
             var draw = () => {
@@ -106,55 +106,19 @@ module jsidea.test {
 
         private drawOffsetChain(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
             while (e && e.parentElement != document.body.parentElement) {
-                var sc = layout.StyleChain.create(e).node;
+                var sc = layout.StyleChain.create(e);
                 this.drawCross(ctx, sc.offset.x, sc.offset.y);
                 e = e.parentElement;
             }
         }
 
-        private drawQuad(ctx: CanvasRenderingContext2D, quad: geom.Quad): void {
-            ctx.beginPath();
-            ctx.lineWidth = 2;
-            ctx.moveTo(quad.a.x, quad.a.y);
-            ctx.lineTo(quad.b.x, quad.b.y);
-            ctx.lineTo(quad.c.x, quad.c.y);
-            ctx.lineTo(quad.d.x, quad.d.y);
-            ctx.lineTo(quad.a.x, quad.a.y);
-            ctx.stroke();
-            
-            this.drawBox(ctx, quad.outerBox());
-            this.drawBox(ctx, quad.innerBox());
-        }
-        
-        private drawBox(ctx: CanvasRenderingContext2D, box: geom.Box2D): void {
-            ctx.beginPath();
-            ctx.lineWidth = 2;
-            ctx.moveTo(box.x, box.y);
-            ctx.lineTo(box.x + box.width, box.y);
-            ctx.lineTo(box.x + box.width, box.y + box.height);
-            ctx.lineTo(box.x, box.y + box.height);
-            ctx.lineTo(box.x, box.y);
-            ctx.stroke();
-        }
-
         private drawBoundingBox(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
-
             var can: HTMLElement = ctx.canvas;
 
             var a = new geom.Point3D(0, 0, 0);
             var b = new geom.Point3D(e.offsetWidth, 0, 0);
             var c = new geom.Point3D(e.offsetWidth, e.offsetHeight, 0);
             var d = new geom.Point3D(0, e.offsetHeight, 0);
-
-            var tim = (new Date()).getTime();
-
-            //            var locToGlo = geom.Transform.create(e);
-            //            locToGlo.fromBox = layout.BoxModel.BORDER;
-            //            locToGlo.toBox = layout.BoxModel.CANVAS;
-            //            a = locToGlo.localToLocal(can, a.x, a.y);
-            //            b = locToGlo.localToLocal(can, b.x, b.y);
-            //            c = locToGlo.localToLocal(can, c.x, c.y);
-            //            d = locToGlo.localToLocal(can, d.x, d.y);
             
             var from = geom.Transform.create(e);
             from.fromBox = layout.BoxModel.BORDER;
@@ -166,30 +130,6 @@ module jsidea.test {
             b = from.localToLocal(to, b.x, b.y);
             c = from.localToLocal(to, c.x, c.y);
             d = from.localToLocal(to, d.x, d.y);           
-            
-
-            //            var locToGlo = geom.Transform.create(e);
-            //            a = locToGlo.project(a.x, a.y);
-            //            b = locToGlo.project(b.x, b.y);
-            //            c = locToGlo.project(c.x, c.y);
-            //            d = locToGlo.project(d.x, d.y);
-            //
-            //            var gloToLoc = geom.Transform.create(can);
-            //            gloToLoc.toBox = "canvas";
-            //            a = gloToLoc.unproject(a.x, a.y);
-            //            b = gloToLoc.unproject(b.x, b.y);
-            //            c = gloToLoc.unproject(c.x, c.y);
-            //            d = gloToLoc.unproject(d.x, d.y);
-            
-            
-            
-            
-            //            a = gloToLoc.unproject(a.x, a.y);
-            //            b = gloToLoc.unproject(b.x, b.y);
-            //            c = gloToLoc.unproject(c.x, c.y);
-            //            d = gloToLoc.unproject(d.x, d.y);
-
-            //            console.log("TIME TO CALC 4 POINTS",(new Date()).getTime() - tim);
 
             ctx.beginPath();
             ctx.setLineDash([4, 4]);
@@ -214,7 +154,7 @@ module jsidea.test {
         }
 
         private logChain(f: HTMLElement): void {
-            var node = layout.StyleChain.create(f).node;
+            var node = layout.StyleChain.create(f);
             if (node)
                 node = node.first;
             while (node) {
@@ -233,7 +173,7 @@ module jsidea.test {
                     text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
                     //                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
                     text.Text.conc(12, " ", "ACC", node.isAccumulatable),
-                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed),
+                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
                     text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),
                     //                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
                     text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
@@ -265,12 +205,13 @@ module jsidea.test {
 
         private testEventDispatcher(): void {
             var d = new jsidea.events.EventDispatcher();
-            d.bind("click.setup",(e: jsidea.events.IEvent) => console.log(e.eventType));
-            d.trigger(".setup");
+//            d.bind("click.setup",(e: jsidea.events.IEvent) => console.log(e.eventType));
+//            d.trigger(".setup");
         }
 
+        public static qualifiedClassName: string = "jsidea.test.TestApplication";
         public toString(): string {
-            return "[" + this.qualifiedClassName() + "]";
+            return "[" + TestApplication.qualifiedClassName + "]";
         }
     }
 }

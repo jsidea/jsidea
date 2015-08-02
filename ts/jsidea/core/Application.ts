@@ -9,16 +9,9 @@ module jsidea.core {
         private _tickInterval: number = 0;
         private _pageX: number = 0;
         private _pageY: number = 0;
-        private _lastScrollLeft: number = 0;
-        private _lastScrollTop: number = 0;
         
-        private _pageOffsetIncludesScroll: boolean = true;
-
         constructor() {
             super();
-
-            var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-            this._pageOffsetIncludesScroll = !isChrome;
             
             this.autoActive = true;
             this.autoTick = true;
@@ -27,37 +20,23 @@ module jsidea.core {
             //initial tick
             this.tick();
 
-            $(document).bind("mousemove.jsdea-application", (e) => this.onMouseMove(e));
-            $(window).bind("scroll.jsdea-application", (e) => this.onScroll(e));
+            document.addEventListener("mousemove", (e) => this.onMouseMove(e));
         }
 
-        private onMouseMove(e: JQueryEventObject): void {
+        private onMouseMove(e: MouseEvent): void {
             this._pageX = e.pageX;
             this._pageY = e.pageY;
-        }
-
-        private onScroll(e: JQueryEventObject): void {
-            if (this._lastScrollLeft != $(document).scrollLeft()) {
-                this._pageX -= this._lastScrollLeft;
-                this._lastScrollLeft = $(document).scrollLeft();
-                this._pageX += this._lastScrollLeft;
-            }
-            if (this._lastScrollTop != $(document).scrollTop()) {
-                this._pageY -= this._lastScrollTop;
-                this._lastScrollTop = $(document).scrollTop();
-                this._pageY += this._lastScrollTop;
-            }
         }
 
         public create(): void {
         }
 
         public get pageX(): number {
-            return this._pageOffsetIncludesScroll ? this._pageX : this._pageX - $(document).scrollLeft();
+            return !system.Caps.isWebkit ? this._pageX : this._pageX - $(document).scrollLeft();
         }
 
         public get pageY(): number {
-            return this._pageOffsetIncludesScroll ? this._pageY : this._pageY - $(document).scrollTop();
+            return !system.Caps.isWebkit ? this._pageY : this._pageY - $(document).scrollTop();
         }
 
         public get active(): boolean {
@@ -68,9 +47,6 @@ module jsidea.core {
             if (this._active == value)
                 return;
             this._active = value;
-
-            this.broadcast(this._active ? jsidea.events.Event.ACTIVATE : jsidea.events.Event.DEACTIVATE,
-                new jsidea.events.Event());
         }
 
         public get autoActive(): boolean {
@@ -138,12 +114,9 @@ module jsidea.core {
             super.dispose();
         }
 
-        public qualifiedClassName(): string {
-            return "jsidea.Application";
-        }
-
+        public static qualifiedClassName: string = "jsidea.core.Application";
         public toString(): string {
-            return "[" + this.qualifiedClassName() + "]";
+            return "[" + Application.qualifiedClassName + "]";
         }
     }
 }
