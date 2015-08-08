@@ -522,5 +522,5 @@
 
 .test-15 #d-cont {
 	position: fixed;
-	/* transform: rotate(10deg); */
+	transform: rotate(10deg);
 }

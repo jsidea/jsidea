@@ -90,22 +90,31 @@ module jsidea.layout {
                 0,
                 this.toBox,
                 this.fromBox);
+
             //shift to origin/pivot/to-point
             lc.x += this._to.matrix.m41 - toX;
             lc.y += this._to.matrix.m42 - toY;
             
-            
-            
             //clamp
-            var dx = lc.x - this._to.matrix.m41;
-            var dy = lc.y - this._to.matrix.m42;
+            var boundsBox = layout.BoxModel.PADDING;
+            var boundsBoxTo = layout.BoxModel.BORDER;
             var bounds = geom.Transform.create(element.parentElement.parentElement.parentElement);
-            var blc = this._to.localToLocal(bounds, dx, dy, 0);
-            blc.x = Math.max(0, blc.x);
-            blc.y = Math.max(0, blc.y);
-            var llc = bounds.localToLocal(this._to, blc.x, blc.y, 0);
-            lc.x = this._to.matrix.m41 + llc.x;
-            lc.y = this._to.matrix.m42 + llc.y;            
+            
+            var off = new geom.Point2D(0, element.offsetHeight);
+            var blc = this._to.localToLocal(bounds, (lc.x - this._to.matrix.m41) + off.x, (lc.y - this._to.matrix.m42) + off.y, 0, boundsBoxTo, boundsBox);
+            blc.x = math.Number.clamp(blc.x, 0, 2000);
+            blc.y = math.Number.clamp(blc.y, 0, 2000);
+            var llc = bounds.localToLocal(this._to, blc.x, blc.y, 0, boundsBoxTo, boundsBox);
+            lc.x = this._to.matrix.m41 + llc.x - off.x;
+            lc.y = this._to.matrix.m42 + llc.y - off.y;
+            
+//            var off = new geom.Point2D(0, element.offsetHeight);
+//            var blc = this._to.localToLocal(bounds, (lc.x - this._to.matrix.m41) + off.x, (lc.y - this._to.matrix.m42) + off.y, 0);
+//            blc.x = Math.max(0, blc.x);
+//            blc.y = Math.max(0, blc.y);
+//            var llc = bounds.localToLocal(this._to, blc.x, blc.y, 0);
+//            lc.x = this._to.matrix.m41 + llc.x - off.x;
+//            lc.y = this._to.matrix.m42 + llc.y - off.y;   
             
             return lc.clone();
         }
