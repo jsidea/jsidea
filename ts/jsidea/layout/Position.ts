@@ -82,7 +82,7 @@ module jsidea.layout {
             var fromX: number = math.Number.parseRelation(this.from.x, sizeFrom.x, 0) + math.Number.parseRelation(this.from.offsetX, sizeFrom.x, 0);
             var fromY: number = math.Number.parseRelation(this.from.y, sizeFrom.y, 0) + math.Number.parseRelation(this.from.offsetY, sizeFrom.y, 0);
             
-            //the transfrom from "from" to "to"
+            //the transfrom: "from" -> "to"
             var lc = this._from.localToLocal(
                 this._to,
                 fromX,
@@ -90,74 +90,30 @@ module jsidea.layout {
                 0,
                 this.toBox,
                 this.fromBox);
-
-            lc.x -= toX;
-            lc.y -= toY;
-
-            var m = Position.createWithPerspective(element, Buffer._APPLY_POSITION);
-            var pt = m.project(lc).clone();
+            //shift to origin/pivot/to-point
+            lc.x += this._to.matrix.m41 - toX;
+            lc.y += this._to.matrix.m42 - toY;
             
-            //var pt = (new geom.Matrix3D()).project(lc).clone();
-
-            //restrict to box
-            //hhmmmmmmm the offset will be wrong in many cases
-            //get layout.StyleChain and read that position
-            //mmmmm?????? fuck
-            //            var bounds = geom.Transform.create(element.parentElement);
-            //            var node = layout.StyleChain.create(element);
-            //            var container = geom.Transform.create(node.isSticked ? element.ownerDocument.body : element.parentElement);
-            //            var pos = node.position;
-            //            var bnds = m.bounds(0, 0, element.offsetWidth, element.offsetHeight);
-            //            
-            //            pt.addPoint2D(pos);
-            //            
-            ////            pt.x -= bnds.x;
-            ////            pt.y -= bnds.y;
-            //            
-            //            var glc = container.localToGlobal(pt.x, pt.y, 0);
-            //            
-            //            var conLc = bounds.globalToLocal(glc.x, glc.y, 0);
-            ////            conLc = m.project(conLc);
-            //            conLc.x = math.Number.clamp(conLc.x, 0, bounds.element.offsetWidth);
-            //            conLc.y = math.Number.clamp(conLc.y, 0, bounds.element.offsetHeight);
-            //            glc = bounds.localToGlobal(conLc.x, conLc.y, 0);
-            //            
-            //            
-            //            var loc = container.globalToLocal(glc.x, glc.y, 0);
-            //            pt.x = loc.x - pos.x;
-            //            pt.y = loc.y - pos.y;
             
-            //            m.invert();
-            //            var pt = m.project(pt).clone();
             
-            return pt;
+            //clamp
+            var dx = lc.x - this._to.matrix.m41;
+            var dy = lc.y - this._to.matrix.m42;
+            var bounds = geom.Transform.create(element.parentElement.parentElement.parentElement);
+            var blc = this._to.localToLocal(bounds, dx, dy, 0);
+            blc.x = Math.max(0, blc.x);
+            blc.y = Math.max(0, blc.y);
+            var llc = bounds.localToLocal(this._to, blc.x, blc.y, 0);
+            lc.x = this._to.matrix.m41 + llc.x;
+            lc.y = this._to.matrix.m42 + llc.y;            
+            
+            return lc.clone();
         }
 
         public dispose(): void {
             this.to = null;
             this.from = null;
             this.from = null;
-        }
-
-        private static createWithPerspective(element: HTMLElement, ret = new geom.Matrix3D()): geom.Matrix3D {
-            ret.identity();
-            if (element.ownerDocument) {
-                ret.appendCSS(layout.Style.create(element).transform);
-                if (element.parentElement) {
-                    var parentStyle = window.getComputedStyle(element.parentElement);
-                    var perspective = math.Number.parse(parentStyle.perspective, 0);
-                    if (perspective) {
-                        var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
-                        var perspectiveOriginX = math.Number.parseRelation(perspectiveOrigin[0], element.parentElement.offsetWidth, 0);
-                        var perspectiveOriginY = math.Number.parseRelation(perspectiveOrigin[1], element.parentElement.offsetHeight, 0);
-
-                        ret.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
-                        ret.appendPerspective(perspective);
-                        ret.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
-                    }
-                }
-            }
-            return ret;
         }
 
         public static qualifiedClassName: string = "jsidea.layout.Position";

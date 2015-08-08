@@ -42,8 +42,8 @@ module jsidea.test {
             d.appendChild(xc);
 
             var pos = new layout.Position();
-            pos.to.x = 0;//"100%";
-            pos.to.y = 0;//"100%";
+            pos.to.x = "100%";
+            pos.to.y = "100%";
             pos.useTransform = true;
 
             var draw = () => {

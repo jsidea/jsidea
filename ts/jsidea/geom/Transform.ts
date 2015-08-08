@@ -11,10 +11,11 @@ module jsidea.geom {
         public element: HTMLElement;
         public toBox: string = layout.BoxModel.BORDER;
         public fromBox: string = layout.BoxModel.BORDER;
+        public matrix: geom.Matrix3D = new geom.Matrix3D();
         public sceneTransform: geom.Matrix3D[] = [];
         public inverseSceneTransform: geom.Matrix3D[] = [];
         public box: layout.BoxModel = new layout.BoxModel();
-//        public chain: layout.StyleChain;
+        //        public chain: layout.StyleChain;
 
         constructor(element: HTMLElement = null, mode: string = Transform.MODE_AUTO) {
             if (element)
@@ -52,6 +53,7 @@ module jsidea.geom {
 
             if (mode == Transform.MODE_PERSPECTIVE) {
                 var node = layout.StyleChain.create(element);
+                this.matrix.setCSS(node.style.transform);
                 this.sceneTransform = Transform.extractAccumulatedMatrices(node);
                 this.box.update(element, node.style);
             }
@@ -91,6 +93,7 @@ module jsidea.geom {
                 this.sceneTransform = [matrix];
 
                 var style = layout.Style.create(element);
+                this.matrix.setCSS(style.transform);
                 this.box.update(element, style);
             }
 
