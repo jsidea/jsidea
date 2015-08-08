@@ -52,9 +52,11 @@ module jsidea.geom {
 
             if (mode == Transform.MODE_PERSPECTIVE) {
                 var node = layout.StyleChain.create(element);
-                this.matrix.setCSS(node.style.transform);
+                
                 this.sceneTransform = Transform.extractAccumulatedMatrices(node);
                 this.boxModel.update(element, node.style);
+                this.matrix.setCSS(node.style.transform);
+//                this.matrix = Transform.extractMatrix(node, this.matrix.identity());
             }
             //runs if there is no perspective involved
             //the elements can have 3d-transformation also
@@ -401,6 +403,11 @@ module jsidea.geom {
             //position is relative to the direct parent
             matrix.appendPositionRaw(node.position.x, node.position.y, 0);
             
+//            if(node.element.id == "d-cont")
+//            {
+//                console.log("d-cont", originX, originY);    
+//            }
+            
             //-------
             //perspective
             //-------
@@ -414,6 +421,8 @@ module jsidea.geom {
                 matrix.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
                 matrix.appendPerspective(perspective);
                 matrix.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
+                
+//                console.log("PERSPECTIVE FOUND...");
             }
 
             return matrix;

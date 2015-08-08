@@ -13,8 +13,8 @@ module jsidea.test {
             var con = document.getElementById("content");
             var vie = document.getElementById("view");
 
-            var max = 15;
-            var te = 15;//5;//7;//11 for ie11 testing 5 is scrolling test
+            var max = 16;
+            var te = 16;//5;//7;//11 for ie11 testing 5 is scrolling test
             document.body.className = "test-" + te;
 
             var can = document.createElement("canvas");
@@ -37,21 +37,23 @@ module jsidea.test {
             a.appendChild(b);
             b.appendChild(c);
             c.appendChild(d);
-            d.appendChild(xc);
+//            d.appendChild(xc);
             con.appendChild(a);
             document.body.appendChild(can);
-            d.appendChild(xc);
+//            d.appendChild(xc);
 
             var pos = new layout.Position();
             pos.to.x = "100%";
             pos.to.y = "100%";
             pos.useTransform = true;
-            pos.boundsElement = con;
+//            pos.boundsElement = vie;
+            
             document.addEventListener("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(this.pageX, this.pageY);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
                 pos.apply(d);
+//                console.log("MOVE", this.pageX, this.pageY);
             });
 
             var draw = () => {
@@ -63,7 +65,7 @@ module jsidea.test {
                 this.drawBoundingBox(ctx, b);
                 this.drawBoundingBox(ctx, c);
                 this.drawBoundingBox(ctx, d);
-                this.drawBoundingBox(ctx, xc);
+//                this.drawBoundingBox(ctx, xc);
                 this.drawBoundingBox(ctx, can);
                 
 //                var transD = geom.Transform.create(d);
@@ -100,6 +102,7 @@ module jsidea.test {
 
             document.addEventListener("click",(evt) => {
 //                this.logChain(d);
+//                console.log(geom.Matrix3D.create(d).toStringTable());
             });
 
             document.addEventListener("click", draw);

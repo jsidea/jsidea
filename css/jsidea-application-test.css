@@ -522,5 +522,38 @@
 
 .test-15 #d-cont {
 	position: fixed;
-	transform: rotate(10deg);
+	transform: scale(0.75);
+}
+
+/* TEST 16 */
+.test-16 #view {
+	position: relative;
+}
+
+.test-16 #content {
+	position: relative;
+}
+
+.test-16 #a-cont {
+	position: relative;
+}
+
+.test-16 #b-cont {
+	position: relative;
+}
+
+.test-16 #c-cont {
+	position: relative;
+	width: 512px;
+	height: 512px;
+	transform: rotateY(20deg);
+	perspective: 600px;
+	transform-style: preserve-3d;
+	/* overflow:scroll; */
+}
+
+.test-16 #d-cont {
+	/* box-sizing: border-box; */
+	position: relative;
+	transform: rotateY(15deg);
 }

@@ -77,7 +77,7 @@ module jsidea.layout {
             this._to.boxModel.size(sizeTo, this.toBox, layout.BoxModel.BORDER);
             var toX: number = math.Number.parseRelation(this.to.x, sizeTo.x, 0) + math.Number.parseRelation(this.to.offsetX, sizeTo.x, 0);
             var toY: number = math.Number.parseRelation(this.to.y, sizeTo.y, 0) + math.Number.parseRelation(this.to.offsetY, sizeTo.y, 0);
-
+            
             //transform box-models of "from"
             var sizeFrom = Buffer._APPLY_POSITION_SIZE_FROM.setTo(fromElement.offsetWidth, fromElement.offsetHeight);
             this._from.boxModel.size(sizeFrom, this.fromBox, layout.BoxModel.BORDER);
@@ -94,14 +94,15 @@ module jsidea.layout {
                 this.fromBox);
 
             //shift to origin/pivot/to-point
-            point.x += this._to.matrix.m41 - toX;
-            point.y += this._to.matrix.m42 - toY;
+            point.x -= toX;
+            point.y -= toY;
+            point = this._to.matrix.unproject(point);
 
             //keep in bounds
             if (this.boundsElement) {
-                if(this.boundsElement == element)
+                if (this.boundsElement == element)
                     throw new Error("The bounds element cannot be the \"to\"-element.");
-                if(element.contains(this.boundsElement))
+                if (element.contains(this.boundsElement))
                     throw new Error("The bounds element cannot be a child-element of the \"to\"-element.");
                 var toBox = layout.BoxModel.BORDER;
                 var fromBox = layout.BoxModel.PADDING;
