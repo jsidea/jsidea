@@ -240,7 +240,7 @@ module jsidea.geom {
             var qy = y + this.m32;
             var qz = z + this.m33;
             var qw = w + this.m34;
-            
+
             if (w == 0)
                 w = 0.0001;
             x /= w;
@@ -253,10 +253,12 @@ module jsidea.geom {
             qy /= qw;
             qz /= qw;
 
-            if((qz - z) == 0)
-                console.log("AH NULL");
-            
-            var t = -z / (qz - z);
+            //TODO: ....
+            var wz = qz - z;
+            if (wz == 0)
+                return ret.setTo(x, y, z, w);
+
+            var t = -z / wz;
             x += t * (qx - x);
             y += t * (qy - y);
 

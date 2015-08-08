@@ -46,7 +46,7 @@ module jsidea.test {
             pos.to.x = "100%";
             pos.to.y = "100%";
             pos.useTransform = true;
-//            pos.boundsElement = vie;
+//            pos.boundsElement = a;
             
             document.addEventListener("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(this.pageX, this.pageY);
