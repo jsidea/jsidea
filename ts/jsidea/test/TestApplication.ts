@@ -40,19 +40,30 @@ module jsidea.test {
 //            d.appendChild(xc);
             con.appendChild(a);
             document.body.appendChild(can);
-//            d.appendChild(xc);
+            d.appendChild(xc);
 
             var pos = new layout.Position();
-            pos.to.x = "100%";
-            pos.to.y = "100%";
+            pos.to.x = 0;//"100%";
+            pos.to.y = 0;//"100%";
             pos.useTransform = true;
 //            pos.boundsElement = a;
             
-            document.addEventListener("mousemove",(evt) => {
-                var pt: any = new geom.Point3D(this.pageX, this.pageY);
-                pos.from.x = pt.x;
-                pos.from.y = pt.y;
-                pos.apply(d);
+            document.addEventListener("click",(evt) => {
+                var pt = new geom.Point3D(this.pageX, this.pageY);
+                
+                var tr = geom.Transform.create(d);
+                var lc = tr.globalToLocalPoint(pt, "content");
+                
+                var ma = geom.Matrix3D.createWithOrigin(xc);
+                var pk = ma.transform(new geom.Point3D());
+                var maR = geom.Matrix3D.create(xc);
+                maR.m41 += lc.x - pk.x;
+                maR.m42 += lc.y - pk.y;
+                xc.style.transform = maR.getCSS();
+                
+//                pos.from.x = pt.x;
+//                pos.from.y = pt.y;
+//                pos.apply(d);
 //                console.log("MOVE", this.pageX, this.pageY);
             });
 
@@ -108,11 +119,9 @@ module jsidea.test {
             document.addEventListener("click", draw);
 
 //            pos.useTransform = system.Caps.isSafari ? false : true;
-            console.log("Browser", system.Caps.browserName, system.Caps.browserVersionFull, "OS", system.Caps.osName, "Engine", system.Caps.engineName);
-            
-            
-            console.log(navigator.userAgent.toLowerCase());
-            console.log(navigator.appVersion.toLowerCase());
+//            console.log("Browser", system.Caps.browserName, system.Caps.browserVersionFull, "OS", system.Caps.osName, "Engine", system.Caps.engineName);
+//            console.log(navigator.userAgent.toLowerCase());
+//            console.log(navigator.appVersion.toLowerCase());
         }
 
         private drawOffsetChain(ctx: CanvasRenderingContext2D, e: HTMLElement): void {

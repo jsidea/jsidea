@@ -92,11 +92,32 @@ module jsidea.layout {
                 0,
                 this.toBox,
                 this.fromBox);
+            
+//            console.log("LOC", point.x, point.y);
 
             //shift to origin/pivot/to-point
-            point.x -= toX;
-            point.y -= toY;
-            point = this._to.matrix.unproject(point);
+//            point.x -= toX;
+//            point.y -= toY;
+            
+            point.z = 0;
+            
+//            point.x += this._to.matrix.m41;
+//            point.y += this._to.matrix.m42;
+            
+            //from "to" -> parent
+            point = this._to.matrix.project(point);
+            
+//            var pk = this._to.matrix.getMatrix2D().transform(point);
+//            point.x = pk.x;
+//            point.y = pk.y;
+            
+//            point.x -= this._to.matrix.m41;
+//            point.y -= this._to.matrix.m42;
+            
+//            point.x = point.x - this._to.matrix.m41;
+//            point.y = point.y - this._to.matrix.m42;
+            
+//            point = this._to.matrix.project(point);
 
             //keep in bounds
             if (this.boundsElement) {
@@ -107,7 +128,7 @@ module jsidea.layout {
                 var toBox = layout.BoxModel.BORDER;
                 var fromBox = layout.BoxModel.PADDING;
                 this._bounds.update(this.boundsElement, this.transformMode);
-                point = this._to.clampBox(this._bounds, toBox, fromBox, point, point);
+                point = this._to.clampBox2(this._bounds, toBox, fromBox, point, point);
             }
 
             return point;

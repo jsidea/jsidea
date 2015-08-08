@@ -52,11 +52,12 @@ module jsidea.geom {
 
             if (mode == Transform.MODE_PERSPECTIVE) {
                 var node = layout.StyleChain.create(element);
+                this.matrix.setCSS(node.style.transform);
+                //                this.matrix = Transform.extractMatrix(node, this.matrix.identity());
+                //                this.matrix = Transform.extractMatrixPerspective(node, this.matrix.identity());
                 
                 this.sceneTransform = Transform.extractAccumulatedMatrices(node);
                 this.boxModel.update(element, node.style);
-                this.matrix.setCSS(node.style.transform);
-//                this.matrix = Transform.extractMatrix(node, this.matrix.identity());
             }
             //runs if there is no perspective involved
             //the elements can have 3d-transformation also
@@ -233,6 +234,62 @@ module jsidea.geom {
                 0);
         }
 
+        public clampBox2(
+            to: Transform,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO,
+            position: geom.Point3D = null,
+            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
+            var toRect = to.boxModel.getOriginBox(fromBox);
+            var fromRect = this.boxModel.getOriginBox(toBox);
+            ret.setTo(position.x, position.y, position.z);
+            this.clamp2(to, fromRect.x, fromRect.y, ret, toRect, toBox, fromBox, ret);//top left
+            //            this.clamp2(to, fromRect.right, fromRect.y, ret, toRect, toBox, fromBox, ret);//top right
+            //            this.clamp2(to, fromRect.right, fromRect.bottom, ret, toRect, toBox, fromBox, ret);//bottom right
+            this.clamp2(to, fromRect.x, fromRect.bottom, ret, toRect, toBox, fromBox, ret);//bottom left
+            return ret;
+        }
+
+        public clamp2(
+            to: Transform,
+            localX: number,
+            localY: number,
+            position: geom.Point3D,
+            toBounds: geom.Box2D,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO,
+            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
+
+            var dx = position.x - this.matrix.m41;
+            var dy = position.y - this.matrix.m42;
+            var blc = this.localToLocal(
+                to,
+                dx + localX,
+                dy + localY,
+                0,
+                fromBox,
+                toBox);
+            blc.x = math.Number.clamp(blc.x, toBounds.x, toBounds.right);
+            blc.y = math.Number.clamp(blc.y, toBounds.y, toBounds.bottom);
+            var llc = to.localToLocal(this, blc.x, blc.y, 0, toBox, fromBox);
+
+            llc.x -= localX;
+            llc.y -= localY;
+            llc = this.matrix.unproject(llc);
+            
+            //            llc.x += position.x;
+            //            llc.y += position.y;
+            
+            
+            ret.copyFrom(llc);
+            return ret;
+            
+            //            return ret.setTo(
+            //                this.matrix.m41 + llc.x - localX,
+            //                this.matrix.m42 + llc.y - localY,
+            //                0);
+        }
+
         public localToLocalPoint(
             to: Transform, pt: geom.Point3D,
             toBox: string = layout.BoxModel.AUTO,
@@ -372,6 +429,40 @@ module jsidea.geom {
             return isTransformed ? Transform.MODE_TRANSFORM : Transform.MODE_BOX;
         }
 
+        private static extractMatrixPerspective(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
+            if (!matrix)
+                matrix = new geom.Matrix3D();
+            if (!node)
+                return matrix;
+
+            var element: HTMLElement = node.element;
+            var style: CSSStyleDeclaration = node.style;
+            
+            //------
+            //transform
+            //------
+            if (node.isTransformed) {
+                matrix.appendCSS(style.transform);
+            }
+
+            //-------
+            //perspective
+            //-------
+            if (node.parent && node.parent.perspective) {
+                var perspective = node.parent.perspective;
+                var parentStyle: CSSStyleDeclaration = node.parent.style;
+                var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
+                var perspectiveOriginX = math.Number.parseRelation(perspectiveOrigin[0], element.parentElement.offsetWidth, 0);
+                var perspectiveOriginY = math.Number.parseRelation(perspectiveOrigin[1], element.parentElement.offsetHeight, 0);
+
+                matrix.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
+                matrix.appendPerspective(perspective);
+                matrix.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
+            }
+
+            return matrix;
+        }
+
         private static extractMatrix(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
             if (!matrix)
                 matrix = new geom.Matrix3D();
@@ -403,10 +494,10 @@ module jsidea.geom {
             //position is relative to the direct parent
             matrix.appendPositionRaw(node.position.x, node.position.y, 0);
             
-//            if(node.element.id == "d-cont")
-//            {
-//                console.log("d-cont", originX, originY);    
-//            }
+            //            if(node.element.id == "d-cont")
+            //            {
+            //                console.log("d-cont", originX, originY);    
+            //            }
             
             //-------
             //perspective
@@ -422,7 +513,7 @@ module jsidea.geom {
                 matrix.appendPerspective(perspective);
                 matrix.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
                 
-//                console.log("PERSPECTIVE FOUND...");
+                //                console.log("PERSPECTIVE FOUND...");
             }
 
             return matrix;
