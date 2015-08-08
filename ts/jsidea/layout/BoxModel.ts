@@ -83,6 +83,18 @@ module jsidea.layout {
             return this;
         }
 
+        public sizeBox(box: geom.Box2D, toBox: string, fromBox: string = BoxModel.BORDER): geom.Box2D {
+            if (toBox == fromBox)
+                return box;
+            var size = new geom.Point2D(box.width, box.height);
+            if (fromBox != BoxModel.BORDER)
+                this.convertSize(size, fromBox, true)
+            this.convertSize(size, toBox, false);
+            box.width = size.x;
+            box.height = size.y;
+            return box;
+        }
+
         public size(size: geom.IPoint2DValue, toBox: string, fromBox: string = BoxModel.BORDER): geom.IPoint2DValue {
             if (toBox == fromBox)
                 return size;

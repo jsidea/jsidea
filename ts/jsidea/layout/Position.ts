@@ -19,6 +19,7 @@ module jsidea.layout {
         public transformMode: string = geom.Transform.MODE_AUTO;
         private _from: geom.Transform = new geom.Transform();
         private _to: geom.Transform = new geom.Transform();
+        private _bounds: geom.Transform = new geom.Transform();
 
         constructor() {
         }
@@ -95,18 +96,33 @@ module jsidea.layout {
             lc.x += this._to.matrix.m41 - toX;
             lc.y += this._to.matrix.m42 - toY;
             
-            //clamp
-            var boundsBox = layout.BoxModel.PADDING;
-            var boundsBoxTo = layout.BoxModel.BORDER;
-            var bounds = geom.Transform.create(element.parentElement.parentElement.parentElement);
+            var boundsBoxTo = layout.BoxModel.PADDING;
+            var boundsBox = layout.BoxModel.BORDER;
             
-            var off = new geom.Point2D(0, element.offsetHeight);
-            var blc = this._to.localToLocal(bounds, (lc.x - this._to.matrix.m41) + off.x, (lc.y - this._to.matrix.m42) + off.y, 0, boundsBoxTo, boundsBox);
-            blc.x = math.Number.clamp(blc.x, 0, 2000);
-            blc.y = math.Number.clamp(blc.y, 0, 2000);
-            var llc = bounds.localToLocal(this._to, blc.x, blc.y, 0, boundsBoxTo, boundsBox);
-            lc.x = this._to.matrix.m41 + llc.x - off.x;
-            lc.y = this._to.matrix.m42 + llc.y - off.y;
+            this._bounds.update(element.parentElement.parentElement, this.transformMode);
+            var boxBounds = new geom.Box2D(0, 0, this._bounds.element.offsetWidth, this._bounds.element.offsetHeight);
+            var toBounds = new geom.Box2D(0, 0, element.offsetWidth, element.offsetHeight);
+            
+            this._bounds.box.sizeBox(boxBounds, boundsBox);
+            this._to.box.sizeBox(toBounds, boundsBoxTo);
+            
+            this._to.clamp(this._bounds, 0, 0, boxBounds, boundsBoxTo, boundsBox, lc, lc);
+            this._to.clamp(this._bounds, toBounds.width, 0, boxBounds, boundsBoxTo, boundsBox, lc, lc);
+            this._to.clamp(this._bounds, toBounds.width, toBounds.height, boxBounds, boundsBoxTo, boundsBox, lc, lc);
+            this._to.clamp(this._bounds, 0, toBounds.height, boxBounds, boundsBoxTo, boundsBox, lc, lc);
+            
+            //clamp
+//            var boundsBox = layout.BoxModel.PADDING;
+//            var boundsBoxTo = layout.BoxModel.MARGIN;
+//            var bounds = geom.Transform.create(element.parentElement.parentElement.parentElement);
+//            
+//            var off = new geom.Point2D(0, 0);
+//            var blc = this._to.localToLocal(bounds, (lc.x - this._to.matrix.m41) + off.x, (lc.y - this._to.matrix.m42) + off.y, 0, boundsBox, boundsBoxTo);
+//            blc.x = math.Number.clamp(blc.x, 0, 2000);
+//            blc.y = math.Number.clamp(blc.y, 0, 2000);
+//            var llc = bounds.localToLocal(this._to, blc.x, blc.y, 0, boundsBoxTo, boundsBox);
+//            lc.x = this._to.matrix.m41 + llc.x - off.x;
+//            lc.y = this._to.matrix.m42 + llc.y - off.y;
             
 //            var off = new geom.Point2D(0, element.offsetHeight);
 //            var blc = this._to.localToLocal(bounds, (lc.x - this._to.matrix.m41) + off.x, (lc.y - this._to.matrix.m42) + off.y, 0);

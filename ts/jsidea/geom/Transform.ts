@@ -112,6 +112,35 @@ module jsidea.geom {
             this.box.clear();
         }
 
+        public clamp(
+            to: Transform,
+            localX: number,
+            localY: number,
+            toBounds: geom.Box2D,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO,
+            position: geom.Point3D = null,
+            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
+
+            //optional: if the position is set than 
+            position = position ? position : new geom.Point3D(this.matrix.m41, this.matrix.m42, this.matrix.m43);
+
+            var blc = this.localToLocal(
+                to,
+                (position.x - this.matrix.m41) + localX,
+                (position.y - this.matrix.m42) + localY,
+                0,
+                fromBox,
+                toBox);
+            blc.x = math.Number.clamp(blc.x, toBounds.x, toBounds.x + toBounds.width);
+            blc.y = math.Number.clamp(blc.y, toBounds.y, toBounds.y + toBounds.height);
+            var llc = to.localToLocal(this, blc.x, blc.y, 0, toBox, fromBox);
+            return ret.setTo(
+                this.matrix.m41 + llc.x - localX,
+                this.matrix.m42 + llc.y - localY,
+                0);
+        }
+
         public localToLocalPoint(
             to: Transform, pt: geom.Point3D,
             toBox: string = layout.BoxModel.AUTO,
