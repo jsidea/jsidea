@@ -14,7 +14,7 @@ module jsidea.geom {
         public matrix: geom.Matrix3D = new geom.Matrix3D();
         public sceneTransform: geom.Matrix3D[] = [];
         public inverseSceneTransform: geom.Matrix3D[] = [];
-        public box: layout.BoxModel = new layout.BoxModel();
+        public boxModel: layout.BoxModel = new layout.BoxModel();
         //        public chain: layout.StyleChain;
 
         constructor(element: HTMLElement = null, mode: string = Transform.MODE_AUTO) {
@@ -55,7 +55,7 @@ module jsidea.geom {
                 var node = layout.StyleChain.create(element);
                 this.matrix.setCSS(node.style.transform);
                 this.sceneTransform = Transform.extractAccumulatedMatrices(node);
-                this.box.update(element, node.style);
+                this.boxModel.update(element, node.style);
             }
             //runs if there is no perspective involved
             //the elements can have 3d-transformation also
@@ -94,7 +94,7 @@ module jsidea.geom {
 
                 var style = layout.Style.create(element);
                 this.matrix.setCSS(style.transform);
-                this.box.update(element, style);
+                this.boxModel.update(element, style);
             }
 
             //create inverse
@@ -109,7 +109,35 @@ module jsidea.geom {
             this.element = null;
             this.sceneTransform = [];
             this.inverseSceneTransform = [];
-            this.box.clear();
+            this.boxModel.clear();
+        }
+
+        public clampBox(
+            to: Transform,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO,
+            position: geom.Point3D = null,
+            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
+            var boxBounds = to.boxModel.getOriginBox(fromBox);
+            var toBounds = this.boxModel.getOriginBox(toBox);
+            return this.clampBoxCustom(to, boxBounds, toBounds, toBox, fromBox, position, ret);
+        }
+
+        public clampBoxCustom(
+            to: Transform,
+            boxBounds: geom.Box2D,
+            toBounds: geom.Box2D,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO,
+            position: geom.Point3D = null,
+            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
+
+            ret.setTo(position.x, position.y, position.z);
+            this.clamp(to, toBounds.x, toBounds.y, boxBounds, toBox, fromBox, ret, ret);
+            this.clamp(to, toBounds.right, toBounds.y, boxBounds, toBox, fromBox, ret, ret);
+            this.clamp(to, toBounds.right, toBounds.bottom, boxBounds, toBox, fromBox, ret, ret);
+            this.clamp(to, toBounds.x, toBounds.bottom, boxBounds, toBox, fromBox, ret, ret);
+            return ret;
         }
 
         public clamp(
@@ -211,14 +239,14 @@ module jsidea.geom {
             ret.setTo(x, y, z);
             
             //apply box model transformations
-            this.box.point(ret, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);
+            this.boxModel.point(ret, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);
             
             //project from parent to child
             for (var i = 0; i < this.inverseSceneTransform.length; ++i)
                 ret = this.inverseSceneTransform[i].unproject(ret, ret);
 
             //apply box model transformations
-            this.box.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
+            this.boxModel.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
 
             return ret;
         }
@@ -254,7 +282,7 @@ module jsidea.geom {
             ret.setTo(x, y, z);
             
             //apply from-box model transformations
-            this.box.point(ret, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);            
+            this.boxModel.point(ret, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);            
             
             //unproject from child to parent
             var l = this.sceneTransform.length;
@@ -262,7 +290,7 @@ module jsidea.geom {
                 ret = this.sceneTransform[i].project(ret, ret);
             
             //apply to-box model transformations
-            this.box.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
+            this.boxModel.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
 
             return ret;
         }

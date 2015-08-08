@@ -45,6 +45,13 @@ module jsidea.test {
             pos.to.x = "100%";
             pos.to.y = "100%";
             pos.useTransform = true;
+            pos.boundsElement = con;
+            document.addEventListener("mousemove",(evt) => {
+                var pt: any = new geom.Point3D(this.pageX, this.pageY);
+                pos.from.x = pt.x;
+                pos.from.y = pt.y;
+                pos.apply(d);
+            });
 
             var draw = () => {
                 ctx.clearRect(0, 0, can.width, can.height);
@@ -97,13 +104,7 @@ module jsidea.test {
 
 //            pos.useTransform = system.Caps.isSafari ? false : true;
             console.log("Browser", system.Caps.browserName, system.Caps.browserVersionFull, "OS", system.Caps.osName, "Engine", system.Caps.engineName);
-            document.addEventListener("mousemove",(evt) => {
-                var pt: any = new geom.Point3D(this.pageX, this.pageY);
-                pos.from.x = pt.x;
-                pos.from.y = pt.y;
-                pos.apply(d);
-                //                draw();
-            });
+            
             
             console.log(navigator.userAgent.toLowerCase());
             console.log(navigator.appVersion.toLowerCase());

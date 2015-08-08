@@ -72,6 +72,14 @@ module jsidea.geom {
             this.height = rect.height;
             return this;
         }
+        
+        public get right():number{
+            return this.x + this.width;    
+        }
+        
+        public get bottom():number{
+            return this.y + this.height;    
+        }
 
         public intersects(r: IRectangleValue): boolean {
             if (this.contains(r.x, r.y)

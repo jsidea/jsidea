@@ -7,6 +7,9 @@ module jsidea.layout {
         public static CANVAS: string = "canvas";
         public static AUTO: string = "auto";
 
+        public offsetWidth: number = 0;
+        public offsetHeight: number = 0;
+
         public marginTop: number = 0;
         public marginRight: number = 0;
         public marginBottom: number = 0;
@@ -41,6 +44,9 @@ module jsidea.layout {
             }
 
             this._element = element;
+
+            this.offsetWidth = element.offsetWidth;
+            this.offsetHeight = element.offsetHeight;
 
             this.marginTop = math.Number.parse(style.marginTop, 0);
             this.marginRight = math.Number.parse(style.marginRight, 0);
@@ -83,16 +89,9 @@ module jsidea.layout {
             return this;
         }
 
-        public sizeBox(box: geom.Box2D, toBox: string, fromBox: string = BoxModel.BORDER): geom.Box2D {
-            if (toBox == fromBox)
-                return box;
-            var size = new geom.Point2D(box.width, box.height);
-            if (fromBox != BoxModel.BORDER)
-                this.convertSize(size, fromBox, true)
-            this.convertSize(size, toBox, false);
-            box.width = size.x;
-            box.height = size.y;
-            return box;
+        public getOriginBox(toBox: string): geom.Box2D {
+            var pt = this.size(new geom.Point2D(this.offsetWidth, this.offsetHeight), toBox, BoxModel.BORDER);
+            return new geom.Box2D(0, 0, pt.x, pt.y);
         }
 
         public size(size: geom.IPoint2DValue, toBox: string, fromBox: string = BoxModel.BORDER): geom.IPoint2DValue {

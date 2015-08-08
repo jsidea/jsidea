@@ -13,6 +13,7 @@ module jsidea.layout {
         public to: IPositionValue = {};
         public from: IPositionValue = {};
         public fromElement: HTMLElement = null;
+        public boundsElement: HTMLElement = null;
         public toBox: string = layout.BoxModel.BORDER;
         public fromBox: string = layout.BoxModel.BORDER;
         public useTransform: boolean = true;
@@ -73,13 +74,13 @@ module jsidea.layout {
             
             //transform box-models of "to"
             var sizeTo = Buffer._APPLY_POSITION_SIZE_TO.setTo(element.offsetWidth, element.offsetHeight);
-            this._to.box.size(sizeTo, this.toBox, layout.BoxModel.BORDER);
+            this._to.boxModel.size(sizeTo, this.toBox, layout.BoxModel.BORDER);
             var toX: number = math.Number.parseRelation(this.to.x, sizeTo.x, 0) + math.Number.parseRelation(this.to.offsetX, sizeTo.x, 0);
             var toY: number = math.Number.parseRelation(this.to.y, sizeTo.y, 0) + math.Number.parseRelation(this.to.offsetY, sizeTo.y, 0);
 
             //transform box-models of "from"
             var sizeFrom = Buffer._APPLY_POSITION_SIZE_FROM.setTo(fromElement.offsetWidth, fromElement.offsetHeight);
-            this._from.box.size(sizeFrom, this.fromBox, layout.BoxModel.BORDER);
+            this._from.boxModel.size(sizeFrom, this.fromBox, layout.BoxModel.BORDER);
             var fromX: number = math.Number.parseRelation(this.from.x, sizeFrom.x, 0) + math.Number.parseRelation(this.from.offsetX, sizeFrom.x, 0);
             var fromY: number = math.Number.parseRelation(this.from.y, sizeFrom.y, 0) + math.Number.parseRelation(this.from.offsetY, sizeFrom.y, 0);
             
@@ -95,44 +96,20 @@ module jsidea.layout {
             //shift to origin/pivot/to-point
             lc.x += this._to.matrix.m41 - toX;
             lc.y += this._to.matrix.m42 - toY;
-            
-            var boundsBoxTo = layout.BoxModel.PADDING;
-            var boundsBox = layout.BoxModel.BORDER;
-            
-            this._bounds.update(element.parentElement.parentElement, this.transformMode);
-            var boxBounds = new geom.Box2D(0, 0, this._bounds.element.offsetWidth, this._bounds.element.offsetHeight);
-            var toBounds = new geom.Box2D(0, 0, element.offsetWidth, element.offsetHeight);
-            
-            this._bounds.box.sizeBox(boxBounds, boundsBox);
-            this._to.box.sizeBox(toBounds, boundsBoxTo);
-            
-            this._to.clamp(this._bounds, 0, 0, boxBounds, boundsBoxTo, boundsBox, lc, lc);
-            this._to.clamp(this._bounds, toBounds.width, 0, boxBounds, boundsBoxTo, boundsBox, lc, lc);
-            this._to.clamp(this._bounds, toBounds.width, toBounds.height, boxBounds, boundsBoxTo, boundsBox, lc, lc);
-            this._to.clamp(this._bounds, 0, toBounds.height, boxBounds, boundsBoxTo, boundsBox, lc, lc);
-            
-            //clamp
-//            var boundsBox = layout.BoxModel.PADDING;
-//            var boundsBoxTo = layout.BoxModel.MARGIN;
-//            var bounds = geom.Transform.create(element.parentElement.parentElement.parentElement);
-//            
-//            var off = new geom.Point2D(0, 0);
-//            var blc = this._to.localToLocal(bounds, (lc.x - this._to.matrix.m41) + off.x, (lc.y - this._to.matrix.m42) + off.y, 0, boundsBox, boundsBoxTo);
-//            blc.x = math.Number.clamp(blc.x, 0, 2000);
-//            blc.y = math.Number.clamp(blc.y, 0, 2000);
-//            var llc = bounds.localToLocal(this._to, blc.x, blc.y, 0, boundsBoxTo, boundsBox);
-//            lc.x = this._to.matrix.m41 + llc.x - off.x;
-//            lc.y = this._to.matrix.m42 + llc.y - off.y;
-            
-//            var off = new geom.Point2D(0, element.offsetHeight);
-//            var blc = this._to.localToLocal(bounds, (lc.x - this._to.matrix.m41) + off.x, (lc.y - this._to.matrix.m42) + off.y, 0);
-//            blc.x = Math.max(0, blc.x);
-//            blc.y = Math.max(0, blc.y);
-//            var llc = bounds.localToLocal(this._to, blc.x, blc.y, 0);
-//            lc.x = this._to.matrix.m41 + llc.x - off.x;
-//            lc.y = this._to.matrix.m42 + llc.y - off.y;   
-            
-            return lc.clone();
+
+            //keep in bounds
+            if (this.boundsElement && this.boundsElement != element && !element.contains(this.boundsElement)) {
+                if(this.boundsElement == element)
+                    throw new Error("The bounds element cannot be the \"to\"-element.");
+                if(element.contains(this.boundsElement))
+                    throw new Error("The bounds element cannot be a child-element of the \"to\"-element.");
+                var boundsBoxTo = layout.BoxModel.BORDER;
+                var boundsBox = layout.BoxModel.BORDER;
+                this._bounds.update(this.boundsElement, this.transformMode);
+                lc = this._to.clampBox(this._bounds, boundsBoxTo, boundsBox, lc, lc);
+            }
+
+            return lc;
         }
 
         public dispose(): void {
