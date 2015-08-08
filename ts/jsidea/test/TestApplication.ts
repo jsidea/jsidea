@@ -37,6 +37,7 @@ module jsidea.test {
             a.appendChild(b);
             b.appendChild(c);
             c.appendChild(d);
+            d.appendChild(xc);
             con.appendChild(a);
             document.body.appendChild(can);
             d.appendChild(xc);
@@ -62,6 +63,7 @@ module jsidea.test {
                 this.drawBoundingBox(ctx, b);
                 this.drawBoundingBox(ctx, c);
                 this.drawBoundingBox(ctx, d);
+                this.drawBoundingBox(ctx, xc);
                 this.drawBoundingBox(ctx, can);
                 
 //                var transD = geom.Transform.create(d);

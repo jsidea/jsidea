@@ -15,7 +15,6 @@ module jsidea.geom {
         public sceneTransform: geom.Matrix3D[] = [];
         public inverseSceneTransform: geom.Matrix3D[] = [];
         public boxModel: layout.BoxModel = new layout.BoxModel();
-        //        public chain: layout.StyleChain;
 
         constructor(element: HTMLElement = null, mode: string = Transform.MODE_AUTO) {
             if (element)
@@ -112,33 +111,96 @@ module jsidea.geom {
             this.boxModel.clear();
         }
 
+        //        public clampBox(
+        //            to: Transform,
+        //            toBox: string = layout.BoxModel.AUTO,
+        //            fromBox: string = layout.BoxModel.AUTO,
+        //            position: geom.Point3D = null,
+        //            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
+        //            var toRect = to.boxModel.getOriginBox(fromBox);
+        //            var fromRect = this.boxModel.getOriginBox(toBox);
+        //            return this.clampBoxCustom(to, toRect, fromRect, toBox, fromBox, position, ret);
+        //        }
+        //
+        //        public clampBoxCustom(
+        //            to: Transform,
+        //            toRect: geom.Box2D,
+        //            fromRect: geom.Box2D,
+        //            toBox: string = layout.BoxModel.AUTO,
+        //            fromBox: string = layout.BoxModel.AUTO,
+        //            position: geom.Point3D = null,
+        //            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
+        //
+        //            ret.setTo(position.x, position.y, position.z);
+        //            this.clamp(to, fromRect.x, fromRect.y, toRect, toBox, fromBox, ret, ret);
+        //            this.clamp(to, fromRect.right, fromRect.y, toRect, toBox, fromBox, ret, ret);
+        //            this.clamp(to, fromRect.right, fromRect.bottom, toRect, toBox, fromBox, ret, ret);
+        //            this.clamp(to, fromRect.x, fromRect.bottom, toRect, toBox, fromBox, ret, ret);
+        //            return ret;
+        //        }
+        
         public clampBox(
             to: Transform,
             toBox: string = layout.BoxModel.AUTO,
             fromBox: string = layout.BoxModel.AUTO,
             position: geom.Point3D = null,
             ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
-            var boxBounds = to.boxModel.getOriginBox(fromBox);
-            var toBounds = this.boxModel.getOriginBox(toBox);
-            return this.clampBoxCustom(to, boxBounds, toBounds, toBox, fromBox, position, ret);
+            var toRect = to.boxModel.getOriginBox(fromBox);
+            var fromRect = this.boxModel.getOriginBox(toBox);
+            return this.clampBoxCustom(
+                to,
+                toRect,
+                fromRect,
+                toBox,
+                fromBox,
+                position,
+                ret);
         }
 
         public clampBoxCustom(
             to: Transform,
-            boxBounds: geom.Box2D,
-            toBounds: geom.Box2D,
+            toRect: geom.Box2D,
+            fromRect: geom.Box2D,
             toBox: string = layout.BoxModel.AUTO,
             fromBox: string = layout.BoxModel.AUTO,
             position: geom.Point3D = null,
             ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
 
             ret.setTo(position.x, position.y, position.z);
-            this.clamp(to, toBounds.x, toBounds.y, boxBounds, toBox, fromBox, ret, ret);
-            this.clamp(to, toBounds.right, toBounds.y, boxBounds, toBox, fromBox, ret, ret);
-            this.clamp(to, toBounds.right, toBounds.bottom, boxBounds, toBox, fromBox, ret, ret);
-            this.clamp(to, toBounds.x, toBounds.bottom, boxBounds, toBox, fromBox, ret, ret);
+            this.clamp(to, fromRect.x, fromRect.y, toRect, toBox, fromBox, ret, ret);
+            this.clamp(to, fromRect.right, fromRect.y, toRect, toBox, fromBox, ret, ret);
+            this.clamp(to, fromRect.right, fromRect.bottom, toRect, toBox, fromBox, ret, ret);
+            this.clamp(to, fromRect.x, fromRect.bottom, toRect, toBox, fromBox, ret, ret);
             return ret;
         }
+        
+        //        public clampBox(
+        //            to: Transform,
+        //            toBox: string = layout.BoxModel.AUTO,
+        //            fromBox: string = layout.BoxModel.AUTO,
+        //            position: geom.Point3D = null,
+        //            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
+        //            var toRect = to.boxModel.getOriginBox(toBox);
+        //            var fromRect = this.boxModel.getOriginBox(fromBox);
+        //            return this.clampBoxCustom(to, toRect, fromRect, fromBox, toBox, position, ret);
+        //        }
+        //
+        //        public clampBoxCustom(
+        //            to: Transform,
+        //            toRect: geom.Box2D,
+        //            fromRect: geom.Box2D,
+        //            toBox: string = layout.BoxModel.AUTO,
+        //            fromBox: string = layout.BoxModel.AUTO,
+        //            position: geom.Point3D = null,
+        //            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
+        //
+        //            ret.setTo(position.x, position.y, position.z);
+        //            this.clamp(to, fromRect.x, fromRect.y, toRect, toBox, fromBox, ret, ret);
+        //            this.clamp(to, fromRect.right, fromRect.y, toRect, toBox, fromBox, ret, ret);
+        //            this.clamp(to, fromRect.right, fromRect.bottom, toRect, toBox, fromBox, ret, ret);
+        //            this.clamp(to, fromRect.x, fromRect.bottom, toRect, toBox, fromBox, ret, ret);
+        //            return ret;
+        //        }
 
         public clamp(
             to: Transform,

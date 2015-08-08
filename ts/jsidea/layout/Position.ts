@@ -85,7 +85,7 @@ module jsidea.layout {
             var fromY: number = math.Number.parseRelation(this.from.y, sizeFrom.y, 0) + math.Number.parseRelation(this.from.offsetY, sizeFrom.y, 0);
             
             //the transfrom: "from" -> "to"
-            var lc = this._from.localToLocal(
+            var point = this._from.localToLocal(
                 this._to,
                 fromX,
                 fromY,
@@ -94,22 +94,22 @@ module jsidea.layout {
                 this.fromBox);
 
             //shift to origin/pivot/to-point
-            lc.x += this._to.matrix.m41 - toX;
-            lc.y += this._to.matrix.m42 - toY;
+            point.x += this._to.matrix.m41 - toX;
+            point.y += this._to.matrix.m42 - toY;
 
             //keep in bounds
-            if (this.boundsElement && this.boundsElement != element && !element.contains(this.boundsElement)) {
+            if (this.boundsElement) {
                 if(this.boundsElement == element)
                     throw new Error("The bounds element cannot be the \"to\"-element.");
                 if(element.contains(this.boundsElement))
                     throw new Error("The bounds element cannot be a child-element of the \"to\"-element.");
-                var boundsBoxTo = layout.BoxModel.BORDER;
-                var boundsBox = layout.BoxModel.BORDER;
+                var toBox = layout.BoxModel.BORDER;
+                var fromBox = layout.BoxModel.PADDING;
                 this._bounds.update(this.boundsElement, this.transformMode);
-                lc = this._to.clampBox(this._bounds, boundsBoxTo, boundsBox, lc, lc);
+                point = this._to.clampBox(this._bounds, toBox, fromBox, point, point);
             }
 
-            return lc;
+            return point;
         }
 
         public dispose(): void {

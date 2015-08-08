@@ -103,3 +103,9 @@ canvas {
 	margin: 20px;
 	padding: 50px;
 }
+
+#x-cont {
+	background-color: #CCC;
+	width: 100%;
+	height: 100%;
+}
