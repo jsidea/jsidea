@@ -1,5 +1,5 @@
 module jsidea.test {
-    export class TestApplication extends jsidea.core.Application {
+    export class TestApplication extends jsidea.system.Application {
         constructor() {
             super();
         }
@@ -90,11 +90,13 @@ module jsidea.test {
             };
 
             document.addEventListener("click",(evt) => {
-                this.logChain(d);
+//                this.logChain(d);
             });
 
             document.addEventListener("click", draw);
 
+//            pos.useTransform = system.Caps.isSafari ? false : true;
+            console.log("Browser", system.Caps.browserName, system.Caps.browserVersionFull, "OS", system.Caps.osName, "Engine", system.Caps.engineName);
             document.addEventListener("mousemove",(evt) => {
                 var pt: any = new geom.Point3D(this.pageX, this.pageY);
                 pos.from.x = pt.x;
@@ -102,6 +104,9 @@ module jsidea.test {
                 pos.apply(d);
                 //                draw();
             });
+            
+            console.log(navigator.userAgent.toLowerCase());
+            console.log(navigator.appVersion.toLowerCase());
         }
 
         private drawOffsetChain(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
@@ -132,7 +137,7 @@ module jsidea.test {
             d = from.localToLocal(to, d.x, d.y);           
 
             ctx.beginPath();
-            ctx.setLineDash([4, 4]);
+//            ctx.setLineDash([4, 4]);
             ctx.lineWidth = 2;
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
@@ -199,10 +204,6 @@ module jsidea.test {
             //ARRGHHH funzt nit
         }
 
-        private testXMLConverter(): void {
-            var x = new jsidea.model.conversion.XMLConverter();
-        }
-
         private testEventDispatcher(): void {
             var d = new jsidea.events.EventDispatcher();
 //            d.bind("click.setup",(e: jsidea.events.IEvent) => console.log(e.eventType));
@@ -216,16 +217,16 @@ module jsidea.test {
     }
 }
 
-interface JQuery {
-    globalToLocal(x: number, y: number, z?: number): jsidea.geom.IPoint3DValue;
-    localToGlobal(x: number, y: number, z?: number): jsidea.geom.IPoint3DValue;
-}
-
-(function($) {
-    $.fn.globalToLocal = function(x: number, y: number, z: number = 0) {
-        return jsidea.geom.Transform.create(this[0]).globalToLocal(x, y, z);
-    };
-    $.fn.localToGlobal = function(x: number, y: number, z: number = 0) {
-        return jsidea.geom.Transform.create(this[0]).localToGlobal(x, y, z);
-    };
-} (jQuery));
+//interface JQuery {
+//    globalToLocal(x: number, y: number, z?: number): jsidea.geom.IPoint3DValue;
+//    localToGlobal(x: number, y: number, z?: number): jsidea.geom.IPoint3DValue;
+//}
+//
+//(function($) {
+//    $.fn.globalToLocal = function(x: number, y: number, z: number = 0) {
+//        return jsidea.geom.Transform.create(this[0]).globalToLocal(x, y, z);
+//    };
+//    $.fn.localToGlobal = function(x: number, y: number, z: number = 0) {
+//        return jsidea.geom.Transform.create(this[0]).localToGlobal(x, y, z);
+//    };
+//} (jQuery));

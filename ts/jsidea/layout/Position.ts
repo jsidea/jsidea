@@ -47,7 +47,10 @@ module jsidea.layout {
             if (this.useTransform) {
                 m.m41 = pt.x;
                 m.m42 = pt.y;
-                element.style.transform = m.getCSS();
+                if (system.Caps.isSafari)
+                    element.style["webkitTransform"] = m.getCSS();
+                else
+                    element.style.transform = m.getCSS();
             }
             else {
                 pt.x += math.Number.parse(element.style.left, 0) - m.m41;
@@ -63,7 +66,7 @@ module jsidea.layout {
 
             //retrieve "of"-element
             var fromElement = this.fromElement ? this.fromElement : element.ownerDocument.documentElement;
-            
+
             this._from.update(fromElement, this.transformMode);
             this._to.update(element, this.transformMode);
             
@@ -139,7 +142,7 @@ module jsidea.layout {
         private static createWithPerspective(element: HTMLElement, ret = new geom.Matrix3D()): geom.Matrix3D {
             ret.identity();
             if (element.ownerDocument) {
-                ret.appendCSS(window.getComputedStyle(element).transform);
+                ret.appendCSS(layout.Style.create(element).transform);
                 if (element.parentElement) {
                     var parentStyle = window.getComputedStyle(element.parentElement);
                     var perspective = math.Number.parse(parentStyle.perspective, 0);

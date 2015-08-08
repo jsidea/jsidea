@@ -1,4 +1,4 @@
-module jsidea.core {
+module jsidea.system {
     export class Application extends jsidea.events.EventDispatcher {
 
         private _version: jsidea.core.IVersion;
@@ -32,11 +32,11 @@ module jsidea.core {
         }
 
         public get pageX(): number {
-            return !system.Caps.isWebkit ? this._pageX : this._pageX - $(document).scrollLeft();
+            return !system.Caps.isWebKit ? this._pageX : this._pageX - document.body.scrollLeft;
         }
 
         public get pageY(): number {
-            return !system.Caps.isWebkit ? this._pageY : this._pageY - $(document).scrollTop();
+            return !system.Caps.isWebKit ? this._pageY : this._pageY - document.body.scrollTop;
         }
 
         public get active(): boolean {
@@ -60,10 +60,10 @@ module jsidea.core {
 
             if (this._autoActive) {
                 this._active = document.visibilityState == "visible";
-                $(document).bind("visibilitychange.jsidea_application", () => this.onVisibilityChange());
+                document.addEventListener("visibilitychange", () => this.onVisibilityChange());
             }
             else
-                $(document).unbind("visibilitychange.jsidea_application");
+                document.removeEventListener("visibilitychange", null);
         }
 
         public get frameRate(): number {

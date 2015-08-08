@@ -49,12 +49,9 @@ module jsidea.core {
         public dispose(): void {
         }
 
-        public qualifiedClassName(): string {
-            return "jsidea.core.Version";
-        }
-
+        public static qualifiedClassName: string = "jsidea.core.Version";
         public toString(): string {
-            return "[" + this.qualifiedClassName() +
+            return "[" + Version.qualifiedClassName +
                 " version='" + this.versionString + "']";
         }
     }

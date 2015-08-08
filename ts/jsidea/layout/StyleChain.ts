@@ -71,7 +71,7 @@ module jsidea.layout {
             //collect from child to root
             var nodes: INodeLite[] = [];
             while (element) {
-                var style = window.getComputedStyle(element);
+                var style = layout.Style.create(element);
                 var node: INodeLite = {
                     element: element,
                     first: null,
@@ -89,8 +89,13 @@ module jsidea.layout {
                     style: style,
                     isAccumulatable: true
                 }
+                
+                //maybe its not needed
+                if (system.Caps.isInternetExplorer)
+                    node.isPreserved3d = false;
+                
                 //webkit ignores perspective set on scroll elements
-                node.perspective = (system.Caps.isWebkit && node.isTransformed && node.isScrollable) ? 0 : math.Number.parse(style.perspective, 0);
+                node.perspective = (system.Caps.isWebKit && node.isTransformed && node.isScrollable) ? 0 : math.Number.parse(style.perspective, 0);
 
                 element._node = <INode> node;
                 nodes.push(node);
@@ -283,7 +288,7 @@ module jsidea.layout {
                 return false;
             
             //ie does it right
-            if (system.Caps.isIE)
+            if (system.Caps.isInternetExplorer || system.Caps.isEdge)
                 return node.isFixed && !(node.isPerspectiveChild || node.isPreserved3dOrPerspective);
 
             while (node = node.parent) {
@@ -298,7 +303,7 @@ module jsidea.layout {
         private static getScrollOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node)
                 return ret;
-            if (node.isHTML && system.Caps.isWebkit) {
+            if (node.isHTML && system.Caps.isWebKit) {
                 ret.x -= node.element.ownerDocument.body.scrollLeft;
                 ret.y -= node.element.ownerDocument.body.scrollTop;
             }
@@ -309,7 +314,7 @@ module jsidea.layout {
             
             
             if (node.isStickedChild) {
-                if (system.Caps.isWebkit) {
+                if (system.Caps.isWebKit) {
                     ret.x -= node.element.ownerDocument.body.scrollLeft;
                     ret.y -= node.element.ownerDocument.body.scrollTop;
                 }
@@ -354,7 +359,7 @@ module jsidea.layout {
                 //then the offsets are also wrong... arghhh)
                 //correct them here
                 this.addCorrectOffset(node, ret);
-                if ((system.Caps.isWebkit || system.Caps.isIE) && !node.offsetParentRaw)//!!!important
+                if (!node.offsetParentRaw)
                     break;
                 node = node.offsetParent;
             }
@@ -362,6 +367,10 @@ module jsidea.layout {
         }
 
         private static getIsAccumulatable(node: INodeLite): boolean {
+            //ie11 has no "working" preserve-3d, but window.getComputedStyle includes the preserve-3d value? 
+            if (system.Caps.isInternetExplorer)
+                return true;
+            
             //in any case, if an element has only 2d-transforms or its the document-root item
             //the transform can be accumulated to the parent transform
             if (node.isBody || !node.isTransformed3D)
@@ -374,6 +383,9 @@ module jsidea.layout {
             if (!node.parent.isPreserved3d && node.parent.perspective == 0)
                 return false;
 
+            if (node.parent.isScrollable)
+                return false;
+
             return true;
         }
 
@@ -384,17 +396,33 @@ module jsidea.layout {
             ret.x += node.offsetLeft;
             ret.y += node.offsetTop;
 
-            if (system.Caps.isWebkit) {
+            if (system.Caps.isWebKit) {
                 this.getCorrectOffsetWebkit(node, ret);
             } else if (system.Caps.isFirefox) {
                 this.getCorrectOffsetFirefox(node, ret);
-            } else if (system.Caps.isIE) {
-                this.getCorrectOffsetIE(node, ret);
+            } else if (system.Caps.isInternetExplorer) {
+                this.getCorrectOffsetInternetExplorer(node, ret);
+            }  else if (system.Caps.isEdge) {
+                this.getCorrectOffsetEdge(node, ret);
             }
+            
             return ret;
         }
 
-        private static getCorrectOffsetIE(node: INode, ret: geom.Point2D): geom.Point2D {
+        private static getCorrectOffsetEdge(node: INode, ret: geom.Point2D): geom.Point2D {
+            if (!node || !node.offsetParent || node.isBody)
+                return ret;
+
+            if (node.offsetParent.element != node.element.offsetParent) {
+                //coming soon...
+                return ret;
+            }
+
+            ret.x += node.offsetParent.clientLeft;
+            ret.y += node.offsetParent.clientTop;
+        }
+        
+        private static getCorrectOffsetInternetExplorer(node: INode, ret: geom.Point2D): geom.Point2D {
             if (!node || !node.offsetParent || node.isBody)
                 return ret;
 

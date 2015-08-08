@@ -1,20 +1,22 @@
-interface IEventDispatcher extends EventTarget {
-    removeEventListener(
-        type: string,
-        useCapture?: any): void;
-}
-
 module jsidea.events {
+    export interface IEventListener extends Function {
+        (e?: Event): any;
+    }
+    export interface IEventDispatcher extends EventTarget {
+        removeEventListener(type: string, useCapture?: any): void;
+    }
     export class EventDispatcher implements IEventDispatcher {
 
-        private _listener: ((e: Event) => any)[] = [];
+        private _listener: IEventListener[] = [];
+        private _scope: any;
 
-        constructor() {
+        constructor(scope: any = null) {
+            this._scope = scope === null ? this : scope;
         }
 
         public addEventListener(
             type: string,
-            listener: (e: Event) => any,
+            listener: IEventListener,
             useCapture: boolean = false): void {
 
             var listeners = this.getListeners(type, useCapture);
@@ -25,7 +27,7 @@ module jsidea.events {
 
         public removeEventListener(
             type: string,
-            listener: (e: Event) => any,
+            listener: IEventListener,
             useCapture: boolean = false): void {
 
             var listeners = this.getListeners(type, useCapture);
@@ -39,12 +41,15 @@ module jsidea.events {
 
             var listeners = this.getListeners(event.type, false);
             for (var i = 0; i < listeners.length; i++)
-                listeners[i](event);
+                listeners[i].apply(this._scope, event);
             return !event.defaultPrevented;
         }
 
-        public getListeners(type: string, useCapture: boolean = false) {
-            var capType = (useCapture ? '1' : '0') + type;
+        public getListeners(
+            type: string,
+            useCapture: boolean = false): IEventListener[] {
+
+            var capType = type + (useCapture ? '1' : '0');
             if (!(capType in this._listener))
                 this._listener[capType] = [];
             return this._listener[capType];

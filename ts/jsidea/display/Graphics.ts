@@ -5,6 +5,19 @@ module jsidea.events {
 
         }
 
+        public cross(x: number, y: number, size: number): Graphics {
+            var ctx = this.context;
+
+            ctx.beginPath();
+            ctx.moveTo(x + size, y);
+            ctx.lineTo(x - size, y);
+            ctx.moveTo(x, y + size);
+            ctx.lineTo(x, y - size);
+            ctx.closePath();
+
+            return this;
+        }
+
         public quad(quad: geom.Quad): Graphics {
             var ctx = this.context;
 
@@ -15,7 +28,7 @@ module jsidea.events {
             ctx.lineTo(quad.d.x, quad.d.y);
             ctx.lineTo(quad.a.x, quad.a.y);
             ctx.closePath();
-            
+
             return this;
         }
 

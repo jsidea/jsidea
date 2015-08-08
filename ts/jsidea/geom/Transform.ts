@@ -90,7 +90,7 @@ module jsidea.geom {
 
                 this.sceneTransform = [matrix];
 
-                var style = window.getComputedStyle(element);
+                var style = layout.Style.create(element);
                 this.box.update(element, style);
             }
 
@@ -238,7 +238,7 @@ module jsidea.geom {
         private static getMode(element: HTMLElement): string {
             var isTransformed = false;
             while (element && element != document.body.parentElement) {
-                var style = window.getComputedStyle(element);
+                var style = layout.Style.create(element);
                 if (style.perspective != "none")// || style.transform.indexOf("matrix3d") >= 0)
                     return Transform.MODE_PERSPECTIVE;
                 if (style.transform != "none")
@@ -261,7 +261,7 @@ module jsidea.geom {
             //transform
             //------
             if (node.isTransformed) {
-                var origin = style.transformOrigin.split(" ");
+                var origin = style.transformOrigin ? style.transformOrigin.split(" ") : "0 0";
                 var originX = math.Number.parseRelation(origin[0], element.offsetWidth, 0);
                 var originY = math.Number.parseRelation(origin[1], element.offsetHeight, 0);
                 var originZ = math.Number.parseRelation(origin[2], 0, 0);

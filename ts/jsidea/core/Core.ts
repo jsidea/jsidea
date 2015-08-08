@@ -2,12 +2,11 @@
 module jsidea.core {
     export interface ICore {
         dispose(): void;
-        qualifiedClassName(): string;
     }
 }
 
 interface Window {
-    app: jsidea.core.Application;
+    app: jsidea.system.Application;
 }
 
 interface HTMLElement {
@@ -34,8 +33,7 @@ if (!Array.prototype.indexOf) {
 //hook
 //$(window).ready(() => {
 document.addEventListener("DOMContentLoaded",() => {
-
-    var qualifiedClassName = $("body").attr("data-application");
+    var qualifiedClassName = document.body.getAttribute("data-application");
     if (!qualifiedClassName) {
         return;
     }
@@ -48,25 +46,12 @@ document.addEventListener("DOMContentLoaded",() => {
             return;
         }
     }
-    if (hook.prototype instanceof jsidea.core.Application) {
+    if (hook.prototype instanceof jsidea.system.Application) {
     }
     else {
-        console.warn("Application " + hook + " does not inherit from jsidea.core.Application");
+        console.warn("Application " + hook + " does not inherit from jsidea.system.Application");
         return;
     }
-    //    try {
-    var app = new hook();
-    window.app = app;
-    //    }
-    //    catch (e) {
-    //        window.app = null;
-    //        var err = new Error("Unable to instantiate application from " + qualifiedClassName + ".");
-    //        err.name = "ApplicationError";
-    //        err.lineNumber = e.lineNumber;
-    //        err.fileName = e.fileName;
-    //        throw err;
-    ////        console.warn("Unable to instantiate application from " + qualifiedClassName + ". view-source:" + e.fileName + "  :" + e.lineNumber);
-    ////        return;
-    //    }
+    window.app = new hook();
 });
 
