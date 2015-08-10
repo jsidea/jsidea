@@ -47,8 +47,8 @@ module jsidea.layout {
             var pt = this.calc(element);
             var m = geom.Matrix3D.create(element, Buffer._APPLY_POSITION);
             if (this.useTransform) {
-                m.m41 = pt.x;
-                m.m42 = pt.y;
+                m.m41 += pt.x;
+                m.m42 += pt.y;
                 if (system.Caps.isSafari)
                     element.style["webkitTransform"] = m.getCSS();
                 else
@@ -93,31 +93,34 @@ module jsidea.layout {
                 this.toBox,
                 this.fromBox);
             
-//            console.log("LOC", point.x, point.y);
+            //            console.log("LOC", point.x, point.y);
 
             //shift to origin/pivot/to-point
-//            point.x -= toX;
-//            point.y -= toY;
+            //            point.x -= toX;
+            //            point.y -= toY;
             
             point.z = 0;
-            
-//            point.x += this._to.matrix.m41;
-//            point.y += this._to.matrix.m42;
-            
-            //from "to" -> parent
-            point = this._to.matrix.project(point);
-            
-//            var pk = this._to.matrix.getMatrix2D().transform(point);
-//            point.x = pk.x;
-//            point.y = pk.y;
-            
 //            point.x -= this._to.matrix.m41;
 //            point.y -= this._to.matrix.m42;
+            point = this._to.matrix.unproject(point);
             
-//            point.x = point.x - this._to.matrix.m41;
-//            point.y = point.y - this._to.matrix.m42;
+            //            point.x += this._to.matrix.m41;
+            //            point.y += this._to.matrix.m42;
             
-//            point = this._to.matrix.project(point);
+            //from "to" -> parent
+            //            point = this._to.matrix.project(point);
+            
+            //            var pk = this._to.matrix.getMatrix2D().transform(point);
+            //            point.x = pk.x;
+            //            point.y = pk.y;
+            
+            //            point.x -= this._to.matrix.m41;
+            //            point.y -= this._to.matrix.m42;
+            
+            //            point.x = point.x - this._to.matrix.m41;
+            //            point.y = point.y - this._to.matrix.m42;
+            
+            //            point = this._to.matrix.project(point);
 
             //keep in bounds
             if (this.boundsElement) {

@@ -52,9 +52,9 @@ module jsidea.geom {
 
             if (mode == Transform.MODE_PERSPECTIVE) {
                 var node = layout.StyleChain.create(element);
-                this.matrix.setCSS(node.style.transform);
+//                this.matrix.setCSS(node.style.transform);
                 //                this.matrix = Transform.extractMatrix(node, this.matrix.identity());
-                //                this.matrix = Transform.extractMatrixPerspective(node, this.matrix.identity());
+                this.matrix = Transform.extractMatrixWithOrigin(node, this.matrix.identity());
                 
                 this.sceneTransform = Transform.extractAccumulatedMatrices(node);
                 this.boxModel.update(element, node.style);
@@ -429,7 +429,7 @@ module jsidea.geom {
             return isTransformed ? Transform.MODE_TRANSFORM : Transform.MODE_BOX;
         }
 
-        private static extractMatrixPerspective(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
+        private static extractMatrixWithOrigin(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
             if (!matrix)
                 matrix = new geom.Matrix3D();
             if (!node)
@@ -442,22 +442,15 @@ module jsidea.geom {
             //transform
             //------
             if (node.isTransformed) {
+                var origin = style.transformOrigin ? style.transformOrigin.split(" ") : "0 0";
+                var originX = math.Number.parseRelation(origin[0], element.offsetWidth, 0);
+                var originY = math.Number.parseRelation(origin[1], element.offsetHeight, 0);
+                var originZ = math.Number.parseRelation(origin[2], 0, 0);
+
+                //not vice versa: not adding than subtracting like some docs mentioned
+                matrix.appendPositionRaw(-originX, -originY, -originZ);
                 matrix.appendCSS(style.transform);
-            }
-
-            //-------
-            //perspective
-            //-------
-            if (node.parent && node.parent.perspective) {
-                var perspective = node.parent.perspective;
-                var parentStyle: CSSStyleDeclaration = node.parent.style;
-                var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
-                var perspectiveOriginX = math.Number.parseRelation(perspectiveOrigin[0], element.parentElement.offsetWidth, 0);
-                var perspectiveOriginY = math.Number.parseRelation(perspectiveOrigin[1], element.parentElement.offsetHeight, 0);
-
-                matrix.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
-                matrix.appendPerspective(perspective);
-                matrix.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
+                matrix.appendPositionRaw(originX, originY, originZ);
             }
 
             return matrix;
