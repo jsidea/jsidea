@@ -46,36 +46,50 @@ module jsidea.test {
             pos.to.x = "100%";
             pos.to.y = 0;//"100%";
             pos.useTransform = true;
+            //            pos.toBox = layout.BoxModel.CONTENT;
             //            pos.boundsElement = a;
             
-            document.addEventListener("click",(evt) => {
+            var target: HTMLElement = null;
+            document.addEventListener("mousedown",(evt) => {
+                target = <HTMLElement> evt.target;
+                var pt = new geom.Point3D(this.pageX, this.pageY);
+                var loc = geom.Transform.create(target).globalToLocalPoint(pt);
+                pos.to.x = loc.x;
+                pos.to.y = loc.y;
+            });
+            document.addEventListener("mouseup",(evt) => {
+                target = null;
+            });
+            document.addEventListener("mousemove",(evt) => {
+                if (!target)
+                    return;
                 var pt = new geom.Point3D(this.pageX, this.pageY);
                 
-//                var tar = d;
-//                var tr = geom.Transform.create(tar.parentElement);
-//                var lc = tr.globalToLocalPoint(pt, "content");
-//                var mao = geom.Matrix3D.createWithOrigin(tar);
-//                var ma = geom.Matrix3D.create(tar);
-//                var dx = ma.m41 - mao.m41;
-//                var dy = ma.m42 - mao.m42;
-//                var off = mao.deltaProject(new geom.Point3D(256, 0));
-//                ma.m41 = lc.x + dx - off.x;
-//                ma.m42 = lc.y + dy - off.y;
-//                tar.style.transform = ma.getCSS();
+                //                var tar = d;
+                //                var tr = geom.Transform.create(tar.parentElement);
+                //                var lc = tr.globalToLocalPoint(pt, "content");
+                //                var mao = geom.Matrix3D.createWithOrigin(tar);
+                //                var ma = geom.Matrix3D.create(tar);
+                //                var dx = ma.m41 - mao.m41;
+                //                var dy = ma.m42 - mao.m42;
+                //                var off = mao.deltaProject(new geom.Point3D(256, 0));
+                //                ma.m41 = lc.x + dx - off.x;
+                //                ma.m42 = lc.y + dy - off.y;
+                //                tar.style.transform = ma.getCSS();
                 
-//                var tar = xc;
-//                var tr = geom.Transform.create(tar);
-//                var lc = tr.globalToLocalPoint(pt, "border");
-//                var ma = geom.Matrix3D.create(tar);
-//                ma.prependPositionRaw(lc.x, lc.y, 0);
-//
-//                tar.style.transform = ma.getCSS();
+                //                var tar = xc;
+                //                var tr = geom.Transform.create(tar);
+                //                var lc = tr.globalToLocalPoint(pt, "border");
+                //                var ma = geom.Matrix3D.create(tar);
+                //                ma.prependPositionRaw(lc.x, lc.y, 0);
+                //
+                //                tar.style.transform = ma.getCSS();
                 
-//                var pt = new geom.Point3D(ma.m41, ma.m42, ma.m43);
-//                var mat = geom.Matrix3D.create(tar);
-//                mat.m41 = pt.x;
-//                mat.m42 = pt.y;
-//                tar.style.transform = mat.getCSS();
+                //                var pt = new geom.Point3D(ma.m41, ma.m42, ma.m43);
+                //                var mat = geom.Matrix3D.create(tar);
+                //                mat.m41 = pt.x;
+                //                mat.m42 = pt.y;
+                //                tar.style.transform = mat.getCSS();
                 
                 //                var tr = geom.Transform.create(xc);
                 //                var lc = tr.globalToLocalPoint(pt);
@@ -91,7 +105,7 @@ module jsidea.test {
                 
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
-                pos.apply(xc);
+                pos.apply(target);
                 //                console.log("MOVE", this.pageX, this.pageY);
             });
 
@@ -139,20 +153,20 @@ module jsidea.test {
                 }
             };
 
-//           var target = con;
-//             var observer = new MutationObserver(function(mutations) {
-//                mutations.forEach(function(mutation) {
-//                    console.log(
-//                    mutation.type, 
-//                        mutation.attributeName, 
-//                        mutation.oldValue, 
-//                        mutation.target[mutation.attributeName],
-//                        mutation.attributeNamespace,
-//                        mutation.target);
-//                });
-//            });
-//            var config:MutationObserverInit = { attributes: true, childList: true, characterData: true, subtree: true };
-//            observer.observe(target, config);
+            //           var target = con;
+            //             var observer = new MutationObserver(function(mutations) {
+            //                mutations.forEach(function(mutation) {
+            //                    console.log(
+            //                    mutation.type, 
+            //                        mutation.attributeName, 
+            //                        mutation.oldValue, 
+            //                        mutation.target[mutation.attributeName],
+            //                        mutation.attributeNamespace,
+            //                        mutation.target);
+            //                });
+            //            });
+            //            var config:MutationObserverInit = { attributes: true, childList: true, characterData: true, subtree: true };
+            //            observer.observe(target, config);
             //            document.documentElement.addEventListener('DOMAttrModified', function(e) {
             //                if (e.attrName === 'style') {
             //                    console.log('prevValue: ' + e.prevValue, 'newValue: ' + e.newValue);

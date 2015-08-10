@@ -86,6 +86,8 @@ module jsidea.layout {
             var lc = this._from.localToLocalPoint(this._to, pt, this.toBox, this.fromBox);
             var ma = this._to.matrix.clone();
             ma.prependPositionRaw(lc.x - toX, lc.y - toY, 0);
+//            console.log(ma.m43);
+//            ma.m43 = 0;
 
             //keep in bounds
             //            if (this.boundsElement) {

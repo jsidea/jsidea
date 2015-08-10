@@ -194,7 +194,7 @@ module jsidea.geom {
             this.boxModel.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
 
             //FOR TEST ONLY
-            ret.z = 0;
+//            ret.z = 0;
             
             return ret;
         }
