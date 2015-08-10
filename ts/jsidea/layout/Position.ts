@@ -45,17 +45,29 @@ module jsidea.layout {
                 return;
 
             var m = this.calc(element);
+            
+            
+            //the strangest bug ever
+            //it applies the zoom-factor as a scaling factor
+            //for the z-value (m43)
+            if (system.Caps.isWebKit) {
+                var scale = 1 / (window.innerWidth / window.outerWidth);
+                m.m43 *= scale;
+            }
+            
             if (this.useTransform) {
-                if (system.Caps.isSafari)
-                    element.style["webkitTransform"] = m.getCSS();
-                else
-                    element.style.transform = m.getCSS();
+                element.style.transform = m.getCSS();
+//                console.log("BEFORE");
+//                console.log(m.toStringTable());
+//                var mar = geom.Matrix3D.create(element);
+//                console.log("AFTER");
+//                console.log(mar.toStringTable());
             }
             else {
                 var x = math.Number.parse(element.style.left, 0);
                 var y = math.Number.parse(element.style.top, 0);
-                element.style.left = Math.round(m.m41) + "px";
-                element.style.top = Math.round(m.m42) + "px";
+                element.style.left = Math.round(m.m41 - x) + "px";
+                element.style.top = Math.round(m.m42 - y) + "px";
             }
         }
 
@@ -86,8 +98,6 @@ module jsidea.layout {
             var lc = this._from.localToLocalPoint(this._to, pt, this.toBox, this.fromBox);
             var ma = this._to.matrix.clone();
             ma.prependPositionRaw(lc.x - toX, lc.y - toY, 0);
-//            console.log(ma.m43);
-//            ma.m43 = 0;
 
             //keep in bounds
             //            if (this.boundsElement) {
@@ -99,8 +109,8 @@ module jsidea.layout {
             //                var fromBox = layout.BoxModel.PADDING;
             //                this._bounds.update(this.boundsElement, this.transformMode);
             //                point = this._to.clampBox2(this._bounds, toBox, fromBox, point, point);
-            //            }
-
+            //            }            
+            
             return ma;
         }
 

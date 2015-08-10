@@ -37,25 +37,29 @@ module jsidea.test {
             a.appendChild(b);
             b.appendChild(c);
             c.appendChild(d);
-            //            d.appendChild(xc);
+            d.appendChild(xc);
             con.appendChild(a);
             document.body.appendChild(can);
-            d.appendChild(xc);
 
             var pos = new layout.Position();
             pos.to.x = "100%";
             pos.to.y = 0;//"100%";
             pos.useTransform = true;
-            //            pos.toBox = layout.BoxModel.CONTENT;
+            pos.toBox = layout.BoxModel.BORDER;
             //            pos.boundsElement = a;
             
             var target: HTMLElement = null;
             document.addEventListener("mousedown",(evt) => {
+                //                if (!evt.ctrlKey)
+                //                    return;
                 target = <HTMLElement> evt.target;
-                var pt = new geom.Point3D(this.pageX, this.pageY);
-                var loc = geom.Transform.create(target).globalToLocalPoint(pt);
+                var pt = new geom.Point3D(evt.pageX, evt.pageY);
+                var loc = geom.Transform.create(target).globalToLocalPoint(pt, pos.toBox);
                 pos.to.x = loc.x;
                 pos.to.y = loc.y;
+                
+                evt.preventDefault();
+                evt.stopImmediatePropagation();
             });
             document.addEventListener("mouseup",(evt) => {
                 target = null;
@@ -64,49 +68,9 @@ module jsidea.test {
                 if (!target)
                     return;
                 var pt = new geom.Point3D(this.pageX, this.pageY);
-                
-                //                var tar = d;
-                //                var tr = geom.Transform.create(tar.parentElement);
-                //                var lc = tr.globalToLocalPoint(pt, "content");
-                //                var mao = geom.Matrix3D.createWithOrigin(tar);
-                //                var ma = geom.Matrix3D.create(tar);
-                //                var dx = ma.m41 - mao.m41;
-                //                var dy = ma.m42 - mao.m42;
-                //                var off = mao.deltaProject(new geom.Point3D(256, 0));
-                //                ma.m41 = lc.x + dx - off.x;
-                //                ma.m42 = lc.y + dy - off.y;
-                //                tar.style.transform = ma.getCSS();
-                
-                //                var tar = xc;
-                //                var tr = geom.Transform.create(tar);
-                //                var lc = tr.globalToLocalPoint(pt, "border");
-                //                var ma = geom.Matrix3D.create(tar);
-                //                ma.prependPositionRaw(lc.x, lc.y, 0);
-                //
-                //                tar.style.transform = ma.getCSS();
-                
-                //                var pt = new geom.Point3D(ma.m41, ma.m42, ma.m43);
-                //                var mat = geom.Matrix3D.create(tar);
-                //                mat.m41 = pt.x;
-                //                mat.m42 = pt.y;
-                //                tar.style.transform = mat.getCSS();
-                
-                //                var tr = geom.Transform.create(xc);
-                //                var lc = tr.globalToLocalPoint(pt);
-                //                var mao = geom.Matrix3D.createWithOrigin(xc);
-                //                var ma = geom.Matrix3D.create(xc);
-                //                var dx = ma.m41 - mao.m41;
-                //                var dy = ma.m42 - mao.m42;
-                //                ma.m41 = ma.m41 + dx + lc.x;
-                //                ma.m42 = ma.m42 + dy + lc.y;
-                //                xc.style.transform = ma.getCSS();
-                
-                //                console.log(ma.m41 - mao.m41, ma.m42 - mao.m42);//, ma.m41, ma.m42, d._node.position.x, d._node.position.y
-                
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
                 pos.apply(target);
-                //                console.log("MOVE", this.pageX, this.pageY);
             });
 
             var draw = () => {
@@ -118,27 +82,15 @@ module jsidea.test {
                 this.drawBoundingBox(ctx, b);
                 this.drawBoundingBox(ctx, c);
                 this.drawBoundingBox(ctx, d);
-                //                this.drawBoundingBox(ctx, xc);
+                this.drawBoundingBox(ctx, xc);
                 this.drawBoundingBox(ctx, can);
                 
-                //                var transD = geom.Transform.create(d);
-                //                var qu = new geom.Quad();
-                //                qu.b.x = d.offsetWidth;
-                //                qu.c.x = d.offsetWidth;
-                //                qu.c.y = d.offsetHeight;
-                //                qu.d.y = d.offsetHeight;
-                //                var transCan = geom.Transform.create(can);
-                //                transCan.toBox = layout.BoxModel.CANVAS;
-                //                var quad = transD.localToGlobalQuad(qu);
-                //                quad = transCan.globalToLocalQuad(quad);
-                //                this.drawQuad(ctx, quad);
-
-                //                this.drawOffsetChain(ctx, d);
+                this.logChain(xc);
             };
-
-            document.onkeyup = (e) => {
-                //console.log("KEY UP");
-                if (e.keyCode == 37 || e.keyCode == 39) {
+            document.addEventListener("click", draw);
+            
+            var setTest = (e:KeyboardEvent) => {
+                    if (e.keyCode == 37 || e.keyCode == 39) {
                     if (e.keyCode == 37)
                         te--;
                     else
@@ -149,9 +101,9 @@ module jsidea.test {
                         te = max;
                     document.body.className = "test-" + te;
                     console.log("TEST-" + te);
-                    //                    draw();
                 }
-            };
+            }
+            document.addEventListener("keyup", setTest);
 
             //           var target = con;
             //             var observer = new MutationObserver(function(mutations) {
@@ -172,18 +124,6 @@ module jsidea.test {
             //                    console.log('prevValue: ' + e.prevValue, 'newValue: ' + e.newValue);
             //                }
             //            }, false);
-
-            document.addEventListener("click",(evt) => {
-                //                this.logChain(d);
-                //                console.log(geom.Matrix3D.create(d).toStringTable());
-            });
-
-            document.addEventListener("click", draw);
-
-            //            pos.useTransform = system.Caps.isSafari ? false : true;
-            //            console.log("Browser", system.Caps.browserName, system.Caps.browserVersionFull, "OS", system.Caps.osName, "Engine", system.Caps.engineName);
-            //            console.log(navigator.userAgent.toLowerCase());
-            //            console.log(navigator.appVersion.toLowerCase());
         }
 
         private drawOffsetChain(ctx: CanvasRenderingContext2D, e: HTMLElement): void {

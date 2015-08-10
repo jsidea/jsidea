@@ -306,6 +306,7 @@ module jsidea.geom {
             //ff and chrome do it wrong: the highlighted bounding box failed to be correct
             //getBoundingClientRect
             if (w < 0) {
+                console.log("BEHIND CAM");
                 x -= this.m41;
                 y -= this.m42;
                 x *= 1 / w;

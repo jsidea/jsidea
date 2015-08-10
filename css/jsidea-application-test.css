@@ -549,6 +549,7 @@
 	/* transform: rotateY(45deg); */
 	perspective: 400px;
 	transform-style: preserve-3d;
+	/* perspective-origin: 0px 0px; */
 	/* overflow:scroll; */
 }
 
@@ -557,7 +558,7 @@
 	position: relative;
 	/* transform: rotateY(15deg) rotate(25deg); */
 	/* transform-origin: 0px 0px; */
-	transform: rotateY(25deg);
+	transform: rotateY(-25deg);
 }
 
 .test-16 #x-cont {
