@@ -37,47 +37,62 @@ module jsidea.test {
             a.appendChild(b);
             b.appendChild(c);
             c.appendChild(d);
-//            d.appendChild(xc);
+            //            d.appendChild(xc);
             con.appendChild(a);
             document.body.appendChild(can);
             d.appendChild(xc);
 
             var pos = new layout.Position();
             pos.to.x = "100%";
-            pos.to.y = "100%";
+            pos.to.y = 0;//"100%";
             pos.useTransform = true;
-//            pos.boundsElement = a;
+            //            pos.boundsElement = a;
             
             document.addEventListener("click",(evt) => {
                 var pt = new geom.Point3D(this.pageX, this.pageY);
                 
-//                var tr = geom.Transform.create(d);
+//                var tar = d;
+//                var tr = geom.Transform.create(tar.parentElement);
 //                var lc = tr.globalToLocalPoint(pt, "content");
-//                var mao = geom.Matrix3D.createWithOrigin(xc);
-//                var ma = geom.Matrix3D.create(xc);
+//                var mao = geom.Matrix3D.createWithOrigin(tar);
+//                var ma = geom.Matrix3D.create(tar);
 //                var dx = ma.m41 - mao.m41;
 //                var dy = ma.m42 - mao.m42;
 //                var off = mao.deltaProject(new geom.Point3D(256, 0));
 //                ma.m41 = lc.x + dx - off.x;
 //                ma.m42 = lc.y + dy - off.y;
-//                xc.style.transform = ma.getCSS();
+//                tar.style.transform = ma.getCSS();
                 
-//                var tr = geom.Transform.create(xc);
-//                var lc = tr.globalToLocalPoint(pt);
-//                var mao = geom.Matrix3D.createWithOrigin(xc);
-//                var ma = geom.Matrix3D.create(xc);
-//                var dx = ma.m41 - mao.m41;
-//                var dy = ma.m42 - mao.m42;
-//                ma.m41 = ma.m41 + dx + lc.x;
-//                ma.m42 = ma.m42 + dy + lc.y;
-//                xc.style.transform = ma.getCSS();
+//                var tar = xc;
+//                var tr = geom.Transform.create(tar);
+//                var lc = tr.globalToLocalPoint(pt, "border");
+//                var ma = geom.Matrix3D.create(tar);
+//                ma.prependPositionRaw(lc.x, lc.y, 0);
+//
+//                tar.style.transform = ma.getCSS();
                 
-//                console.log(ma.m41 - mao.m41, ma.m42 - mao.m42);//, ma.m41, ma.m42, d._node.position.x, d._node.position.y
+//                var pt = new geom.Point3D(ma.m41, ma.m42, ma.m43);
+//                var mat = geom.Matrix3D.create(tar);
+//                mat.m41 = pt.x;
+//                mat.m42 = pt.y;
+//                tar.style.transform = mat.getCSS();
+                
+                //                var tr = geom.Transform.create(xc);
+                //                var lc = tr.globalToLocalPoint(pt);
+                //                var mao = geom.Matrix3D.createWithOrigin(xc);
+                //                var ma = geom.Matrix3D.create(xc);
+                //                var dx = ma.m41 - mao.m41;
+                //                var dy = ma.m42 - mao.m42;
+                //                ma.m41 = ma.m41 + dx + lc.x;
+                //                ma.m42 = ma.m42 + dy + lc.y;
+                //                xc.style.transform = ma.getCSS();
+                
+                //                console.log(ma.m41 - mao.m41, ma.m42 - mao.m42);//, ma.m41, ma.m42, d._node.position.x, d._node.position.y
                 
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
                 pos.apply(xc);
-//                console.log("MOVE", this.pageX, this.pageY);
+                //                console.log("MOVE", this.pageX, this.pageY);
             });
 
             var draw = () => {
@@ -89,20 +104,20 @@ module jsidea.test {
                 this.drawBoundingBox(ctx, b);
                 this.drawBoundingBox(ctx, c);
                 this.drawBoundingBox(ctx, d);
-//                this.drawBoundingBox(ctx, xc);
+                //                this.drawBoundingBox(ctx, xc);
                 this.drawBoundingBox(ctx, can);
                 
-//                var transD = geom.Transform.create(d);
-//                var qu = new geom.Quad();
-//                qu.b.x = d.offsetWidth;
-//                qu.c.x = d.offsetWidth;
-//                qu.c.y = d.offsetHeight;
-//                qu.d.y = d.offsetHeight;
-//                var transCan = geom.Transform.create(can);
-//                transCan.toBox = layout.BoxModel.CANVAS;
-//                var quad = transD.localToGlobalQuad(qu);
-//                quad = transCan.globalToLocalQuad(quad);
-//                this.drawQuad(ctx, quad);
+                //                var transD = geom.Transform.create(d);
+                //                var qu = new geom.Quad();
+                //                qu.b.x = d.offsetWidth;
+                //                qu.c.x = d.offsetWidth;
+                //                qu.c.y = d.offsetHeight;
+                //                qu.d.y = d.offsetHeight;
+                //                var transCan = geom.Transform.create(can);
+                //                transCan.toBox = layout.BoxModel.CANVAS;
+                //                var quad = transD.localToGlobalQuad(qu);
+                //                quad = transCan.globalToLocalQuad(quad);
+                //                this.drawQuad(ctx, quad);
 
                 //                this.drawOffsetChain(ctx, d);
             };
@@ -124,17 +139,37 @@ module jsidea.test {
                 }
             };
 
+//           var target = con;
+//             var observer = new MutationObserver(function(mutations) {
+//                mutations.forEach(function(mutation) {
+//                    console.log(
+//                    mutation.type, 
+//                        mutation.attributeName, 
+//                        mutation.oldValue, 
+//                        mutation.target[mutation.attributeName],
+//                        mutation.attributeNamespace,
+//                        mutation.target);
+//                });
+//            });
+//            var config:MutationObserverInit = { attributes: true, childList: true, characterData: true, subtree: true };
+//            observer.observe(target, config);
+            //            document.documentElement.addEventListener('DOMAttrModified', function(e) {
+            //                if (e.attrName === 'style') {
+            //                    console.log('prevValue: ' + e.prevValue, 'newValue: ' + e.newValue);
+            //                }
+            //            }, false);
+
             document.addEventListener("click",(evt) => {
-//                this.logChain(d);
-//                console.log(geom.Matrix3D.create(d).toStringTable());
+                //                this.logChain(d);
+                //                console.log(geom.Matrix3D.create(d).toStringTable());
             });
 
             document.addEventListener("click", draw);
 
-//            pos.useTransform = system.Caps.isSafari ? false : true;
-//            console.log("Browser", system.Caps.browserName, system.Caps.browserVersionFull, "OS", system.Caps.osName, "Engine", system.Caps.engineName);
-//            console.log(navigator.userAgent.toLowerCase());
-//            console.log(navigator.appVersion.toLowerCase());
+            //            pos.useTransform = system.Caps.isSafari ? false : true;
+            //            console.log("Browser", system.Caps.browserName, system.Caps.browserVersionFull, "OS", system.Caps.osName, "Engine", system.Caps.engineName);
+            //            console.log(navigator.userAgent.toLowerCase());
+            //            console.log(navigator.appVersion.toLowerCase());
         }
 
         private drawOffsetChain(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
@@ -152,7 +187,7 @@ module jsidea.test {
             var b = new geom.Point3D(e.offsetWidth, 0, 0);
             var c = new geom.Point3D(e.offsetWidth, e.offsetHeight, 0);
             var d = new geom.Point3D(0, e.offsetHeight, 0);
-            
+
             var from = geom.Transform.create(e);
             from.fromBox = layout.BoxModel.BORDER;
 
@@ -162,10 +197,10 @@ module jsidea.test {
             a = from.localToLocal(to, a.x, a.y);
             b = from.localToLocal(to, b.x, b.y);
             c = from.localToLocal(to, c.x, c.y);
-            d = from.localToLocal(to, d.x, d.y);           
+            d = from.localToLocal(to, d.x, d.y);
 
             ctx.beginPath();
-//            ctx.setLineDash([4, 4]);
+            //            ctx.setLineDash([4, 4]);
             ctx.lineWidth = 2;
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
@@ -234,8 +269,8 @@ module jsidea.test {
 
         private testEventDispatcher(): void {
             var d = new jsidea.events.EventDispatcher();
-//            d.bind("click.setup",(e: jsidea.events.IEvent) => console.log(e.eventType));
-//            d.trigger(".setup");
+            //            d.bind("click.setup",(e: jsidea.events.IEvent) => console.log(e.eventType));
+            //            d.trigger(".setup");
         }
 
         public static qualifiedClassName: string = "jsidea.test.TestApplication";

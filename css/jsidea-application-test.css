@@ -547,7 +547,7 @@
 	width: 512px;
 	height: 512px;
 	/* transform: rotateY(45deg); */
-	perspective: 600px;
+	perspective: 400px;
 	transform-style: preserve-3d;
 	/* overflow:scroll; */
 }
@@ -556,6 +556,7 @@
 	/* box-sizing: border-box; */
 	position: relative;
 	/* transform: rotateY(15deg) rotate(25deg); */
+	transform-origin: 0px 0px;
 	transform: rotateY(25deg);
 }
 

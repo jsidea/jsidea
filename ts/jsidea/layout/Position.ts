@@ -20,7 +20,6 @@ module jsidea.layout {
         public transformMode: string = geom.Transform.MODE_AUTO;
         private _from: geom.Transform = new geom.Transform();
         private _to: geom.Transform = new geom.Transform();
-        private _parent: geom.Transform = new geom.Transform();
         private _bounds: geom.Transform = new geom.Transform();
 
         constructor() {
@@ -45,25 +44,22 @@ module jsidea.layout {
             if (!element)
                 return;
 
-            var pt = this.calc(element);
-            var m = geom.Matrix3D.create(element, Buffer._APPLY_POSITION);
+            var m = this.calc(element);
             if (this.useTransform) {
-                m.m41 = pt.x;
-                m.m42 = pt.y;
                 if (system.Caps.isSafari)
                     element.style["webkitTransform"] = m.getCSS();
                 else
                     element.style.transform = m.getCSS();
             }
             else {
-                pt.x += math.Number.parse(element.style.left, 0) - m.m41;
-                pt.y += math.Number.parse(element.style.top, 0) - m.m42;
-                element.style.left = Math.round(pt.x) + "px";
-                element.style.top = Math.round(pt.y) + "px";
+                var x = math.Number.parse(element.style.left, 0);
+                var y = math.Number.parse(element.style.top, 0);
+                element.style.left = Math.round(m.m41) + "px";
+                element.style.top = Math.round(m.m42) + "px";
             }
         }
 
-        public calc(element: HTMLElement): geom.Point3D {
+        public calc(element: HTMLElement): geom.Matrix3D {
             if (!element)
                 return null;
 
@@ -72,7 +68,6 @@ module jsidea.layout {
 
             this._from.update(fromElement, this.transformMode);
             this._to.update(element, this.transformMode);
-            this._parent.update(element.parentElement, this.transformMode);
             
             //transform box-models of "to"
             var sizeTo = Buffer._APPLY_POSITION_SIZE_TO.setTo(element.offsetWidth, element.offsetHeight);
@@ -86,26 +81,25 @@ module jsidea.layout {
             var fromX: number = math.Number.parseRelation(this.from.x, sizeFrom.x, 0) + math.Number.parseRelation(this.from.offsetX, sizeFrom.x, 0);
             var fromY: number = math.Number.parseRelation(this.from.y, sizeFrom.y, 0) + math.Number.parseRelation(this.from.offsetY, sizeFrom.y, 0);
 
-            var lc = this._parent.globalToLocal(fromX, fromY, 0, "content", this.fromBox);
-            var mao = geom.Matrix3D.createWithOrigin(element);
-            var dx = this._to.matrix.m41 - mao.m41;
-            var dy = this._to.matrix.m42 - mao.m42;
-            var off = mao.deltaProject(new geom.Point3D(toX, toY));
-            var point = new geom.Point3D(lc.x + dx - off.x, lc.y + dy - off.y);
+            //create matrix
+            var pt = new geom.Point3D(fromX, fromY);
+            var lc = this._from.localToLocalPoint(this._to, pt, this.toBox, this.fromBox);
+            var ma = this._to.matrix.clone();
+            ma.prependPositionRaw(lc.x - toX, lc.y - toY, 0);
 
             //keep in bounds
-            if (this.boundsElement) {
-                if (this.boundsElement == element)
-                    throw new Error("The bounds element cannot be the \"to\"-element.");
-                if (element.contains(this.boundsElement))
-                    throw new Error("The bounds element cannot be a child-element of the \"to\"-element.");
-                var toBox = layout.BoxModel.BORDER;
-                var fromBox = layout.BoxModel.PADDING;
-                this._bounds.update(this.boundsElement, this.transformMode);
-                point = this._to.clampBox2(this._bounds, toBox, fromBox, point, point);
-            }
+            //            if (this.boundsElement) {
+            //                if (this.boundsElement == element)
+            //                    throw new Error("The bounds element cannot be the \"to\"-element.");
+            //                if (element.contains(this.boundsElement))
+            //                    throw new Error("The bounds element cannot be a child-element of the \"to\"-element.");
+            //                var toBox = layout.BoxModel.BORDER;
+            //                var fromBox = layout.BoxModel.PADDING;
+            //                this._bounds.update(this.boundsElement, this.transformMode);
+            //                point = this._to.clampBox2(this._bounds, toBox, fromBox, point, point);
+            //            }
 
-            return point;
+            return ma;
         }
 
         public dispose(): void {
