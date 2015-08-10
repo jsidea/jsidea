@@ -43,32 +43,40 @@ module jsidea.test {
             d.appendChild(xc);
 
             var pos = new layout.Position();
-            pos.to.x = 0;//"100%";
-            pos.to.y = 0;//"100%";
+            pos.to.x = "100%";
+            pos.to.y = "100%";
             pos.useTransform = true;
 //            pos.boundsElement = a;
             
             document.addEventListener("click",(evt) => {
                 var pt = new geom.Point3D(this.pageX, this.pageY);
                 
-                var tr = geom.Transform.create(d);
-                var lc = tr.globalToLocalPoint(pt, "content");
-                var mao = geom.Matrix3D.createWithOrigin(xc);
-                var ma = geom.Matrix3D.create(xc);
-                var dx = ma.m41 - mao.m41;
-                var dy = ma.m42 - mao.m42;
-                mao.m41 = 0;
-                mao.m42 = 0;
-                var off = mao.project(new geom.Point3D(256, 256));
-                ma.m41 = lc.x + dx - off.x;
-                ma.m42 = lc.y + dy - off.y;
-                xc.style.transform = ma.getCSS();
+//                var tr = geom.Transform.create(d);
+//                var lc = tr.globalToLocalPoint(pt, "content");
+//                var mao = geom.Matrix3D.createWithOrigin(xc);
+//                var ma = geom.Matrix3D.create(xc);
+//                var dx = ma.m41 - mao.m41;
+//                var dy = ma.m42 - mao.m42;
+//                var off = mao.deltaProject(new geom.Point3D(256, 0));
+//                ma.m41 = lc.x + dx - off.x;
+//                ma.m42 = lc.y + dy - off.y;
+//                xc.style.transform = ma.getCSS();
+                
+//                var tr = geom.Transform.create(xc);
+//                var lc = tr.globalToLocalPoint(pt);
+//                var mao = geom.Matrix3D.createWithOrigin(xc);
+//                var ma = geom.Matrix3D.create(xc);
+//                var dx = ma.m41 - mao.m41;
+//                var dy = ma.m42 - mao.m42;
+//                ma.m41 = ma.m41 + dx + lc.x;
+//                ma.m42 = ma.m42 + dy + lc.y;
+//                xc.style.transform = ma.getCSS();
                 
 //                console.log(ma.m41 - mao.m41, ma.m42 - mao.m42);//, ma.m41, ma.m42, d._node.position.x, d._node.position.y
                 
-//                pos.from.x = pt.x;
-//                pos.from.y = pt.y;
-//                pos.apply(d);
+                pos.from.x = pt.x;
+                pos.from.y = pt.y;
+                pos.apply(xc);
 //                console.log("MOVE", this.pageX, this.pageY);
             });
 

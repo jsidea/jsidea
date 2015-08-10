@@ -317,6 +317,35 @@ module jsidea.geom {
             return ret.setTo(x, y, z, w);
         }
         
+        //from homegeneous (euclid) to cartesian FLATTENED!!!! like a projection
+        public deltaProject(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
+            var z = point.z;
+            var w = point.x * this.m14 + point.y * this.m24 + z * this.m34 + this.m44;
+            var x = point.x * this.m11 + point.y * this.m21 + z * this.m31;
+            var y = point.x * this.m12 + point.y * this.m22 + z * this.m32;
+
+            if (w == 0)
+                w = 0.0001;
+
+            x /= w;
+            y /= w;
+
+            //lets call it "hasenfuss"
+            //look at the developer tools of firefox and chrome -> 
+            //ff and chrome do it wrong: the highlighted bounding box failed to be correct
+            //getBoundingClientRect
+//            if (w < 0) {
+//                x -= this.m41;
+//                y -= this.m42;
+//                x *= 1 / w;
+//                y *= 1 / w;
+//                x += this.m41;
+//                y += this.m42;
+//            }
+
+            return ret.setTo(x, y, z, w);
+        }
+        
         //from homegeneous (euclid) to cartesian
         public transform3D(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
             var x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41;

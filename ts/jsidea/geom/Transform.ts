@@ -52,9 +52,9 @@ module jsidea.geom {
 
             if (mode == Transform.MODE_PERSPECTIVE) {
                 var node = layout.StyleChain.create(element);
-//                this.matrix.setCSS(node.style.transform);
+                this.matrix.setCSS(node.style.transform);
                 //                this.matrix = Transform.extractMatrix(node, this.matrix.identity());
-                this.matrix = Transform.extractMatrixWithOrigin(node, this.matrix.identity());
+//                this.matrix = Transform.extractMatrixWithOrigin(node, this.matrix.identity());
                 
                 this.sceneTransform = Transform.extractAccumulatedMatrices(node);
                 this.boxModel.update(element, node.style);

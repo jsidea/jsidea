@@ -20,6 +20,7 @@ module jsidea.layout {
         public transformMode: string = geom.Transform.MODE_AUTO;
         private _from: geom.Transform = new geom.Transform();
         private _to: geom.Transform = new geom.Transform();
+        private _parent: geom.Transform = new geom.Transform();
         private _bounds: geom.Transform = new geom.Transform();
 
         constructor() {
@@ -47,8 +48,8 @@ module jsidea.layout {
             var pt = this.calc(element);
             var m = geom.Matrix3D.create(element, Buffer._APPLY_POSITION);
             if (this.useTransform) {
-                m.m41 += pt.x;
-                m.m42 += pt.y;
+                m.m41 = pt.x;
+                m.m42 = pt.y;
                 if (system.Caps.isSafari)
                     element.style["webkitTransform"] = m.getCSS();
                 else
@@ -71,6 +72,7 @@ module jsidea.layout {
 
             this._from.update(fromElement, this.transformMode);
             this._to.update(element, this.transformMode);
+            this._parent.update(element.parentElement, this.transformMode);
             
             //transform box-models of "to"
             var sizeTo = Buffer._APPLY_POSITION_SIZE_TO.setTo(element.offsetWidth, element.offsetHeight);
@@ -83,44 +85,13 @@ module jsidea.layout {
             this._from.boxModel.size(sizeFrom, this.fromBox, layout.BoxModel.BORDER);
             var fromX: number = math.Number.parseRelation(this.from.x, sizeFrom.x, 0) + math.Number.parseRelation(this.from.offsetX, sizeFrom.x, 0);
             var fromY: number = math.Number.parseRelation(this.from.y, sizeFrom.y, 0) + math.Number.parseRelation(this.from.offsetY, sizeFrom.y, 0);
-            
-            //the transfrom: "from" -> "to"
-            var point = this._from.localToLocal(
-                this._to,
-                fromX,
-                fromY,
-                0,
-                this.toBox,
-                this.fromBox);
-            
-            //            console.log("LOC", point.x, point.y);
 
-            //shift to origin/pivot/to-point
-            //            point.x -= toX;
-            //            point.y -= toY;
-            
-            point.z = 0;
-//            point.x -= this._to.matrix.m41;
-//            point.y -= this._to.matrix.m42;
-            point = this._to.matrix.unproject(point);
-            
-            //            point.x += this._to.matrix.m41;
-            //            point.y += this._to.matrix.m42;
-            
-            //from "to" -> parent
-            //            point = this._to.matrix.project(point);
-            
-            //            var pk = this._to.matrix.getMatrix2D().transform(point);
-            //            point.x = pk.x;
-            //            point.y = pk.y;
-            
-            //            point.x -= this._to.matrix.m41;
-            //            point.y -= this._to.matrix.m42;
-            
-            //            point.x = point.x - this._to.matrix.m41;
-            //            point.y = point.y - this._to.matrix.m42;
-            
-            //            point = this._to.matrix.project(point);
+            var lc = this._parent.globalToLocal(fromX, fromY, 0, "content", this.fromBox);
+            var mao = geom.Matrix3D.createWithOrigin(element);
+            var dx = this._to.matrix.m41 - mao.m41;
+            var dy = this._to.matrix.m42 - mao.m42;
+            var off = mao.deltaProject(new geom.Point3D(toX, toY));
+            var point = new geom.Point3D(lc.x + dx - off.x, lc.y + dy - off.y);
 
             //keep in bounds
             if (this.boundsElement) {
