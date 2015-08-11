@@ -46,7 +46,7 @@ module jsidea.test {
 //            pos.to.y = "100%";
             pos.useTransform = true;
             pos.toBox = layout.BoxModel.BORDER;
-            //            pos.boundsElement = a;
+            pos.boundsElement = con;
             
             var target: HTMLElement = null;
             document.addEventListener("mousedown",(evt) => {
@@ -56,7 +56,9 @@ module jsidea.test {
                 var pt = new geom.Point3D(evt.pageX, evt.pageY);
                 var loc = geom.Transform.create(target).globalToLocalPoint(pt, pos.toBox);
                 pos.to.x = loc.x;
-                pos.to.y = loc.y;
+                pos.to.y = loc.y;                
+                
+//                pos.useTransform = Math.random() > 0.5;
                 
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
@@ -70,6 +72,7 @@ module jsidea.test {
                 var pt = new geom.Point3D(this.pageX, this.pageY);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
+                
                 pos.apply(target);
             });
 

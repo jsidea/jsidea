@@ -541,6 +541,7 @@
 .test-16 #b-cont {
 	position: relative;
 	perspective: 400px;
+	transform-style: preserve-3d;
 }
 
 .test-16 #c-cont {
@@ -559,6 +560,7 @@
 	position: relative;
 	/* transform: rotateY(15deg) rotate(25deg); */
 	/* transform-origin: 0px 0px; */
+	transform-style: preserve-3d;
 	transform: rotateY(-25deg);
 }
 

@@ -18,6 +18,7 @@ module jsidea.layout {
         public fromBox: string = layout.BoxModel.BORDER;
         public useTransform: boolean = true;
         public transformMode: string = geom.Transform.MODE_AUTO;
+        
         private _from: geom.Transform = new geom.Transform();
         private _to: geom.Transform = new geom.Transform();
         private _bounds: geom.Transform = new geom.Transform();
@@ -33,10 +34,12 @@ module jsidea.layout {
             var p = new Position();
             p.to = this.to;
             p.from = this.from;
-            p.from = this.from;
+            p.fromElement = this.fromElement;
+            p.boundsElement = this.boundsElement;
             p.toBox = this.toBox;
             p.fromBox = this.fromBox;
             p.useTransform = this.useTransform;
+            p.transformMode = this.transformMode;
             return p;
         }
 
@@ -88,10 +91,33 @@ module jsidea.layout {
             var fromY: number = math.Number.parseRelation(this.from.y, sizeFrom.y, 0) + math.Number.parseRelation(this.from.offsetY, sizeFrom.y, 0);
 
             //create matrix
-            var pt = new geom.Point3D(fromX, fromY);
-            var lc = this._from.localToLocalPoint(this._to, pt, this.toBox, this.fromBox);
+            var lc = this._from.localToLocal(this._to, fromX, fromY, 0, this.toBox, this.fromBox);
+            lc.x -= toX;
+            lc.y -= toY;
             var ma = this._to.matrix.clone();
-            ma.prependPositionRaw(lc.x - toX, lc.y - toY, 0);
+            
+            
+            //keep in bounds
+            if (this.boundsElement) {
+                if (this.boundsElement == element)
+                    throw new Error("The bounds element cannot be the \"to\"-element.");
+                if (element.contains(this.boundsElement))
+                    throw new Error("The bounds element cannot be a child-element of the \"to\"-element.");
+                var toBox = layout.BoxModel.BORDER;
+                var fromBox = layout.BoxModel.BORDER;
+                
+                this._bounds.update(this.boundsElement, this.transformMode);
+                
+                lc = this._to.clamp(this._bounds, lc, 0, 1024, 0, 1024, toBox, fromBox);
+                
+//                var point = ma.getPosition();
+//                point.subPoint(this._to.matrix.getPosition());
+//                point = this._to.clamp(this._bounds, point, 0, 1024, 0, 1024, toBox, fromBox);
+//                point.addPoint(this._to.matrix.getPosition());
+//                ma.setPosition(point);
+            } 
+            
+            ma.prependPositionRaw(lc.x, lc.y, 0);
 
             //keep in bounds
             //            if (this.boundsElement) {

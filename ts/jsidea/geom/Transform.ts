@@ -53,9 +53,6 @@ module jsidea.geom {
             if (mode == Transform.MODE_PERSPECTIVE) {
                 var node = layout.StyleChain.create(element);
                 this.matrix.setCSS(node.style.transform);
-                //                this.matrix = Transform.extractMatrix(node, this.matrix.identity());
-//                this.matrix = Transform.extractMatrixWithOrigin(node, this.matrix.identity());
-                
                 this.sceneTransform = Transform.extractAccumulatedMatrices(node);
                 this.boxModel.update(element, node.style);
             }
@@ -112,10 +109,29 @@ module jsidea.geom {
             this.sceneTransform = [];
             this.inverseSceneTransform = [];
             this.boxModel.clear();
+            this.matrix.identity();
+        }
+
+        public clamp(
+            to: Transform, 
+            pt: geom.Point3D,
+            minX:number,
+            maxX:number,
+            minY:number,
+            maxY:number,
+            toBox: string = layout.BoxModel.AUTO,
+            fromBox: string = layout.BoxModel.AUTO,
+            ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
+
+            var lc = this.localToLocalPoint(to, pt, toBox, fromBox, ret);
+            lc.x = math.Number.clamp(lc.x, minX, maxX);
+            lc.y = math.Number.clamp(lc.y, minY, maxY);
+            return to.localToLocalPoint(this, lc, toBox, fromBox);
         }
 
         public localToLocalPoint(
-            to: Transform, pt: geom.Point3D,
+            to: Transform, 
+            pt: geom.Point3D,
             toBox: string = layout.BoxModel.AUTO,
             fromBox: string = layout.BoxModel.AUTO,
             ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
@@ -194,8 +210,8 @@ module jsidea.geom {
             this.boxModel.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
 
             //FOR TEST ONLY
-//            ret.z = 0;
-            
+            ret.z = 0;
+
             return ret;
         }
 
@@ -256,33 +272,6 @@ module jsidea.geom {
             return isTransformed ? Transform.MODE_TRANSFORM : Transform.MODE_BOX;
         }
 
-        private static extractMatrixWithOrigin(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
-            if (!matrix)
-                matrix = new geom.Matrix3D();
-            if (!node)
-                return matrix;
-
-            var element: HTMLElement = node.element;
-            var style: CSSStyleDeclaration = node.style;
-            
-            //------
-            //transform
-            //------
-            if (node.isTransformed) {
-                var origin = style.transformOrigin ? style.transformOrigin.split(" ") : "0 0";
-                var originX = math.Number.parseRelation(origin[0], element.offsetWidth, 0);
-                var originY = math.Number.parseRelation(origin[1], element.offsetHeight, 0);
-                var originZ = math.Number.parseRelation(origin[2], 0, 0);
-
-                //not vice versa: not adding than subtracting like some docs mentioned
-                matrix.appendPositionRaw(-originX, -originY, -originZ);
-                matrix.appendCSS(style.transform);
-                matrix.appendPositionRaw(originX, originY, originZ);
-            }
-
-            return matrix;
-        }
-
         private static extractMatrix(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
             if (!matrix)
                 matrix = new geom.Matrix3D();
@@ -314,11 +303,6 @@ module jsidea.geom {
             //position is relative to the direct parent
             matrix.appendPositionRaw(node.position.x, node.position.y, 0);
             
-            //            if(node.element.id == "d-cont")
-            //            {
-            //                console.log("d-cont", originX, originY);    
-            //            }
-            
             //-------
             //perspective
             //-------
@@ -332,8 +316,6 @@ module jsidea.geom {
                 matrix.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
                 matrix.appendPerspective(perspective);
                 matrix.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
-                
-                //                console.log("PERSPECTIVE FOUND...");
             }
 
             return matrix;
