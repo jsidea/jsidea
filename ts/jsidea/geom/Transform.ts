@@ -115,6 +115,8 @@ module jsidea.geom {
         public clamp(
             to: Transform, 
             pt: geom.Point3D,
+            offsetX:number,
+            offsetY:number,
             minX:number,
             maxX:number,
             minY:number,
@@ -123,10 +125,14 @@ module jsidea.geom {
             fromBox: string = layout.BoxModel.AUTO,
             ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
 
-            var lc = this.localToLocalPoint(to, pt, toBox, fromBox, ret);
+            var lc = this.localToLocal(to, pt.x + offsetX, pt.y + offsetY, pt.z, fromBox, toBox, ret);
             lc.x = math.Number.clamp(lc.x, minX, maxX);
             lc.y = math.Number.clamp(lc.y, minY, maxY);
-            return to.localToLocalPoint(this, lc, toBox, fromBox);
+            lc = to.localToLocalPoint(this, lc, toBox, fromBox);
+            lc.z = pt.z;
+            lc.x -= offsetX;
+            lc.y -= offsetY;
+            return lc;
         }
 
         public localToLocalPoint(

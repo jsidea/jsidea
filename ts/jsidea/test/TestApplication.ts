@@ -46,7 +46,7 @@ module jsidea.test {
 //            pos.to.y = "100%";
             pos.useTransform = true;
             pos.toBox = layout.BoxModel.BORDER;
-            pos.boundsElement = con;
+            pos.boundsElement = vie;
             
             var target: HTMLElement = null;
             document.addEventListener("mousedown",(evt) => {
@@ -90,6 +90,8 @@ module jsidea.test {
                 
                 this.logChain(xc);
             };
+            
+            draw();
 //            document.addEventListener("click", draw);
             
             var setTest = (e:KeyboardEvent) => {

@@ -103,34 +103,20 @@ module jsidea.layout {
                     throw new Error("The bounds element cannot be the \"to\"-element.");
                 if (element.contains(this.boundsElement))
                     throw new Error("The bounds element cannot be a child-element of the \"to\"-element.");
-                var toBox = layout.BoxModel.BORDER;
+                var toBox = layout.BoxModel.PADDING;
                 var fromBox = layout.BoxModel.BORDER;
                 
                 this._bounds.update(this.boundsElement, this.transformMode);
+                var boundsSize = this._bounds.boxModel.size(new geom.Point2D(this._bounds.boxModel.offsetWidth, this._bounds.boxModel.offsetHeight), fromBox);
+                var toSize = this._to.boxModel.size(new geom.Point2D(this._to.boxModel.offsetWidth, this._to.boxModel.offsetHeight), toBox);
                 
-                lc = this._to.clamp(this._bounds, lc, 0, 1024, 0, 1024, toBox, fromBox);
-                
-//                var point = ma.getPosition();
-//                point.subPoint(this._to.matrix.getPosition());
-//                point = this._to.clamp(this._bounds, point, 0, 1024, 0, 1024, toBox, fromBox);
-//                point.addPoint(this._to.matrix.getPosition());
-//                ma.setPosition(point);
+                lc = this._to.clamp(this._bounds, lc, toSize.x, toSize.y, 0, boundsSize.x, 0, boundsSize.y, toBox, fromBox);
+                lc = this._to.clamp(this._bounds, lc, 0, toSize.y, 0, boundsSize.x, 0, boundsSize.y, toBox, fromBox);
+                lc = this._to.clamp(this._bounds, lc, toSize.x, 0, 0, boundsSize.x, 0, boundsSize.y, toBox, fromBox);
+                lc = this._to.clamp(this._bounds, lc, 0, 0, 0, boundsSize.x, 0, boundsSize.y, toBox, fromBox);
             } 
-            
             ma.prependPositionRaw(lc.x, lc.y, 0);
 
-            //keep in bounds
-            //            if (this.boundsElement) {
-            //                if (this.boundsElement == element)
-            //                    throw new Error("The bounds element cannot be the \"to\"-element.");
-            //                if (element.contains(this.boundsElement))
-            //                    throw new Error("The bounds element cannot be a child-element of the \"to\"-element.");
-            //                var toBox = layout.BoxModel.BORDER;
-            //                var fromBox = layout.BoxModel.PADDING;
-            //                this._bounds.update(this.boundsElement, this.transformMode);
-            //                point = this._to.clampBox2(this._bounds, toBox, fromBox, point, point);
-            //            }            
-            
             return ma;
         }
 
