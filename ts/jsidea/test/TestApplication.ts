@@ -42,8 +42,8 @@ module jsidea.test {
             document.body.appendChild(can);
 
             var pos = new layout.Position();
-            pos.to.x = "100%";
-            pos.to.y = 0;//"100%";
+//            pos.to.x = "100%";
+//            pos.to.y = "100%";
             pos.useTransform = true;
             pos.toBox = layout.BoxModel.BORDER;
             //            pos.boundsElement = a;
@@ -87,7 +87,7 @@ module jsidea.test {
                 
                 this.logChain(xc);
             };
-            document.addEventListener("click", draw);
+//            document.addEventListener("click", draw);
             
             var setTest = (e:KeyboardEvent) => {
                     if (e.keyCode == 37 || e.keyCode == 39) {

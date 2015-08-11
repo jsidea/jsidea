@@ -44,8 +44,7 @@ module jsidea.layout {
             if (!element)
                 return;
 
-            var m = this.calc(element);
-            
+            var m = this.calc(element);            
             
             //the strangest bug ever
             //it applies the zoom-factor as a scaling factor
@@ -54,20 +53,15 @@ module jsidea.layout {
                 var scale = 1 / (window.innerWidth / window.outerWidth);
                 m.m43 *= scale;
             }
-            
+
             if (this.useTransform) {
                 element.style.transform = m.getCSS();
-//                console.log("BEFORE");
-//                console.log(m.toStringTable());
-//                var mar = geom.Matrix3D.create(element);
-//                console.log("AFTER");
-//                console.log(mar.toStringTable());
             }
             else {
                 var x = math.Number.parse(element.style.left, 0);
                 var y = math.Number.parse(element.style.top, 0);
-                element.style.left = Math.round(m.m41 - x) + "px";
-                element.style.top = Math.round(m.m42 - y) + "px";
+                element.style.left = Math.round(m.m41 + x) + "px";
+                element.style.top = Math.round(m.m42 + y) + "px";
             }
         }
 
