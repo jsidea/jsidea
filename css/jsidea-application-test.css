@@ -392,7 +392,7 @@
 .test-12 #a-cont {
 	position: fixed;
 	overflow: scroll;
-	transform: translateZ(-200px);
+	transform: translateZ(-100px);
 	transform-style: preserve-3d;
 	box-sizing: border-box;
 }

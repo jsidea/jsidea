@@ -14,7 +14,7 @@ module jsidea.test {
             var vie = document.getElementById("view");
 
             var max = 16;
-            var te = 16;//5;//7;//11 for ie11 testing 5 is scrolling test
+            var te = 15;//5;//7;//11 for ie11 testing 5 is scrolling test
             document.body.className = "test-" + te;
 
             var can = document.createElement("canvas");
@@ -46,7 +46,7 @@ module jsidea.test {
 //            pos.to.y = "100%";
             pos.useTransform = true;
 //            pos.to.boxModel = layout.BoxModel.BORDER;
-            pos.bounds.element = a;
+//            pos.bounds.element = a;
             
             var target: HTMLElement = null;
             document.addEventListener("mousedown",(evt) => {
@@ -91,8 +91,8 @@ module jsidea.test {
                 this.logChain(xc);
             };
             
-//            draw();
-//            document.addEventListener("click", draw);
+            draw();
+            document.addEventListener("click", draw);
             
             var setTest = (e:KeyboardEvent) => {
                     if (e.keyCode == 37 || e.keyCode == 39) {

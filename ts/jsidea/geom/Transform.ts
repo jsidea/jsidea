@@ -79,9 +79,9 @@ module jsidea.geom {
                     
                     //if perspective of preserve-3d is on the get getBoundingClientRect
                     //we need to scale it
-                    var scX = globalBounds.width / localBounds.width;
-                    var scY = globalBounds.height / localBounds.height;
-                    matrix.appendScaleRaw(scX, scY, 1);
+//                    var scX = globalBounds.width / localBounds.width;
+//                    var scY = globalBounds.height / localBounds.height;
+//                    matrix.appendScaleRaw(scX, scY, 1);
 
                     //re-offset
                     matrix.appendPositionRaw(-localBounds.x, -localBounds.y, 0);
@@ -208,7 +208,7 @@ module jsidea.geom {
             //apply box model transformations
             this.boxModel.point(ret, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);
             
-            //project from parent to child
+            //unproject from parent to child
             for (var i = 0; i < this.inverseSceneTransform.length; ++i)
                 ret = this.inverseSceneTransform[i].unproject(ret, ret);
 
@@ -216,6 +216,7 @@ module jsidea.geom {
             this.boxModel.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
 
             //FOR TEST ONLY
+            //or maybe: let a be, let a be
             ret.z = 0;
 
             return ret;
@@ -254,7 +255,7 @@ module jsidea.geom {
             //apply from-box model transformations
             this.boxModel.point(ret, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);            
             
-            //unproject from child to parent
+            //project from child to parent
             var l = this.sceneTransform.length;
             for (var i = 0; i < l; ++i)
                 ret = this.sceneTransform[i].project(ret, ret);
@@ -288,7 +289,7 @@ module jsidea.geom {
             var style: CSSStyleDeclaration = node.style;
             
             //------
-            //transform
+            //transform (including transformOrigin)
             //------
             if (node.isTransformed) {
                 var origin = style.transformOrigin ? style.transformOrigin.split(" ") : "0 0";
@@ -303,14 +304,15 @@ module jsidea.geom {
             }
             
             //------
-            //offset
+            //local position
             //------
             //append the position to the transform-matrix
             //position is relative to the direct parent
+            //not the offsetParent
             matrix.appendPositionRaw(node.position.x, node.position.y, 0);
             
             //-------
-            //perspective
+            //perspective/focalLength/nearFarDistance/frustumLength or whatever you wanna call it
             //-------
             if (node.parent && node.parent.perspective) {
                 var perspective = node.parent.perspective;

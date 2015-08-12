@@ -304,9 +304,10 @@ module jsidea.geom {
             //lets call it "hasenfuss"
             //look at the developer tools of firefox and chrome -> 
             //ff and chrome do it wrong: the highlighted bounding box failed to be correct
-            //getBoundingClientRect
+            //and getBoundingClientRect also
+            
+            //behind the "camera" (z > 0)
             if (w < 0) {
-                console.log("BEHIND CAM");
                 x -= this.m41;
                 y -= this.m42;
                 x *= 1 / w;
