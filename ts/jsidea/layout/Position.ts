@@ -1,24 +1,28 @@
 module jsidea.layout {
     export interface IPositionValue {
+        element?: HTMLElement;
         x?: number | string;
         y?: number | string;
         offsetX?: number | string;
         offsetY?: number | string;
+        boxModel?: string;
+    }
+    export interface IPositionBounds {
+        element?: HTMLElement;
         minX?: number | string;
         minY?: number | string;
         maxX?: number | string;
         maxY?: number | string;
+        boxModel?: string;
+        toBoxModel?: string;
     }
     export class Position {
-        public to: IPositionValue = {};
-        public from: IPositionValue = {};
-        public fromElement: HTMLElement = null;
-        public boundsElement: HTMLElement = null;
-        public toBox: string = layout.BoxModel.BORDER;
-        public fromBox: string = layout.BoxModel.BORDER;
+        public to: IPositionValue = { boxModel: layout.BoxModel.BORDER };
+        public from: IPositionValue = { boxModel: layout.BoxModel.BORDER };
+        public bounds: IPositionBounds = {boxModel: layout.BoxModel.BORDER};
         public useTransform: boolean = true;
         public transformMode: string = geom.Transform.MODE_AUTO;
-        
+
         private _from: geom.Transform = new geom.Transform();
         private _to: geom.Transform = new geom.Transform();
         private _bounds: geom.Transform = new geom.Transform();
@@ -34,16 +38,14 @@ module jsidea.layout {
             var p = new Position();
             p.to = this.to;
             p.from = this.from;
-            p.fromElement = this.fromElement;
-            p.boundsElement = this.boundsElement;
-            p.toBox = this.toBox;
-            p.fromBox = this.fromBox;
+            p.bounds = this.bounds;
             p.useTransform = this.useTransform;
             p.transformMode = this.transformMode;
             return p;
         }
 
-        public apply(element: HTMLElement): void {
+        public apply(element: HTMLElement = null): void {
+            element = element ? element : this.to.element;
             if (!element)
                 return;
 
@@ -73,56 +75,60 @@ module jsidea.layout {
                 return null;
 
             //retrieve "of"-element
-            var fromElement = this.fromElement ? this.fromElement : element.ownerDocument.documentElement;
+            var fromElement = this.from.element ? this.from.element : element.ownerDocument.documentElement;
 
             this._from.update(fromElement, this.transformMode);
             this._to.update(element, this.transformMode);
+
+            var toBox = this.to.boxModel ? this.to.boxModel : layout.BoxModel.BORDER;
+            var fromBox = this.from.boxModel ? this.from.boxModel : layout.BoxModel.BORDER;
             
             //transform box-models of "to"
             var sizeTo = Buffer._APPLY_POSITION_SIZE_TO.setTo(element.offsetWidth, element.offsetHeight);
-            this._to.boxModel.size(sizeTo, this.toBox, layout.BoxModel.BORDER);
+            this._to.boxModel.size(sizeTo, toBox, layout.BoxModel.BORDER);
             var toX: number = math.Number.parseRelation(this.to.x, sizeTo.x, 0) + math.Number.parseRelation(this.to.offsetX, sizeTo.x, 0);
             var toY: number = math.Number.parseRelation(this.to.y, sizeTo.y, 0) + math.Number.parseRelation(this.to.offsetY, sizeTo.y, 0);
             
             //transform box-models of "from"
             var sizeFrom = Buffer._APPLY_POSITION_SIZE_FROM.setTo(fromElement.offsetWidth, fromElement.offsetHeight);
-            this._from.boxModel.size(sizeFrom, this.fromBox, layout.BoxModel.BORDER);
+            this._from.boxModel.size(sizeFrom, fromBox, layout.BoxModel.BORDER);
             var fromX: number = math.Number.parseRelation(this.from.x, sizeFrom.x, 0) + math.Number.parseRelation(this.from.offsetX, sizeFrom.x, 0);
             var fromY: number = math.Number.parseRelation(this.from.y, sizeFrom.y, 0) + math.Number.parseRelation(this.from.offsetY, sizeFrom.y, 0);
 
-            //create matrix
-            var lc = this._from.localToLocal(this._to, fromX, fromY, 0, this.toBox, this.fromBox);
+            //calc local position
+            var lc = this._from.localToLocal(this._to, fromX, fromY, 0, toBox, fromBox);
             lc.x -= toX;
             lc.y -= toY;
-            var ma = this._to.matrix.clone();
-            
             
             //keep in bounds
-            if (this.boundsElement) {
-                if (this.boundsElement == element)
-                    throw new Error("The bounds element cannot be the \"to\"-element.");
-                if (element.contains(this.boundsElement))
-                    throw new Error("The bounds element cannot be a child-element of the \"to\"-element.");
-                var toBox = layout.BoxModel.PADDING;
-                var fromBox = layout.BoxModel.BORDER;
-                
-                this._bounds.update(this.boundsElement, this.transformMode);
-                var boundsSize = this._bounds.boxModel.size(new geom.Point2D(this._bounds.boxModel.offsetWidth, this._bounds.boxModel.offsetHeight), fromBox);
-                var toSize = this._to.boxModel.size(new geom.Point2D(this._to.boxModel.offsetWidth, this._to.boxModel.offsetHeight), toBox);
-                
-                lc = this._to.clamp(this._bounds, lc, toSize.x, toSize.y, 0, boundsSize.x, 0, boundsSize.y, toBox, fromBox);
-                lc = this._to.clamp(this._bounds, lc, 0, toSize.y, 0, boundsSize.x, 0, boundsSize.y, toBox, fromBox);
-                lc = this._to.clamp(this._bounds, lc, toSize.x, 0, 0, boundsSize.x, 0, boundsSize.y, toBox, fromBox);
-                lc = this._to.clamp(this._bounds, lc, 0, 0, 0, boundsSize.x, 0, boundsSize.y, toBox, fromBox);
-            } 
-            ma.prependPositionRaw(lc.x, lc.y, 0);
+            if (this.bounds.element) {
+                if (this.bounds.element == element)
+                    console.warn("The bounds element cannot be the \"to\"-element.");
+                else if (element.contains(this.bounds.element))
+                    console.warn("The bounds element cannot be a child-element of the \"to\"-element.");
+                else {
+                    var toBox = this.bounds.toBoxModel ? this.bounds.toBoxModel : layout.BoxModel.BORDER;
+                    var boundsBox = this.bounds.boxModel ? this.bounds.boxModel : layout.BoxModel.BORDER;
 
+                    this._bounds.update(this.bounds.element, this.transformMode);
+                    var boundsSize = this._bounds.boxModel.size(new geom.Point2D(this._bounds.boxModel.offsetWidth, this._bounds.boxModel.offsetHeight), boundsBox);
+                    var toSize = this._to.boxModel.size(new geom.Point2D(this._to.boxModel.offsetWidth, this._to.boxModel.offsetHeight), toBox);
+
+                    lc = this._to.clamp(this._bounds, lc, toSize.x, toSize.y, 0, boundsSize.x, 0, boundsSize.y, toBox, boundsBox);
+                    lc = this._to.clamp(this._bounds, lc, 0, toSize.y, 0, boundsSize.x, 0, boundsSize.y, toBox, boundsBox);
+                    lc = this._to.clamp(this._bounds, lc, toSize.x, 0, 0, boundsSize.x, 0, boundsSize.y, toBox, boundsBox);
+                    lc = this._to.clamp(this._bounds, lc, 0, 0, 0, boundsSize.x, 0, boundsSize.y, toBox, boundsBox);
+                }
+            }
+            
+            //prepend the local offset
+            var ma = this._to.matrix.clone();            
+            ma.prependPositionRaw(lc.x, lc.y, 0);
             return ma;
         }
 
         public dispose(): void {
             this.to = null;
-            this.from = null;
             this.from = null;
         }
 
