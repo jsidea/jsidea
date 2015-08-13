@@ -1,0 +1,1 @@
+npm install uglify-js --save-dev

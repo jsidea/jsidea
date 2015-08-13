@@ -292,9 +292,9 @@ module jsidea.geom {
             //transform (including transformOrigin)
             //------
             if (node.isTransformed) {
-                var origin = style.transformOrigin ? style.transformOrigin.split(" ") : "0 0";
-                var originX = math.Number.parseRelation(origin[0], element.offsetWidth, 0);
-                var originY = math.Number.parseRelation(origin[1], element.offsetHeight, 0);
+                var origin = style.transformOrigin ? style.transformOrigin.split(" ") : [];
+                var originX = math.Number.parseRelation(origin[0], element.offsetWidth, element.offsetWidth * 0.5);
+                var originY = math.Number.parseRelation(origin[1], element.offsetHeight, element.offsetHeight * 0.5);
                 var originZ = math.Number.parseRelation(origin[2], 0, 0);
 
                 //not vice versa: not adding than subtracting like some docs mentioned

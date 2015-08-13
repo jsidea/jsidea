@@ -9,6 +9,9 @@ module jsidea.test {
             this.testGeometryUtils();
         }
 
+        private testAffineFit(): void {
+        }
+
         private testGeometryUtils(): void {
             var con = document.getElementById("content");
             var vie = document.getElementById("view");
@@ -21,7 +24,7 @@ module jsidea.test {
             can.id = "can";
             can.width = 1920;
             can.height = 1080;
-            var ctx = can.getContext("2d");
+            var ctx = <CanvasRenderingContext2D> can.getContext("2d");
 
             var a = document.createElement("div");
             a.id = "a-cont";
@@ -42,11 +45,11 @@ module jsidea.test {
             document.body.appendChild(can);
 
             var pos = new layout.Position();
-//            pos.to.x = "100%";
-//            pos.to.y = "100%";
+            //            pos.to.x = "100%";
+            //            pos.to.y = "100%";
             pos.useTransform = true;
-//            pos.to.boxModel = layout.BoxModel.BORDER;
-//            pos.bounds.element = a;
+            //            pos.to.boxModel = layout.BoxModel.BORDER;
+            //            pos.bounds.element = a;
             
             var target: HTMLElement = null;
             document.addEventListener("mousedown",(evt) => {
@@ -58,7 +61,7 @@ module jsidea.test {
                 pos.to.x = loc.x;
                 pos.to.y = loc.y;                
                 
-//                pos.useTransform = Math.random() > 0.5;
+                //                pos.useTransform = Math.random() > 0.5;
                 
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
@@ -72,7 +75,7 @@ module jsidea.test {
                 var pt = new geom.Point3D(this.pageX, this.pageY);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
-                
+
                 pos.apply(target);
             });
 
@@ -87,15 +90,15 @@ module jsidea.test {
                 this.drawBoundingBox(ctx, d);
                 this.drawBoundingBox(ctx, xc);
                 this.drawBoundingBox(ctx, can);
-                
+
                 this.logChain(xc);
             };
-            
+
             draw();
             document.addEventListener("click", draw);
-            
-            var setTest = (e:KeyboardEvent) => {
-                    if (e.keyCode == 37 || e.keyCode == 39) {
+
+            var setTest = (e: KeyboardEvent) => {
+                if (e.keyCode == 37 || e.keyCode == 39) {
                     if (e.keyCode == 37)
                         te--;
                     else

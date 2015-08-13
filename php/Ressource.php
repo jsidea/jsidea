@@ -38,20 +38,25 @@ class Ressource {
 		}
 		return $result;
 	}
-	public static function importJavaScriptOnline($url) {
-		return "<script type='text/javascript' src='$url'></script>\n";
+	public static function importJavaScriptOnline($url, $condition) {
+		return self::wrapCondition ( "<script type='text/javascript' src='$url'></script>\n", $condition );
 	}
-	private static function importCSSOnline($url) {
-		return "<link type='text/css' rel='stylesheet' href='$url' >\n";
+	public static function importCSSOnline($url, $condition) {
+		return self::wrapCondition ( "<link type='text/css' rel='stylesheet' href='$url' >\n", $condition );
 	}
-	private static function encodeCSS($projectPathRelative, $importPath) {
-		return "<link type='text/css' rel='stylesheet' href='$projectPathRelative/css/$importPath' >\n";
+	private static function encodeCSS($projectPathRelative, $importPath, $condition) {
+		return self::wrapCondition ( "<link type='text/css' rel='stylesheet' href='$projectPathRelative/css/$importPath' >\n", $condition );
 	}
-	private static function encodeJavaScript($projectPathRelative, $importPath) {
-		return "<script type='text/javascript' src='$projectPathRelative/libs/$importPath'></script>\n";
+	private static function encodeJavaScript($projectPathRelative, $importPath, $condition) {
+		return self::wrapCondition ( "<script type='text/javascript' src='$projectPathRelative/libs/$importPath'></script>\n", $condition );
 	}
 	private static function resolveProjectPathAbsolute($projectName) {
 		return realpath ( dirname ( __FILE__ ) . "/../../" . $projectName );
+	}
+	private static function wrapCondition($result, $condition) {
+		if ($condition)
+			return "<![if $condition]>\n$result<![endif]>\n";
+		return $result;
 	}
 	private static function resolveProjectPathRelative($projectName) {
 		$abs = self::resolveProjectPathAbsolute ( $projectName );
@@ -64,17 +69,13 @@ class Ressource {
 		$result = "<!-- $projectName/$type -->\n";
 		$projectPathRelative = self::resolveProjectPathRelative ( $projectName );
 		$projectPath = self::resolveProjectPathAbsolute ( $projectName );
-		$bui = file_get_contents ( $projectPath . "/" . $referencesFileName );
-		$bui = preg_replace ( "/\<\!\-\- *.* *\-\-\>/s", "", $bui );
-		preg_match_all ( "/src.*src/i", $bui, $out );
-		$res = $out [0];
-		for($i = 0; $i < count ( $res ); ++ $i) {
-			$importPath = $res [$i];
-			if (strpos ( $importPath, ".." ) !== false)
-				continue;
-			$importPath = preg_replace ( "/.*src.*\>/i", "", $importPath );
-			$importPath = preg_replace ( "/\< *\/ *src.*/i", "", $importPath );
-			$result .= $encoderFunction ( $projectPathRelative, $importPath );
+		$xmlString = file_get_contents ( $projectPath . "/" . $referencesFileName );
+		$scripts = new SimpleXMLElement ( $xmlString );
+		$sources = $scripts->src;
+		for($i = 0; $i < count ( $sources ); ++ $i) {
+			$filename = $sources [$i];
+			$condition = $sources [$i] ["condition"];
+			$result .= $encoderFunction ( $projectPathRelative, $filename, $condition );
 		}
 		return $result;
 	}

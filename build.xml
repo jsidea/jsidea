@@ -3,12 +3,21 @@
 <project name="jsidea" xmlns:ac="antlib:net.sf.antcontrib">
 	<property name="ROOT" value="${basedir}" />
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="authoring/plugins/ant-contrib-1.0b3.jar" />
+
 	<condition property="tsc" value="C:/Users/${user.name}/AppData/Roaming/npm/tsc.cmd">
 		<os family="windows" />
 	</condition>
 	<condition property="tsc" value="/usr/local/lib/node_modules/typescript/bin/tsc">
 		<os family="mac" />
 	</condition>
+
+	<condition property="grunt" value="C:/Users/${user.name}/AppData/Roaming/npm/grunt.cmd">
+		<os family="windows" />
+	</condition>
+	<condition property="grunt" value="/usr/local/lib/node_modules/grunt-cli/bin/grunt">
+		<os family="mac" />
+	</condition>
+
 	<property name="REFERENCES_CSS_FILE_NAME" value="references.css.xml" />
 	<property name="REFERENCES_JS_FILE_NAME" value="references.javascript.xml" />
 	<property name="REFERENCES_TS_FILE_NAME" value="references.typescript.ts" />
@@ -28,6 +37,9 @@
 	<property name="PHP_DIR" value="${PROJECT_PATH}/php" />
 	<property name="PHP_DIR_DIST" value="${PROJECT_BIN}/php" />
 	<property name="YUI" value="${PROJECT_PATH}/authoring/plugins/yuicompressor.jar" />
+	<property name="GRUNT_DIR" value="${PROJECT_PATH}/authoring/plugins" />
+	<property name="GRUNT_CSS_FILE" value="${GRUNT_DIR}/file.css" />
+	<property name="GRUNT_FILE" value="${GRUNT_DIR}/Gruntfile.js" />
 
 	<target name="release" description="Release">
 		<echo message="${PROJECT_NAME} : Merge CSS" />
@@ -35,14 +47,9 @@
 		<concat destfile="${CSS_DIST}" fixlastline="yes" eol="lf">
 			<filelist dir="${CSS_DIR}" files="${css_scripts.src}" />
 		</concat>
-		<echo message="${PROJECT_NAME} : Merge JavaScript" />
-		<xmlproperty file="${PROJECT_PATH}/${REFERENCES_JS_FILE_NAME}" collapseAttributes="true" />
-		<concat destfile="${JS_DIST}" fixlastline="yes" eol="lf">
-			<filelist dir="${JS_DIR}" files="${js_scripts.src}" />
-		</concat>
 		<echo message="${PROJECT_NAME} : Compile TypeScript" />
 		<exec executable="${tsc}">
-			<!-- <arg value="-declaration" /> -->
+			<arg value="-declaration" />
 			<arg value="--out" />
 			<arg value="${TS_DIST}" />
 			<arg value="-target" />
@@ -53,26 +60,6 @@
 		<copy todir="${ASSETS_DIR_DIST}">
 			<fileset dir="${ASSETS_DIR}" includes="**" />
 		</copy>
-		<echo message="${PROJECT_NAME} : Minify TypeScript" />
-		<apply executable="java" parallel="false">
-			<fileset dir="${JS_DIR_DIST}" includes="${PROJECT_NAME}.js" />
-			<arg line="-jar" />
-			<arg path="${YUI}" />
-			<srcfile />
-			<arg line="-o" />
-			<mapper type="glob" from="${PROJECT_NAME}.js" to="${JS_DIR_DIST}/${PROJECT_NAME}.min.js" />
-			<targetfile />
-		</apply>
-		<echo message="${PROJECT_NAME} : Minify JavaScript" />
-		<apply executable="java" parallel="false">
-			<fileset dir="${JS_DIR_DIST}" includes="${PROJECT_NAME}.libs.js" />
-			<arg line="-jar" />
-			<arg path="${YUI}" />
-			<srcfile />
-			<arg line="-o" />
-			<mapper type="glob" from="${PROJECT_NAME}.libs.js" to="${JS_DIR_DIST}/${PROJECT_NAME}.libs.min.js" />
-			<targetfile />
-		</apply>
 		<echo message="${PROJECT_NAME} : Minify CSS" />
 		<apply executable="java" parallel="false">
 			<fileset dir="${CSS_DIR_DIST}" includes="${PROJECT_NAME}.css" />
@@ -83,5 +70,16 @@
 			<mapper type="glob" from="${PROJECT_NAME}.css" to="${CSS_DIR_DIST}/${PROJECT_NAME}.min.css" />
 			<targetfile />
 		</apply>
+		<echo message="${PROJECT_NAME} : Grunt" />
+		<echo message="${PROJECT_NAME} : - prefix css" />
+		<echo message="${PROJECT_NAME} : - typescript doc" />
+		<exec executable="${grunt}">
+			<arg value="--gruntfile" />
+			<arg value="${GRUNT_FILE}" />
+			<arg value="--projectname=${PROJECT_NAME}" />
+			<arg value="--autoprefixer=off" />
+			<arg value="--uglify=on" />
+			<arg value="--typedoc=off" />
+		</exec>
 	</target>
 </project>

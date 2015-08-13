@@ -63,24 +63,6 @@ module jsidea.geom {
             return ret;
         }
 
-        public static createWithOrigin(element: HTMLElement, ret = new Matrix3D()): Matrix3D {
-            ret.identity();
-            if (element.ownerDocument) {
-                var st = layout.Style.create(element);
-                var origin = st.transformOrigin ? st.transformOrigin.split(" ") : "0 0";
-                var originX = math.Number.parseRelation(origin[0], element.offsetWidth, 0);
-                var originY = math.Number.parseRelation(origin[1], element.offsetHeight, 0);
-                var originZ = math.Number.parseRelation(origin[2], 0, 0);
-
-                //not vice versa: not adding than subtracting like some docs mentioned
-                ret.appendPositionRaw(-originX, -originY, -originZ);
-                ret.appendCSS(st.transform);
-                ret.appendPositionRaw(originX, originY, originZ);
-                return ret;
-            }
-            return ret;
-        }
-
         public getData(): number[] {
             return [
                 this.m11, this.m12, this.m13, this.m14,//column 1

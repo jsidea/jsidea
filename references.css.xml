@@ -3,7 +3,4 @@
 <css_scripts>
 	<src>jsidea-application.css</src>
 	<src>jsidea-application-test.css</src>
-	<src>jsidea-display-element.css</src>
-	<src>jsidea-ui-dialog.css</src>
-	<src>jsidea-ui-uielement.css</src>
 </css_scripts>

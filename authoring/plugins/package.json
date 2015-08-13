@@ -1,0 +1,22 @@
+{
+  "name": "jsidea",
+  "description": "jsidea",
+  "author": "jsidea",
+  "dependencies": {
+    "grunt": "0.x.x",
+    "grunt-autoprefixer": "0.2.x"
+  },
+  "engine": "node >= 0.10",
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-uglify": "~0.9.1",
+    "chalk": "~1.1.0",
+    "indent-string": "~2.0.0",
+    "each-async": "~1.1.1",
+    "minmax": "~0.1.0",
+    "maxmin": "~1.1.0",
+    "uglify-js": "~2.4.24",
+    "lodash": "~3.10.1",
+    "uri-path": "0.0.2"
+  }
+}

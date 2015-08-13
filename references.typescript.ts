@@ -27,8 +27,5 @@
 
 /// <reference path='ts/jsidea/action/BaseInteractor.ts' />
 /// <reference path='ts/jsidea/action/DragInteractor.ts' />
-/// <reference path='ts/jsidea/test/BulkImageLoader.ts' />
-/// <reference path='ts/jsidea/test/IsoBitmapData.ts' />
-/// <reference path='ts/jsidea/test/IsoImage.ts' />
 
 /// <reference path='ts/jsidea/test/TestApplication.ts' />

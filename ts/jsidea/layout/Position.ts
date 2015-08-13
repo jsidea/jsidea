@@ -1,18 +1,18 @@
 module jsidea.layout {
     export interface IPositionValue {
         element?: HTMLElement;
-        x?: number | string;
-        y?: number | string;
-        offsetX?: number | string;
-        offsetY?: number | string;
+        x?: any;
+        y?: any;
+        offsetX?: any;
+        offsetY?: any;
         boxModel?: string;
     }
     export interface IPositionBounds {
         element?: HTMLElement;
-        minX?: number | string;
-        minY?: number | string;
-        maxX?: number | string;
-        maxY?: number | string;
+        minX?: any;
+        minY?: any;
+        maxX?: any;
+        maxY?: any;
         boxModel?: string;
         toBoxModel?: string;
     }
