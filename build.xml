@@ -60,6 +60,18 @@
 		<copy todir="${ASSETS_DIR_DIST}">
 			<fileset dir="${ASSETS_DIR}" includes="**" />
 		</copy>
+		<echo message="${PROJECT_NAME} : Grunt" />
+		<echo message="${PROJECT_NAME} : - prefix css" />
+		<echo message="${PROJECT_NAME} : - typescript doc" />
+		<echo message="${PROJECT_NAME} : - uglify javascript" />
+		<exec executable="${grunt}">
+			<arg value="--gruntfile" />
+			<arg value="${GRUNT_FILE}" />
+			<arg value="--projectname=${PROJECT_NAME}" />
+			<arg value="--autoprefixer=on" />
+			<arg value="--uglify=on" />
+			<arg value="--typedoc=on" />
+		</exec>
 		<echo message="${PROJECT_NAME} : Minify CSS" />
 		<apply executable="java" parallel="false">
 			<fileset dir="${CSS_DIR_DIST}" includes="${PROJECT_NAME}.css" />
@@ -70,16 +82,5 @@
 			<mapper type="glob" from="${PROJECT_NAME}.css" to="${CSS_DIR_DIST}/${PROJECT_NAME}.min.css" />
 			<targetfile />
 		</apply>
-		<echo message="${PROJECT_NAME} : Grunt" />
-		<echo message="${PROJECT_NAME} : - prefix css" />
-		<echo message="${PROJECT_NAME} : - typescript doc" />
-		<exec executable="${grunt}">
-			<arg value="--gruntfile" />
-			<arg value="${GRUNT_FILE}" />
-			<arg value="--projectname=${PROJECT_NAME}" />
-			<arg value="--autoprefixer=off" />
-			<arg value="--uglify=on" />
-			<arg value="--typedoc=off" />
-		</exec>
 	</target>
 </project>
