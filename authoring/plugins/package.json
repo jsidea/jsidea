@@ -17,6 +17,9 @@
     "maxmin": "~1.1.0",
     "uglify-js": "~2.4.24",
     "lodash": "~3.10.1",
-    "uri-path": "0.0.2"
+    "uri-path": "0.0.2",
+    "grunt-cli": "~0.1.13",
+    "grunt-autoprefixer": "~0.2.20130806",
+    "grunt-typedoc": "~0.2.2"
   }
 }

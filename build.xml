@@ -65,9 +65,6 @@
 			<fileset dir="${ASSETS_DIR}" includes="**" />
 		</copy>
 		<echo message="${PROJECT_NAME} : Grunt" />
-		<echo message="${PROJECT_NAME} : - prefix css" />
-		<echo message="${PROJECT_NAME} : - typescript doc" />
-		<echo message="${PROJECT_NAME} : - uglify javascript" />
 		<exec executable="${grunt}">
 			<arg value="--gruntfile" />
 			<arg value="${GRUNT_FILE}" />

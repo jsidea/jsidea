@@ -9,6 +9,7 @@ module.exports = function(grunt) {
 
 	// setup autoprefixer
 	if (grunt.option("autoprefixer") == "on") {
+		grunt.log.writeln(projectName + " : Prefix CSS");
 		tasks.push("autoprefixer");
 		npmTasks.push('grunt-autoprefixer');
 		config.autoprefixer = {
@@ -26,6 +27,7 @@ module.exports = function(grunt) {
 
 	// setup typedoc
 	if (grunt.option("typedoc") == "on") {
+		grunt.log.writeln(projectName + " : Create docs");
 		tasks.push("typedoc");
 		npmTasks.push('grunt-typedoc');
 		config.typedoc = {
@@ -43,6 +45,7 @@ module.exports = function(grunt) {
 
 	// setup uglify
 	if (grunt.option("uglify") == "on") {
+		grunt.log.writeln(projectName + " : Uglify JavaScript");
 		tasks.push("uglify");
 		npmTasks.push('grunt-contrib-uglify');
 		var dirJS = root + projectName + '/bin/' + projectName + '/js/' + projectName;
