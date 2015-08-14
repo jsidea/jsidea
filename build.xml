@@ -42,6 +42,10 @@
 	<property name="GRUNT_FILE" value="${GRUNT_DIR}/Gruntfile.js" />
 
 	<target name="release" description="Release">
+		<echo message="${PROJECT_NAME} : clean bin folder" />
+		<delete includeemptydirs="true" quiet="true">
+			<fileset dir="${PROJECT_BIN}" includes="**/*" />
+		</delete>
 		<echo message="${PROJECT_NAME} : Merge CSS" />
 		<xmlproperty file="${PROJECT_PATH}/${REFERENCES_CSS_FILE_NAME}" collapseAttributes="true" />
 		<concat destfile="${CSS_DIST}" fixlastline="yes" eol="lf">
