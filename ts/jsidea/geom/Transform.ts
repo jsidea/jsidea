@@ -9,8 +9,8 @@ module jsidea.geom {
         private static _lookup = new model.Dictonary<HTMLElement, { mode: string; bounds: geom.Box2D }>();
 
         public element: HTMLElement;
-        public toBox: string = layout.BoxModel.BORDER;
-        public fromBox: string = layout.BoxModel.BORDER;
+        public toBox: layout.IBoxModel = layout.BoxModel.BORDER;
+        public fromBox: layout.IBoxModel = layout.BoxModel.BORDER;
         public matrix: geom.Matrix3D = new geom.Matrix3D();
         public sceneTransform: geom.Matrix3D[] = [];
         public inverseSceneTransform: geom.Matrix3D[] = [];
@@ -121,8 +121,8 @@ module jsidea.geom {
             maxX:number,
             minY:number,
             maxY:number,
-            toBox: string = layout.BoxModel.AUTO,
-            fromBox: string = layout.BoxModel.AUTO,
+            toBox?: layout.IBoxModel,
+            fromBox?: layout.IBoxModel,
             ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
 
             var lc = this.localToLocal(to, pt.x + offsetX, pt.y + offsetY, pt.z, fromBox, toBox, ret);
@@ -138,8 +138,8 @@ module jsidea.geom {
         public localToLocalPoint(
             to: Transform, 
             pt: geom.Point3D,
-            toBox: string = layout.BoxModel.AUTO,
-            fromBox: string = layout.BoxModel.AUTO,
+            toBox?: layout.IBoxModel,
+            fromBox?: layout.IBoxModel,
             ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
 
             return this.localToLocal(to, pt.x, pt.y, pt.z, toBox, fromBox, ret);
@@ -148,8 +148,8 @@ module jsidea.geom {
         public localToLocalQuad(
             to: Transform,
             quad: geom.Quad,
-            toBox: string = layout.BoxModel.AUTO,
-            fromBox: string = layout.BoxModel.AUTO,
+            toBox?: layout.IBoxModel,
+            fromBox?: layout.IBoxModel,
             ret: geom.Quad = new geom.Quad()): geom.Quad {
 
             this.localToLocalPoint(to, quad.a, toBox, fromBox, ret.a);
@@ -164,8 +164,8 @@ module jsidea.geom {
             x: number,
             y: number,
             z: number = 0,
-            toBox: string = layout.BoxModel.AUTO,
-            fromBox: string = layout.BoxModel.AUTO,
+            toBox?: layout.IBoxModel,
+            fromBox?: layout.IBoxModel,
             ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
 
             ret.setTo(x, y, z);
@@ -175,8 +175,8 @@ module jsidea.geom {
 
         public globalToLocalPoint(
             point: geom.Point3D,
-            toBox: string = layout.BoxModel.AUTO,
-            fromBox: string = layout.BoxModel.AUTO,
+            toBox?: layout.IBoxModel,
+            fromBox?: layout.IBoxModel,
             ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
 
             return this.globalToLocal(point.x, point.y, point.z, toBox, fromBox, ret);
@@ -184,8 +184,8 @@ module jsidea.geom {
 
         public globalToLocalQuad(
             quad: geom.Quad,
-            toBox: string = layout.BoxModel.AUTO,
-            fromBox: string = layout.BoxModel.AUTO,
+            toBox?: layout.IBoxModel,
+            fromBox?: layout.IBoxModel,
             ret: geom.Quad = new geom.Quad()): geom.Quad {
 
             this.globalToLocalPoint(quad.a, toBox, fromBox, ret.a);
@@ -199,41 +199,42 @@ module jsidea.geom {
             x: number,
             y: number,
             z: number = 0,
-            toBox: string = layout.BoxModel.AUTO,
-            fromBox: string = layout.BoxModel.AUTO,
+            toBox?: layout.IBoxModel,
+            fromBox?: layout.IBoxModel,
             ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
 
             ret.setTo(x, y, z);
             
             //apply box model transformations
-            this.boxModel.point(ret, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);
+            this.boxModel.point(ret, layout.BoxModel.BORDER, fromBox || this.fromBox);
             
             //unproject from parent to child
             for (var i = 0; i < this.inverseSceneTransform.length; ++i)
                 ret = this.inverseSceneTransform[i].unproject(ret, ret);
 
             //apply box model transformations
-            this.boxModel.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
+            this.boxModel.point(ret, toBox || this.toBox, layout.BoxModel.BORDER);
 
             //FOR TEST ONLY
             //or maybe: let a be, let a be
-            ret.z = 0;
+//            ret.z = 0;
 
             return ret;
         }
 
         public localToGlobalPoint(
             point: geom.Point3D,
-            toBox: string = layout.BoxModel.AUTO,
-            fromBox: string = layout.BoxModel.AUTO,
+            toBox?: layout.IBoxModel,
+            fromBox?: layout.IBoxModel,
             ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
+            
             return this.localToGlobal(point.x, point.y, point.z, toBox, fromBox, ret);
         }
 
         public localToGlobalQuad(
             quad: geom.Quad,
-            toBox: string = layout.BoxModel.AUTO,
-            fromBox: string = layout.BoxModel.AUTO,
+            toBox?: layout.IBoxModel,
+            fromBox?: layout.IBoxModel,
             ret: geom.Quad = new geom.Quad()): geom.Quad {
             this.localToGlobalPoint(quad.a, toBox, fromBox, ret.a);
             this.localToGlobalPoint(quad.b, toBox, fromBox, ret.b);
@@ -246,14 +247,14 @@ module jsidea.geom {
             x: number,
             y: number,
             z: number = 0,
-            toBox: string = layout.BoxModel.AUTO,
-            fromBox: string = layout.BoxModel.AUTO,
+            toBox?: layout.IBoxModel,
+            fromBox?: layout.IBoxModel,
             ret: geom.Point3D = new geom.Point3D()): jsidea.geom.Point3D {
 
             ret.setTo(x, y, z);
             
             //apply from-box model transformations
-            this.boxModel.point(ret, layout.BoxModel.BORDER, fromBox == layout.BoxModel.AUTO ? this.fromBox : fromBox);            
+            this.boxModel.point(ret, layout.BoxModel.BORDER, fromBox || this.fromBox);            
             
             //project from child to parent
             var l = this.sceneTransform.length;
@@ -261,7 +262,7 @@ module jsidea.geom {
                 ret = this.sceneTransform[i].project(ret, ret);
             
             //apply to-box model transformations
-            this.boxModel.point(ret, toBox == layout.BoxModel.AUTO ? this.toBox : toBox, layout.BoxModel.BORDER);
+            this.boxModel.point(ret, toBox || this.toBox, layout.BoxModel.BORDER);
 
             return ret;
         }

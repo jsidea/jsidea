@@ -1,48 +1,93 @@
 module jsidea.layout {
     export interface IBoxModel {
-        name: string;
-        fromBorderBoxSize(model: BoxModel, borderSize: geom.Point2D): geom.Point2D;
-        toBorderBoxSize(model: BoxModel, boxSize: geom.Point2D): geom.Point2D;
-        fromBorderBoxPoint(model: BoxModel, borderPoint: geom.Point2D): geom.Point2D;
-        toBorderBoxPoint(model: BoxModel, boxPoint: geom.Point2D): geom.Point2D;
+        //convert from border-box to custom box
+        fromBorderBox(model: BoxModel, box: geom.Box2D): void;
+        //convert from custom-box to border box
+        toBorderBox(model: BoxModel, box: geom.Box2D): void;
     }
     class MarginBoxModel implements IBoxModel {
-        public name: string = "margin";
-        public fromBorderBoxSize(model: BoxModel, point: geom.Point2D): geom.Point2D {
-            return point.subRaw(model.marginLeft + model.marginRight, model.marginTop + model.marginBottom);
+        public fromBorderBox(model: BoxModel, box: geom.Box2D): void {
+            box.x += model.marginLeft;
+            box.y += model.marginTop;
+            box.width += model.marginLeft + model.marginRight;
+            box.height += model.marginTop + model.marginBottom;
         }
-        public toBorderBoxSize(model: BoxModel, point: geom.Point2D): geom.Point2D {
-            return point.addRaw(model.marginLeft + model.marginRight, model.marginTop + model.marginBottom);
-        }
-        public fromBorderBoxPoint(model: BoxModel, point: geom.Point2D): geom.Point2D {
-            return point.subRaw(model.marginLeft, model.marginTop);
-        }
-        public toBorderBoxPoint(model: BoxModel, point: geom.Point2D): geom.Point2D {
-            return point.addRaw(model.marginLeft, model.marginTop);
+        public toBorderBox(model: BoxModel, box: geom.Box2D): void {
+            box.x -= model.marginLeft;
+            box.y -= model.marginTop;
+            box.width -= model.marginLeft + model.marginRight;
+            box.height -= model.marginTop + model.marginBottom;
         }
     }
     class BorderBoxModel implements IBoxModel {
-        public name: string = "border";
-        public fromBorderBoxSize(model: BoxModel, point: geom.Point2D): geom.Point2D {
-            return point;
+        public fromBorderBox(model: BoxModel, box: geom.Box2D): void {
         }
-        public toBorderBoxSize(model: BoxModel, point: geom.Point2D): geom.Point2D {
-            return point;
-        }
-        public fromBorderBoxPoint(model: BoxModel, point: geom.Point2D): geom.Point2D {
-            return point;
-        }
-        public toBorderBoxPoint(model: BoxModel, point: geom.Point2D): geom.Point2D {
-            return point;
+        public toBorderBox(model: BoxModel, box: geom.Box2D): void {
         }
     }
+    class PaddingBoxModel implements IBoxModel {
+        public fromBorderBox(model: BoxModel, box: geom.Box2D): void {
+            box.x += model.borderLeft;
+            box.y += model.borderTop;
+            box.width += model.borderLeft + model.borderRight;
+            box.height += model.borderTop + model.borderBottom;
+        }
+        public toBorderBox(model: BoxModel, box: geom.Box2D): void {
+            box.x -= model.marginLeft;
+            box.y -= model.marginTop;
+            box.width -= model.marginLeft + model.marginRight;
+            box.height -= model.marginTop + model.marginBottom;
+        }
+    }
+    class ContentBoxModel implements IBoxModel {
+        public fromBorderBox(model: BoxModel, box: geom.Box2D): void {
+            box.x += model.borderLeft + model.paddingLeft;
+            box.y += model.borderTop + model.paddingTop;
+            box.width += model.borderLeft + model.borderRight + model.paddingLeft + model.paddingRight;
+            box.height += model.borderTop + model.borderBottom + model.paddingTop + model.paddingBottom;
+        }
+        public toBorderBox(model: BoxModel, box: geom.Box2D): void {
+            box.x -= model.borderLeft + model.paddingLeft;
+            box.y -= model.borderTop + model.paddingTop;
+            box.width -= model.borderLeft + model.borderRight + model.paddingLeft + model.paddingRight;
+            box.height -= model.borderTop + model.borderBottom + model.paddingTop + model.paddingBottom;
+        }
+    }
+    class CanvasBoxModel implements IBoxModel {
+        public fromBorderBox(model: BoxModel, box: geom.Box2D): void {
+            if (model.element && model.element instanceof HTMLCanvasElement) {
+                var can = <HTMLCanvasElement> model.element;
+                var scX = can.width / (can.clientWidth - (model.paddingLeft + model.paddingRight));
+                var scY = can.height / (can.clientHeight - (model.paddingTop + model.paddingBottom));
+                box.width *= scX;
+                box.height *= scY;
+                box.x *= scX;
+                box.y *= scY;
+                box.x += model.paddingLeft + model.borderLeft;
+                box.y += model.paddingTop + model.borderTop;
+            }
+        }
+        public toBorderBox(model: BoxModel, box: geom.Box2D): void {
+            if (model.element && model.element instanceof HTMLCanvasElement) {
+                var can = <HTMLCanvasElement> model.element;
+                box.x -= model.paddingLeft + model.borderLeft;
+                box.y -= model.paddingTop + model.borderTop;
+                var scX = can.width / (can.clientWidth - (model.paddingLeft + model.paddingRight));
+                var scY = can.height / (can.clientHeight - (model.paddingTop + model.paddingBottom));
+                box.width /= scX;
+                box.height /= scY;
+                box.x /= scX;
+                box.y /= scY;
+            }
+        }
+    }
+
     export class BoxModel {
-        public static MARGIN: string = "margin";
-        public static BORDER: string = "border";
-        public static PADDING: string = "padding";
-        public static CONTENT: string = "content";
-        public static CANVAS: string = "canvas";
-        public static AUTO: string = "auto";
+        public static MARGIN: IBoxModel = new MarginBoxModel();
+        public static BORDER: IBoxModel = new BorderBoxModel();
+        public static PADDING: IBoxModel = new PaddingBoxModel();
+        public static CONTENT: IBoxModel = new ContentBoxModel();
+        public static CANVAS: IBoxModel = new CanvasBoxModel();
 
         public element: HTMLElement = null;
         public offsetWidth: number = 0;
@@ -125,111 +170,33 @@ module jsidea.layout {
             return this;
         }
 
-        public getOriginBox(toBox: string): geom.Box2D {
-            var pt = this.size(new geom.Point2D(this.offsetWidth, this.offsetHeight), toBox, BoxModel.BORDER);
-            return new geom.Box2D(0, 0, pt.x, pt.y);
-        }
-
-        public size(size: geom.IPoint2DValue, toBox: string, fromBox: string = BoxModel.BORDER): geom.IPoint2DValue {
-            if (toBox == fromBox)
-                return size;
-            if (fromBox != BoxModel.BORDER)
-                this.convertSize(size, fromBox, true)
-            return this.convertSize(size, toBox, false);
-        }
-
-        public point(pt: geom.IPoint2DValue, toBox: string, fromBox: string = BoxModel.BORDER): geom.IPoint2DValue {
-            if (toBox == fromBox)
-                return pt;
-            if (fromBox != BoxModel.BORDER)
-                this.convertPoint(pt, fromBox, true)
-            return this.convertPoint(pt, toBox, false);
+        public getBox(toBox?: IBoxModel, fromBox?: IBoxModel, ret: geom.Box2D = new geom.Box2D()): geom.Box2D {
+            ret.x = 0;
+            ret.y = 0;
+            ret.width = this.offsetWidth;
+            ret.height = this.offsetHeight;
+            return this.convert(ret, toBox, fromBox);
         }
         
-        //converts sizes from or to border-box
-        private convertSize(size: geom.IPoint2DValue, toBox: string, convertFromBoxTo: boolean): geom.IPoint2DValue {
-            if (toBox != BoxModel.BORDER) {
-                var px = 0;
-                var py = 0;
-                var sx = 1;
-                var sy = 1;
-                if (toBox == BoxModel.CONTENT) {
-                    px += this.paddingLeft + this.paddingRight + this.borderLeft + this.borderRight;
-                    py += this.paddingTop + this.paddingBottom + this.borderTop + this.borderBottom;
-                }
-                else if (toBox == BoxModel.PADDING) {
-                    px += this.borderLeft + this.borderRight;
-                    py += this.borderTop + this.borderBottom;
-                }
-                else if (toBox == BoxModel.MARGIN) {
-                    px -= this.marginLeft + this.marginRight;
-                    py -= this.marginTop + this.marginBottom;
-                }
-                else if (toBox == BoxModel.CANVAS && (this.element && this.element instanceof HTMLCanvasElement)) {
-                    var can = <HTMLCanvasElement> this.element;
-                    px += this.paddingLeft + this.paddingRight + this.borderLeft + this.borderRight;
-                    py += this.paddingTop + this.paddingBottom + this.borderTop + this.borderBottom;
-                    sx = can.width / (can.clientWidth - (this.paddingLeft + this.paddingRight));
-                    sy = can.height / (can.clientHeight - (this.paddingTop + this.paddingBottom));
-                }
-
-                if (convertFromBoxTo) {
-                    size.x += px;
-                    size.y += px;
-                    size.x /= sx;
-                    size.y /= sy;
-                }
-                else {
-                    size.x -= px;
-                    size.y -= px;
-                    size.x *= sx;
-                    size.y *= sy;
-                }
-            }
-            return size;
+        //converts sizes between different boxes
+        public convert(box: geom.Box2D, toBox?: IBoxModel, fromBox?: IBoxModel): geom.Box2D {
+            if (toBox == fromBox)
+                return box;
+            if (fromBox)
+                fromBox.toBorderBox(this, box);
+            if (toBox)
+                toBox.fromBorderBox(this, box);
+            return box;
         }
 
-        //converts points from or to border-box
-        private convertPoint(pt: geom.IPoint2DValue, toBox: string, convertFromBoxTo: boolean): geom.IPoint2DValue {
-            if (toBox != BoxModel.BORDER) {
-                var px = 0;
-                var py = 0;
-                var sx = 1;
-                var sy = 1;
-                if (toBox == BoxModel.CONTENT) {
-                    px += this.paddingLeft + this.borderLeft;
-                    py += this.paddingTop + this.borderTop;
-                }
-                else if (toBox == BoxModel.PADDING) {
-                    px += this.borderLeft;
-                    py += this.borderTop;
-                }
-                else if (toBox == BoxModel.MARGIN) {
-                    px -= this.marginLeft;
-                    py -= this.marginTop;
-                }
-                else if (toBox == BoxModel.CANVAS && (this.element && this.element instanceof HTMLCanvasElement)) {
-                    var can = <HTMLCanvasElement> this.element;
-                    px += this.paddingLeft + this.borderLeft;
-                    py += this.paddingTop + this.borderTop;
-                    sx = can.width / (can.clientWidth - (this.paddingLeft + this.paddingRight));
-                    sy = can.height / (can.clientHeight - (this.paddingTop + this.paddingBottom));
-                }
-
-                if (convertFromBoxTo) {
-                    pt.x /= sx;
-                    pt.y /= sy;
-                    pt.x += px;
-                    pt.y += px;
-                }
-                else {
-                    pt.x -= px;
-                    pt.y -= px;
-                    pt.x *= sx;
-                    pt.y *= sy;
-                }
-            }
-            return pt;
+        public point(point: geom.Point3D, toBox: IBoxModel = null, fromBox?: IBoxModel): geom.Point3D {
+            if (toBox == fromBox)
+                return point;
+            var box = Buffer._POINT_MODEL;
+            box.x = point.x;
+            box.y = point.y;
+            this.convert(box, toBox, fromBox);
+            return point.setTo(box.x, box.y, 0);
         }
 
         public dispose(): void {

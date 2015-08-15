@@ -5,26 +5,34 @@ module jsidea.layout {
         y?: any;
         offsetX?: any;
         offsetY?: any;
-        boxModel?: string;
+        minX?: any;
+        maxX?: any;
+        minY?: any;
+        maxY?: any;
+        minZ?: any;
+        maxZ?: any;
+        boxModel?: IBoxModel;
     }
     export interface IPositionBounds {
         element?: HTMLElement;
         minX?: any;
-        minY?: any;
         maxX?: any;
+        minY?: any;
         maxY?: any;
-        boxModel?: string;
-        toBoxModel?: string;
+        minZ?: any;
+        maxZ?: any;
+        boxModel?: IBoxModel;
+        toBoxModel?: IBoxModel;
     }
     export class Position {
-        public to: IPositionValue = { boxModel: layout.BoxModel.BORDER };
-        public from: IPositionValue = { boxModel: layout.BoxModel.BORDER };
-        public bounds: IPositionBounds = {boxModel: layout.BoxModel.BORDER};
+        public to: IPositionValue = {};
+        public from: IPositionValue = {};
+        public bounds: IPositionBounds = {};
         public useTransform: boolean = true;
         public transformMode: string = geom.Transform.MODE_AUTO;
 
-        private _from: geom.Transform = new geom.Transform();
         private _to: geom.Transform = new geom.Transform();
+        private _from: geom.Transform = new geom.Transform();
         private _bounds: geom.Transform = new geom.Transform();
 
         constructor() {
@@ -35,16 +43,19 @@ module jsidea.layout {
         }
 
         public clone(): Position {
-            var p = new Position();
-            p.to = this.to;
-            p.from = this.from;
-            p.bounds = this.bounds;
-            p.useTransform = this.useTransform;
-            p.transformMode = this.transformMode;
-            return p;
+            return (new Position()).copyFrom(this);
         }
 
-        public apply(element: HTMLElement = null): void {
+        public copyFrom(position: Position): Position {
+            this.to = position.to;
+            this.from = position.from;
+            this.bounds = position.bounds;
+            this.useTransform = position.useTransform;
+            this.transformMode = position.transformMode;
+            return this;
+        }
+
+        public apply(element?: HTMLElement): void {
             element = element ? element : this.to.element;
             if (!element)
                 return;
@@ -54,6 +65,7 @@ module jsidea.layout {
             //the strangest bug ever
             //it applies the zoom-factor as a scaling factor
             //for the z-value (m43)
+            //-->> zoom does not apply to z value bug
             if (system.Caps.isWebKit) {
                 var scale = 1 / (window.innerWidth / window.outerWidth);
                 m.m43 *= scale;
@@ -75,25 +87,33 @@ module jsidea.layout {
                 return null;
 
             //retrieve "of"-element
-            var fromElement = this.from.element ? this.from.element : element.ownerDocument.documentElement;
+            var fromElement = this.from.element || element.ownerDocument.documentElement;
 
             this._from.update(fromElement, this.transformMode);
             this._to.update(element, this.transformMode);
 
-            var toBox = this.to.boxModel ? this.to.boxModel : layout.BoxModel.BORDER;
-            var fromBox = this.from.boxModel ? this.from.boxModel : layout.BoxModel.BORDER;
+            var toBox = this.to.boxModel || layout.BoxModel.BORDER;
+            var fromBox = this.from.boxModel || layout.BoxModel.BORDER;
             
             //transform box-models of "to"
-            var sizeTo = Buffer._APPLY_POSITION_SIZE_TO.setTo(element.offsetWidth, element.offsetHeight);
-            this._to.boxModel.size(sizeTo, toBox, layout.BoxModel.BORDER);
-            var toX: number = math.Number.parseRelation(this.to.x, sizeTo.x, 0) + math.Number.parseRelation(this.to.offsetX, sizeTo.x, 0);
-            var toY: number = math.Number.parseRelation(this.to.y, sizeTo.y, 0) + math.Number.parseRelation(this.to.offsetY, sizeTo.y, 0);
+            var sizeTo = this._to.boxModel.getBox(toBox, layout.BoxModel.BORDER);
+            var toX: number = math.Number.parseRelation(this.to.x, sizeTo.width, 0) + math.Number.parseRelation(this.to.offsetX, sizeTo.width, 0);
+            var toY: number = math.Number.parseRelation(this.to.y, sizeTo.height, 0) + math.Number.parseRelation(this.to.offsetY, sizeTo.height, 0);
             
             //transform box-models of "from"
-            var sizeFrom = Buffer._APPLY_POSITION_SIZE_FROM.setTo(fromElement.offsetWidth, fromElement.offsetHeight);
-            this._from.boxModel.size(sizeFrom, fromBox, layout.BoxModel.BORDER);
-            var fromX: number = math.Number.parseRelation(this.from.x, sizeFrom.x, 0) + math.Number.parseRelation(this.from.offsetX, sizeFrom.x, 0);
-            var fromY: number = math.Number.parseRelation(this.from.y, sizeFrom.y, 0) + math.Number.parseRelation(this.from.offsetY, sizeFrom.y, 0);
+            var sizeFrom = this._from.boxModel.getBox(fromBox, layout.BoxModel.BORDER);
+            var fromX: number = math.Number.parseRelation(this.from.x, sizeFrom.width, 0) + math.Number.parseRelation(this.from.offsetX, sizeFrom.width, 0);
+            var fromY: number = math.Number.parseRelation(this.from.y, sizeFrom.height, 0) + math.Number.parseRelation(this.from.offsetY, sizeFrom.height, 0);
+            
+            //clamp from
+            if (this.from.minX !== undefined)
+                fromX = Math.max(fromX, math.Number.parseRelation(this.from.minX, sizeFrom.width, fromX));
+            if (this.from.maxX !== undefined)
+                fromX = Math.min(fromX, math.Number.parseRelation(this.from.maxX, sizeFrom.width, fromX));
+            if (this.from.minY !== undefined)
+                fromY = Math.max(fromY, math.Number.parseRelation(this.from.minY, sizeFrom.height, fromY));
+            if (this.from.maxY !== undefined)
+                fromY = Math.min(fromY, math.Number.parseRelation(this.from.maxY, sizeFrom.height, fromY)); 
 
             //calc local position
             var lc = this._from.localToLocal(this._to, fromX, fromY, 0, toBox, fromBox);
@@ -107,29 +127,45 @@ module jsidea.layout {
                 else if (element.contains(this.bounds.element))
                     console.warn("The bounds element cannot be a child-element of the \"to\"-element.");
                 else {
-                    var toBox = this.bounds.toBoxModel ? this.bounds.toBoxModel : layout.BoxModel.BORDER;
-                    var boundsBox = this.bounds.boxModel ? this.bounds.boxModel : layout.BoxModel.BORDER;
+                    var toBox = this.bounds.toBoxModel || layout.BoxModel.BORDER;
+                    var boundsBox = this.bounds.boxModel || layout.BoxModel.BORDER;
 
                     this._bounds.update(this.bounds.element, this.transformMode);
-                    var boundsSize = this._bounds.boxModel.size(new geom.Point2D(this._bounds.boxModel.offsetWidth, this._bounds.boxModel.offsetHeight), boundsBox);
-                    var toSize = this._to.boxModel.size(new geom.Point2D(this._to.boxModel.offsetWidth, this._to.boxModel.offsetHeight), toBox);
+                    var boundsSize = this._bounds.boxModel.getBox(boundsBox);
+                    var toSize = this._to.boxModel.getBox(toBox);
 
-                    lc = this._to.clamp(this._bounds, lc, toSize.x, toSize.y, 0, boundsSize.x, 0, boundsSize.y, toBox, boundsBox);
-                    lc = this._to.clamp(this._bounds, lc, 0, toSize.y, 0, boundsSize.x, 0, boundsSize.y, toBox, boundsBox);
-                    lc = this._to.clamp(this._bounds, lc, toSize.x, 0, 0, boundsSize.x, 0, boundsSize.y, toBox, boundsBox);
-                    lc = this._to.clamp(this._bounds, lc, 0, 0, 0, boundsSize.x, 0, boundsSize.y, toBox, boundsBox);
+                    lc = this._to.clamp(this._bounds, lc, toSize.width, toSize.height, 0, boundsSize.width, 0, boundsSize.height, toBox, boundsBox);
+                    lc = this._to.clamp(this._bounds, lc, 0, toSize.height, 0, boundsSize.width, 0, boundsSize.height, toBox, boundsBox);
+                    lc = this._to.clamp(this._bounds, lc, toSize.width, 0, 0, boundsSize.width, 0, boundsSize.height, toBox, boundsBox);
+                    lc = this._to.clamp(this._bounds, lc, 0, 0, 0, boundsSize.width, 0, boundsSize.height, toBox, boundsBox);
                 }
             }
             
             //prepend the local offset
-            var ma = this._to.matrix.clone();            
+            var ma = this._to.matrix.clone();
             ma.prependPositionRaw(lc.x, lc.y, 0);
+            
+            //clamp to
+            if (this.to.minX !== undefined)
+                ma.m41 = Math.max(ma.m41, math.Number.parseRelation(this.to.minX, sizeTo.width, ma.m41));
+            if (this.to.maxX !== undefined)
+                ma.m41 = Math.min(ma.m41, math.Number.parseRelation(this.to.maxX, sizeTo.width, ma.m41));
+            if (this.to.minY !== undefined)
+                ma.m42 = Math.max(ma.m42, math.Number.parseRelation(this.to.minY, sizeTo.height, ma.m42));
+            if (this.to.maxY !== undefined)
+                ma.m42 = Math.min(ma.m42, math.Number.parseRelation(this.to.maxY, sizeTo.height, ma.m42));
+            if (this.to.minZ !== undefined && !isNaN(this.to.minZ))
+                ma.m43 = Math.max(ma.m43, this.to.minZ);
+            if (this.to.maxZ !== undefined && !isNaN(this.to.maxZ))
+                ma.m43 = Math.min(ma.m43, this.to.maxZ);
+
             return ma;
         }
 
         public dispose(): void {
             this.to = null;
             this.from = null;
+            this._bounds = null;
         }
 
         public static qualifiedClassName: string = "jsidea.layout.Position";

@@ -1,10 +1,4 @@
 //basic classes and interfaces
-module jsidea.core {
-    export interface ICore {
-        dispose(): void;
-    }
-}
-
 interface Window {
     app: jsidea.system.Application;
 }
@@ -15,19 +9,6 @@ interface HTMLElement {
 
 interface Object {
     observe(beingObserved: any, callback: (update: any) => any, types?: string[]): void;
-}
-
-//shortcut for console.log
-//var trace = console.log ? console.log : function(...args) { };
-
-//fix missing indexOf function
-if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function(obj, start?) {
-        for (var i = (start || 0), j = this.length; i < j; i++) {
-            if (this[i] === obj) { return i; }
-        }
-        return -1;
-    }
 }
 
 //hook

@@ -1,10 +1,11 @@
 module jsidea.core {
-    export interface IVersion extends jsidea.core.ICore {
+    export interface IVersion {
         state: string;
         major: number;
         build: number;
         revision: number;
         compare(v: IVersion): number;
+        dispose(): void;
     }
     export class Version implements IVersion {
         constructor() {

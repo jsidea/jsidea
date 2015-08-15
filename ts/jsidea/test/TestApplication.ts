@@ -7,9 +7,23 @@ module jsidea.test {
         //@override abstract
         public create(): void {
             this.testGeometryUtils();
+            //            this.testAffineFit();
         }
 
         private testAffineFit(): void {
+
+            var view = document.getElementById("view");
+            var cont = document.getElementById("content");
+            var a = document.createElement("div");
+            a.id = "x-cont";
+
+            view.style.perspective = "500px";
+            cont.style.transform = "rotateY(-45deg)";
+            cont.style.transformStyle = "preserve-3d";
+            a.style.transform = "rotateY(45deg)";
+
+
+            cont.appendChild(a);
         }
 
         private testGeometryUtils(): void {
@@ -22,8 +36,8 @@ module jsidea.test {
 
             var can = document.createElement("canvas");
             can.id = "can";
-            can.width = 1920;
-            can.height = 1080;
+            can.width = 1920 * 0.5;
+            can.height = 1080 * 0.5;
             var ctx = <CanvasRenderingContext2D> can.getContext("2d");
 
             var a = document.createElement("div");
@@ -48,6 +62,8 @@ module jsidea.test {
             //            pos.to.x = "100%";
             //            pos.to.y = "100%";
             pos.useTransform = true;
+            pos.to.minX = 0;
+            pos.to.minY = 0;
             //            pos.to.boxModel = layout.BoxModel.BORDER;
             //            pos.bounds.element = a;
             
