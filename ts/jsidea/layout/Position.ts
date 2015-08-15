@@ -24,12 +24,12 @@ module jsidea.layout {
         boxModel?: IBoxModel;
         toBoxModel?: IBoxModel;
     }
-    export class Position {
+    export class Position implements IDisposable {
         public to: IPositionValue = {};
         public from: IPositionValue = {};
         public bounds: IPositionBounds = {};
         public useTransform: boolean = true;
-        public transformMode: string = geom.Transform.MODE_AUTO;
+        public transformMode: geom.ITransformMode = null;
 
         private _to: geom.Transform = new geom.Transform();
         private _from: geom.Transform = new geom.Transform();
@@ -96,24 +96,24 @@ module jsidea.layout {
             var fromBox = this.from.boxModel || layout.BoxModel.BORDER;
             
             //transform box-models of "to"
-            var sizeTo = this._to.boxModel.getBox(toBox, layout.BoxModel.BORDER);
-            var toX: number = math.Number.parseRelation(this.to.x, sizeTo.width, 0) + math.Number.parseRelation(this.to.offsetX, sizeTo.width, 0);
-            var toY: number = math.Number.parseRelation(this.to.y, sizeTo.height, 0) + math.Number.parseRelation(this.to.offsetY, sizeTo.height, 0);
+            var sizeTo = this._to.size.getBox(toBox, layout.BoxModel.BORDER);
+            var toX: number = math.Number.relation(this.to.x, sizeTo.width, 0) + math.Number.relation(this.to.offsetX, sizeTo.width, 0);
+            var toY: number = math.Number.relation(this.to.y, sizeTo.height, 0) + math.Number.relation(this.to.offsetY, sizeTo.height, 0);
             
             //transform box-models of "from"
-            var sizeFrom = this._from.boxModel.getBox(fromBox, layout.BoxModel.BORDER);
-            var fromX: number = math.Number.parseRelation(this.from.x, sizeFrom.width, 0) + math.Number.parseRelation(this.from.offsetX, sizeFrom.width, 0);
-            var fromY: number = math.Number.parseRelation(this.from.y, sizeFrom.height, 0) + math.Number.parseRelation(this.from.offsetY, sizeFrom.height, 0);
+            var sizeFrom = this._from.size.getBox(fromBox, layout.BoxModel.BORDER);
+            var fromX: number = math.Number.relation(this.from.x, sizeFrom.width, 0) + math.Number.relation(this.from.offsetX, sizeFrom.width, 0);
+            var fromY: number = math.Number.relation(this.from.y, sizeFrom.height, 0) + math.Number.relation(this.from.offsetY, sizeFrom.height, 0);
             
             //clamp from
             if (this.from.minX !== undefined)
-                fromX = Math.max(fromX, math.Number.parseRelation(this.from.minX, sizeFrom.width, fromX));
+                fromX = Math.max(fromX, math.Number.relation(this.from.minX, sizeFrom.width, fromX));
             if (this.from.maxX !== undefined)
-                fromX = Math.min(fromX, math.Number.parseRelation(this.from.maxX, sizeFrom.width, fromX));
+                fromX = Math.min(fromX, math.Number.relation(this.from.maxX, sizeFrom.width, fromX));
             if (this.from.minY !== undefined)
-                fromY = Math.max(fromY, math.Number.parseRelation(this.from.minY, sizeFrom.height, fromY));
+                fromY = Math.max(fromY, math.Number.relation(this.from.minY, sizeFrom.height, fromY));
             if (this.from.maxY !== undefined)
-                fromY = Math.min(fromY, math.Number.parseRelation(this.from.maxY, sizeFrom.height, fromY)); 
+                fromY = Math.min(fromY, math.Number.relation(this.from.maxY, sizeFrom.height, fromY)); 
 
             //calc local position
             var lc = this._from.localToLocal(this._to, fromX, fromY, 0, toBox, fromBox);
@@ -131,8 +131,8 @@ module jsidea.layout {
                     var boundsBox = this.bounds.boxModel || layout.BoxModel.BORDER;
 
                     this._bounds.update(this.bounds.element, this.transformMode);
-                    var boundsSize = this._bounds.boxModel.getBox(boundsBox);
-                    var toSize = this._to.boxModel.getBox(toBox);
+                    var boundsSize = this._bounds.size.getBox(boundsBox);
+                    var toSize = this._to.size.getBox(toBox);
 
                     lc = this._to.clamp(this._bounds, lc, toSize.width, toSize.height, 0, boundsSize.width, 0, boundsSize.height, toBox, boundsBox);
                     lc = this._to.clamp(this._bounds, lc, 0, toSize.height, 0, boundsSize.width, 0, boundsSize.height, toBox, boundsBox);
@@ -147,13 +147,13 @@ module jsidea.layout {
             
             //clamp to
             if (this.to.minX !== undefined)
-                ma.m41 = Math.max(ma.m41, math.Number.parseRelation(this.to.minX, sizeTo.width, ma.m41));
+                ma.m41 = Math.max(ma.m41, math.Number.relation(this.to.minX, sizeTo.width, ma.m41));
             if (this.to.maxX !== undefined)
-                ma.m41 = Math.min(ma.m41, math.Number.parseRelation(this.to.maxX, sizeTo.width, ma.m41));
+                ma.m41 = Math.min(ma.m41, math.Number.relation(this.to.maxX, sizeTo.width, ma.m41));
             if (this.to.minY !== undefined)
-                ma.m42 = Math.max(ma.m42, math.Number.parseRelation(this.to.minY, sizeTo.height, ma.m42));
+                ma.m42 = Math.max(ma.m42, math.Number.relation(this.to.minY, sizeTo.height, ma.m42));
             if (this.to.maxY !== undefined)
-                ma.m42 = Math.min(ma.m42, math.Number.parseRelation(this.to.maxY, sizeTo.height, ma.m42));
+                ma.m42 = Math.min(ma.m42, math.Number.relation(this.to.maxY, sizeTo.height, ma.m42));
             if (this.to.minZ !== undefined && !isNaN(this.to.minZ))
                 ma.m43 = Math.max(ma.m43, this.to.minZ);
             if (this.to.maxZ !== undefined && !isNaN(this.to.maxZ))

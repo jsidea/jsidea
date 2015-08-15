@@ -110,7 +110,7 @@ module jsidea.test {
                 this.logChain(xc);
             };
 
-            draw();
+//            draw();
             document.addEventListener("click", draw);
 
             var setTest = (e: KeyboardEvent) => {

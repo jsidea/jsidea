@@ -4,7 +4,7 @@ module jsidea.math {
         public static RAD_TO_DEG: number = 180 / Math.PI;
         public static DEG_TO_RAD: number = Math.PI / 180;
 
-        public static parseRelation(value: any, relativeSize: number, defaultValue: number): number {
+        public static relation(value: any, relativeSize: number, defaultValue: number): number {
             if (typeof value == "number") {
                 return value;
             }
