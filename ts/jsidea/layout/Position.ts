@@ -24,12 +24,56 @@ module jsidea.layout {
         boxModel?: IBoxModel;
         toBoxModel?: IBoxModel;
     }
+    export interface IPositionMode {
+        apply(matrix: geom.Matrix3D, position: Position, element: HTMLElement): void;
+    }
+    class TransformMode implements IPositionMode {
+        public apply(matrix: geom.Matrix3D, position: Position, element: HTMLElement): void {
+            //the strangest bug ever
+            //it applies the zoom-factor as a scaling factor
+            //for the z-value (m43)
+            //-->> zoom does not apply to z value bug
+            if (system.Caps.isWebKit) {
+                var scale = 1 / (window.innerWidth / window.outerWidth);
+                matrix.m43 *= scale;
+            }
+            element.style.transform = matrix.getCSS();
+        }
+    }
+    class TopLeftMode implements IPositionMode {
+        public apply(matrix: geom.Matrix3D, position: Position, element: HTMLElement): void {
+            var x = math.Number.parse(element.style.left, 0);
+            var y = math.Number.parse(element.style.top, 0);
+            element.style.left = Math.round(matrix.m41 + x) + "px";
+            element.style.top = Math.round(matrix.m42 + y) + "px";
+        }
+    }
+    class BackgroundMode implements IPositionMode {
+        public apply(matrix: geom.Matrix3D, position: Position, element: HTMLElement): void {
+            var size = layout.Size.create(element);
+            var bx = size.getBox(layout.BoxModel.PADDING, layout.BoxModel.BACKGROUND); 
+            var cssStr = "";
+            cssStr += Math.round(matrix.m41 + bx.x) + "px ";
+            cssStr += Math.round(matrix.m42 + bx.y) + "px";
+            element.style.backgroundPosition = cssStr;
+        }
+    }
+    class ScrollMode implements IPositionMode {
+        public apply(matrix: geom.Matrix3D, position: Position, element: HTMLElement): void {
+
+        }
+    }
     export class Position implements IDisposable {
+        public static TRANSFORM: IPositionMode = new TransformMode();
+        public static TOP_LEFT: IPositionMode = new TopLeftMode();
+        public static BACKGROUND: IPositionMode = new BackgroundMode();
+        public static SCROLL: IPositionMode = new ScrollMode();
+
         public to: IPositionValue = {};
         public from: IPositionValue = {};
         public bounds: IPositionBounds = {};
-        public useTransform: boolean = true;
-        public transformMode: geom.ITransformMode = null;
+        public mode: IPositionMode;
+        public transformMode: geom.ITransformMode;
 
         private _to: geom.Transform = new geom.Transform();
         private _from: geom.Transform = new geom.Transform();
@@ -50,35 +94,20 @@ module jsidea.layout {
             this.to = position.to;
             this.from = position.from;
             this.bounds = position.bounds;
-            this.useTransform = position.useTransform;
+            this.mode = position.mode;
             this.transformMode = position.transformMode;
             return this;
         }
 
-        public apply(element?: HTMLElement): void {
+        public apply(element?: HTMLElement, mode?: IPositionMode): void {
             element = element ? element : this.to.element;
             if (!element)
                 return;
 
+            mode = mode || this.mode || Position.TRANSFORM;
+            
             var m = this.calc(element);
-
-            if (this.useTransform) {
-                //the strangest bug ever
-                //it applies the zoom-factor as a scaling factor
-                //for the z-value (m43)
-                //-->> zoom does not apply to z value bug
-                if (system.Caps.isWebKit) {
-                    var scale = 1 / (window.innerWidth / window.outerWidth);
-                    m.m43 *= scale;
-                }
-                element.style.transform = m.getCSS();
-            }
-            else {
-                var x = math.Number.parse(element.style.left, 0);
-                var y = math.Number.parse(element.style.top, 0);
-                element.style.left = Math.round(m.m41 + x) + "px";
-                element.style.top = Math.round(m.m42 + y) + "px";
-            }
+            mode.apply(m, this, element);
         }
 
         public calc(element: HTMLElement): geom.Matrix3D {

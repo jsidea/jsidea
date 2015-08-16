@@ -105,7 +105,6 @@ module jsidea.layout {
                 return ret.setTo(0, 0, size.width, size.height);
             this._image.src = src;
 
-            //TODO: get by backgroundOrigin
             var backgroundOrigin = size.style.backgroundOrigin ? BoxModel.getModel(size.style.backgroundOrigin) : BoxModel.PADDING;
             var origin = size.getBox(backgroundOrigin);
 
@@ -142,13 +141,17 @@ module jsidea.layout {
 
             if (xPos == "auto" || xSize == "cover" || xSize == "contain")
             { }
-            else
+            else if(xPos.indexOf("%") > 0)
                 x = math.Number.relation(xPos, origin.width, 0) - math.Number.relation(xPos, width, 0);
+            else
+                x = math.Number.relation(xPos, origin.width, 0);
 
             if (yPos == "auto" || xSize == "cover" || xSize == "contain")
             { }
-            else
+            else if(yPos.indexOf("%") > 0)
                 y = math.Number.relation(yPos, origin.height, 0) - math.Number.relation(yPos, height, 0);
+            else
+                y = math.Number.relation(yPos, origin.height, 0);
 
             //back to border box
             var pt = new geom.Point3D(x, y);

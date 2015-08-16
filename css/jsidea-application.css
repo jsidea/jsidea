@@ -113,6 +113,7 @@ canvas {
 	/* background-size: cover; */
 	/* background-origin: 0px 0px; */
 	background-repeat: no-repeat;
-	background-position: center top;
+	
+	/* background-position: 128px 0px; */
 	/* background-position: 128px 128px; */
 }

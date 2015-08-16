@@ -6,10 +6,10 @@ module jsidea.test {
 
         //@override abstract
         public create(): void {
-            //                        this.testGeometryUtils();
+            this.testGeometryUtils();
             //                                    this.testAffineFit();
             //            this.testMatrix();
-            this.testSize();
+//                        this.testSize();
         }
 
         private testSize(): void {
@@ -81,7 +81,7 @@ module jsidea.test {
             var vie = document.getElementById("view");
 
             var max = 16;
-            var te = 15;//5;//7;//11 for ie11 testing 5 is scrolling test
+            var te = 14;//5;//7;//11 for ie11 testing 5 is scrolling test
             document.body.className = "test-" + te;
 
             var can = document.createElement("canvas");
@@ -111,24 +111,24 @@ module jsidea.test {
             var pos = new layout.Position();
             //            pos.to.x = "100%";
             //            pos.to.y = "100%";
-            pos.useTransform = true;
             //            pos.to.minX = 0;
             //            pos.to.minY = 0;
-            pos.to.boxModel = layout.BoxModel.BORDER;
-            //            pos.to.boxModel = layout.BoxModel.BORDER;
-            //            pos.bounds.element = a;
+//            pos.bounds.element = a;
+            
+            pos.to.boxModel = layout.BoxModel.BACKGROUND;
+            pos.mode = layout.Position.BACKGROUND;
+//            pos.bounds.boxModel = layout.BoxModel.PADDING;
+//            document.addEventListener("mouseover",(evt) => {
+//                console.log("ENTER", evt.target);
+//            });
             
             var target: HTMLElement = null;
             document.addEventListener("mousedown",(evt) => {
-                //                if (!evt.ctrlKey)
-                //                    return;
                 target = <HTMLElement> evt.target;
                 var pt = new geom.Point3D(evt.pageX, evt.pageY);
                 var loc = geom.Transform.create(target).globalToLocalPoint(pt, pos.to.boxModel);
                 pos.to.x = loc.x;
                 pos.to.y = loc.y;                
-                
-                //                pos.useTransform = Math.random() > 0.5;
                 
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
@@ -162,7 +162,7 @@ module jsidea.test {
             };
 
             //            draw();
-            document.addEventListener("click", draw);
+//            document.addEventListener("click", draw);
 
             var setTest = (e: KeyboardEvent) => {
                 if (e.keyCode == 37 || e.keyCode == 39) {
