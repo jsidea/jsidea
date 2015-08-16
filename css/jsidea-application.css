@@ -105,7 +105,14 @@ canvas {
 }
 
 #x-cont {
-	background-color: #CCC;
-	width: 100%;
-	height: 100%;
+	width: 512px;
+	height: 512px;
+	border: 50px solid #FF0000;
+	background-image: url(../assets/jsidea-logo.png);
+	background-size: 256px 256px;
+	/* background-size: cover; */
+	/* background-origin: 0px 0px; */
+	background-repeat: no-repeat;
+	background-position: center top;
+	/* background-position: 128px 128px; */
 }

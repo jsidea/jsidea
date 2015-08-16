@@ -1,8 +1,12 @@
+build.path.exportedFolder=
+build.path.sourceFolder=ts
 compiler.codeGenTarget=ECMASCRIPT5
 compiler.compileOnSave=true
 compiler.mapSourceFiles=false
 compiler.moduleGenTarget=UNSPECIFIED
 compiler.noImplicitAny=false
 compiler.noLib=false
+compiler.outputDirOption=
+compiler.outputFileOption=
 compiler.removeComments=false
 eclipse.preferences.version=1

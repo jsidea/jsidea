@@ -7,13 +7,13 @@
 /// <reference path='ts/jsidea/system/Application.ts' />
 /// <reference path='ts/jsidea/math/Number.ts' />
 /// <reference path='ts/jsidea/text/Text.ts' />
+/// <reference path='ts/jsidea/model/Ressource.ts' />
+/// <reference path='ts/jsidea/model/Dictionary.ts' />
 /// <reference path='ts/jsidea/layout/Style.ts' />
 /// <reference path='ts/jsidea/layout/BoxModel.ts' />
 /// <reference path='ts/jsidea/layout/Size.ts' />
 /// <reference path='ts/jsidea/layout/StyleChain.ts' />
 /// <reference path='ts/jsidea/layout/Position.ts' />
-/// <reference path='ts/jsidea/model/Ressource.ts' />
-/// <reference path='ts/jsidea/model/Dictionary.ts' />
 /// <reference path='ts/jsidea/geom/Point2D.ts' />
 /// <reference path='ts/jsidea/geom/Point3D.ts' />
 /// <reference path='ts/jsidea/geom/Matrix2D.ts' />
@@ -26,8 +26,4 @@
 /// <reference path='ts/jsidea/geom/Transform.ts' />
 /// <reference path='ts/jsidea/display/Graphics.ts' />
 /// <reference path='ts/jsidea/Buffer.ts' />
-
-/// <reference path='ts/jsidea/action/BaseInteractor.ts' />
-/// <reference path='ts/jsidea/action/DragInteractor.ts' />
-
 /// <reference path='ts/jsidea/test/TestApplication.ts' />

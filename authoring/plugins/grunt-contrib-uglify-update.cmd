@@ -1,1 +1,0 @@
-npm install grunt-contrib-uglify --save-dev

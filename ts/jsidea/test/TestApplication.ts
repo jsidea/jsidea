@@ -6,8 +6,56 @@ module jsidea.test {
 
         //@override abstract
         public create(): void {
-            this.testGeometryUtils();
-            //            this.testAffineFit();
+            //                        this.testGeometryUtils();
+            //                                    this.testAffineFit();
+            //            this.testMatrix();
+            this.testSize();
+        }
+
+        private testSize(): void {
+
+            var view = document.getElementById("view");
+            var cont = document.getElementById("content");
+            var a = document.createElement("div");
+            a.id = "x-cont";
+            cont.appendChild(a);
+
+            //            setTimeout(() => {
+            //                var size = layout.Size.create(a);
+            //                var box = size.getBox(layout.BoxModel.BACKGROUND);
+            //                a.style.backgroundSize = Math.round(box.width) + "px " + Math.round(box.height) + "px";
+            //                a.style.backgroundPosition = Math.round(box.x) + "px " + Math.round(box.y) + "px";
+            //            }, 1000);
+            
+            var tr = geom.Transform.create();
+            document.addEventListener("click",(e) => {
+                tr.update(a);
+                var lc = tr.globalToLocal(e.pageX, e.pageY, 0, layout.BoxModel.BACKGROUND);
+                console.log(lc.x, lc.y);
+            });
+        }
+
+        private testMatrix(): void {
+
+            var scale = new geom.Matrix2D();
+            scale.setScale({ x: 2, y: 2 });
+            var translate = new geom.Matrix2D();
+            translate.setPosition({ x: 10, y: 10 });
+
+            var a = scale.clone().append(translate);
+            var b = translate.clone().append(scale);
+
+
+            console.log("scaling");
+            console.log(scale.toStringTable());
+
+            console.log("translate");
+            console.log(translate.toStringTable());
+
+            console.log("A");
+            console.log(a.toStringTable());
+            console.log("B");
+            console.log(b.toStringTable());
         }
 
         private testAffineFit(): void {
@@ -18,12 +66,14 @@ module jsidea.test {
             a.id = "x-cont";
 
             view.style.perspective = "500px";
-            cont.style.transform = "rotateY(-45deg)";
-            cont.style.transformStyle = "preserve-3d";
-            a.style.transform = "rotateY(45deg)";
+            cont.style.transform = "perspective(-300px) rotateY(-45deg)";
+            //            cont.style.transformStyle = "preserve-3d";
+            //            a.style.transform = "rotateY(45deg)";
 
 
             cont.appendChild(a);
+
+
         }
 
         private testGeometryUtils(): void {
@@ -62,8 +112,9 @@ module jsidea.test {
             //            pos.to.x = "100%";
             //            pos.to.y = "100%";
             pos.useTransform = true;
-            pos.to.minX = 0;
-            pos.to.minY = 0;
+            //            pos.to.minX = 0;
+            //            pos.to.minY = 0;
+            pos.to.boxModel = layout.BoxModel.BORDER;
             //            pos.to.boxModel = layout.BoxModel.BORDER;
             //            pos.bounds.element = a;
             
@@ -110,7 +161,7 @@ module jsidea.test {
                 this.logChain(xc);
             };
 
-//            draw();
+            //            draw();
             document.addEventListener("click", draw);
 
             var setTest = (e: KeyboardEvent) => {
@@ -233,8 +284,9 @@ module jsidea.test {
         }
 
         private testObserver(): void {
-            var d = $("<div>A</div>");
-            $("body").append(d);
+            var d = document.createElement("div");
+            d.textContent = "A";
+            document.body.appendChild(d);
             var o = d[0];
             Object.observe(o, function(a): void {
                 console.log(a);

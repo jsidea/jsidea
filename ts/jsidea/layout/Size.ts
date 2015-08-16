@@ -2,8 +2,9 @@ module jsidea.layout {
     export class Size implements IDisposable {
 
         public element: HTMLElement = null;
-        public offsetWidth: number = 0;
-        public offsetHeight: number = 0;
+        public style: CSSStyleDeclaration;
+        public width: number = 0;
+        public height: number = 0;
 
         public marginTop: number = 0;
         public marginRight: number = 0;
@@ -34,10 +35,11 @@ module jsidea.layout {
                 return this.clear();
             style = style || window.getComputedStyle(element);
 
+            this.style = style;
             this.element = element;
 
-            this.offsetWidth = element.offsetWidth;
-            this.offsetHeight = element.offsetHeight;
+            this.width = element.offsetWidth;
+            this.height = element.offsetHeight;
 
             this.marginTop = math.Number.parse(style.marginTop, 0);
             this.marginRight = math.Number.parse(style.marginRight, 0);
@@ -62,6 +64,11 @@ module jsidea.layout {
         }
 
         public clear(): Size {
+            this.element = null;
+            this.style = null;
+            this.width = 0;
+            this.height = 0;
+
             this.marginTop = 0;
             this.marginRight = 0;
             this.marginBottom = 0;
@@ -80,17 +87,39 @@ module jsidea.layout {
             return this;
         }
 
+        public apply(element: HTMLElement): Size {
+            var style = element.style;
+            //TODO:
+            //keep units here (percentage should keep percentage)
+            style.marginTop = this.marginTop + "px";
+            style.marginRight = this.marginRight + "px";
+            style.marginBottom = this.marginBottom + "px";
+            style.marginLeft = this.marginLeft + "px";
+
+            style.paddingTop = this.paddingTop + "px";
+            style.paddingRight = this.paddingRight + "px";
+            style.paddingBottom = this.paddingBottom + "px";
+            style.paddingLeft = this.paddingLeft + "px";
+
+            style.borderTop = this.borderTop + "px";
+            style.borderRight = this.borderRight + "px";
+            style.borderBottom = this.borderBottom + "px";
+            style.borderLeft = this.borderLeft + "px";
+
+            return this;
+        }
+
         public getBox(toBox?: IBoxModel, fromBox?: IBoxModel, ret: geom.Box2D = new geom.Box2D()): geom.Box2D {
             ret.x = 0;
             ret.y = 0;
-            ret.width = this.offsetWidth;
-            ret.height = this.offsetHeight;
+            ret.width = this.width;
+            ret.height = this.height;
             return this.convert(ret, toBox, fromBox);
         }
         
         //converts sizes between different boxes
         public convert(box: geom.Box2D, toBox?: IBoxModel, fromBox?: IBoxModel): geom.Box2D {
-            if (toBox == fromBox)
+            if (toBox === fromBox)
                 return box;
             if (fromBox)
                 fromBox.toBorderBox(this, box);
@@ -99,18 +128,21 @@ module jsidea.layout {
             return box;
         }
 
-        public point(point: geom.Point3D, toBox: IBoxModel = null, fromBox?: IBoxModel): geom.Point3D {
+        public point(point: geom.Point3D, toBox?: IBoxModel, fromBox?: IBoxModel): geom.Point3D {
             if (toBox == fromBox)
                 return point;
-            var box = Buffer._POINT_MODEL;
+            //            var box = Buffer._POINT_MODEL;
+            var box = new geom.Box2D();
             box.x = point.x;
             box.y = point.y;
+            box.width = this.width;
+            box.height = this.height;
             this.convert(box, toBox, fromBox);
             return point.setTo(box.x, box.y, 0);
         }
 
         public dispose(): void {
-            this.element = null;
+            this.clear();
         }
 
         public static qualifiedClassName: string = "jsidea.layout.Size";

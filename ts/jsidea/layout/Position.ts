@@ -60,18 +60,17 @@ module jsidea.layout {
             if (!element)
                 return;
 
-            var m = this.calc(element);            
-            
-            //the strangest bug ever
-            //it applies the zoom-factor as a scaling factor
-            //for the z-value (m43)
-            //-->> zoom does not apply to z value bug
-            if (system.Caps.isWebKit) {
-                var scale = 1 / (window.innerWidth / window.outerWidth);
-                m.m43 *= scale;
-            }
+            var m = this.calc(element);
 
             if (this.useTransform) {
+                //the strangest bug ever
+                //it applies the zoom-factor as a scaling factor
+                //for the z-value (m43)
+                //-->> zoom does not apply to z value bug
+                if (system.Caps.isWebKit) {
+                    var scale = 1 / (window.innerWidth / window.outerWidth);
+                    m.m43 *= scale;
+                }
                 element.style.transform = m.getCSS();
             }
             else {

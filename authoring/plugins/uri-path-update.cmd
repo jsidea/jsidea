@@ -1,1 +1,0 @@
-npm install uri-path --save-dev

@@ -8,16 +8,16 @@ module jsidea.geom {
         public inverseSceneTransform: geom.Matrix3D[] = [];
         public size: layout.Size = new layout.Size();
 
-        constructor(element: HTMLElement = null, mode?: ITransformMode) {
+        constructor(element?: HTMLElement, mode?: ITransformMode) {
             if (element)
                 this.update(element, mode);
         }
 
-        public static create(element: HTMLElement, mode?: ITransformMode): geom.Transform {
+        public static create(element?: HTMLElement, mode?: ITransformMode): geom.Transform {
             return new Transform(element, mode);
         }
 
-        public update(element: HTMLElement, mode?: ITransformMode): void {
+        public update(element?: HTMLElement, mode?: ITransformMode): void {
             if (!element)
                 return this.clear();
 
@@ -36,10 +36,8 @@ module jsidea.geom {
             this.sceneTransform = mode.extract(this, style);
 
             //create inverse
-            this.inverseSceneTransform = this.sceneTransform.slice(0, this.sceneTransform.length);
-            this.inverseSceneTransform.reverse();
-            var l = this.inverseSceneTransform.length;
-            for (var i = 0; i < l; ++i)
+            this.inverseSceneTransform = this.sceneTransform.slice(0, this.sceneTransform.length).reverse();
+            for (var i = 0; i < this.inverseSceneTransform.length; ++i)
                 this.inverseSceneTransform[i] = this.inverseSceneTransform[i].clone().invert();
         }
 
