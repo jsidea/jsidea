@@ -1,5 +1,5 @@
 module jsidea.layout {
-    export class Size implements IDisposable {
+    export class BoxSizing implements IDisposable {
 
         public element: HTMLElement = null;
         public style: CSSStyleDeclaration;
@@ -26,11 +26,11 @@ module jsidea.layout {
                 this.update(element, style);
         }
 
-        public static create(element: HTMLElement = null, style?: CSSStyleDeclaration): Size {
-            return new Size(element, style);
+        public static create(element: HTMLElement = null, style?: CSSStyleDeclaration): BoxSizing {
+            return new BoxSizing(element, style);
         }
 
-        public update(element: HTMLElement, style?: CSSStyleDeclaration): Size {
+        public update(element: HTMLElement, style?: CSSStyleDeclaration): BoxSizing {
             if (!element)
                 return this.clear();
             style = style || window.getComputedStyle(element);
@@ -59,11 +59,11 @@ module jsidea.layout {
             return this;
         }
 
-        public clone(): Size {
-            return new Size();
+        public clone(): BoxSizing {
+            return new BoxSizing();
         }
 
-        public clear(): Size {
+        public clear(): BoxSizing {
             this.element = null;
             this.style = null;
             this.width = 0;
@@ -87,7 +87,7 @@ module jsidea.layout {
             return this;
         }
 
-        public apply(element: HTMLElement): Size {
+        public apply(element: HTMLElement): BoxSizing {
             var style = element.style;
             //TODO:
             //keep units here (percentage should keep percentage)
@@ -147,7 +147,7 @@ module jsidea.layout {
 
         public static qualifiedClassName: string = "jsidea.layout.Size";
         public toString(): string {
-            return "[" + Size.qualifiedClassName + "]";
+            return "[" + BoxSizing.qualifiedClassName + "]";
         }
     }
 }

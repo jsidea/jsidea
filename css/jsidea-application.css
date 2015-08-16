@@ -59,6 +59,11 @@ canvas {
 	width: 1024px;
 	height: 1024px;
 	border: 100px solid #FF00FF;
+	
+	background-image: url(../assets/jsidea-logo.png);
+	background-size: 256px 256px;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
 }
 
 #content {
@@ -68,6 +73,8 @@ canvas {
 	margin: 20px;
 	padding: 200px;
 	border: 40px solid #FFF000;
+	
+	
 }
 
 #a-cont {
@@ -78,6 +85,8 @@ canvas {
 	top: 100px;
 	margin: 40px;
 	padding: 60px;
+	
+	
 }
 
 #b-cont {
@@ -109,10 +118,13 @@ canvas {
 	height: 512px;
 	border: 50px solid #FF0000;
 	background-image: url(../assets/jsidea-logo.png);
-	background-size: 256px 256px;
+	/* background-size: 256px 256px; */
+	background-size: 100% 128px;
 	/* background-size: cover; */
 	/* background-origin: 0px 0px; */
 	background-repeat: no-repeat;
+	/* background-attachment: fixed; */
+	/* background-attachment: fixed; */
 	
 	/* background-position: 128px 0px; */
 	/* background-position: 128px 128px; */

@@ -1,4 +1,7 @@
 module jsidea.layout {
+    export interface IPositionClamper {
+        clamp(point: geom.Point3D, width: number, height: number, depth?: number): geom.Point3D;
+    }
     export interface IPositionValue {
         element?: HTMLElement;
         x?: any;
@@ -25,45 +28,74 @@ module jsidea.layout {
         toBoxModel?: IBoxModel;
     }
     export interface IPositionMode {
-        apply(matrix: geom.Matrix3D, position: Position, element: HTMLElement): void;
+        apply(matrix: geom.Matrix3D, element: HTMLElement, clamper?: IPositionClamper): void;
     }
     class TransformMode implements IPositionMode {
-        public apply(matrix: geom.Matrix3D, position: Position, element: HTMLElement): void {
-            //the strangest bug ever
-            //it applies the zoom-factor as a scaling factor
-            //for the z-value (m43)
-            //-->> zoom does not apply to z value bug
-            if (system.Caps.isWebKit) {
-                var scale = 1 / (window.innerWidth / window.outerWidth);
-                matrix.m43 *= scale;
-            }
+        private _point = new geom.Point3D();
+        public apply(matrix: geom.Matrix3D, element: HTMLElement, clamper?: IPositionClamper): void {
+            this._point.setTo(
+                matrix.m41,
+                matrix.m42,
+                matrix.m43);
+            if (clamper)
+                clamper.clamp(this._point, element.offsetWidth, element.offsetHeight);
+            matrix.m41 = this._point.x;
+            matrix.m42 = this._point.y;
+            matrix.m43 = this._point.z;
+            //WebKit bug
+            if (system.Caps.isWebKit)
+                matrix.m43 *= 1 / (window.innerWidth / window.outerWidth);
             element.style.transform = matrix.getCSS();
         }
     }
     class TopLeftMode implements IPositionMode {
-        public apply(matrix: geom.Matrix3D, position: Position, element: HTMLElement): void {
-            var x = math.Number.parse(element.style.left, 0);
-            var y = math.Number.parse(element.style.top, 0);
-            element.style.left = Math.round(matrix.m41 + x) + "px";
-            element.style.top = Math.round(matrix.m42 + y) + "px";
+        private _point = new geom.Point3D();
+        public apply(matrix: geom.Matrix3D, element: HTMLElement, clamper?: IPositionClamper): void {
+            this._point.setTo(
+                matrix.m41 + math.Number.parse(element.style.left, 0),
+                matrix.m42 + math.Number.parse(element.style.top, 0),
+                matrix.m43);
+            if (clamper)
+                clamper.clamp(this._point, element.offsetWidth, element.offsetHeight);
+            element.style.left = Math.round(this._point.x) + "px";
+            element.style.top = Math.round(this._point.y) + "px";
+        }
+    }
+    class BottomRightMode implements IPositionMode {
+        private _point = new geom.Point3D();
+        public apply(matrix: geom.Matrix3D, element: HTMLElement, clamper?: IPositionClamper): void {
+            this._point.setTo(
+                matrix.m41 + math.Number.parse(element.style.right, 0),
+                matrix.m42 + math.Number.parse(element.style.bottom, 0),
+                matrix.m43);
+            if (clamper)
+                clamper.clamp(this._point, element.offsetWidth, element.offsetHeight);
+            element.style.left = Math.round(this._point.x) + "px";
+            element.style.top = Math.round(this._point.y) + "px";
         }
     }
     class BackgroundMode implements IPositionMode {
-        public apply(matrix: geom.Matrix3D, position: Position, element: HTMLElement): void {
-            var size = layout.Size.create(element);
-            var bx = size.getBox(layout.BoxModel.PADDING, layout.BoxModel.BACKGROUND); 
-            var cssStr = "";
-            cssStr += Math.round(matrix.m41 + bx.x) + "px ";
-            cssStr += Math.round(matrix.m42 + bx.y) + "px";
-            element.style.backgroundPosition = cssStr;
+        private _point = new geom.Point3D();
+        private _box = new geom.Box2D();
+        private _boxSizing = new layout.BoxSizing();
+        public apply(matrix: geom.Matrix3D, element: HTMLElement, clamper?: IPositionClamper): void {
+            this._boxSizing.update(element);
+            var bx = this._boxSizing.getBox(layout.BoxModel.PADDING, layout.BoxModel.BACKGROUND, this._box);
+            this._point.setTo(
+                matrix.m41 + bx.x,
+                matrix.m42 + bx.y,
+                matrix.m43);
+            if (clamper)
+                clamper.clamp(this._point, bx.width, bx.height);
+            element.style.backgroundPosition = Math.round(this._point.x) + "px " + Math.round(this._point.y) + "px";
         }
     }
     class ScrollMode implements IPositionMode {
-        public apply(matrix: geom.Matrix3D, position: Position, element: HTMLElement): void {
+        public apply(matrix: geom.Matrix3D, element: HTMLElement, clamper?: IPositionClamper): void {
 
         }
     }
-    export class Position implements IDisposable {
+    export class Position implements IPositionClamper, IDisposable {
         public static TRANSFORM: IPositionMode = new TransformMode();
         public static TOP_LEFT: IPositionMode = new TopLeftMode();
         public static BACKGROUND: IPositionMode = new BackgroundMode();
@@ -105,14 +137,14 @@ module jsidea.layout {
                 return;
 
             mode = mode || this.mode || Position.TRANSFORM;
-            
+
             var m = this.calc(element);
-            mode.apply(m, this, element);
+            mode.apply(m, element, this);
         }
 
-        public calc(element: HTMLElement): geom.Matrix3D {
+        public calc(element: HTMLElement, ret: geom.Matrix3D = new geom.Matrix3D()): geom.Matrix3D {
             if (!element)
-                return null;
+                return ret;
 
             //retrieve "of"-element
             var fromElement = this.from.element || element.ownerDocument.documentElement;
@@ -124,12 +156,12 @@ module jsidea.layout {
             var fromBox = this.from.boxModel || layout.BoxModel.BORDER;
             
             //transform box-models of "to"
-            var sizeTo = this._to.size.getBox(toBox, layout.BoxModel.BORDER);
+            var sizeTo = this._to.boxSizing.getBox(toBox, layout.BoxModel.BORDER);
             var toX: number = math.Number.relation(this.to.x, sizeTo.width, 0) + math.Number.relation(this.to.offsetX, sizeTo.width, 0);
             var toY: number = math.Number.relation(this.to.y, sizeTo.height, 0) + math.Number.relation(this.to.offsetY, sizeTo.height, 0);
             
             //transform box-models of "from"
-            var sizeFrom = this._from.size.getBox(fromBox, layout.BoxModel.BORDER);
+            var sizeFrom = this._from.boxSizing.getBox(fromBox, layout.BoxModel.BORDER);
             var fromX: number = math.Number.relation(this.from.x, sizeFrom.width, 0) + math.Number.relation(this.from.offsetX, sizeFrom.width, 0);
             var fromY: number = math.Number.relation(this.from.y, sizeFrom.height, 0) + math.Number.relation(this.from.offsetY, sizeFrom.height, 0);
             
@@ -150,17 +182,18 @@ module jsidea.layout {
             
             //keep in bounds
             if (this.bounds.element) {
-                if (this.bounds.element == element)
-                    console.warn("The bounds element cannot be the \"to\"-element.");
-                else if (element.contains(this.bounds.element))
+                //                if (this.bounds.element == element)
+                //                    console.warn("The bounds element cannot be the \"to\"-element.");
+                //                else 
+                if (element.contains(this.bounds.element))
                     console.warn("The bounds element cannot be a child-element of the \"to\"-element.");
                 else {
                     var toBox = this.bounds.toBoxModel || layout.BoxModel.BORDER;
                     var boundsBox = this.bounds.boxModel || layout.BoxModel.BORDER;
 
                     this._bounds.update(this.bounds.element, this.transformMode);
-                    var boundsSize = this._bounds.size.getBox(boundsBox);
-                    var toSize = this._to.size.getBox(toBox);
+                    var boundsSize = this._bounds.boxSizing.getBox(boundsBox);
+                    var toSize = this._to.boxSizing.getBox(toBox);
 
                     lc = this._to.clamp(this._bounds, lc, toSize.width, toSize.height, 0, boundsSize.width, 0, boundsSize.height, toBox, boundsBox);
                     lc = this._to.clamp(this._bounds, lc, 0, toSize.height, 0, boundsSize.width, 0, boundsSize.height, toBox, boundsBox);
@@ -170,24 +203,26 @@ module jsidea.layout {
             }
             
             //prepend the local offset
-            var ma = this._to.matrix.clone();
-            ma.prependPositionRaw(lc.x, lc.y, 0);
-            
-            //clamp to
-            if (this.to.minX !== undefined)
-                ma.m41 = Math.max(ma.m41, math.Number.relation(this.to.minX, sizeTo.width, ma.m41));
-            if (this.to.maxX !== undefined)
-                ma.m41 = Math.min(ma.m41, math.Number.relation(this.to.maxX, sizeTo.width, ma.m41));
-            if (this.to.minY !== undefined)
-                ma.m42 = Math.max(ma.m42, math.Number.relation(this.to.minY, sizeTo.height, ma.m42));
-            if (this.to.maxY !== undefined)
-                ma.m42 = Math.min(ma.m42, math.Number.relation(this.to.maxY, sizeTo.height, ma.m42));
-            if (this.to.minZ !== undefined && !isNaN(this.to.minZ))
-                ma.m43 = Math.max(ma.m43, this.to.minZ);
-            if (this.to.maxZ !== undefined && !isNaN(this.to.maxZ))
-                ma.m43 = Math.min(ma.m43, this.to.maxZ);
+            ret.copyFrom(this._to.matrix);
+            ret.prependPositionRaw(lc.x, lc.y, 0);
 
-            return ma;
+            return ret;
+        }
+
+        public clamp(point: geom.Point3D, width: number, height: number, depth: number = 1000): geom.Point3D {
+            if (this.to.minX !== undefined)
+                point.x = Math.max(point.x, math.Number.relation(this.to.minX, width, point.x));
+            if (this.to.maxX !== undefined)
+                point.x = Math.min(point.x, math.Number.relation(this.to.maxX, width, point.x));
+            if (this.to.minY !== undefined)
+                point.y = Math.max(point.y, math.Number.relation(this.to.minY, height, point.y));
+            if (this.to.maxY !== undefined)
+                point.y = Math.min(point.y, math.Number.relation(this.to.maxY, height, point.y));
+            if (this.to.minZ !== undefined)
+                point.z = Math.max(point.z, math.Number.relation(this.to.minZ, depth, point.z));
+            if (this.to.maxY !== undefined)
+                point.z = Math.min(point.z, math.Number.relation(this.to.maxZ, depth, point.z));
+            return point;
         }
 
         public dispose(): void {

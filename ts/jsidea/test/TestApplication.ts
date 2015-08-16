@@ -9,7 +9,7 @@ module jsidea.test {
             this.testGeometryUtils();
             //                                    this.testAffineFit();
             //            this.testMatrix();
-//                        this.testSize();
+            //            this.testSize();
         }
 
         private testSize(): void {
@@ -30,7 +30,7 @@ module jsidea.test {
             var tr = geom.Transform.create();
             document.addEventListener("click",(e) => {
                 tr.update(a);
-                var lc = tr.globalToLocal(e.pageX, e.pageY, 0, layout.BoxModel.BACKGROUND);
+                var lc = tr.globalToLocal(e.pageX, e.pageY, 0, layout.BoxModel.ATTACHMENT);
                 console.log(lc.x, lc.y);
             });
         }
@@ -113,14 +113,15 @@ module jsidea.test {
             //            pos.to.y = "100%";
             //            pos.to.minX = 0;
             //            pos.to.minY = 0;
-//            pos.bounds.element = a;
+            //            pos.bounds.element = a;
             
-            pos.to.boxModel = layout.BoxModel.BACKGROUND;
-            pos.mode = layout.Position.BACKGROUND;
-//            pos.bounds.boxModel = layout.BoxModel.PADDING;
-//            document.addEventListener("mouseover",(evt) => {
-//                console.log("ENTER", evt.target);
-//            });
+//            pos.to.boxModel = layout.BoxModel.BACKGROUND;
+            pos.mode = layout.Position.TOP_LEFT;
+            
+            //            pos.bounds.boxModel = layout.BoxModel.PADDING;
+            //            document.addEventListener("mouseover",(evt) => {
+            //                console.log("ENTER", evt.target);
+            //            });
             
             var target: HTMLElement = null;
             document.addEventListener("mousedown",(evt) => {
@@ -128,8 +129,8 @@ module jsidea.test {
                 var pt = new geom.Point3D(evt.pageX, evt.pageY);
                 var loc = geom.Transform.create(target).globalToLocalPoint(pt, pos.to.boxModel);
                 pos.to.x = loc.x;
-                pos.to.y = loc.y;                
-                
+                pos.to.y = loc.y;
+
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
             });
@@ -143,6 +144,8 @@ module jsidea.test {
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
 
+//                pos.bounds = target;
+                pos.to.minX = 0;
                 pos.apply(target);
             });
 
@@ -162,7 +165,7 @@ module jsidea.test {
             };
 
             //            draw();
-//            document.addEventListener("click", draw);
+            //            document.addEventListener("click", draw);
 
             var setTest = (e: KeyboardEvent) => {
                 if (e.keyCode == 37 || e.keyCode == 39) {
