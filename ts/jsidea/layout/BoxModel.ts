@@ -130,7 +130,7 @@ module jsidea.layout {
             this._imageHeight = height;
 
             var backgroundOrigin = size.style.backgroundOrigin ? BoxModel.getModel(size.style.backgroundOrigin) : BoxModel.PADDING;
-            var origin = size.getBox(backgroundOrigin);
+            var origin = size.getBox(BoxModel.BORDER, backgroundOrigin);
 
             var x = 0;
             var y = 0;
@@ -189,7 +189,7 @@ module jsidea.layout {
 
             //back to border box
             var pt = new geom.Point3D(x, y);
-            size.point(pt, BoxModel.BORDER, backgroundOrigin);
+            size.point(pt, backgroundOrigin, BoxModel.BORDER);
 
             return ret.setTo(pt.x, pt.y, width, height);
         }
@@ -230,7 +230,7 @@ module jsidea.layout {
                 }
                 //transform to html
                 var trans = geom.Transform.create(size.element);
-                var gl = trans.localToGlobal(0, 0, 0, null, layout.BoxModel.PADDING);
+                var gl = trans.localToGlobal(0, 0, 0, BoxModel.PADDING, BoxModel.BORDER);
                 ret.x -= gl.x;
                 ret.y -= gl.y;
             }

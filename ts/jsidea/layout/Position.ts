@@ -1,7 +1,4 @@
 module jsidea.layout {
-    export interface IPositionClamper {
-        clamp(point: geom.Point3D, width: number, height: number, depth?: number): geom.Point3D;
-    }
     export interface IPositionValue {
         element?: HTMLElement;
         x?: any;
@@ -15,6 +12,7 @@ module jsidea.layout {
         minZ?: any;
         maxZ?: any;
         boxModel?: IBoxModel;
+        transformMode?: geom.ITransformMode;
     }
     export interface IPositionBounds {
         element?: HTMLElement;
@@ -26,86 +24,13 @@ module jsidea.layout {
         maxZ?: any;
         boxModel?: IBoxModel;
         toBoxModel?: IBoxModel;
+        transformMode?: geom.ITransformMode;
     }
-    export interface IPositionMode {
-        apply(matrix: geom.Matrix3D, element: HTMLElement, clamper?: IPositionClamper): void;
-    }
-    class TransformMode implements IPositionMode {
-        private _point = new geom.Point3D();
-        public apply(matrix: geom.Matrix3D, element: HTMLElement, clamper?: IPositionClamper): void {
-            this._point.setTo(
-                matrix.m41,
-                matrix.m42,
-                matrix.m43);
-            if (clamper)
-                clamper.clamp(this._point, element.offsetWidth, element.offsetHeight);
-            matrix.m41 = this._point.x;
-            matrix.m42 = this._point.y;
-            matrix.m43 = this._point.z;
-            //WebKit bug
-            if (system.Caps.isWebKit)
-                matrix.m43 *= 1 / (window.innerWidth / window.outerWidth);
-            element.style.transform = matrix.getCSS();
-        }
-    }
-    class TopLeftMode implements IPositionMode {
-        private _point = new geom.Point3D();
-        public apply(matrix: geom.Matrix3D, element: HTMLElement, clamper?: IPositionClamper): void {
-            this._point.setTo(
-                matrix.m41 + math.Number.parse(element.style.left, 0),
-                matrix.m42 + math.Number.parse(element.style.top, 0),
-                matrix.m43);
-            if (clamper)
-                clamper.clamp(this._point, element.offsetWidth, element.offsetHeight);
-            element.style.left = Math.round(this._point.x) + "px";
-            element.style.top = Math.round(this._point.y) + "px";
-        }
-    }
-    class BottomRightMode implements IPositionMode {
-        private _point = new geom.Point3D();
-        public apply(matrix: geom.Matrix3D, element: HTMLElement, clamper?: IPositionClamper): void {
-            this._point.setTo(
-                matrix.m41 + math.Number.parse(element.style.right, 0),
-                matrix.m42 + math.Number.parse(element.style.bottom, 0),
-                matrix.m43);
-            if (clamper)
-                clamper.clamp(this._point, element.offsetWidth, element.offsetHeight);
-            element.style.left = Math.round(this._point.x) + "px";
-            element.style.top = Math.round(this._point.y) + "px";
-        }
-    }
-    class BackgroundMode implements IPositionMode {
-        private _point = new geom.Point3D();
-        private _box = new geom.Box2D();
-        private _boxSizing = new layout.BoxSizing();
-        public apply(matrix: geom.Matrix3D, element: HTMLElement, clamper?: IPositionClamper): void {
-            this._boxSizing.update(element);
-            var bx = this._boxSizing.getBox(layout.BoxModel.PADDING, layout.BoxModel.BACKGROUND, this._box);
-            this._point.setTo(
-                matrix.m41 + bx.x,
-                matrix.m42 + bx.y,
-                matrix.m43);
-            if (clamper)
-                clamper.clamp(this._point, bx.width, bx.height);
-            element.style.backgroundPosition = Math.round(this._point.x) + "px " + Math.round(this._point.y) + "px";
-        }
-    }
-    class ScrollMode implements IPositionMode {
-        public apply(matrix: geom.Matrix3D, element: HTMLElement, clamper?: IPositionClamper): void {
-
-        }
-    }
-    export class Position implements IPositionClamper, IDisposable {
-        public static TRANSFORM: IPositionMode = new TransformMode();
-        public static TOP_LEFT: IPositionMode = new TopLeftMode();
-        public static BACKGROUND: IPositionMode = new BackgroundMode();
-        public static SCROLL: IPositionMode = new ScrollMode();
-
+    export class Position implements IDisposable {
         public to: IPositionValue = {};
         public from: IPositionValue = {};
         public bounds: IPositionBounds = {};
         public mode: IPositionMode;
-        public transformMode: geom.ITransformMode;
 
         private _to: geom.Transform = new geom.Transform();
         private _from: geom.Transform = new geom.Transform();
@@ -127,41 +52,51 @@ module jsidea.layout {
             this.from = position.from;
             this.bounds = position.bounds;
             this.mode = position.mode;
-            this.transformMode = position.transformMode;
             return this;
         }
 
         public apply(element?: HTMLElement, mode?: IPositionMode): void {
-            element = element ? element : this.to.element;
+            element = element || this.to.element;
             if (!element)
                 return;
 
-            mode = mode || this.mode || Position.TRANSFORM;
+            mode = mode || this.mode || PositionMode.TRANSFORM;
 
-            var m = this.calc(element);
-            mode.apply(m, element, this);
+            //the un-clamped point
+            var point = this.calc(element);
+            
+            //the point in "Position"-space
+            mode.transform(point, element);
+            
+            //TODO: use the right box model
+            var size = layout.BoxSizing.create(element);
+            var box = size.getBox(null, layout.BoxModel.BORDER);
+            this.clamp(point, box.width, box.height);
+            
+            //apply the final point
+            mode.apply(point, element);
         }
 
-        public calc(element: HTMLElement, ret: geom.Matrix3D = new geom.Matrix3D()): geom.Matrix3D {
+        public calc(element: HTMLElement, ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
             if (!element)
                 return ret;
 
             //retrieve "of"-element
             var fromElement = this.from.element || element.ownerDocument.documentElement;
 
-            this._from.update(fromElement, this.transformMode);
-            this._to.update(element, this.transformMode);
+            this._from.update(fromElement, this.from.transformMode);
+            this._to.update(element, this.to.transformMode);
 
             var toBox = this.to.boxModel || layout.BoxModel.BORDER;
             var fromBox = this.from.boxModel || layout.BoxModel.BORDER;
             
             //transform box-models of "to"
-            var sizeTo = this._to.boxSizing.getBox(toBox, layout.BoxModel.BORDER);
+            var sizeTo = this._to.boxSizing.getBox(layout.BoxModel.BORDER, toBox);
             var toX: number = math.Number.relation(this.to.x, sizeTo.width, 0) + math.Number.relation(this.to.offsetX, sizeTo.width, 0);
             var toY: number = math.Number.relation(this.to.y, sizeTo.height, 0) + math.Number.relation(this.to.offsetY, sizeTo.height, 0);
             
             //transform box-models of "from"
-            var sizeFrom = this._from.boxSizing.getBox(fromBox, layout.BoxModel.BORDER);
+            var sizeFrom = this._from.boxSizing.getBox(layout.BoxModel.BORDER, fromBox);
             var fromX: number = math.Number.relation(this.from.x, sizeFrom.width, 0) + math.Number.relation(this.from.offsetX, sizeFrom.width, 0);
             var fromY: number = math.Number.relation(this.from.y, sizeFrom.height, 0) + math.Number.relation(this.from.offsetY, sizeFrom.height, 0);
             
@@ -176,7 +111,7 @@ module jsidea.layout {
                 fromY = Math.min(fromY, math.Number.relation(this.from.maxY, sizeFrom.height, fromY)); 
 
             //calc local position
-            var lc = this._from.localToLocal(this._to, fromX, fromY, 0, toBox, fromBox);
+            var lc = this._from.localToLocal(this._to, fromX, fromY, 0, fromBox, toBox);
             lc.x -= toX;
             lc.y -= toY;
             
@@ -188,25 +123,25 @@ module jsidea.layout {
                 if (element.contains(this.bounds.element))
                     console.warn("The bounds element cannot be a child-element of the \"to\"-element.");
                 else {
-                    var toBox = this.bounds.toBoxModel || layout.BoxModel.BORDER;
-                    var boundsBox = this.bounds.boxModel || layout.BoxModel.BORDER;
+                    var toBox = this.bounds.toBoxModel || BoxModel.BORDER;
+                    var boundsBox = this.bounds.boxModel || BoxModel.BORDER;
 
-                    this._bounds.update(this.bounds.element, this.transformMode);
-                    var boundsSize = this._bounds.boxSizing.getBox(boundsBox);
-                    var toSize = this._to.boxSizing.getBox(toBox);
+                    this._bounds.update(this.bounds.element, this.bounds.transformMode);
+                    var boundsSize = this._bounds.boxSizing.getBox(BoxModel.BORDER, boundsBox);
+                    var toSize = this._to.boxSizing.getBox(BoxModel.BORDER, toBox);
 
-                    lc = this._to.clamp(this._bounds, lc, toSize.width, toSize.height, 0, boundsSize.width, 0, boundsSize.height, toBox, boundsBox);
-                    lc = this._to.clamp(this._bounds, lc, 0, toSize.height, 0, boundsSize.width, 0, boundsSize.height, toBox, boundsBox);
-                    lc = this._to.clamp(this._bounds, lc, toSize.width, 0, 0, boundsSize.width, 0, boundsSize.height, toBox, boundsBox);
-                    lc = this._to.clamp(this._bounds, lc, 0, 0, 0, boundsSize.width, 0, boundsSize.height, toBox, boundsBox);
+                    lc = this._to.clamp(this._bounds, lc, toSize.width, toSize.height, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
+                    lc = this._to.clamp(this._bounds, lc, 0, toSize.height, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
+                    lc = this._to.clamp(this._bounds, lc, toSize.width, 0, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
+                    lc = this._to.clamp(this._bounds, lc, 0, 0, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
                 }
             }
             
             //prepend the local offset
-            ret.copyFrom(this._to.matrix);
-            ret.prependPositionRaw(lc.x, lc.y, 0);
+            var mat = this._to.matrix.clone();
+            mat.prependPositionRaw(lc.x, lc.y, 0);
 
-            return ret;
+            return mat.getPosition(ret);
         }
 
         public clamp(point: geom.Point3D, width: number, height: number, depth: number = 1000): geom.Point3D {

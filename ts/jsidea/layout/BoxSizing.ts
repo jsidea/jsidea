@@ -109,16 +109,16 @@ module jsidea.layout {
             return this;
         }
 
-        public getBox(toBox?: IBoxModel, fromBox?: IBoxModel, ret: geom.Box2D = new geom.Box2D()): geom.Box2D {
+        public getBox(fromBox?: IBoxModel, toBox?: IBoxModel, ret: geom.Box2D = new geom.Box2D()): geom.Box2D {
             ret.x = 0;
             ret.y = 0;
             ret.width = this.width;
             ret.height = this.height;
-            return this.convert(ret, toBox, fromBox);
+            return this.convert(ret, fromBox, toBox);
         }
         
         //converts sizes between different boxes
-        public convert(box: geom.Box2D, toBox?: IBoxModel, fromBox?: IBoxModel): geom.Box2D {
+        public convert(box: geom.Box2D, fromBox?: IBoxModel, toBox?: IBoxModel): geom.Box2D {
             if (toBox === fromBox)
                 return box;
             if (fromBox)
@@ -128,7 +128,7 @@ module jsidea.layout {
             return box;
         }
 
-        public point(point: geom.Point3D, toBox?: IBoxModel, fromBox?: IBoxModel): geom.Point3D {
+        public point(point: geom.Point3D, fromBox?: IBoxModel, toBox?: IBoxModel): geom.Point3D {
             if (toBox == fromBox)
                 return point;
             //            var box = Buffer._POINT_MODEL;
@@ -137,7 +137,7 @@ module jsidea.layout {
             box.y = point.y;
             box.width = this.width;
             box.height = this.height;
-            this.convert(box, toBox, fromBox);
+            this.convert(box, fromBox, toBox);
             return point.setTo(box.x, box.y, 0);
         }
 

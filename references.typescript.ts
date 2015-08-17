@@ -20,6 +20,7 @@
 /// <reference path='ts/jsidea/geom/Plane3D.ts' />
 /// <reference path='ts/jsidea/geom/AffineFit.ts' />
 /// <reference path='ts/jsidea/geom/Box2D.ts' />
+/// <reference path='ts/jsidea/layout/PositionMode.ts' />
 /// <reference path='ts/jsidea/layout/Position.ts' />
 /// <reference path='ts/jsidea/geom/Quad.ts' />
 /// <reference path='ts/jsidea/geom/TransformMode.ts' />

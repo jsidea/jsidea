@@ -30,7 +30,7 @@ module jsidea.test {
             var tr = geom.Transform.create();
             document.addEventListener("click",(e) => {
                 tr.update(a);
-                var lc = tr.globalToLocal(e.pageX, e.pageY, 0, layout.BoxModel.ATTACHMENT);
+                var lc = tr.globalToLocal(e.pageX, e.pageY, 0, null, layout.BoxModel.ATTACHMENT);
                 console.log(lc.x, lc.y);
             });
         }
@@ -116,7 +116,9 @@ module jsidea.test {
             //            pos.bounds.element = a;
             
 //            pos.to.boxModel = layout.BoxModel.BACKGROUND;
-            pos.mode = layout.Position.TOP_LEFT;
+            pos.mode = layout.PositionMode.BOTTOM_RIGHT;
+//            pos.to.minX = 0;
+//            pos.to.minY = 0;
             
             //            pos.bounds.boxModel = layout.BoxModel.PADDING;
             //            document.addEventListener("mouseover",(evt) => {
@@ -127,7 +129,7 @@ module jsidea.test {
             document.addEventListener("mousedown",(evt) => {
                 target = <HTMLElement> evt.target;
                 var pt = new geom.Point3D(evt.pageX, evt.pageY);
-                var loc = geom.Transform.create(target).globalToLocalPoint(pt, pos.to.boxModel);
+                var loc = geom.Transform.create(target).globalToLocalPoint(pt, null, pos.to.boxModel);
                 pos.to.x = loc.x;
                 pos.to.y = loc.y;
 
@@ -143,9 +145,6 @@ module jsidea.test {
                 var pt = new geom.Point3D(this.pageX, this.pageY);
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
-
-//                pos.bounds = target;
-                pos.to.minX = 0;
                 pos.apply(target);
             });
 
