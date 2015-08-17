@@ -2,6 +2,11 @@ interface Element {
     _node: jsidea.layout.INode;
 }
 module jsidea.layout {
+    export interface INodePosition {
+        element: HTMLElement;
+        style: CSSStyleDeclaration;
+        position: geom.Point2D;
+    }
     export interface INodeLite {
         element: HTMLElement;
         style: CSSStyleDeclaration;
@@ -62,6 +67,15 @@ module jsidea.layout {
             if (!element)
                 return null;
             return StyleChain.extractStyleChainLite(element);
+        }
+
+        public static createPosition(element: HTMLElement, style?: CSSStyleDeclaration): INodePosition {
+            if (!element)
+                return null;
+
+            style = style || Style.create(element);
+
+            return { element: element, style: style, position: null };
         }
 
         private static extractStyleChainLite(element: HTMLElement): INodeLite {
@@ -402,10 +416,10 @@ module jsidea.layout {
                 this.getCorrectOffsetFirefox(node, ret);
             } else if (system.Caps.isInternetExplorer) {
                 this.getCorrectOffsetInternetExplorer(node, ret);
-            }  else if (system.Caps.isEdge) {
+            } else if (system.Caps.isEdge) {
                 this.getCorrectOffsetEdge(node, ret);
             }
-            
+
             return ret;
         }
 
@@ -421,7 +435,7 @@ module jsidea.layout {
             ret.x += node.offsetParent.clientLeft;
             ret.y += node.offsetParent.clientTop;
         }
-        
+
         private static getCorrectOffsetInternetExplorer(node: INode, ret: geom.Point2D): geom.Point2D {
             if (!node || !node.offsetParent || node.isBody)
                 return ret;

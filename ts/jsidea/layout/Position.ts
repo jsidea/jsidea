@@ -63,18 +63,19 @@ module jsidea.layout {
             mode = mode || this.mode || PositionMode.TRANSFORM;
 
             //the un-clamped point
+            var style = layout.Style.create(element);
             var point = this.calc(element);
             
             //the point in "Position"-space
-            mode.transform(point, element);
+            mode.transform(point, element, style);
             
-            //TODO: use the right box model
+            //TODO: use the correct box model
             var size = layout.BoxSizing.create(element);
             var box = size.getBox(null, layout.BoxModel.BORDER);
             this.clamp(point, box.width, box.height);
             
             //apply the final point
-            mode.apply(point, element);
+            mode.apply(point, element, style);
         }
 
         public calc(element: HTMLElement, ret: geom.Point3D = new geom.Point3D()): geom.Point3D {

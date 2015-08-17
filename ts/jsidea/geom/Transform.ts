@@ -4,9 +4,10 @@ module jsidea.geom {
         public toBox: layout.IBoxModel = layout.BoxModel.BORDER;
         public fromBox: layout.IBoxModel = layout.BoxModel.BORDER;
         public matrix: geom.Matrix3D = new geom.Matrix3D();
-        public sceneTransform: geom.Matrix3D[] = [];
-        public inverseSceneTransform: geom.Matrix3D[] = [];
         public boxSizing: layout.BoxSizing = new layout.BoxSizing();
+        
+        private _sceneTransform: geom.Matrix3D[] = [];
+        private _inverseSceneTransform: geom.Matrix3D[] = [];
 
         constructor(element?: HTMLElement, mode?: ITransformMode) {
             if (element)
@@ -33,18 +34,18 @@ module jsidea.geom {
             var style = layout.Style.create(element);
             this.boxSizing.update(element, style);
             this.matrix.setCSS(style.transform);
-            this.sceneTransform = mode.extract(this, style);
+            this._sceneTransform = mode.extract(this, style);
 
             //create inverse
-            this.inverseSceneTransform = this.sceneTransform.slice(0, this.sceneTransform.length).reverse();
-            for (var i = 0; i < this.inverseSceneTransform.length; ++i)
-                this.inverseSceneTransform[i] = this.inverseSceneTransform[i].clone().invert();
+            this._inverseSceneTransform = this._sceneTransform.slice(0, this._sceneTransform.length).reverse();
+            for (var i = 0; i < this._inverseSceneTransform.length; ++i)
+                this._inverseSceneTransform[i] = this._inverseSceneTransform[i].clone().invert();
         }
 
         public clear(): void {
             this.element = null;
-            this.sceneTransform = [];
-            this.inverseSceneTransform = [];
+            this._sceneTransform = [];
+            this._inverseSceneTransform = [];
             this.boxSizing.clear();
             this.matrix.identity();
         }
@@ -146,8 +147,8 @@ module jsidea.geom {
             this.boxSizing.point(ret, fromBox || this.fromBox, layout.BoxModel.BORDER);
             
             //unproject from parent to child
-            for (var i = 0; i < this.inverseSceneTransform.length; ++i)
-                ret = this.inverseSceneTransform[i].unproject(ret, ret);
+            for (var i = 0; i < this._inverseSceneTransform.length; ++i)
+                ret = this._inverseSceneTransform[i].unproject(ret, ret);
 
             //apply box model transformations
             this.boxSizing.point(ret, layout.BoxModel.BORDER, toBox || this.toBox);
@@ -190,9 +191,9 @@ module jsidea.geom {
             this.boxSizing.point(ret, fromBox || this.fromBox, layout.BoxModel.BORDER);            
             
             //project from child to parent
-            var l = this.sceneTransform.length;
+            var l = this._sceneTransform.length;
             for (var i = 0; i < l; ++i)
-                ret = this.sceneTransform[i].project(ret, ret);
+                ret = this._sceneTransform[i].project(ret, ret);
             
             //apply to-box model transformations
             this.boxSizing.point(ret, layout.BoxModel.BORDER, toBox || this.toBox);

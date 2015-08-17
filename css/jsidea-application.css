@@ -56,45 +56,47 @@ canvas {
 	/* box-sizing: border-box; */
 }
 #view {
+	position: absolute;
 	width: 1024px;
 	height: 1024px;
+	/* min-width: 1024px;
+	min-height: 1024px; */
 	border: 100px solid #FF00FF;
-	
-	background-image: url(../assets/jsidea-logo.png);
+	right: 0px;
+	/* bottom: 0px; */
+	/* left: 50%; */
+	/* background-image: url(../assets/jsidea-logo.png);
 	background-size: 256px 256px;
 	background-repeat: no-repeat;
-	background-attachment: fixed;
+	background-attachment: fixed; */
 }
 
 #content {
 	width: 512px;
 	height: 512px;
-	border: 10px solid #FFFF00;
-	margin: 20px;
+	margin: 5px;
 	padding: 200px;
-	border: 40px solid #FFF000;
+	border: 10px solid #FFF000;
 	
 	
 }
 
 #a-cont {
-	border: 70px solid #00FFFF;
+	border: 50px solid #00FFFF;
 	width: 512px;
 	height: 512px;
 	left: 100px;
 	top: 100px;
-	margin: 40px;
-	padding: 60px;
-	
-	
+	margin: 70px;
+	padding: 30px;
 }
 
 #b-cont {
 	border: 35px solid #0000FF;
 	width: 512px;
 	height: 512px;
-	padding: 45px;
-	margin: 20px;
+	padding: 25px;
+	margin: 40px;
 }
 
 #c-cont {

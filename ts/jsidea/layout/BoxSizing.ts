@@ -5,6 +5,8 @@ module jsidea.layout {
         public style: CSSStyleDeclaration;
         public width: number = 0;
         public height: number = 0;
+        public parentWidth: number = 0;
+        public parentHeight: number = 0;
 
         public marginTop: number = 0;
         public marginRight: number = 0;
@@ -41,26 +43,63 @@ module jsidea.layout {
             this.width = element.offsetWidth;
             this.height = element.offsetHeight;
 
-            this.marginTop = math.Number.parse(style.marginTop, 0);
-            this.marginRight = math.Number.parse(style.marginRight, 0);
-            this.marginBottom = math.Number.parse(style.marginBottom, 0);
-            this.marginLeft = math.Number.parse(style.marginLeft, 0);
+            if (element.parentElement) {
+                this.parentWidth = element.parentElement.clientWidth;
+                this.parentHeight = element.parentElement.clientHeight;
+            }
+            else {
+                this.parentWidth = window.innerWidth;
+                this.parentHeight = window.innerHeight;
+            }
 
-            this.paddingTop = math.Number.parse(style.paddingTop, 0);
-            this.paddingRight = math.Number.parse(style.paddingRight, 0);
-            this.paddingBottom = math.Number.parse(style.paddingBottom, 0);
-            this.paddingLeft = math.Number.parse(style.paddingLeft, 0);
+            var w = this.parentWidth;
+            var h = this.parentHeight;
+            this.marginTop = math.Number.relation(style.marginTop, h, 0);
+            this.marginRight = math.Number.relation(style.marginRight, w, 0);
+            this.marginBottom = math.Number.relation(style.marginBottom, h, 0);
+            this.marginLeft = math.Number.relation(style.marginLeft, w, 0);
 
-            this.borderTop = math.Number.parse(style.borderTopWidth, 0);
-            this.borderRight = math.Number.parse(style.borderRightWidth, 0);
-            this.borderBottom = math.Number.parse(style.borderBottomWidth, 0);
-            this.borderLeft = math.Number.parse(style.borderLeftWidth, 0);
+            this.paddingTop = math.Number.relation(style.paddingTop, h, 0);
+            this.paddingRight = math.Number.relation(style.paddingRight, w, 0);
+            this.paddingBottom = math.Number.relation(style.paddingBottom, h, 0);
+            this.paddingLeft = math.Number.relation(style.paddingLeft, w, 0);
+
+            this.borderTop = math.Number.relation(style.borderTopWidth, h, 0);
+            this.borderRight = math.Number.relation(style.borderRightWidth, w, 0);
+            this.borderBottom = math.Number.relation(style.borderBottomWidth, h, 0);
+            this.borderLeft = math.Number.relation(style.borderLeftWidth, w, 0);
+
+            return this;
+        }
+
+        public copyFrom(size: BoxSizing): BoxSizing {
+            this.element = size.element;
+            this.style = size.style;
+            this.width = size.width;
+            this.height = size.height;
+            this.parentWidth = size.parentWidth;
+            this.parentHeight = size.parentHeight;
+
+            this.marginTop = size.marginTop;
+            this.marginRight = size.marginRight;
+            this.marginBottom = size.marginBottom;
+            this.marginLeft = size.marginLeft;
+
+            this.paddingTop = size.paddingTop;
+            this.paddingRight = size.paddingRight;
+            this.paddingBottom = size.paddingBottom;
+            this.paddingLeft = size.paddingLeft;
+
+            this.borderTop = size.borderTop;
+            this.borderRight = size.borderRight;
+            this.borderBottom = size.borderBottom;
+            this.borderLeft = size.borderLeft;
 
             return this;
         }
 
         public clone(): BoxSizing {
-            return new BoxSizing();
+            return (new BoxSizing()).copyFrom(this);
         }
 
         public clear(): BoxSizing {
@@ -68,6 +107,8 @@ module jsidea.layout {
             this.style = null;
             this.width = 0;
             this.height = 0;
+            this.parentWidth = 0;
+            this.parentHeight = 0;
 
             this.marginTop = 0;
             this.marginRight = 0;
