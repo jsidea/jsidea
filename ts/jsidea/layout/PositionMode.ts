@@ -29,7 +29,19 @@ module jsidea.layout {
                 if (leftAuto || topAuto) {
                     var node = StyleChain.create(element);
                     var pos = new geom.Point3D();
-                    if (node.isSticked) {
+                    if (node.isRelative) {
+                        this._size.update(node.element, node.style);
+                        this._sizeParent.update(node.parent.element, node.parent.style);
+                        pos.x = node.position.x;
+                        pos.y = node.position.y;
+                        pos.x -= node.parent.clientLeft;
+                        pos.y -= node.parent.clientTop;
+                        pos.x -= this._sizeParent.paddingLeft;
+                        pos.y -= this._sizeParent.paddingTop;
+                        pos.x -= this._size.marginLeft;
+                        pos.y -= this._size.marginTop;
+                    }
+                    else if (node.isSticked) {
                         pos.setTo(node.offset.x, node.offset.y, 0);
                         this._size.update(node.element, node.style);
                         pos.x -= element.ownerDocument.body.scrollLeft + this._size.marginLeft;
@@ -77,19 +89,46 @@ module jsidea.layout {
         }
     }
     class BottomRightMode implements IPositionMode {
+        private _size: BoxSizing = new BoxSizing();
         public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             PositionMode.TOP_LEFT.transform(point, element, style);
-            point.x += element.offsetWidth;
-            point.y += element.offsetHeight;
+
+            var parentWidth = 0;
+            var parentHeight = 0;
             if (element.parentElement) {
-                point.x = element.parentElement.clientWidth - point.x;
-                point.y = element.parentElement.clientHeight - point.y;
+                parentWidth = element.parentElement.clientWidth;
+                parentHeight = element.parentElement.clientHeight;
+            }
+
+            if (style.position == "fixed") {
+                var node = layout.StyleChain.create(element);
+                if (node.isSticked) {
+                    parentWidth = element.ownerDocument.body.clientWidth;
+                    parentHeight = element.ownerDocument.body.clientHeight;
+                }
+                this._size.update(element);
+                point.x += this._size.marginLeft;
+                point.y += this._size.marginTop;
+                point.x += this._size.marginRight;
+                point.y += this._size.marginBottom;
+                point.x += element.offsetWidth;
+                point.y += element.offsetHeight;
+                point.x = parentWidth - point.x;
+                point.y = parentHeight - point.y;
+            }
+            //if its relative the bottom/right are offset to "calced"/layout-position
+            else if (style.position == "relative") {
+                point.x = -point.x;
+                point.y = -point.y;
+                return point;
             }
             else {
-                console.log("WINDOW");
-                point.x = window.innerWidth - point.x;
-                point.y = window.innerHeight - point.y;
+                point.x += element.offsetWidth;
+                point.y += element.offsetHeight;
+                point.x = parentWidth - point.x;
+                point.y = parentHeight - point.y;
             }
+
             return point;
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
