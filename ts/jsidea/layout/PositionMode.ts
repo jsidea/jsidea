@@ -20,9 +20,9 @@ module jsidea.layout {
         private _sizeParent: BoxSizing = new BoxSizing();
         private _size: BoxSizing = new BoxSizing();
         public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
-            //another WebKit/IE bug: if top/left is auto the used/computed style
-            //should reflect the offsetParent's border, but it returns "auto auto".
             //!IMPORTANT: style needs to be an computed style not the element's style-property
+            
+            //TODO: its not running fine...
             if (system.Caps.isWebKit) {
                 var leftAuto = isNaN(parseInt(style.left));
                 var topAuto = isNaN(parseInt(style.top));
@@ -59,19 +59,40 @@ module jsidea.layout {
                         this._sizeParent.point(pos, BoxModel.BORDER, BoxModel.CONTENT);
                     }
                     return point.add(
-                        math.Number.parse(style.left, pos.x),
-                        math.Number.parse(style.top, pos.y),
+                        pos.x,
+                        pos.y,
                         0);
                 }
             }
+            //TODO: its not running fine...
             else if (system.Caps.isInternetExplorer) {
                 if (isNaN(parseInt(style.left)) || isNaN(parseInt(style.top))) {
                     this._size.update(element, style);
+                    this._sizeParent.update(element.parentElement);
+                    var dx = element.offsetLeft;
+                    var dy = element.offsetTop;
+                    if (style.position == "relative") {
+                        if (style.transform != "none") {
+                            dx -= this._sizeParent.borderLeft - this._sizeParent.paddingLeft;
+                            dy -= this._sizeParent.borderTop - this._sizeParent.paddingTop;
+                        }
+                    }
+                    if (element.offsetParent && style.transform != "none") {
+                        dx -= element.offsetParent.clientLeft;
+                        dy -= element.offsetParent.clientTop;
+                    }
+                    else {
+                        dx -= this._sizeParent.borderLeft;
+                        dy -= this._sizeParent.borderTop;
+                    }
                     return point.add(
-                        math.Number.parse(style.left, element.offsetLeft - this._size.marginLeft),
-                        math.Number.parse(style.top, element.offsetTop - this._size.marginTop),
+                        math.Number.parse(style.left, dx),
+                        math.Number.parse(style.top, dy),
                         0);
                 }
+            }
+            else if (system.Caps.isFirefox) {
+                //nice: firefox reflects the top left in any case
             }
 
             return point.add(
@@ -81,7 +102,7 @@ module jsidea.layout {
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             if (style.position === "static") {
-                console.warn("You cannot apply top/left to an static element");
+                console.warn("You cannot apply top/left to an static element.");
                 return;
             }
             element.style.left = Math.round(point.x) + "px";
@@ -133,7 +154,7 @@ module jsidea.layout {
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             if (style.position === "static") {
-                console.warn("You cannot apply bottom/right to an static element");
+                console.warn("You cannot apply bottom/right to an static element.");
                 return;
             }
             element.style.right = Math.round(point.x) + "px";

@@ -116,8 +116,8 @@ module jsidea.test {
             //            pos.bounds.element = a;
             
 //            pos.to.boxModel = layout.BoxModel.BACKGROUND;
-//            pos.mode = layout.PositionMode.TOP_LEFT;
-            pos.mode = layout.PositionMode.BOTTOM_RIGHT;
+            pos.mode = layout.PositionMode.TOP_LEFT;
+//            pos.mode = layout.PositionMode.BOTTOM_RIGHT;
 //            pos.to.minX = 0;
 //            pos.to.minY = 0;
             
@@ -273,7 +273,7 @@ module jsidea.test {
                     text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
                     //                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
 //                    text.Text.conc(12, " ", "ACC", node.isAccumulatable),
-//                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
+                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
                     text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),
                                         text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
                     text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
