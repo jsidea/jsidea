@@ -104,7 +104,7 @@ module jsidea.geom {
         
         public static createBoundingBox(element: HTMLElement, ret: Box2D = new Box2D()): Box2D {
             ret.copyFromClientRect(element.getBoundingClientRect());
-            if (system.Caps.isWebKit) {
+            if (system.Browser.isWebKit) {
                 ret.x += document.body.scrollLeft;
                 ret.y += document.body.scrollTop;
             }

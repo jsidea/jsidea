@@ -11,7 +11,7 @@ module jsidea.layout {
             var matrix = geom.Matrix3D.create(element);
             matrix.setPosition(point);
             //WebKit bug
-            if (system.Caps.isWebKit)
+            if (system.Browser.isWebKit)
                 matrix.m43 *= 1 / (window.innerWidth / window.outerWidth);
             element.style.transform = matrix.getCSS();
         }
@@ -23,39 +23,44 @@ module jsidea.layout {
             //!IMPORTANT: style needs to be an computed style not the element's style-property
             
             //TODO: its not running fine...
-            if (system.Caps.isWebKit) {
-                var leftAuto = isNaN(parseInt(style.left));
-                var topAuto = isNaN(parseInt(style.top));
+            if (system.Browser.isWebKit) {
+                var leftAuto = style.left == "auto";
+                var topAuto = style.top == "auto";
                 if (leftAuto || topAuto) {
                     var node = StyleChain.create(element);
                     var pos = new geom.Point3D();
                     if (node.isRelative) {
                         this._size.update(node.element, node.style);
                         this._sizeParent.update(node.parent.element, node.parent.style);
-                        pos.x = node.position.x;
-                        pos.y = node.position.y;
-                        pos.x -= node.parent.clientLeft;
-                        pos.y -= node.parent.clientTop;
+                        pos.x = node.position.x - node.parent.clientLeft;
+                        pos.y = node.position.y - node.parent.clientTop;
                         pos.x -= this._sizeParent.paddingLeft;
                         pos.y -= this._sizeParent.paddingTop;
                         pos.x -= this._size.marginLeft;
                         pos.y -= this._size.marginTop;
                     }
                     else if (node.isSticked) {
-                        pos.setTo(node.offset.x, node.offset.y, 0);
+                        //get the offset to body
+                        pos.x = node.offset.x;
+                        pos.y = node.offset.y;
+                        //subtract body's margin and scroll values
                         this._size.update(node.element, node.style);
                         pos.x -= element.ownerDocument.body.scrollLeft + this._size.marginLeft;
                         pos.y -= element.ownerDocument.body.scrollTop + this._size.marginTop;
+                    }
+                    else if (node.isAbsolute) {
+                        //get the offset to offsetParent
+                        pos.x = node.offset.x - node.offsetParent.offset.x;
+                        pos.y = node.offset.y - node.offsetParent.offset.y;
+                        //subtract the parent's border
+                        pos.x -= node.parent.clientLeft;
+                        pos.y -= node.parent.clientTop;
                     }
                     else {
                         this._size.update(node.element, node.style);
                         this._sizeParent.update(node.parent.element, node.parent.style);
                         pos.x = node.position.x + this._sizeParent.paddingLeft - this._size.marginLeft;
                         pos.y = node.position.y + this._sizeParent.paddingTop - this._size.marginTop;
-                        if (node.isAbsolute) {
-                            pos.x += node.parent.clientLeft;
-                            pos.y += node.parent.clientTop;
-                        }
                         this._sizeParent.point(pos, BoxModel.BORDER, BoxModel.CONTENT);
                     }
                     return point.add(
@@ -65,25 +70,32 @@ module jsidea.layout {
                 }
             }
             //TODO: its not running fine...
-            else if (system.Caps.isInternetExplorer) {
-                if (isNaN(parseInt(style.left)) || isNaN(parseInt(style.top))) {
+            else if (system.Browser.isInternetExplorer) {
+                var leftAuto = style.left == "auto";
+                var topAuto = style.top == "auto";
+                if (leftAuto || topAuto) {
                     this._size.update(element, style);
-                    this._sizeParent.update(element.parentElement);
                     var dx = element.offsetLeft;
                     var dy = element.offsetTop;
                     if (style.position == "relative") {
-                        if (style.transform != "none") {
-                            dx -= this._sizeParent.borderLeft - this._sizeParent.paddingLeft;
-                            dy -= this._sizeParent.borderTop - this._sizeParent.paddingTop;
+                        this._sizeParent.update(element.parentElement);
+                        if (element.parentElement == element.ownerDocument.body) {
+                            dx -= this._size.marginLeft + this._sizeParent.borderLeft;
+                            dy -= this._size.marginTop + this._sizeParent.borderRight;
+                        }
+                        else {
+                            dx -= this._size.marginLeft + this._sizeParent.paddingLeft;
+                            dy -= this._size.marginTop + this._sizeParent.paddingTop;
                         }
                     }
-                    if (element.offsetParent && style.transform != "none") {
-                        dx -= element.offsetParent.clientLeft;
-                        dy -= element.offsetParent.clientTop;
+                    else if (style.position == "fixed") {
+                        this._sizeParent.update(element.ownerDocument.body);
+                        dx -= this._size.marginLeft + this._sizeParent.paddingLeft;
+                        dy -= this._size.marginTop + this._sizeParent.paddingTop;
                     }
-                    else {
-                        dx -= this._sizeParent.borderLeft;
-                        dy -= this._sizeParent.borderTop;
+                    else if (style.position == "absolute") {
+                        dx -= this._size.marginLeft;
+                        dy -= this._size.marginTop;
                     }
                     return point.add(
                         math.Number.parse(style.left, dx),
@@ -91,8 +103,9 @@ module jsidea.layout {
                         0);
                 }
             }
-            else if (system.Caps.isFirefox) {
+            else if (system.Browser.isFirefox) {
                 //nice: firefox reflects the top left in any case
+                //i think this is not w3c standard but its the best solution
             }
 
             return point.add(
@@ -132,6 +145,7 @@ module jsidea.layout {
                 point.y += this._size.marginTop;
                 point.x += this._size.marginRight;
                 point.y += this._size.marginBottom;
+                
                 point.x += element.offsetWidth;
                 point.y += element.offsetHeight;
                 point.x = parentWidth - point.x;

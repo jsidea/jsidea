@@ -32,11 +32,11 @@ module jsidea.system {
         }
 
         public get pageX(): number {
-            return !system.Caps.isWebKit ? this._pageX : this._pageX - document.body.scrollLeft;
+            return !system.Browser.isWebKit ? this._pageX : this._pageX - document.body.scrollLeft;
         }
 
         public get pageY(): number {
-            return !system.Caps.isWebKit ? this._pageY : this._pageY - document.body.scrollTop;
+            return !system.Browser.isWebKit ? this._pageY : this._pageY - document.body.scrollTop;
         }
 
         public get active(): boolean {

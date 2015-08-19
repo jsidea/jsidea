@@ -1,80 +1,80 @@
 module jsidea.system {
-    export class Caps {
+    export class Browser {
         //operating systems
         public static isWindows = /win/i.test(navigator.appVersion);
         public static isMac = /mac/i.test(navigator.appVersion);
         public static isUnix = /x11/i.test(navigator.appVersion);
         public static isLinux = /linux/i.test(navigator.appVersion);
         public static osName: string = (() => {
-            if (Caps.isWindows)
+            if (Browser.isWindows)
                 return "Windows";
-            if (Caps.isMac)
+            if (Browser.isMac)
                 return "Mac OS X";
-            if (Caps.isUnix)
+            if (Browser.isUnix)
                 return "Unix";
-            if (Caps.isLinux)
+            if (Browser.isLinux)
                 return "Linux";
             return "";
         })();
         public static osVersion: string = (() => {
-            if (Caps.isWindows)
+            if (Browser.isWindows)
                 return "7";
-            if (Caps.isMac)
+            if (Browser.isMac)
                 return "Yosemite";
-            if (Caps.isUnix)
+            if (Browser.isUnix)
                 return "Unix";
-            if (Caps.isLinux)
+            if (Browser.isLinux)
                 return "Linux";
             return "";
         })();        
         
         //browsers
         public static isOpera = /opr\//i.test(navigator.userAgent) || /opera/i.test(navigator.userAgent);
-        public static isChrome = !Caps.isOpera && /chrome/i.test(navigator.userAgent);
+        public static isChrome = !Browser.isOpera && /chrome/i.test(navigator.userAgent);
         public static isFirefox = /firefox/i.test(navigator.userAgent);
-        public static isSafari = !Caps.isChrome && !Caps.isFirefox && !Caps.isOpera && /safari/i.test(navigator.userAgent);
+        public static isSafari = !Browser.isChrome && !Browser.isFirefox && !Browser.isOpera && /safari/i.test(navigator.userAgent);
         public static isInternetExplorer = (navigator.userAgent.indexOf("MSIE") != -1) || !!navigator.userAgent.match(/Trident.*rv[ :]*11\./);
         public static isEdge = /edge\//i.test(navigator.userAgent);
         public static isYandex = /yandex/i.test(navigator.userAgent);
         public static browserName: string = (() => {
-            if (Caps.isOpera)
+            if (Browser.isOpera)
                 return "Opera";
-            if (Caps.isChrome)
+            if (Browser.isChrome)
                 return "Chrome";
-            if (Caps.isFirefox)
+            if (Browser.isFirefox)
                 return "Firefox";
-            if (Caps.isSafari)
+            if (Browser.isSafari)
                 return "Safari";
-            if (Caps.isInternetExplorer)
+            if (Browser.isInternetExplorer)
                 return "Internet Explorer";
-            if (Caps.isYandex)
+            if (Browser.isYandex)
                 return "Yandex";
             return "";
         })();
-        public static browserInfoDate = "2015-08-07";
-        public static browserVersionCurrentFull: string = (() => {
-            if (Caps.isOpera)
+        public static infoDate = "2015-08-07";
+        public static versionCurrentFull: string = (() => {
+            if (Browser.isOpera)
                 return "31.0.1889.106";
-            if (Caps.isChrome)
+            if (Browser.isChrome)
                 return "44.0.2403.130";
-            if (Caps.isFirefox)
+            if (Browser.isFirefox)
                 return "39.0.3";
             //apple discontinued windows-branch
-            if (Caps.isSafari && !Caps.isMac)
+            if (Browser.isSafari && !Browser.isMac)
                 return "5.1.7";
-            if (Caps.isSafari && Caps.isMac)
+            if (Browser.isSafari && Browser.isMac)
                 return "8.0";
-            if (Caps.isInternetExplorer)
+            if (Browser.isInternetExplorer)
                 return "11.0.9600.17914";
-            if (Caps.isEdge)
+            if (Browser.isEdge)
                 return "12.0";
-            if (Caps.isYandex)
+            if (Browser.isYandex)
                 return "1.0";
             return "";
         })();
-        public static browserVersionCurrent: number = parseInt(Caps.browserVersionCurrentFull);
+        public static versionCurrent: number = parseInt(Browser.versionCurrentFull);
         //source: http://www.javascripter.net/faq/browsern.htm
-        public static browserVersionFull: string = (() => {
+        public static versionFull: string = (() => {
             var nVer = navigator.appVersion;
             var nAgt = navigator.userAgent.toLowerCase();
             var fullVersion = '' + parseFloat(navigator.appVersion);
@@ -123,29 +123,29 @@ module jsidea.system {
                 fullVersion = "";
             return fullVersion;
         })();
-        public static browserVersion: number = parseInt(Caps.browserVersionFull);
+        public static version: number = parseInt(Browser.versionFull);
         
         //engines
-        public static isWebKit = !Caps.isInternetExplorer && !Caps.isEdge && /webkit/i.test(navigator.userAgent);
-        public static isBlink = Caps.isWebKit && ((Caps.isChrome && Caps.browserVersion >= 28) || (Caps.isOpera && Caps.browserVersion >= 15) || Caps.isYandex);
+        public static isWebKit = !Browser.isInternetExplorer && !Browser.isEdge && /webkit/i.test(navigator.userAgent);
+        public static isBlink = Browser.isWebKit && ((Browser.isChrome && Browser.version >= 28) || (Browser.isOpera && Browser.version >= 15) || Browser.isYandex);
         public static isTrident = /trident/i.test(navigator.userAgent);
-        public static isGecko = !Caps.isInternetExplorer && !Caps.isWebKit && /gecko/i.test(navigator.userAgent);
-        public static isEdgeHTML = Caps.isEdge && Caps.browserVersion >= 12;
+        public static isGecko = !Browser.isInternetExplorer && !Browser.isWebKit && /gecko/i.test(navigator.userAgent);
+        public static isEdgeHTML = Browser.isEdge && Browser.version >= 12;
         public static engineName: string = (() => {
-            if (Caps.isBlink)
+            if (Browser.isBlink)
                 return "WebKit/Blink";
-            if (Caps.isWebKit)
+            if (Browser.isWebKit)
                 return "WebKit";
-            if (Caps.isTrident)
+            if (Browser.isTrident)
                 return "Trident";
-            if (Caps.isGecko)
+            if (Browser.isGecko)
                 return "Gecko";
             return "";
         })();
 
         public static qualifiedClassName: string = "jsidea.system.Caps";
         public toString(): string {
-            return "[" + Caps.qualifiedClassName + "]";
+            return "[" + Browser.qualifiedClassName + "]";
         }
     }
 }

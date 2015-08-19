@@ -57,14 +57,15 @@ canvas {
 }
 #view {
 	position: absolute;
-	width: 1024px;
-	height: 1024px;
-	/* min-width: 1024px;
-	min-height: 1024px; */
+	/* width: 1024px;
+	height: 1024px; */
+	min-width: 1024px;
+	min-height: 1024px;
 	border: 100px solid #FF00FF;
-	right: 0px;
-	bottom: 0px;
-	/* left: 50%; */
+	/* right: 0px;
+	bottom: 0px; */
+	/* top:0px;
+	left: 0px; */
 	/* background-image: url(../assets/jsidea-logo.png);
 	background-size: 256px 256px;
 	background-repeat: no-repeat;

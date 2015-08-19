@@ -220,7 +220,7 @@ module jsidea.layout {
                 ret.y -= size.element.scrollTop;
             }
             else if (attachment == "fixed") {
-                if (system.Caps.isWebKit) {
+                if (system.Browser.isWebKit) {
                     ret.x += size.element.ownerDocument.body.scrollLeft;
                     ret.y += size.element.ownerDocument.body.scrollTop;
                 }

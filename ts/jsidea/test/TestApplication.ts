@@ -81,7 +81,7 @@ module jsidea.test {
             var vie = document.getElementById("view");
 
             var max = 16;
-            var te = 14;//5;//7;//11 for ie11 testing 5 is scrolling test
+            var te = 13;//5;//7;//11 for ie11 testing 5 is scrolling test
             document.body.className = "test-" + te;
 
             var can = document.createElement("canvas");
@@ -116,7 +116,7 @@ module jsidea.test {
             //            pos.bounds.element = a;
             
 //            pos.to.boxModel = layout.BoxModel.BACKGROUND;
-            pos.mode = layout.PositionMode.TOP_LEFT;
+            pos.mode = layout.PositionMode.BOTTOM_RIGHT;
 //            pos.mode = layout.PositionMode.BOTTOM_RIGHT;
 //            pos.to.minX = 0;
 //            pos.to.minY = 0;
@@ -152,14 +152,14 @@ module jsidea.test {
             var draw = () => {
                 ctx.clearRect(0, 0, can.width, can.height);
 
-//                this.drawBoundingBox(ctx, vie);
-//                this.drawBoundingBox(ctx, con);
-//                this.drawBoundingBox(ctx, a);
-//                this.drawBoundingBox(ctx, b);
-//                this.drawBoundingBox(ctx, c);
-//                this.drawBoundingBox(ctx, d);
-//                this.drawBoundingBox(ctx, xc);
-//                this.drawBoundingBox(ctx, can);
+                this.drawBoundingBox(ctx, vie);
+                this.drawBoundingBox(ctx, con);
+                this.drawBoundingBox(ctx, a);
+                this.drawBoundingBox(ctx, b);
+                this.drawBoundingBox(ctx, c);
+                this.drawBoundingBox(ctx, d);
+                this.drawBoundingBox(ctx, xc);
+                this.drawBoundingBox(ctx, can);
 
                 this.logChain(xc);
             };
