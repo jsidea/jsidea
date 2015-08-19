@@ -116,7 +116,7 @@ module jsidea.test {
             //            pos.bounds.element = a;
             
             //            pos.to.boxModel = layout.BoxModel.BACKGROUND;
-            pos.mode = layout.PositionMode.TOP_RIGHT;
+            pos.mode = layout.PositionMode.BOTTOM_LEFT;
             //            pos.mode = layout.PositionMode.BOTTOM_RIGHT;
             //            pos.to.minX = 0;
             //            pos.to.minY = 0;
@@ -128,20 +128,14 @@ module jsidea.test {
             
             var target: HTMLElement = null;
             var pivot = new geom.Point3D();
-            var invertX = true;
-            var invertY = false;
+            var invertX = false;
+            var invertY = true;
             document.addEventListener("mousedown",(evt) => {
                 target = <HTMLElement> evt.target;
                 var pt = new geom.Point3D(evt.pageX, evt.pageY);
                 var loc = geom.Transform.create(target).globalToLocalPoint(pt, null, pos.to.boxModel);
-                if (invertX)
-                    pivot.x = target.offsetWidth - loc.x;
-                else
-                    pivot.x = loc.x;
-                if (invertY)
-                    pivot.y = target.offsetHeight - loc.y;
-                else
-                    pivot.y = loc.y;
+                pivot.x = invertX ? (target.offsetWidth - loc.x) : loc.x;
+                pivot.y = invertY ? (target.offsetHeight - loc.y) : loc.y;
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
                 
@@ -154,15 +148,8 @@ module jsidea.test {
                 if (!target)
                     return;
                 var pt = new geom.Point3D(this.pageX, this.pageY);
-                if (invertX)
-                    pos.to.x = target.offsetWidth - pivot.x;
-                else
-                    pos.to.x = pivot.x;
-                if (invertY)
-                    pos.to.y = target.offsetHeight - pivot.y;
-                else
-                    pos.to.y = pivot.y;
-
+                pos.to.x = invertX ? (target.offsetWidth - pivot.x) : pivot.x;
+                pos.to.y = invertY ? (target.offsetHeight - pivot.y) : pivot.y;
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
                 pos.apply(target);

@@ -22,58 +22,53 @@ module jsidea.layout {
         public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             //!IMPORTANT: style needs to be an computed style not the element's style-property
             
-            //TODO: its not running fine...
-            if (system.Browser.isWebKit) {
-                var leftAuto = style.left == "auto";
-                var topAuto = style.top == "auto";
-                if (leftAuto || topAuto) {
+            var leftAuto = style.left == "auto";
+            var topAuto = style.top == "auto";
+            if (leftAuto || topAuto) {
+                if (system.Browser.isWebKit) {
                     var node = StyleChain.create(element);
-                    var pos = new geom.Point3D();
+                    var position = new geom.Point3D();
                     if (node.isRelative) {
                         this._size.update(node.element, node.style);
                         this._sizeParent.update(node.parent.element, node.parent.style);
-                        pos.x = node.position.x - node.parent.clientLeft;
-                        pos.y = node.position.y - node.parent.clientTop;
-                        pos.x -= this._sizeParent.paddingLeft;
-                        pos.y -= this._sizeParent.paddingTop;
-                        pos.x -= this._size.marginLeft;
-                        pos.y -= this._size.marginTop;
+                        position.x = node.position.x - node.parent.clientLeft;
+                        position.y = node.position.y - node.parent.clientTop;
+                        position.x -= this._sizeParent.paddingLeft;
+                        position.y -= this._sizeParent.paddingTop;
+                        position.x -= this._size.marginLeft;
+                        position.y -= this._size.marginTop;
                     }
                     else if (node.isSticked) {
                         //get the offset to body
-                        pos.x = node.offset.x;
-                        pos.y = node.offset.y;
+                        position.x = node.offset.x;
+                        position.y = node.offset.y;
                         //subtract body's margin and scroll values
                         this._size.update(node.element, node.style);
-                        pos.x -= element.ownerDocument.body.scrollLeft + this._size.marginLeft;
-                        pos.y -= element.ownerDocument.body.scrollTop + this._size.marginTop;
+                        position.x -= element.ownerDocument.body.scrollLeft + this._size.marginLeft;
+                        position.y -= element.ownerDocument.body.scrollTop + this._size.marginTop;
                     }
                     else if (node.isAbsolute) {
                         //get the offset to offsetParent
-                        pos.x = node.offset.x - node.offsetParent.offset.x;
-                        pos.y = node.offset.y - node.offsetParent.offset.y;
+                        position.x = node.offset.x - node.offsetParent.offset.x;
+                        position.y = node.offset.y - node.offsetParent.offset.y;
                         //subtract the parent's border
-                        pos.x -= node.parent.clientLeft;
-                        pos.y -= node.parent.clientTop;
+                        position.x -= node.parent.clientLeft;
+                        position.y -= node.parent.clientTop;
                     }
                     else {
                         this._size.update(node.element, node.style);
                         this._sizeParent.update(node.parent.element, node.parent.style);
-                        pos.x = node.position.x + this._sizeParent.paddingLeft - this._size.marginLeft;
-                        pos.y = node.position.y + this._sizeParent.paddingTop - this._size.marginTop;
-                        this._sizeParent.point(pos, BoxModel.BORDER, BoxModel.CONTENT);
+                        position.x = node.position.x + this._sizeParent.paddingLeft - this._size.marginLeft;
+                        position.y = node.position.y + this._sizeParent.paddingTop - this._size.marginTop;
+                        this._sizeParent.point(position, BoxModel.BORDER, BoxModel.CONTENT);
                     }
                     return point.add(
-                        pos.x,
-                        pos.y,
+                        position.x,
+                        position.y,
                         0);
                 }
-            }
-            //TODO: its not running fine...
-            else if (system.Browser.isInternetExplorer) {
-                var leftAuto = style.left == "auto";
-                var topAuto = style.top == "auto";
-                if (leftAuto || topAuto) {
+                //TODO: its not running fine...
+                else if (system.Browser.isInternetExplorer) {
                     this._size.update(element, style);
                     var dx = element.offsetLeft;
                     var dy = element.offsetTop;
@@ -102,10 +97,10 @@ module jsidea.layout {
                         math.Number.parse(style.top, dy),
                         0);
                 }
-            }
-            else if (system.Browser.isFirefox) {
-                //nice: firefox reflects the top left in any case
-                //i think this is not w3c standard but its the best solution
+                else if (system.Browser.isFirefox) {
+                    //nice: firefox reflects the top left in any case
+                    //i think this is not w3c standard but its the best solution
+                }
             }
 
             return point.add(
@@ -179,7 +174,7 @@ module jsidea.layout {
 
             var leftAuto = style.left == "auto";
             var minWidth = math.Number.parse(style.minWidth, 0);
-            if (!leftAuto && minWidth) {
+            if (!leftAuto) {
                 var newWidth = element.clientWidth + offsetX;
                 if (newWidth < minWidth)
                     point.x += newWidth - minWidth;
@@ -187,7 +182,7 @@ module jsidea.layout {
 
             var topAuto = style.top == "auto";
             var minHeight = math.Number.parse(style.minHeight, 0);
-            if (!topAuto && minHeight) {
+            if (!topAuto) {
                 var newHeight = element.clientHeight + offsetY;
                 if (newHeight < minHeight)
                     point.y += newHeight - minHeight;
@@ -206,7 +201,7 @@ module jsidea.layout {
     }
     class BottomLeftMode implements IPositionMode {
         public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
-            var bottom = PositionMode.BOTTOM_RIGHT.transform(point, element, style);
+            var bottom = PositionMode.BOTTOM_RIGHT.transform(point.clone(), element, style);
             var left = PositionMode.TOP_LEFT.transform(point.clone(), element, style);
             return point.setTo(left.x, bottom.y, point.z);
         }
@@ -222,7 +217,7 @@ module jsidea.layout {
     class TopRightMode implements IPositionMode {
         public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var top = PositionMode.TOP_LEFT.transform(point.clone(), element, style);
-            var right = PositionMode.BOTTOM_RIGHT.transform(point, element, style);
+            var right = PositionMode.BOTTOM_RIGHT.transform(point.clone(), element, style);
             return point.setTo(right.x, top.y, point.z);
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
