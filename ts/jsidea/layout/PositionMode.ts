@@ -115,7 +115,7 @@ module jsidea.layout {
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             if (style.position === "static") {
-                console.warn("You cannot apply top/left to an static element.");
+                console.warn("You cannot apply TopLeftMode to an static element.");
                 return;
             }
             element.style.left = Math.round(point.x) + "px";
@@ -125,54 +125,113 @@ module jsidea.layout {
     class BottomRightMode implements IPositionMode {
         private _size: BoxSizing = new BoxSizing();
         public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
-            PositionMode.TOP_LEFT.transform(point, element, style);
+            var offsetX = point.x;
+            var offsetY = point.y;
+            var rightAuto = style.right == "auto";
+            var bottomAuto = style.bottom == "auto";
+            if (rightAuto || bottomAuto) {
+                PositionMode.TOP_LEFT.transform(point, element, style);
 
-            var parentWidth = 0;
-            var parentHeight = 0;
-            if (element.parentElement) {
-                parentWidth = element.parentElement.clientWidth;
-                parentHeight = element.parentElement.clientHeight;
-            }
-
-            if (style.position == "fixed") {
-                var node = layout.StyleChain.create(element);
-                if (node.isSticked) {
-                    parentWidth = element.ownerDocument.body.clientWidth;
-                    parentHeight = element.ownerDocument.body.clientHeight;
+                var parentWidth = 0;
+                var parentHeight = 0;
+                if (element.parentElement) {
+                    parentWidth = element.parentElement.clientWidth;
+                    parentHeight = element.parentElement.clientHeight;
                 }
-                this._size.update(element);
-                point.x += this._size.marginLeft;
-                point.y += this._size.marginTop;
-                point.x += this._size.marginRight;
-                point.y += this._size.marginBottom;
-                
-                point.x += element.offsetWidth;
-                point.y += element.offsetHeight;
-                point.x = parentWidth - point.x;
-                point.y = parentHeight - point.y;
-            }
-            //if its relative the bottom/right are offset to "calced"/layout-position
-            else if (style.position == "relative") {
-                point.x = -point.x;
-                point.y = -point.y;
-                return point;
+
+                if (style.position == "fixed") {
+                    var node = layout.StyleChain.create(element);
+                    if (node.isSticked) {
+                        var body = element.ownerDocument.body;
+                        parentWidth = body.clientWidth;
+                        parentHeight = body.clientHeight;
+                    }
+                    this._size.update(element);
+                    point.x += this._size.marginLeft;
+                    point.y += this._size.marginTop;
+                    point.x += this._size.marginRight;
+                    point.y += this._size.marginBottom;
+
+                    point.x += element.offsetWidth;
+                    point.y += element.offsetHeight;
+                    point.x = parentWidth - point.x;
+                    point.y = parentHeight - point.y;
+                }
+                //if its relative the bottom/right are offset to "calced"/layout-position
+                else if (style.position == "relative") {
+                    point.x = -point.x;
+                    point.y = -point.y;
+                    return point;
+                }
+                else {
+                    point.x += element.offsetWidth;
+                    point.y += element.offsetHeight;
+                    point.x = parentWidth - point.x;
+                    point.y = parentHeight - point.y;
+                }
             }
             else {
-                point.x += element.offsetWidth;
-                point.y += element.offsetHeight;
-                point.x = parentWidth - point.x;
-                point.y = parentHeight - point.y;
+                point.setTo(
+                    math.Number.parse(style.right, 0) - point.x,
+                    math.Number.parse(style.bottom, 0) - point.y,
+                    point.z);
+            }
+
+            var leftAuto = style.left == "auto";
+            var minWidth = math.Number.parse(style.minWidth, 0);
+            if (!leftAuto && minWidth) {
+                var newWidth = element.clientWidth + offsetX;
+                if (newWidth < minWidth)
+                    point.x += newWidth - minWidth;
+            }
+
+            var topAuto = style.top == "auto";
+            var minHeight = math.Number.parse(style.minHeight, 0);
+            if (!topAuto && minHeight) {
+                var newHeight = element.clientHeight + offsetY;
+                if (newHeight < minHeight)
+                    point.y += newHeight - minHeight;
             }
 
             return point;
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             if (style.position === "static") {
-                console.warn("You cannot apply bottom/right to an static element.");
+                console.warn("You cannot apply BottomRightMode to an static element.");
                 return;
             }
             element.style.right = Math.round(point.x) + "px";
             element.style.bottom = Math.round(point.y) + "px";
+        }
+    }
+    class BottomLeftMode implements IPositionMode {
+        public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
+            var bottom = PositionMode.BOTTOM_RIGHT.transform(point, element, style);
+            var left = PositionMode.TOP_LEFT.transform(point.clone(), element, style);
+            return point.setTo(left.x, bottom.y, point.z);
+        }
+        public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
+            if (style.position === "static") {
+                console.warn("You cannot apply BottomLeftMode to an static element.");
+                return;
+            }
+            element.style.left = Math.round(point.x) + "px";
+            element.style.bottom = Math.round(point.y) + "px";
+        }
+    }
+    class TopRightMode implements IPositionMode {
+        public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
+            var top = PositionMode.TOP_LEFT.transform(point.clone(), element, style);
+            var right = PositionMode.BOTTOM_RIGHT.transform(point, element, style);
+            return point.setTo(right.x, top.y, point.z);
+        }
+        public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
+            if (style.position === "static") {
+                console.warn("You cannot apply TopRightMode to an static element.");
+                return;
+            }
+            element.style.right = Math.round(point.x) + "px";
+            element.style.top = Math.round(point.y) + "px";
         }
     }
     class BackgroundMode implements IPositionMode {
@@ -204,6 +263,8 @@ module jsidea.layout {
         public static TRANSFORM: IPositionMode = new TransformMode();
         public static TOP_LEFT: IPositionMode = new TopLeftMode();
         public static BOTTOM_RIGHT: IPositionMode = new BottomRightMode();
+        public static BOTTOM_LEFT: IPositionMode = new BottomLeftMode();
+        public static TOP_RIGHT: IPositionMode = new TopRightMode();
         public static BACKGROUND: IPositionMode = new BackgroundMode();
         public static SCROLL: IPositionMode = new ScrollMode();
     }

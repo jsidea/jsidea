@@ -115,11 +115,11 @@ module jsidea.test {
             //            pos.to.minY = 0;
             //            pos.bounds.element = a;
             
-//            pos.to.boxModel = layout.BoxModel.BACKGROUND;
-            pos.mode = layout.PositionMode.BOTTOM_RIGHT;
-//            pos.mode = layout.PositionMode.BOTTOM_RIGHT;
-//            pos.to.minX = 0;
-//            pos.to.minY = 0;
+            //            pos.to.boxModel = layout.BoxModel.BACKGROUND;
+            pos.mode = layout.PositionMode.TOP_RIGHT;
+            //            pos.mode = layout.PositionMode.BOTTOM_RIGHT;
+            //            pos.to.minX = 0;
+            //            pos.to.minY = 0;
             
             //            pos.bounds.boxModel = layout.BoxModel.PADDING;
             //            document.addEventListener("mouseover",(evt) => {
@@ -127,15 +127,25 @@ module jsidea.test {
             //            });
             
             var target: HTMLElement = null;
+            var pivot = new geom.Point3D();
+            var invertX = true;
+            var invertY = false;
             document.addEventListener("mousedown",(evt) => {
                 target = <HTMLElement> evt.target;
                 var pt = new geom.Point3D(evt.pageX, evt.pageY);
                 var loc = geom.Transform.create(target).globalToLocalPoint(pt, null, pos.to.boxModel);
-                pos.to.x = loc.x;
-                pos.to.y = loc.y;
-
+                if (invertX)
+                    pivot.x = target.offsetWidth - loc.x;
+                else
+                    pivot.x = loc.x;
+                if (invertY)
+                    pivot.y = target.offsetHeight - loc.y;
+                else
+                    pivot.y = loc.y;
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
+                
+                //                console.log("LOCAL", pos.to.x, pos.to.y, target.parentElement.clientWidth, target.parentElement.clientHeight);
             });
             document.addEventListener("mouseup",(evt) => {
                 target = null;
@@ -144,6 +154,15 @@ module jsidea.test {
                 if (!target)
                     return;
                 var pt = new geom.Point3D(this.pageX, this.pageY);
+                if (invertX)
+                    pos.to.x = target.offsetWidth - pivot.x;
+                else
+                    pos.to.x = pivot.x;
+                if (invertY)
+                    pos.to.y = target.offsetHeight - pivot.y;
+                else
+                    pos.to.y = pivot.y;
+
                 pos.from.x = pt.x;
                 pos.from.y = pt.y;
                 pos.apply(target);
@@ -161,11 +180,11 @@ module jsidea.test {
                 this.drawBoundingBox(ctx, xc);
                 this.drawBoundingBox(ctx, can);
 
-                this.logChain(xc);
+                //                this.logChain(xc);
             };
 
             //            draw();
-                        document.addEventListener("click", draw);
+            document.addEventListener("click", draw);
 
             var setTest = (e: KeyboardEvent) => {
                 if (e.keyCode == 37 || e.keyCode == 39) {
@@ -272,12 +291,12 @@ module jsidea.test {
                     text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
                     text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
                     //                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
-//                    text.Text.conc(12, " ", "ACC", node.isAccumulatable),
+                    //                    text.Text.conc(12, " ", "ACC", node.isAccumulatable),
                     text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
                     text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),
-                                        text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
+                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
                     text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
-                                        text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),
+                    text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),
                     text.Text.conc(18, " ", "OVERFLOW", node.style.overflow),
                     text.Text.conc(18, " ", "POSITION", node.style.position, node.isSticked)
                 ]).join(" ");
