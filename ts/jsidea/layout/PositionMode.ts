@@ -247,11 +247,18 @@ module jsidea.layout {
         }
     }
     class ScrollMode implements IPositionMode {
+        private _boxSizing = new BoxSizing();
         public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
-            return null;
+            this._boxSizing.update(element, style);
+            this._boxSizing.point(point, BoxModel.BORDER, BoxModel.CONTENT);
+            return point.add(
+                element.scrollLeft,
+                element.scrollTop,
+                0);;
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
-            element.style.backgroundPosition = Math.round(point.x) + "px " + Math.round(point.y) + "px";
+            element.scrollLeft = point.x;
+            element.scrollTop = point.y;
         }
     }
     export class PositionMode {
