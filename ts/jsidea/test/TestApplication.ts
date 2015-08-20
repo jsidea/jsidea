@@ -115,11 +115,19 @@ module jsidea.test {
             //            pos.to.minY = 0;
             //            pos.bounds.element = a;
             
+            //            pos.mode = layout.PositionMode.BACKGROUND;
             //            pos.to.boxModel = layout.BoxModel.BACKGROUND;
-            pos.mode = layout.PositionMode.BOTTOM_LEFT;
+            
+            //            pos.mode = layout.PositionMode.SCROLL;
+            //            pos.to.boxModel = layout.BoxModel.SCROLL;
+            
             //            pos.mode = layout.PositionMode.BOTTOM_RIGHT;
+            
+            pos.mode = layout.PositionMode.TOP_LEFT;
+            
             //            pos.to.minX = 0;
             //            pos.to.minY = 0;
+            //            pos.to.boxModel = layout.BoxModel.CONTENT;
             
             //            pos.bounds.boxModel = layout.BoxModel.PADDING;
             //            document.addEventListener("mouseover",(evt) => {
@@ -129,11 +137,13 @@ module jsidea.test {
             var target: HTMLElement = null;
             var pivot = new geom.Point3D();
             var invertX = false;
-            var invertY = true;
+            var invertY = false;
             document.addEventListener("mousedown",(evt) => {
                 target = <HTMLElement> evt.target;
+                console.log(evt.pageX, evt.pageY);
                 var pt = new geom.Point3D(evt.pageX, evt.pageY);
-                var loc = geom.Transform.create(target).globalToLocalPoint(pt, null, pos.to.boxModel);
+                var loc = geom.Transform.create(target).globalToLocalPoint(pt, layout.BoxModel.BORDER, pos.to.boxModel);
+                //                                console.log("LOCAL", loc.x, loc.y);
                 pivot.x = invertX ? (target.offsetWidth - loc.x) : loc.x;
                 pivot.y = invertY ? (target.offsetHeight - loc.y) : loc.y;
                 evt.preventDefault();
@@ -147,6 +157,7 @@ module jsidea.test {
             document.addEventListener("mousemove",(evt) => {
                 if (!target)
                     return;
+                console.log(evt.pageX, evt.pageY);
                 var pt = new geom.Point3D(this.pageX, this.pageY);
                 pos.to.x = invertX ? (target.offsetWidth - pivot.x) : pivot.x;
                 pos.to.y = invertY ? (target.offsetHeight - pivot.y) : pivot.y;
@@ -167,7 +178,7 @@ module jsidea.test {
                 this.drawBoundingBox(ctx, xc);
                 this.drawBoundingBox(ctx, can);
 
-                //                this.logChain(xc);
+                this.logChain(xc);
             };
 
             //            draw();
@@ -279,8 +290,9 @@ module jsidea.test {
                     text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
                     //                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
                     //                    text.Text.conc(12, " ", "ACC", node.isAccumulatable),
-                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
-                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),
+                    text.Text.conc(18, " ", "SCROLL", node.element.scrollLeft, node.element.scrollTop),
+//                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
+//                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),
                     text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
                     text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
                     text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),

@@ -54,19 +54,42 @@ module jsidea.layout {
         }
     }
     class ScrollBoxModel implements IBoxModel {
+        private getScroll(element: HTMLElement): geom.Point2D {
+            var scrollLeft = element.scrollLeft;
+            var scrollTop = element.scrollTop;
+            if (element == element.ownerDocument.body) {
+                if (system.Browser.isFirefox) {
+                    //                scrollLeft = element.ownerDocument.documentElement.scrollLeft;
+                    //                scrollTop = element.ownerDocument.documentElement.scrollTop;
+                }
+                else if (system.Browser.isWebKit) {
+                    scrollLeft = 0;
+                    scrollTop = 0;
+                }
+            }
+            else if (system.Browser.isWebKit && element == element.ownerDocument.documentElement) {
+                scrollLeft = element.ownerDocument.body.scrollLeft;
+                scrollTop = element.ownerDocument.body.scrollTop;
+            }
+            return new geom.Point2D(scrollLeft, scrollTop);
+        }
         public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
-            BoxModel.CONTENT.fromBorderBox(size, box);
-            box.x -= size.element.scrollLeft;
-            box.y -= size.element.scrollTop;
-            box.width -= size.width - size.element.scrollWidth;
-            box.height -= size.height - size.element.scrollHeight;
+            var scroll = this.getScroll(size.element);
+
+            BoxModel.PADDING.toBorderBox(size, box);
+            box.x += scroll.x;
+            box.y += scroll.y;
+            box.width += size.element.scrollWidth - size.width;
+            box.height += size.element.scrollHeight - size.height;
         }
         public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
-            BoxModel.CONTENT.toBorderBox(size, box);
-            box.x += size.element.scrollLeft;
-            box.y += size.element.scrollTop;
-            box.width += size.width - size.element.scrollWidth;
-            box.height += size.height - size.element.scrollHeight;
+            var scroll = this.getScroll(size.element);
+
+            BoxModel.PADDING.toBorderBox(size, box);
+            box.x -= scroll.x;
+            box.y -= scroll.y;
+            box.width -= size.element.scrollWidth - size.width;
+            box.height -= size.element.scrollHeight - size.height;
         }
     }
     class CanvasBoxModel implements IBoxModel {

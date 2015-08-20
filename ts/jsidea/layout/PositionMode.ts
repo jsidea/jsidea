@@ -4,12 +4,19 @@ module jsidea.layout {
         apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void;
     }
     class TransformMode implements IPositionMode {
-        public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
-            return point;
+        public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
+            return offset;
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             var matrix = geom.Matrix3D.create(element);
-            matrix.setPosition(point);
+
+            if (!isNaN(point.x))
+                matrix.m41 = point.x;
+            if (!isNaN(point.y))
+                matrix.m42 = point.y;
+            if (!isNaN(point.z))
+                matrix.m43 = point.z;
+
             //WebKit bug
             if (system.Browser.isWebKit)
                 matrix.m43 *= 1 / (window.innerWidth / window.outerWidth);
@@ -19,7 +26,7 @@ module jsidea.layout {
     class TopLeftMode implements IPositionMode {
         private _sizeParent: BoxSizing = new BoxSizing();
         private _size: BoxSizing = new BoxSizing();
-        public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
+        public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             //!IMPORTANT: style needs to be an computed style not the element's style-property
             
             var leftAuto = style.left == "auto";
@@ -62,7 +69,7 @@ module jsidea.layout {
                         position.y = node.position.y + this._sizeParent.paddingTop - this._size.marginTop;
                         this._sizeParent.point(position, BoxModel.BORDER, BoxModel.CONTENT);
                     }
-                    return point.add(
+                    return offset.add(
                         position.x,
                         position.y,
                         0);
@@ -92,7 +99,7 @@ module jsidea.layout {
                         dx -= this._size.marginLeft;
                         dy -= this._size.marginTop;
                     }
-                    return point.add(
+                    return offset.add(
                         math.Number.parse(style.left, dx),
                         math.Number.parse(style.top, dy),
                         0);
@@ -103,7 +110,7 @@ module jsidea.layout {
                 }
             }
 
-            return point.add(
+            return offset.add(
                 math.Number.parse(style.left, 0),
                 math.Number.parse(style.top, 0),
                 0);
@@ -113,19 +120,57 @@ module jsidea.layout {
                 console.warn("You cannot apply TopLeftMode to an static element.");
                 return;
             }
-            element.style.left = Math.round(point.x) + "px";
-            element.style.top = Math.round(point.y) + "px";
+            if (!isNaN(point.x))
+                element.style.left = Math.round(point.x) + "px";
+            if (!isNaN(point.y))
+                element.style.top = Math.round(point.y) + "px";
+        }
+    }
+    class TopLeftClampedMode implements IPositionMode {
+        public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
+            var offsetX = offset.x;
+            var offsetY = offset.y;
+            PositionMode.TOP_LEFT.transform(offset, element, style);
+
+            var rightAuto = style.right == "auto";
+            var minWidth = math.Number.parse(style.minWidth, 0);
+            if (!rightAuto) {
+                var newWidth = element.clientWidth - offsetX;
+                if (newWidth < minWidth)
+                    offset.x += newWidth - minWidth;
+            }
+
+            var bottomAuto = style.bottom == "auto";
+            var minHeight = math.Number.parse(style.minHeight, 0);
+            if (!bottomAuto) {
+                var newHeight = element.clientHeight - offsetY;
+                if (newHeight < minHeight)
+                    offset.y += newHeight - minHeight;
+            }
+
+            return offset;
+        }
+
+        public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
+            if (style.position === "static") {
+                console.warn("You cannot apply TopLeftModeClamped to an static element.");
+                return;
+            }
+            if (!isNaN(point.x))
+                element.style.left = Math.round(point.x) + "px";
+            if (!isNaN(point.y))
+                element.style.top = Math.round(point.y) + "px";
         }
     }
     class BottomRightMode implements IPositionMode {
         private _size: BoxSizing = new BoxSizing();
-        public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
-            var offsetX = point.x;
-            var offsetY = point.y;
+        public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
+            var offsetX = offset.x;
+            var offsetY = offset.y;
             var rightAuto = style.right == "auto";
             var bottomAuto = style.bottom == "auto";
             if (rightAuto || bottomAuto) {
-                PositionMode.TOP_LEFT.transform(point, element, style);
+                PositionMode.TOP_LEFT.transform(offset, element, style);
 
                 var parentWidth = 0;
                 var parentHeight = 0;
@@ -142,34 +187,34 @@ module jsidea.layout {
                         parentHeight = body.clientHeight;
                     }
                     this._size.update(element);
-                    point.x += this._size.marginLeft;
-                    point.y += this._size.marginTop;
-                    point.x += this._size.marginRight;
-                    point.y += this._size.marginBottom;
+                    offset.x += this._size.marginLeft;
+                    offset.y += this._size.marginTop;
+                    offset.x += this._size.marginRight;
+                    offset.y += this._size.marginBottom;
 
-                    point.x += element.offsetWidth;
-                    point.y += element.offsetHeight;
-                    point.x = parentWidth - point.x;
-                    point.y = parentHeight - point.y;
+                    offset.x += element.offsetWidth;
+                    offset.y += element.offsetHeight;
+                    offset.x = parentWidth - offset.x;
+                    offset.y = parentHeight - offset.y;
                 }
                 //if its relative the bottom/right are offset to "calced"/layout-position
                 else if (style.position == "relative") {
-                    point.x = -point.x;
-                    point.y = -point.y;
-                    return point;
+                    offset.x = -offset.x;
+                    offset.y = -offset.y;
+                    return offset;
                 }
                 else {
-                    point.x += element.offsetWidth;
-                    point.y += element.offsetHeight;
-                    point.x = parentWidth - point.x;
-                    point.y = parentHeight - point.y;
+                    offset.x += element.offsetWidth;
+                    offset.y += element.offsetHeight;
+                    offset.x = parentWidth - offset.x;
+                    offset.y = parentHeight - offset.y;
                 }
             }
             else {
-                point.setTo(
-                    math.Number.parse(style.right, 0) - point.x,
-                    math.Number.parse(style.bottom, 0) - point.y,
-                    point.z);
+                offset.setTo(
+                    math.Number.parse(style.right, 0) - offset.x,
+                    math.Number.parse(style.bottom, 0) - offset.y,
+                    offset.z);
             }
 
             var leftAuto = style.left == "auto";
@@ -177,7 +222,7 @@ module jsidea.layout {
             if (!leftAuto) {
                 var newWidth = element.clientWidth + offsetX;
                 if (newWidth < minWidth)
-                    point.x += newWidth - minWidth;
+                    offset.x += newWidth - minWidth;
             }
 
             var topAuto = style.top == "auto";
@@ -185,58 +230,64 @@ module jsidea.layout {
             if (!topAuto) {
                 var newHeight = element.clientHeight + offsetY;
                 if (newHeight < minHeight)
-                    point.y += newHeight - minHeight;
+                    offset.y += newHeight - minHeight;
             }
 
-            return point;
+            return offset;
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             if (style.position === "static") {
                 console.warn("You cannot apply BottomRightMode to an static element.");
                 return;
             }
-            element.style.right = Math.round(point.x) + "px";
-            element.style.bottom = Math.round(point.y) + "px";
+            if (!isNaN(point.x))
+                element.style.right = Math.round(point.x) + "px";
+            if (!isNaN(point.y))
+                element.style.bottom = Math.round(point.y) + "px";
         }
     }
     class BottomLeftMode implements IPositionMode {
-        public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
-            var bottom = PositionMode.BOTTOM_RIGHT.transform(point.clone(), element, style);
-            var left = PositionMode.TOP_LEFT.transform(point.clone(), element, style);
-            return point.setTo(left.x, bottom.y, point.z);
+        public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
+            var bottom = PositionMode.BOTTOM_RIGHT.transform(offset.clone(), element, style);
+            var left = PositionMode.TOP_LEFT.transform(offset.clone(), element, style);
+            return offset.setTo(left.x, bottom.y, offset.z);
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             if (style.position === "static") {
                 console.warn("You cannot apply BottomLeftMode to an static element.");
                 return;
             }
-            element.style.left = Math.round(point.x) + "px";
-            element.style.bottom = Math.round(point.y) + "px";
+            if (!isNaN(point.x))
+                element.style.left = Math.round(point.x) + "px";
+            if (!isNaN(point.y))
+                element.style.bottom = Math.round(point.y) + "px";
         }
     }
     class TopRightMode implements IPositionMode {
-        public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
-            var top = PositionMode.TOP_LEFT.transform(point.clone(), element, style);
-            var right = PositionMode.BOTTOM_RIGHT.transform(point.clone(), element, style);
-            return point.setTo(right.x, top.y, point.z);
+        public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
+            var top = PositionMode.TOP_LEFT.transform(offset.clone(), element, style);
+            var right = PositionMode.BOTTOM_RIGHT.transform(offset.clone(), element, style);
+            return offset.setTo(right.x, top.y, offset.z);
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             if (style.position === "static") {
                 console.warn("You cannot apply TopRightMode to an static element.");
                 return;
             }
-            element.style.right = Math.round(point.x) + "px";
-            element.style.top = Math.round(point.y) + "px";
+            if (!isNaN(point.x))
+                element.style.right = Math.round(point.x) + "px";
+            if (!isNaN(point.y))
+                element.style.top = Math.round(point.y) + "px";
         }
     }
     class BackgroundMode implements IPositionMode {
         private _box = new geom.Box2D();
         private _boxSizing = new BoxSizing();
-        public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
+        public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var box = this._box;
             this._boxSizing.update(element, style);
             this._boxSizing.getBox(BoxModel.BACKGROUND, BoxModel.PADDING, box);
-            return point.add(
+            return offset.add(
                 box.x,
                 box.y,
                 0);
@@ -247,23 +298,56 @@ module jsidea.layout {
         }
     }
     class ScrollMode implements IPositionMode {
-        private _boxSizing = new BoxSizing();
-        public transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
-            this._boxSizing.update(element, style);
-            this._boxSizing.point(point, BoxModel.BORDER, BoxModel.CONTENT);
-            return point.add(
-                element.scrollLeft,
-                element.scrollTop,
-                0);;
+        public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
+            var scrollLeft = element.scrollLeft;
+            var scrollTop = element.scrollTop;
+
+            var body = element.ownerDocument.body;
+            if (body == element) {
+                if (system.Browser.isFirefox) {
+                    scrollLeft = element.ownerDocument.documentElement.scrollLeft;
+                    scrollTop = element.ownerDocument.documentElement.scrollTop;
+                }
+                else if (system.Browser.isWebKit) {
+//                    offset.x += 19;
+//                    offset.y += 19;
+//                    offset.x -= 10;
+//                    offset.y -= 10;
+//                    scrollLeft = element.ownerDocument.body.scrollLeft;
+//                    scrollTop = element.ownerDocument.body.scrollTop;
+//                    scrollLeft = 0;
+//                    scrollTop = 0;
+                }
+            }
+
+            offset.x *= -1;
+            offset.y *= -1;
+            offset.add(
+                scrollLeft,
+                scrollTop,
+                0);
+
+            offset.x = Math.max(offset.x, 0);
+            offset.y = Math.max(offset.y, 0);
+
+//            console.log("OFFSET", offset.x, offset.y);
+            
+            return offset;
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
-            element.scrollLeft = point.x;
-            element.scrollTop = point.y;
+            if (system.Browser.isFirefox && element == element.ownerDocument.body) {
+                element = element.ownerDocument.documentElement;
+            }
+            if (!isNaN(point.x))
+                element.scrollLeft = point.x;
+            if (!isNaN(point.y))
+                element.scrollTop = point.y;
         }
     }
     export class PositionMode {
         public static TRANSFORM: IPositionMode = new TransformMode();
         public static TOP_LEFT: IPositionMode = new TopLeftMode();
+        public static TOP_LEFT_CLAMPED: IPositionMode = new TopLeftClampedMode();
         public static BOTTOM_RIGHT: IPositionMode = new BottomRightMode();
         public static BOTTOM_LEFT: IPositionMode = new BottomLeftMode();
         public static TOP_RIGHT: IPositionMode = new TopRightMode();

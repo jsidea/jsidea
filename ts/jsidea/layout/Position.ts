@@ -70,8 +70,10 @@ module jsidea.layout {
             mode.transform(point, element, style);
             
             //TODO: use the correct box model
+            var fromBox = this.to.boxModel || layout.BoxModel.BORDER;
+            
             var size = layout.BoxSizing.create(element);
-            var box = size.getBox(null, layout.BoxModel.BORDER);
+            var box = size.getBox(fromBox, BoxModel.BORDER);
             this.clamp(point, box.width, box.height);
             
             //apply the final point

@@ -325,8 +325,6 @@ module jsidea.layout {
                 return ret;
             
             //add scroll value only if reference of the element is the window not the body
-            
-            
             if (node.isStickedChild) {
                 if (system.Browser.isWebKit) {
                     ret.x -= node.element.ownerDocument.body.scrollLeft;
@@ -341,7 +339,7 @@ module jsidea.layout {
             //skip body 
             //the body scroll is only needed for elemente which are fixed to window
             //so this value is added add the getOffset-function
-            while ((node = node.parentScroll) && node.element != document.body) {
+            while ((node = node.parentScroll) && !node.isBody) {
                 ret.x += node.element.scrollLeft;
                 ret.y += node.element.scrollTop;
             }
