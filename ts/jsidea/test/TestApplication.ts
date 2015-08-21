@@ -28,7 +28,7 @@ module jsidea.test {
             //            }, 1000);
             
             var tr = geom.Transform.create();
-            document.addEventListener("click", (e) => {
+            document.addEventListener("click",(e) => {
                 tr.update(a);
                 var lc = tr.globalToLocal(e.pageX, e.pageY, 0, null, layout.BoxModel.ATTACHMENT);
                 console.log(lc.x, lc.y);
@@ -118,19 +118,22 @@ module jsidea.test {
             //            pos.mode = layout.PositionMode.BACKGROUND;
             //            pos.to.boxModel = layout.BoxModel.BACKGROUND;
             
-//            pos.mode = layout.PositionMode.SCROLL;
-//            pos.to.boxModel = layout.BoxModel.SCROLL;
+            //            pos.mode = layout.PositionMode.SCROLL;
+            //            pos.to.boxModel = layout.BoxModel.SCROLL;
             
-//            pos.mode = layout.PositionMode.TRANSFORM;
+            //            pos.mode = layout.PositionMode.TRANSFORM;
             
             //            pos.mode = layout.PositionMode.BOTTOM_RIGHT;
             
-//                        pos.mode = layout.PositionMode.TOP_LEFT;
+            //                        pos.mode = layout.PositionMode.TOP_LEFT;
             
-//            pos.mode = layout.PositionMode.BORDER_TOP_LEFT;
-//            pos.to.boxModel = layout.BoxModel.PADDING;
+            //            pos.mode = layout.PositionMode.BORDER_TOP_LEFT;
+            //            pos.to.boxModel = layout.BoxModel.PADDING;
             
-            pos.mode = layout.PositionMode.BORDER_TOP_LEFT;
+            //            pos.mode = layout.PositionMode.BORDER_TOP_LEFT;
+            //            pos.to.boxModel = layout.BoxModel.PADDING;
+            
+            pos.mode = layout.PositionMode.BORDER_BOTTOM_RIGHT;
             pos.to.boxModel = layout.BoxModel.PADDING;
             
             
@@ -147,23 +150,30 @@ module jsidea.test {
             var pivot = new geom.Point3D();
             var invertX = true;
             var invertY = true;
-            document.addEventListener("mousedown", (evt) => {
+            document.addEventListener("mousedown",(evt) => {
                 target = <HTMLElement> evt.target;
-                console.log(evt.pageX, evt.pageY);
+//                console.log(evt.pageX, evt.pageY);
                 var pt = new geom.Point3D(evt.pageX, evt.pageY);
-                var loc = geom.Transform.create(target).globalToLocalPoint(pt, layout.BoxModel.BORDER, pos.to.boxModel);
+                var tr = geom.Transform.create(target);
+                var loc = tr.globalToLocalPoint(pt, layout.BoxModel.BORDER, pos.to.boxModel);
+
+                var bx = tr.boxSizing.getBox(null, pos.to.boxModel);
                 //                                console.log("LOCAL", loc.x, loc.y);
-                pivot.x = invertX ? (target.offsetWidth - loc.x) : loc.x;
-                pivot.y = invertY ? (target.offsetHeight - loc.y) : loc.y;
+                //                pivot.x = invertX ? (target.offsetWidth - loc.x) : loc.x;
+                //                pivot.y = invertY ? (target.offsetHeight - loc.y) : loc.y;
+                
+                pivot.x = invertX ? (bx.width - loc.x) : loc.x;
+                pivot.y = invertY ? (bx.height - loc.y) : loc.y;
+
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
                 
                 //                console.log("LOCAL", pos.to.x, pos.to.y, target.parentElement.clientWidth, target.parentElement.clientHeight);
             });
-            document.addEventListener("mouseup", (evt) => {
+            document.addEventListener("mouseup",(evt) => {
                 target = null;
             });
-            document.addEventListener("mousemove", (evt) => {
+            document.addEventListener("mousemove",(evt) => {
                 if (!target)
                     return;
                 //                console.log(evt.pageX, evt.pageY);

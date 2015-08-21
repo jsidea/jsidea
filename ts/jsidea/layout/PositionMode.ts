@@ -317,13 +317,21 @@ module jsidea.layout {
     class BorderBottomRightMode implements IPositionMode {
         private _boxSizing = new BoxSizing();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
-            this._boxSizing.update(element, style);
+            var bs = this._boxSizing;
+            bs.update(element, style);
             offset.x *= -1;
             offset.y *= -1;
-            return offset.add(
-                this._boxSizing.borderLeft,
-                this._boxSizing.borderTop,
+            offset.sub(
+                bs.borderLeft,
+                bs.borderTop,
                 0);
+            
+            //clamp min
+            offset.x = Math.max(offset.x, 0);
+            offset.y = Math.max(offset.y, 0);
+            
+//            var bx = bs.getBox(BoxModel.CONTENT, BoxModel.BORDER);
+            
             return offset;
         }
 
