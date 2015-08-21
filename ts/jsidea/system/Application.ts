@@ -7,8 +7,6 @@ module jsidea.system {
         private _autoTick: boolean = false;
         private _frameRate: number = 60;
         private _tickInterval: number = 0;
-        private _pageX: number = 0;
-        private _pageY: number = 0;
         
         constructor() {
             super();
@@ -19,24 +17,9 @@ module jsidea.system {
             this.create();
             //initial tick
             this.tick();
-
-            document.addEventListener("mousemove", (e) => this.onMouseMove(e));
-        }
-
-        private onMouseMove(e: MouseEvent): void {
-            this._pageX = e.pageX;
-            this._pageY = e.pageY;
         }
 
         public create(): void {
-        }
-
-        public get pageX(): number {
-            return !system.Browser.isWebKit ? this._pageX : this._pageX - document.body.scrollLeft;
-        }
-
-        public get pageY(): number {
-            return !system.Browser.isWebKit ? this._pageY : this._pageY - document.body.scrollTop;
         }
 
         public get active(): boolean {

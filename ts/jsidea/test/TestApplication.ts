@@ -28,7 +28,7 @@ module jsidea.test {
             //            }, 1000);
             
             var tr = geom.Transform.create();
-            document.addEventListener("click",(e) => {
+            document.addEventListener("click", (e) => {
                 tr.update(a);
                 var lc = tr.globalToLocal(e.pageX, e.pageY, 0, null, layout.BoxModel.ATTACHMENT);
                 console.log(lc.x, lc.y);
@@ -118,12 +118,21 @@ module jsidea.test {
             //            pos.mode = layout.PositionMode.BACKGROUND;
             //            pos.to.boxModel = layout.BoxModel.BACKGROUND;
             
-                        pos.mode = layout.PositionMode.SCROLL;
-                        pos.to.boxModel = layout.BoxModel.SCROLL;
+//            pos.mode = layout.PositionMode.SCROLL;
+//            pos.to.boxModel = layout.BoxModel.SCROLL;
+            
+//            pos.mode = layout.PositionMode.TRANSFORM;
             
             //            pos.mode = layout.PositionMode.BOTTOM_RIGHT;
             
-//            pos.mode = layout.PositionMode.TOP_LEFT;
+//                        pos.mode = layout.PositionMode.TOP_LEFT;
+            
+//            pos.mode = layout.PositionMode.BORDER_TOP_LEFT;
+//            pos.to.boxModel = layout.BoxModel.PADDING;
+            
+            pos.mode = layout.PositionMode.BORDER_TOP_LEFT;
+            pos.to.boxModel = layout.BoxModel.PADDING;
+            
             
             //            pos.to.minX = 0;
             //            pos.to.minY = 0;
@@ -136,9 +145,9 @@ module jsidea.test {
             
             var target: HTMLElement = null;
             var pivot = new geom.Point3D();
-            var invertX = false;
-            var invertY = false;
-            document.addEventListener("mousedown",(evt) => {
+            var invertX = true;
+            var invertY = true;
+            document.addEventListener("mousedown", (evt) => {
                 target = <HTMLElement> evt.target;
                 console.log(evt.pageX, evt.pageY);
                 var pt = new geom.Point3D(evt.pageX, evt.pageY);
@@ -151,13 +160,13 @@ module jsidea.test {
                 
                 //                console.log("LOCAL", pos.to.x, pos.to.y, target.parentElement.clientWidth, target.parentElement.clientHeight);
             });
-            document.addEventListener("mouseup",(evt) => {
+            document.addEventListener("mouseup", (evt) => {
                 target = null;
             });
-            document.addEventListener("mousemove",(evt) => {
+            document.addEventListener("mousemove", (evt) => {
                 if (!target)
                     return;
-//                console.log(evt.pageX, evt.pageY);
+                //                console.log(evt.pageX, evt.pageY);
                 var pt = new geom.Point3D(evt.pageX, evt.pageY);
                 pos.to.x = invertX ? (target.offsetWidth - pivot.x) : pivot.x;
                 pos.to.y = invertY ? (target.offsetHeight - pivot.y) : pivot.y;
@@ -291,8 +300,8 @@ module jsidea.test {
                     //                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
                     //                    text.Text.conc(12, " ", "ACC", node.isAccumulatable),
                     text.Text.conc(18, " ", "SCROLL", node.element.scrollLeft, node.element.scrollTop),
-//                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
-//                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),
+                    //                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
+                    //                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),
                     text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
                     text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
                     text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),

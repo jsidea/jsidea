@@ -297,27 +297,51 @@ module jsidea.layout {
             element.style.backgroundPosition = Math.round(point.x) + "px " + Math.round(point.y) + "px";
         }
     }
+    class BorderTopLeftMode implements IPositionMode {
+        private _boxSizing = new BoxSizing();
+        public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
+            this._boxSizing.update(element, style);
+            return offset.add(
+                this._boxSizing.borderLeft,
+                this._boxSizing.borderTop,
+                0);
+        }
+
+        public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
+            this._boxSizing.update(element, style);
+            var left = isNaN(point.x) ? this._boxSizing.borderLeft : Math.round(point.x);
+            var top = isNaN(point.y) ? this._boxSizing.borderTop : Math.round(point.y);
+            element.style.borderWidth = top + "px " + this._boxSizing.borderRight + "px " + this._boxSizing.borderBottom + "px " + left + "px";
+        }
+    }
+    class BorderBottomRightMode implements IPositionMode {
+        private _boxSizing = new BoxSizing();
+        public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
+            this._boxSizing.update(element, style);
+            offset.x *= -1;
+            offset.y *= -1;
+            return offset.add(
+                this._boxSizing.borderLeft,
+                this._boxSizing.borderTop,
+                0);
+            return offset;
+        }
+
+        public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
+            this._boxSizing.update(element, style);
+            var right = isNaN(point.x) ? this._boxSizing.borderRight : Math.round(point.x);
+            var bottom = isNaN(point.y) ? this._boxSizing.borderBottom : Math.round(point.y);
+            element.style.borderWidth = this._boxSizing.borderTop + "px " + right + "px " + bottom + "px " + this._boxSizing.borderLeft + "px";
+        }
+    }
     class ScrollMode implements IPositionMode {
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var scrollLeft = element.scrollLeft;
             var scrollTop = element.scrollTop;
 
-            var body = element.ownerDocument.body;
-            if (body == element) {
-                if (!system.Browser.isWebKit) {
-                    scrollLeft = element.ownerDocument.documentElement.scrollLeft;
-                    scrollTop = element.ownerDocument.documentElement.scrollTop;
-                }
-                else if (system.Browser.isWebKit) {
-//                    offset.x += 19;
-//                    offset.y += 19;
-//                    offset.x -= 10;
-//                    offset.y -= 10;
-//                    scrollLeft = element.ownerDocument.body.scrollLeft;
-//                    scrollTop = element.ownerDocument.body.scrollTop;
-//                    scrollLeft = 0;
-//                    scrollTop = 0;
-                }
+            if (!system.Browser.isWebKit && element.ownerDocument.body == element) {
+                scrollLeft = element.ownerDocument.documentElement.scrollLeft;
+                scrollTop = element.ownerDocument.documentElement.scrollTop;
             }
 
             offset.x *= -1;
@@ -330,8 +354,6 @@ module jsidea.layout {
             offset.x = Math.max(offset.x, 0);
             offset.y = Math.max(offset.y, 0);
 
-//            console.log("OFFSET", offset.x, offset.y);
-            
             return offset;
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
@@ -347,6 +369,8 @@ module jsidea.layout {
     export class PositionMode {
         public static TRANSFORM: IPositionMode = new TransformMode();
         public static TOP_LEFT: IPositionMode = new TopLeftMode();
+        public static BORDER_TOP_LEFT: IPositionMode = new BorderTopLeftMode();
+        public static BORDER_BOTTOM_RIGHT: IPositionMode = new BorderBottomRightMode();
         public static TOP_LEFT_CLAMPED: IPositionMode = new TopLeftClampedMode();
         public static BOTTOM_RIGHT: IPositionMode = new BottomRightMode();
         public static BOTTOM_LEFT: IPositionMode = new BottomLeftMode();

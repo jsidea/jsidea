@@ -64,10 +64,10 @@ module jsidea.layout {
             this.paddingBottom = math.Number.relation(style.paddingBottom, h, 0);
             this.paddingLeft = math.Number.relation(style.paddingLeft, w, 0);
 
-            this.borderTop = math.Number.relation(style.borderTopWidth, h, 0);
-            this.borderRight = math.Number.relation(style.borderRightWidth, w, 0);
-            this.borderBottom = math.Number.relation(style.borderBottomWidth, h, 0);
-            this.borderLeft = math.Number.relation(style.borderLeftWidth, w, 0);
+            this.borderTop = math.Number.parse(style.borderTopWidth, 0);
+            this.borderRight = math.Number.parse(style.borderRightWidth, 0);
+            this.borderBottom = math.Number.parse(style.borderBottomWidth, 0);
+            this.borderLeft = math.Number.parse(style.borderLeftWidth, 0);
 
             return this;
         }

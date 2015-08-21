@@ -262,7 +262,7 @@ module jsidea.layout {
             if (!node || node.isSticked || !node.parent)
                 return null;
 
-            //TODO FIND THE BUG
+            //TODO: FIND THE BUG
             //if its forced to have another parent
             if (node.isFixedZombie)
                 return node.offsetParent;
@@ -283,7 +283,7 @@ module jsidea.layout {
             if (!node || node.isSticked || !node.parent)
                 return null;
 
-            //TODO FIND THE BUG
+            //TODO: FIND THE BUG
             //if its forced to have another parent
             if (node.isFixedZombie)
                 return node.offsetParent;
@@ -327,13 +327,7 @@ module jsidea.layout {
         //if you subtract the scroll from the accumlated/summed offset
         //you get the real offset to window (initial-containing-block)
         private static getScrollOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-            if (!node)
-                return ret;
-//            if (node.isHTML && system.Browser.isWebKit) {
-//                ret.x -= node.element.ownerDocument.body.scrollLeft;
-//                ret.y -= node.element.ownerDocument.body.scrollTop;
-//            }
-            if (!node.parent)
+            if (!node || !node.parent)
                 return ret;
             
             //add scroll value only if reference of the element is the window not the body
