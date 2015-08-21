@@ -304,7 +304,7 @@ module jsidea.layout {
 
             var body = element.ownerDocument.body;
             if (body == element) {
-                if (system.Browser.isFirefox) {
+                if (!system.Browser.isWebKit) {
                     scrollLeft = element.ownerDocument.documentElement.scrollLeft;
                     scrollTop = element.ownerDocument.documentElement.scrollTop;
                 }
@@ -335,7 +335,7 @@ module jsidea.layout {
             return offset;
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
-            if (system.Browser.isFirefox && element == element.ownerDocument.body) {
+            if (!system.Browser.isWebKit && element == element.ownerDocument.body) {
                 element = element.ownerDocument.documentElement;
             }
             if (!isNaN(point.x))

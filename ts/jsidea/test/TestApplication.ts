@@ -118,12 +118,12 @@ module jsidea.test {
             //            pos.mode = layout.PositionMode.BACKGROUND;
             //            pos.to.boxModel = layout.BoxModel.BACKGROUND;
             
-            //            pos.mode = layout.PositionMode.SCROLL;
-            //            pos.to.boxModel = layout.BoxModel.SCROLL;
+                        pos.mode = layout.PositionMode.SCROLL;
+                        pos.to.boxModel = layout.BoxModel.SCROLL;
             
             //            pos.mode = layout.PositionMode.BOTTOM_RIGHT;
             
-            pos.mode = layout.PositionMode.TOP_LEFT;
+//            pos.mode = layout.PositionMode.TOP_LEFT;
             
             //            pos.to.minX = 0;
             //            pos.to.minY = 0;
@@ -157,8 +157,8 @@ module jsidea.test {
             document.addEventListener("mousemove",(evt) => {
                 if (!target)
                     return;
-                console.log(evt.pageX, evt.pageY);
-                var pt = new geom.Point3D(this.pageX, this.pageY);
+//                console.log(evt.pageX, evt.pageY);
+                var pt = new geom.Point3D(evt.pageX, evt.pageY);
                 pos.to.x = invertX ? (target.offsetWidth - pivot.x) : pivot.x;
                 pos.to.y = invertY ? (target.offsetHeight - pivot.y) : pivot.y;
                 pos.from.x = pt.x;

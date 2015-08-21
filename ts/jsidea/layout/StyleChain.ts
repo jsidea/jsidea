@@ -165,6 +165,18 @@ module jsidea.layout {
                 node.isBorderBox = style.boxSizing == "border-box";
                 node.offsetLeft = element.offsetLeft;
                 node.offsetTop = element.offsetTop;
+
+                if (system.Browser.isWebKit) {
+                    if (node.isHTML) {
+                        node.offsetLeft = node.element.ownerDocument.body.offsetLeft;
+                        node.offsetTop = node.element.ownerDocument.body.offsetTop;
+                    }
+                    else if (node.isBody) {
+                        node.offsetLeft = 0;
+                        node.offsetTop = 0;
+                    }
+                }
+
                 node.clientLeft = element.clientLeft;
                 node.clientTop = element.clientTop;
                 node.isTransformedChild = isTransformedChild;
@@ -317,10 +329,10 @@ module jsidea.layout {
         private static getScrollOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node)
                 return ret;
-            if (node.isHTML && system.Browser.isWebKit) {
-                ret.x -= node.element.ownerDocument.body.scrollLeft;
-                ret.y -= node.element.ownerDocument.body.scrollTop;
-            }
+//            if (node.isHTML && system.Browser.isWebKit) {
+//                ret.x -= node.element.ownerDocument.body.scrollLeft;
+//                ret.y -= node.element.ownerDocument.body.scrollTop;
+//            }
             if (!node.parent)
                 return ret;
             

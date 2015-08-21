@@ -57,19 +57,15 @@ module jsidea.layout {
         private getScroll(element: HTMLElement): geom.Point2D {
             var scrollLeft = element.scrollLeft;
             var scrollTop = element.scrollTop;
-            if (element == element.ownerDocument.body) {
-                if (system.Browser.isFirefox) {
-                    //                scrollLeft = element.ownerDocument.documentElement.scrollLeft;
-                    //                scrollTop = element.ownerDocument.documentElement.scrollTop;
-                }
-                else if (system.Browser.isWebKit) {
+            if (system.Browser.isWebKit) {
+                if (element == element.ownerDocument.body) {
                     scrollLeft = 0;
                     scrollTop = 0;
                 }
-            }
-            else if (system.Browser.isWebKit && element == element.ownerDocument.documentElement) {
-                scrollLeft = element.ownerDocument.body.scrollLeft;
-                scrollTop = element.ownerDocument.body.scrollTop;
+                else if (system.Browser.isWebKit && element == element.ownerDocument.documentElement) {
+                    scrollLeft = element.ownerDocument.body.scrollLeft;
+                    scrollTop = element.ownerDocument.body.scrollTop;
+                }
             }
             return new geom.Point2D(scrollLeft, scrollTop);
         }
