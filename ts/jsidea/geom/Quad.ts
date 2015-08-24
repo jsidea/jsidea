@@ -101,7 +101,7 @@ module jsidea.geom {
         public dispose(): void {
         }
 
-        public static qualifiedClassName: string = "jsidea.geom.Box2D";
+        public static qualifiedClassName: string = "jsidea.geom.Quad";
         public toString(): string {
             return "[" + Box2D.qualifiedClassName
                 + " a=" + this.a.toString()

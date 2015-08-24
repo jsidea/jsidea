@@ -567,3 +567,48 @@
 .test-16 #x-cont {
 	transform: rotate(25deg);
 }
+
+/* TEST 17 */
+.test-17 #view {
+	position: relative;
+	/* outline: 200px solid #FFF000; */
+}
+
+.test-17 #content {
+	position: relative;
+}
+
+.test-17 #a-cont {
+	position: relative;
+}
+
+.test-17 #b-cont {
+	position: relative;
+	/* perspective: 400px;
+	transform-style: preserve-3d; */
+}
+
+.test-17 #c-cont {
+	position: relative;
+	width: 512px;
+	height: 512px;
+	transform: rotateY(45deg);
+	/* perspective: 400px;
+	transform-style: preserve-3d; */
+	/* perspective-origin: 0px 0px; */
+	/* overflow:scroll; */
+}
+
+.test-17 #d-cont {
+	/* box-sizing: border-box; */
+	position: relative;
+	
+	/* transform: rotateY(15deg) rotate(25deg); */
+	/* transform-origin: 0px 0px; */
+	transform-style: preserve-3d;
+	transform: rotateY(-25deg);
+}
+
+.test-17 #x-cont {
+	transform: rotate(25deg);
+}

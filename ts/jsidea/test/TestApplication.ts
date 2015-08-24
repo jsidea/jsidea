@@ -80,8 +80,8 @@ module jsidea.test {
             var con = document.getElementById("content");
             var vie = document.getElementById("view");
 
-            var max = 16;
-            var te = 13;//5;//7;//11 for ie11 testing 5 is scrolling test
+            var max = 17;
+            var te = 17;//5;//7;//11 for ie11 testing 5 is scrolling test
             document.body.className = "test-" + te;
 
             var can = document.createElement("canvas");
@@ -115,30 +115,9 @@ module jsidea.test {
             //            pos.to.minY = 0;
             //            pos.bounds.element = a;
             
-            //            pos.mode = layout.PositionMode.BACKGROUND;
-            //            pos.to.boxModel = layout.BoxModel.BACKGROUND;
+//            pos.to.minX = 0;
+//            pos.to.minY = 0;
             
-            //            pos.mode = layout.PositionMode.SCROLL;
-            //            pos.to.boxModel = layout.BoxModel.SCROLL;
-            
-            //            pos.mode = layout.PositionMode.TRANSFORM;
-            
-            //            pos.mode = layout.PositionMode.BOTTOM_RIGHT;
-            
-            //                        pos.mode = layout.PositionMode.TOP_LEFT;
-            
-            //            pos.mode = layout.PositionMode.BORDER_TOP_LEFT;
-            //            pos.to.boxModel = layout.BoxModel.PADDING;
-            
-            //            pos.mode = layout.PositionMode.BORDER_TOP_LEFT;
-            //            pos.to.boxModel = layout.BoxModel.PADDING;
-            
-            pos.mode = layout.PositionMode.BORDER_BOTTOM_RIGHT;
-            pos.to.boxModel = layout.BoxModel.PADDING;
-            
-            
-            //            pos.to.minX = 0;
-            //            pos.to.minY = 0;
             //            pos.to.boxModel = layout.BoxModel.CONTENT;
             
             //            pos.bounds.boxModel = layout.BoxModel.PADDING;
@@ -146,42 +125,53 @@ module jsidea.test {
             //                console.log("ENTER", evt.target);
             //            });
             
+            
+            //drag settings
+            var dragMode = layout.DragMode.TOP_LEFT;
+            pos.mode = dragMode.positionMode;
+            pos.to.boxModel = dragMode.boxModel;
+            var invertX = dragMode.invertX;
+            var invertY = dragMode.invertY;
+
             var target: HTMLElement = null;
             var pivot = new geom.Point3D();
-            var invertX = true;
-            var invertY = true;
+            var box = new geom.Box2D();
+            var transform = geom.Transform.create();
+            var boxSizing: layout.BoxSizing = layout.BoxSizing.create();
+            var cursor = new geom.Point3D();
             document.addEventListener("mousedown",(evt) => {
                 target = <HTMLElement> evt.target;
-//                console.log(evt.pageX, evt.pageY);
-                var pt = new geom.Point3D(evt.pageX, evt.pageY);
-                var tr = geom.Transform.create(target);
-                var loc = tr.globalToLocalPoint(pt, layout.BoxModel.BORDER, pos.to.boxModel);
-
-                var bx = tr.boxSizing.getBox(null, pos.to.boxModel);
-                //                                console.log("LOCAL", loc.x, loc.y);
-                //                pivot.x = invertX ? (target.offsetWidth - loc.x) : loc.x;
-                //                pivot.y = invertY ? (target.offsetHeight - loc.y) : loc.y;
-                
-                pivot.x = invertX ? (bx.width - loc.x) : loc.x;
-                pivot.y = invertY ? (bx.height - loc.y) : loc.y;
 
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
-                
-                //                console.log("LOCAL", pos.to.x, pos.to.y, target.parentElement.clientWidth, target.parentElement.clientHeight);
+
+                cursor.setTo(evt.pageX, evt.pageY, 0);
+                transform.update(target);
+                var loc = transform.globalToLocalPoint(cursor, layout.BoxModel.BORDER, pos.to.boxModel);
+
+                box = transform.boxSizing.getBox(null, pos.to.boxModel, box);
+                pivot.x = invertX ? (box.width - loc.x) : loc.x;
+                pivot.y = invertY ? (box.height - loc.y) : loc.y;
+
             });
             document.addEventListener("mouseup",(evt) => {
                 target = null;
+
+                evt.preventDefault();
+                evt.stopImmediatePropagation();
             });
             document.addEventListener("mousemove",(evt) => {
                 if (!target)
                     return;
-                //                console.log(evt.pageX, evt.pageY);
-                var pt = new geom.Point3D(evt.pageX, evt.pageY);
+
+                evt.preventDefault();
+                evt.stopImmediatePropagation();
+
+                cursor.setTo(evt.pageX, evt.pageY, 0);
                 pos.to.x = invertX ? (target.offsetWidth - pivot.x) : pivot.x;
                 pos.to.y = invertY ? (target.offsetHeight - pivot.y) : pivot.y;
-                pos.from.x = pt.x;
-                pos.from.y = pt.y;
+                pos.from.x = cursor.x;
+                pos.from.y = cursor.y;
                 pos.apply(target);
             });
 
@@ -197,7 +187,7 @@ module jsidea.test {
                 this.drawBoundingBox(ctx, xc);
                 this.drawBoundingBox(ctx, can);
 
-                this.logChain(xc);
+                //                this.logChain(xc);
             };
 
             //            draw();

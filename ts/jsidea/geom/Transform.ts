@@ -18,7 +18,7 @@ module jsidea.geom {
             return new Transform(element, mode);
         }
 
-        public update(element?: HTMLElement, mode?: ITransformMode): void {
+        public update(element?: HTMLElement, mode?: ITransformMode): Transform {
             if (!element)
                 return this.clear();
 
@@ -40,14 +40,18 @@ module jsidea.geom {
             this._inverseSceneTransform = this._sceneTransform.slice(0, this._sceneTransform.length).reverse();
             for (var i = 0; i < this._inverseSceneTransform.length; ++i)
                 this._inverseSceneTransform[i] = this._inverseSceneTransform[i].clone().invert();
+            
+            return this;
         }
 
-        public clear(): void {
+        public clear(): Transform {
             this.element = null;
             this._sceneTransform = [];
             this._inverseSceneTransform = [];
             this.boxSizing.clear();
             this.matrix.identity();
+            
+            return this;
         }
 
         public clamp(
@@ -201,7 +205,7 @@ module jsidea.geom {
             return ret;
         }
 
-        public static qualifiedClassName: string = "Transform";
+        public static qualifiedClassName: string = "jsidea.geom.Transform";
         public toString(): string {
             return "[" + Transform.qualifiedClassName + "]";
         }

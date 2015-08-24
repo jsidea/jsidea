@@ -150,12 +150,12 @@ module jsidea.layout {
             return this;
         }
 
-        public getBox(fromBox?: IBoxModel, toBox?: IBoxModel, box: geom.Box2D = new geom.Box2D()): geom.Box2D {
-            box.x = 0;
-            box.y = 0;
-            box.width = this.width;
-            box.height = this.height;
-            return this.convert(box, fromBox, toBox);
+        public getBox(fromBox?: IBoxModel, toBox?: IBoxModel, ret: geom.Box2D = new geom.Box2D()): geom.Box2D {
+            ret.x = 0;
+            ret.y = 0;
+            ret.width = this.width;
+            ret.height = this.height;
+            return this.convert(ret, fromBox, toBox);
         }
         
         //converts sizes between different boxes
