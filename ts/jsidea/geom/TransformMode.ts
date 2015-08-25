@@ -103,7 +103,7 @@ module jsidea.geom {
                 var origin = style.transformOrigin ? style.transformOrigin.split(" ") : [];
                 var originX = math.Number.relation(origin[0], element.offsetWidth, element.offsetWidth * 0.5);
                 var originY = math.Number.relation(origin[1], element.offsetHeight, element.offsetHeight * 0.5);
-                var originZ = math.Number.relation(origin[2], 0, 0);
+                var originZ = math.Number.parse(origin[2], 0);
 
                 //not vice versa: not adding than subtracting like some docs mentioned
                 matrix.appendPositionRaw(-originX, -originY, -originZ);

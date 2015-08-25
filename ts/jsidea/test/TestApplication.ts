@@ -173,6 +173,8 @@ module jsidea.test {
                 pos.from.x = cursor.x;
                 pos.from.y = cursor.y;
                 pos.apply(target);
+                
+                console.log(layout.Style.create(target).clip);
             });
 
             var draw = () => {

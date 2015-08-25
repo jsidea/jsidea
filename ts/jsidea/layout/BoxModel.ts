@@ -53,6 +53,23 @@ module jsidea.layout {
             box.height += size.borderTop + size.borderBottom + size.paddingTop + size.paddingBottom;
         }
     }
+    class ClipBoxModel implements IBoxModel {
+        private _clip: geom.Box2D = new geom.Box2D();
+        public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
+            this._clip.setCSS(size.style.clip);
+            box.x -= this._clip.x;
+            box.y -= this._clip.y;
+            box.width -= size.width - this._clip.width;
+            box.height -= size.height - this._clip.height;
+        }
+        public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
+            this._clip.setCSS(size.style.clip);
+            box.x += this._clip.x;
+            box.y += this._clip.y;
+            box.width += size.width - this._clip.width;
+            box.height += size.height - this._clip.height;
+        }
+    }
     class ScrollBoxModel implements IBoxModel {
         private getScroll(element: HTMLElement): geom.Point2D {
             var scrollLeft = element.scrollLeft;
@@ -288,6 +305,7 @@ module jsidea.layout {
         public static ATTACHMENT: IBoxModel = new AttachmentBoxModel();
         public static SCROLL: IBoxModel = new ScrollBoxModel();
         public static IMAGE: IBoxModel = new ImageBoxModel();
+        public static CLIP: IBoxModel = new ClipBoxModel();
 
         private static _lookup = {
             "margin-box": BoxModel.MARGIN,
@@ -298,7 +316,8 @@ module jsidea.layout {
             "background-box": BoxModel.BACKGROUND,
             "attachment-box": BoxModel.ATTACHMENT,
             "scroll-box": BoxModel.SCROLL,
-            "image-box": BoxModel.IMAGE
+            "image-box": BoxModel.IMAGE,
+            "clip-box": BoxModel.CLIP
         };
         public static getModel(boxSizing: string): IBoxModel {
             return BoxModel._lookup[boxSizing];

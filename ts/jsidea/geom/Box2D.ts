@@ -29,6 +29,27 @@ module jsidea.geom {
             return this;
         }
 
+        public setCSS(clipCSS: string): Box2D {
+            if (!clipCSS || clipCSS == "auto")
+                return this;
+            var values = clipCSS.toLowerCase().replace("rect(", "").replace(")", "").split(",");
+
+            this.x = math.Number.parse(values[3], 0);
+            this.y = math.Number.parse(values[0], 0);
+            this.width = math.Number.parse(values[1], 0) - this.x;
+            this.height = math.Number.parse(values[2], 0) - this.y;
+
+            return this;
+        }
+
+        public getCSS(): string {
+            return "rect("
+                + Math.round(this.y) + "px, "
+                + Math.round(this.right) + "px, "
+                + Math.round(this.bottom) + "px, "
+                + Math.round(this.x) + "px)";
+        }
+
         public copyFrom(value: IRectangleValue): void {
             this.x = value.x;
             this.y = value.y;
@@ -72,13 +93,13 @@ module jsidea.geom {
             this.height = rect.height;
             return this;
         }
-        
-        public get right():number{
-            return this.x + this.width;    
+
+        public get right(): number {
+            return this.x + this.width;
         }
-        
-        public get bottom():number{
-            return this.y + this.height;    
+
+        public get bottom(): number {
+            return this.y + this.height;
         }
 
         public intersects(r: IRectangleValue): boolean {

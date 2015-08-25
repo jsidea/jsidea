@@ -570,7 +570,7 @@
 
 /* TEST 17 */
 .test-17 #view {
-	position: relative;
+	position: absolute;
 	/* outline: 200px solid #FFF000; */
 }
 
