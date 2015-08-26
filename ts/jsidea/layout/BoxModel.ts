@@ -25,6 +25,20 @@ module jsidea.layout {
         public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
         }
     }
+//    class BoxSizingBoxModel implements IBoxModel {
+//        public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
+//            if(size.style.boxSizing == "content-box")
+//                return;
+//            if(size.style.boxSizing == "border-box")
+//                return BoxModel.PADDING.fromBorderBox(size, box);
+//        }
+//        public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
+//            if(size.style.boxSizing == "content-box")
+//                return;
+//            if(size.style.boxSizing == "border-box")
+//                return BoxModel.PADDING.toBorderBox(size, box);
+//        }
+//    }
     class PaddingBoxModel implements IBoxModel {
         public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
             box.x -= size.borderLeft;
@@ -56,18 +70,18 @@ module jsidea.layout {
     class ClipBoxModel implements IBoxModel {
         private _clip: geom.Box2D = new geom.Box2D();
         public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
-            this._clip.setCSS(size.style.clip);
-            box.x -= this._clip.x;
-            box.y -= this._clip.y;
-            box.width -= size.width - this._clip.width;
-            box.height -= size.height - this._clip.height;
+            var clip = geom.Box2D.getClip(size.element, size.style, this._clip);
+            box.x -= clip.x;
+            box.y -= clip.y;
+            box.width -= size.width - clip.width;
+            box.height -= size.height - clip.height;
         }
         public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
-            this._clip.setCSS(size.style.clip);
-            box.x += this._clip.x;
-            box.y += this._clip.y;
-            box.width += size.width - this._clip.width;
-            box.height += size.height - this._clip.height;
+            var clip = geom.Box2D.getClip(size.element, size.style, this._clip);
+            box.x += clip.x;
+            box.y += clip.y;
+            box.width += size.width - clip.width;
+            box.height += size.height - clip.height;
         }
     }
     class ScrollBoxModel implements IBoxModel {
@@ -298,6 +312,7 @@ module jsidea.layout {
     export class BoxModel {
         public static MARGIN: IBoxModel = new MarginBoxModel();
         public static BORDER: IBoxModel = new BorderBoxModel();
+//        public static BOX_SIZING: IBoxModel = new BoxSizingBoxModel();
         public static PADDING: IBoxModel = new PaddingBoxModel();
         public static CONTENT: IBoxModel = new ContentBoxModel();
         public static CANVAS: IBoxModel = new CanvasBoxModel();

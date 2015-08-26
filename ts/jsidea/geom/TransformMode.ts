@@ -5,7 +5,7 @@ module jsidea.geom {
     class ModeTransformedZoom implements ITransformMode {
         public extract(transform: Transform, style: CSSStyleDeclaration): geom.Matrix3D[] {
             var element = transform.element;
-            var globalBounds = geom.Box2D.createBoundingBox(element);
+            var globalBounds = geom.Box2D.getBounds(element);
             var matrix = new geom.Matrix3D();
             while (element) {
                 var ma = geom.Matrix3D.create(element);
@@ -30,7 +30,7 @@ module jsidea.geom {
     class ModeTransformed implements ITransformMode {
         public extract(transform: Transform, style: CSSStyleDeclaration): geom.Matrix3D[] {
             var element = transform.element;
-            var globalBounds = geom.Box2D.createBoundingBox(element);
+            var globalBounds = geom.Box2D.getBounds(element);
             var matrix = new geom.Matrix3D();
             while (element) {
                 matrix.append(geom.Matrix3D.create(element));
@@ -48,7 +48,7 @@ module jsidea.geom {
     class ModeBox implements ITransformMode {
         public extract(transform: Transform, style: CSSStyleDeclaration): geom.Matrix3D[] {
             var element = transform.element;
-            var globalBounds = geom.Box2D.createBoundingBox(element);
+            var globalBounds = geom.Box2D.getBounds(element);
             var matrix = new geom.Matrix3D();
             matrix.appendPositionRaw(globalBounds.x, globalBounds.y, 0);
             return [matrix];

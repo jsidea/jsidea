@@ -109,25 +109,12 @@ module jsidea.test {
             document.body.appendChild(can);
 
             var pos = new layout.Position();
-            //            pos.to.x = "100%";
-            //            pos.to.y = "100%";
+            //            pos.bounds.element = a;
             //            pos.to.minX = 0;
             //            pos.to.minY = 0;
-            //            pos.bounds.element = a;
-            
-//            pos.to.minX = 0;
-//            pos.to.minY = 0;
-            
-            //            pos.to.boxModel = layout.BoxModel.CONTENT;
-            
-            //            pos.bounds.boxModel = layout.BoxModel.PADDING;
-            //            document.addEventListener("mouseover",(evt) => {
-            //                console.log("ENTER", evt.target);
-            //            });
-            
             
             //drag settings
-            var dragMode = layout.DragMode.TOP_LEFT;
+            var dragMode = layout.DragMode.BORDER_BOTTOM_RIGHT_INNER;
             pos.mode = dragMode.positionMode;
             pos.to.boxModel = dragMode.boxModel;
             var invertX = dragMode.invertX;
@@ -139,6 +126,8 @@ module jsidea.test {
             var transform = geom.Transform.create();
             var boxSizing: layout.BoxSizing = layout.BoxSizing.create();
             var cursor = new geom.Point3D();
+            
+            //drag begin
             document.addEventListener("mousedown",(evt) => {
                 target = <HTMLElement> evt.target;
 
@@ -148,18 +137,14 @@ module jsidea.test {
                 cursor.setTo(evt.pageX, evt.pageY, 0);
                 transform.update(target);
                 var loc = transform.globalToLocalPoint(cursor, layout.BoxModel.BORDER, pos.to.boxModel);
-
-                box = transform.boxSizing.getBox(null, pos.to.boxModel, box);
+                box = transform.boxSizing.getBox(layout.BoxModel.BORDER, pos.to.boxModel, box);
+                //                box = transform.boxSizing.getBox(pos.to.boxModel, null, box);
                 pivot.x = invertX ? (box.width - loc.x) : loc.x;
                 pivot.y = invertY ? (box.height - loc.y) : loc.y;
+//                console.log("PIVOT", pivot.x, pivot.y, "LOC", loc.x, loc.y);
 
             });
-            document.addEventListener("mouseup",(evt) => {
-                target = null;
-
-                evt.preventDefault();
-                evt.stopImmediatePropagation();
-            });
+            //drag
             document.addEventListener("mousemove",(evt) => {
                 if (!target)
                     return;
@@ -168,18 +153,29 @@ module jsidea.test {
                 evt.stopImmediatePropagation();
 
                 cursor.setTo(evt.pageX, evt.pageY, 0);
-                pos.to.x = invertX ? (target.offsetWidth - pivot.x) : pivot.x;
-                pos.to.y = invertY ? (target.offsetHeight - pivot.y) : pivot.y;
+                boxSizing.update(target, layout.Style.create(target));
+                box = boxSizing.getBox(layout.BoxModel.BORDER, pos.to.boxModel, box);
+                pos.to.x = invertX ? (box.width - pivot.x) : pivot.x;
+                pos.to.y = invertY ? (box.height - pivot.y) : pivot.y;
+                
                 pos.from.x = cursor.x;
                 pos.from.y = cursor.y;
                 pos.apply(target);
-                
-                console.log(layout.Style.create(target).clip);
+
+//                console.log(layout.Style.create(target).clip);
+            });
+            //drag end
+            document.addEventListener("mouseup",(evt) => {
+                target = null;
+
+                evt.preventDefault();
+                evt.stopImmediatePropagation();
             });
 
+//            document.addEventListener("click", () => this.logChain(xc));
+            
             var draw = () => {
                 ctx.clearRect(0, 0, can.width, can.height);
-
                 this.drawBoundingBox(ctx, vie);
                 this.drawBoundingBox(ctx, con);
                 this.drawBoundingBox(ctx, a);
@@ -188,11 +184,7 @@ module jsidea.test {
                 this.drawBoundingBox(ctx, d);
                 this.drawBoundingBox(ctx, xc);
                 this.drawBoundingBox(ctx, can);
-
-                //                this.logChain(xc);
             };
-
-            //            draw();
             document.addEventListener("click", draw);
 
             var setTest = (e: KeyboardEvent) => {
@@ -210,7 +202,9 @@ module jsidea.test {
                 }
             }
             document.addEventListener("keyup", setTest);
+        }
 
+        private testMutationObserver(): void {
             //           var target = con;
             //             var observer = new MutationObserver(function(mutations) {
             //                mutations.forEach(function(mutation) {

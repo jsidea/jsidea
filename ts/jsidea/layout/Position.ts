@@ -69,6 +69,9 @@ module jsidea.layout {
             //the point in "Position"-space
             mode.transform(point, element, style);
             
+            //clamp it by its "natural" limits
+            mode.clamp(point, element, style);
+            
             //TODO: use the correct box model
             var fromBox = this.to.boxModel || layout.BoxModel.BORDER;
             

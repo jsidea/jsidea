@@ -32,7 +32,9 @@ module jsidea.geom {
         public setCSS(clipCSS: string): Box2D {
             if (!clipCSS || clipCSS == "auto")
                 return this;
-            var values = clipCSS.toLowerCase().replace("rect(", "").replace(")", "").split(",");
+            //TODO: using a regex -> performance testing
+            var str = clipCSS.toLowerCase().replace("rect(", "").replace(")", "");
+            var values = system.Browser.isWebKit ? str.split(" ") : str.split(",");
 
             this.x = math.Number.parse(values[3], 0);
             this.y = math.Number.parse(values[0], 0);
@@ -98,8 +100,16 @@ module jsidea.geom {
             return this.x + this.width;
         }
 
+        public set right(value: number) {
+            this.width = value - this.x;
+        }
+        
         public get bottom(): number {
             return this.y + this.height;
+        }
+        
+        public set bottom(value: number) {
+            this.height = value - this.y;
         }
 
         public intersects(r: IRectangleValue): boolean {
@@ -123,7 +133,7 @@ module jsidea.geom {
         ////                bnds.height);
         //        }
         
-        public static createBoundingBox(element: HTMLElement, ret: Box2D = new Box2D()): Box2D {
+        public static getBounds(element: HTMLElement, ret: Box2D = new Box2D()): Box2D {
             ret.copyFromClientRect(element.getBoundingClientRect());
             if (system.Browser.isWebKit) {
                 ret.x += document.body.scrollLeft;
@@ -133,6 +143,18 @@ module jsidea.geom {
                 ret.x += document.documentElement.scrollLeft;
                 ret.y += document.documentElement.scrollTop;
             }
+            return ret;
+        }
+
+        public static getClip(element: HTMLElement, style: CSSStyleDeclaration, ret: geom.Box2D = new geom.Box2D()): geom.Box2D {
+            if (!style.clip || style.clip == "auto") {
+                ret.x = 0;
+                ret.y = 0;
+                ret.width = element.offsetWidth;
+                ret.height = element.offsetHeight;
+                return ret;
+            }
+            ret.setCSS(style.clip);
             return ret;
         }
 

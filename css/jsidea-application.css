@@ -67,7 +67,7 @@ canvas {
 	left: 0px;
  	right: 0px;
 	bottom: 0px;
-	clip: rect(50px, 350px, 350px, 50px);
+	/* clip: rect(50px, 350px, 350px, 50px); */
 	/* background-image: url(../assets/jsidea-logo.png);
 	background-size: 256px 256px;
 	background-repeat: no-repeat;
