@@ -19,6 +19,7 @@ module jsidea.geom {
     }
 
     export interface IComposition3D {
+        perspective: number;
         position: Point3D;
         scale: Point3D;
         skew: Point3D;
@@ -56,9 +57,11 @@ module jsidea.geom {
         constructor() {
         }
 
-        public static create(visual: HTMLElement, ret = new Matrix3D()): Matrix3D {
-            if (visual.ownerDocument)
-                return ret.setCSS(layout.Style.create(visual).transform);
+        public static create(visual: HTMLElement, style: CSSStyleDeclaration = null, ret = new Matrix3D()): Matrix3D {
+            if (visual.ownerDocument) {
+                style = style || layout.Style.create(visual)
+                return ret.setCSS(style.transform);
+            }
             ret.identity();
             return ret;
         }
@@ -215,9 +218,9 @@ module jsidea.geom {
             var w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34;
 
             
-//            x /= w;
-//            y /= w;
-//            z /= w;
+            //            x /= w;
+            //            y /= w;
+            //            z /= w;
 
             return ret.setTo(x, y, z, w);
         }
@@ -318,14 +321,14 @@ module jsidea.geom {
             //look at the developer tools of firefox and chrome -> 
             //ff and chrome do it wrong: the highlighted bounding box failed to be correct
             //getBoundingClientRect
-//            if (w < 0) {
-//                x -= this.m41;
-//                y -= this.m42;
-//                x *= 1 / w;
-//                y *= 1 / w;
-//                x += this.m41;
-//                y += this.m42;
-//            }
+            //            if (w < 0) {
+            //                x -= this.m41;
+            //                y -= this.m42;
+            //                x *= 1 / w;
+            //                y *= 1 / w;
+            //                x += this.m41;
+            //                y += this.m42;
+            //            }
 
             return ret.setTo(x, y, z, w);
         }
@@ -727,11 +730,14 @@ module jsidea.geom {
                 this.appendRotation(trans.rotation);
             if (trans.position.x || trans.position.y || trans.position.z)
                 this.appendPosition(trans.position);
+            if (trans.perspective)
+                this.appendPerspective(trans.perspective);
             return this;
         }
 
         public decompose(ret: IComposition3D = null): IComposition3D {
             if (ret) {
+                ret.perspective = this.getPerspective();
                 ret.position = this.getPosition(ret.position);
                 ret.skew = this.getSkew(ret.skew);
                 ret.scale = this.getScale(ret.scale);
@@ -739,6 +745,7 @@ module jsidea.geom {
                 return ret;
             }
             return {
+                perspective: this.getPerspective(),
                 position: this.getPosition(),
                 skew: this.getSkew(),
                 scale: this.getScale(),
@@ -848,10 +855,14 @@ module jsidea.geom {
         }
 
         public appendCSS(cssString: string): Matrix3D {
+            if (!cssString || cssString == "none")
+                return this;
             return this.append(Buffer._APPEND_CSS_3D.setCSS(cssString));
         }
 
         public prependCSS(cssString: string): Matrix3D {
+            if (!cssString || cssString == "none")
+                return this;
             return this.prepend(Buffer._PREPEND_CSS_3D.setCSS(cssString));
         }
 
@@ -929,7 +940,7 @@ module jsidea.geom {
         //            return ac.cross(ab);
         //        }
         
-        public bounds(x: number, y: number, width: number, height: number, ret = new geom.Box2D()): geom.Box2D {
+        public bounds(x: number, y: number, width: number, height: number, ret = new geom.Rect2D()): geom.Rect2D {
             var ptA = new geom.Point3D(x, y);
             var ptB = new geom.Point3D(x + width, y);
             var ptC = new geom.Point3D(x + width, y + height);

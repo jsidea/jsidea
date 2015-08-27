@@ -1,5 +1,5 @@
 module jsidea.layout {
-    export class BoxSizing implements IDisposable {
+    export class BoxSizing {
 
         public element: HTMLElement = null;
         public style: CSSStyleDeclaration;
@@ -150,7 +150,7 @@ module jsidea.layout {
             return this;
         }
 
-        public getBox(fromBox?: IBoxModel, toBox?: IBoxModel, ret: geom.Box2D = new geom.Box2D()): geom.Box2D {
+        public getBox(fromBox?: IBoxModel, toBox?: IBoxModel, ret: geom.Rect2D = new geom.Rect2D()): geom.Rect2D {
             ret.x = 0;
             ret.y = 0;
             ret.width = this.width;
@@ -159,21 +159,21 @@ module jsidea.layout {
         }
         
         //converts sizes between different boxes
-        public convert(box: geom.Box2D, fromBox?: IBoxModel, toBox?: IBoxModel): geom.Box2D {
+        public convert(rect: geom.Rect2D, fromBox?: IBoxModel, toBox?: IBoxModel): geom.Rect2D {
             if (toBox === fromBox)
-                return box;
+                return rect;
             if (fromBox)
-                fromBox.toBorderBox(this, box);
+                fromBox.toBorderBox(this, rect);
             if (toBox)
-                toBox.fromBorderBox(this, box);
-            return box;
+                toBox.fromBorderBox(this, rect);
+            return rect;
         }
 
         public point(point: geom.Point3D, fromBox?: IBoxModel, toBox?: IBoxModel): geom.Point3D {
             if (toBox == fromBox)
                 return point;
             //            var box = Buffer._POINT_MODEL;
-            var box = new geom.Box2D();
+            var box = new geom.Rect2D();
             box.x = point.x;
             box.y = point.y;
             box.width = this.width;

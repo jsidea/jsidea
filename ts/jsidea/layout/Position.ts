@@ -26,7 +26,7 @@ module jsidea.layout {
         toBoxModel?: IBoxModel;
         transformMode?: geom.ITransformMode;
     }
-    export class Position implements IDisposable {
+    export class Position {
         public to: IPositionValue = {};
         public from: IPositionValue = {};
         public bounds: IPositionBounds = {};
@@ -63,7 +63,7 @@ module jsidea.layout {
             mode = mode || this.mode || PositionMode.TRANSFORM;
 
             //the un-clamped point
-            var style = layout.Style.create(element);
+            var style = Style.create(element);
             var point = this.calc(element);
             
             //the point in "Position"-space
@@ -73,9 +73,9 @@ module jsidea.layout {
             mode.clamp(point, element, style);
             
             //TODO: use the correct box model
-            var fromBox = this.to.boxModel || layout.BoxModel.BORDER;
-            
-            var size = layout.BoxSizing.create(element);
+            var fromBox = this.to.boxModel || BoxModel.BORDER;
+
+            var size = BoxSizing.create(element, style);
             var box = size.getBox(fromBox, BoxModel.BORDER);
             this.clamp(point, box.width, box.height);
             
@@ -93,16 +93,16 @@ module jsidea.layout {
             this._from.update(fromElement, this.from.transformMode);
             this._to.update(element, this.to.transformMode);
 
-            var toBox = this.to.boxModel || layout.BoxModel.BORDER;
-            var fromBox = this.from.boxModel || layout.BoxModel.BORDER;
+            var toBox = this.to.boxModel || BoxModel.BORDER;
+            var fromBox = this.from.boxModel || BoxModel.BORDER;
             
             //transform box-models of "to"
-            var sizeTo = this._to.boxSizing.getBox(layout.BoxModel.BORDER, toBox);
+            var sizeTo = this._to.boxSizing.getBox(BoxModel.BORDER, toBox);
             var toX: number = math.Number.relation(this.to.x, sizeTo.width, 0) + math.Number.relation(this.to.offsetX, sizeTo.width, 0);
             var toY: number = math.Number.relation(this.to.y, sizeTo.height, 0) + math.Number.relation(this.to.offsetY, sizeTo.height, 0);
             
             //transform box-models of "from"
-            var sizeFrom = this._from.boxSizing.getBox(layout.BoxModel.BORDER, fromBox);
+            var sizeFrom = this._from.boxSizing.getBox(BoxModel.BORDER, fromBox);
             var fromX: number = math.Number.relation(this.from.x, sizeFrom.width, 0) + math.Number.relation(this.from.offsetX, sizeFrom.width, 0);
             var fromY: number = math.Number.relation(this.from.y, sizeFrom.height, 0) + math.Number.relation(this.from.offsetY, sizeFrom.height, 0);
             
@@ -150,7 +150,7 @@ module jsidea.layout {
             return mat.getPosition(ret);
         }
 
-        public clamp(point: geom.Point3D, width: number, height: number, depth: number = 1000): geom.Point3D {
+        private clamp(point: geom.Point3D, width: number, height: number, depth: number = 1000): geom.Point3D {
             if (this.to.minX !== undefined)
                 point.x = Math.max(point.x, math.Number.relation(this.to.minX, width, point.x));
             if (this.to.maxX !== undefined)
@@ -167,9 +167,16 @@ module jsidea.layout {
         }
 
         public dispose(): void {
+            this._to.dispose();
+            this._from.dispose();
+            this._bounds.dispose();
+            this._to = null;
+            this._from = null;
+            this._bounds = null;
             this.to = null;
             this.from = null;
-            this._bounds = null;
+            this.bounds = null;
+            this.mode = null;
         }
 
         public static qualifiedClassName: string = "jsidea.layout.Position";

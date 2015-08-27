@@ -22,17 +22,17 @@ module jsidea.events {
             var ctx = this.context;
 
             ctx.beginPath();
-            ctx.moveTo(quad.a.x, quad.a.y);
-            ctx.lineTo(quad.b.x, quad.b.y);
-            ctx.lineTo(quad.c.x, quad.c.y);
-            ctx.lineTo(quad.d.x, quad.d.y);
-            ctx.lineTo(quad.a.x, quad.a.y);
+            ctx.moveTo(quad.p1.x, quad.p1.y);
+            ctx.lineTo(quad.p2.x, quad.p2.y);
+            ctx.lineTo(quad.p3.x, quad.p3.y);
+            ctx.lineTo(quad.p4.x, quad.p4.y);
+            ctx.lineTo(quad.p1.x, quad.p1.y);
             ctx.closePath();
 
             return this;
         }
 
-        public box(box: geom.Box2D): Graphics {
+        public box(box: geom.Rect2D): Graphics {
             var ctx = this.context;
 
             ctx.beginPath();

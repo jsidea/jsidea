@@ -86,8 +86,8 @@ module jsidea.test {
 
             var can = document.createElement("canvas");
             can.id = "can";
-            can.width = 1920 * 0.5;
-            can.height = 1080 * 0.5;
+            can.width = 1920;
+            can.height = 1080;
             var ctx = <CanvasRenderingContext2D> can.getContext("2d");
 
             var a = document.createElement("div");
@@ -122,7 +122,7 @@ module jsidea.test {
 
             var target: HTMLElement = null;
             var pivot = new geom.Point3D();
-            var box = new geom.Box2D();
+            var box = new geom.Rect2D();
             var transform = geom.Transform.create();
             var boxSizing: layout.BoxSizing = layout.BoxSizing.create();
             var cursor = new geom.Point3D();
@@ -151,6 +151,8 @@ module jsidea.test {
 
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
+                
+//                console.log(document.elementFromPoint(evt.pageX, evt.pageY));
 
                 cursor.setTo(evt.pageX, evt.pageY, 0);
                 boxSizing.update(target, layout.Style.create(target));

@@ -57,6 +57,7 @@ module jsidea.events {
 
         public dispose(): void {
             this._listener = null;
+            this._scope = null;
         }
 
         public static qualifiedClassName: string = "jsidea.events.EventDispatcher";

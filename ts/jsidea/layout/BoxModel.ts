@@ -1,87 +1,87 @@
 module jsidea.layout {
     export interface IBoxModel {
         //convert from border-box to custom box
-        fromBorderBox(size: BoxSizing, box: geom.Box2D): void;
+        fromBorderBox(size: BoxSizing, rect: geom.Rect2D): void;
         //convert from custom-box to border box
-        toBorderBox(size: BoxSizing, box: geom.Box2D): void;
+        toBorderBox(size: BoxSizing, rect: geom.Rect2D): void;
     }
     class MarginBoxModel implements IBoxModel {
-        public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
-            box.x += size.marginLeft;
-            box.y += size.marginTop;
-            box.width += size.marginLeft + size.marginRight;
-            box.height += size.marginTop + size.marginBottom;
+        public fromBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
+            rect.x += size.marginLeft;
+            rect.y += size.marginTop;
+            rect.width += size.marginLeft + size.marginRight;
+            rect.height += size.marginTop + size.marginBottom;
         }
-        public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
-            box.x -= size.marginLeft;
-            box.y -= size.marginTop;
-            box.width -= size.marginLeft + size.marginRight;
-            box.height -= size.marginTop + size.marginBottom;
+        public toBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
+            rect.x -= size.marginLeft;
+            rect.y -= size.marginTop;
+            rect.width -= size.marginLeft + size.marginRight;
+            rect.height -= size.marginTop + size.marginBottom;
         }
     }
     class BorderBoxModel implements IBoxModel {
-        public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
+        public fromBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
         }
-        public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
+        public toBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
         }
     }
-//    class BoxSizingBoxModel implements IBoxModel {
-//        public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
-//            if(size.style.boxSizing == "content-box")
-//                return;
-//            if(size.style.boxSizing == "border-box")
-//                return BoxModel.PADDING.fromBorderBox(size, box);
-//        }
-//        public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
-//            if(size.style.boxSizing == "content-box")
-//                return;
-//            if(size.style.boxSizing == "border-box")
-//                return BoxModel.PADDING.toBorderBox(size, box);
-//        }
-//    }
+    //    class BoxSizingBoxModel implements IBoxModel {
+    //        public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
+    //            if(size.style.boxSizing == "content-box")
+    //                return;
+    //            if(size.style.boxSizing == "border-box")
+    //                return BoxModel.PADDING.fromBorderBox(size, box);
+    //        }
+    //        public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
+    //            if(size.style.boxSizing == "content-box")
+    //                return;
+    //            if(size.style.boxSizing == "border-box")
+    //                return BoxModel.PADDING.toBorderBox(size, box);
+    //        }
+    //    }
     class PaddingBoxModel implements IBoxModel {
-        public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
-            box.x -= size.borderLeft;
-            box.y -= size.borderTop;
-            box.width -= size.borderLeft + size.borderRight;
-            box.height -= size.borderTop + size.borderBottom;
+        public fromBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
+            rect.x -= size.borderLeft;
+            rect.y -= size.borderTop;
+            rect.width -= size.borderLeft + size.borderRight;
+            rect.height -= size.borderTop + size.borderBottom;
         }
-        public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
-            box.x += size.borderLeft;
-            box.y += size.borderTop;
-            box.width += size.borderLeft + size.borderRight;
-            box.height += size.borderTop + size.borderBottom;
+        public toBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
+            rect.x += size.borderLeft;
+            rect.y += size.borderTop;
+            rect.width += size.borderLeft + size.borderRight;
+            rect.height += size.borderTop + size.borderBottom;
         }
     }
     class ContentBoxModel implements IBoxModel {
-        public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
-            box.x -= size.borderLeft + size.paddingLeft;
-            box.y -= size.borderTop + size.paddingTop;
-            box.width -= size.borderLeft + size.borderRight + size.paddingLeft + size.paddingRight;
-            box.height -= size.borderTop + size.borderBottom + size.paddingTop + size.paddingBottom;
+        public fromBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
+            rect.x -= size.borderLeft + size.paddingLeft;
+            rect.y -= size.borderTop + size.paddingTop;
+            rect.width -= size.borderLeft + size.borderRight + size.paddingLeft + size.paddingRight;
+            rect.height -= size.borderTop + size.borderBottom + size.paddingTop + size.paddingBottom;
         }
-        public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
-            box.x += size.borderLeft + size.paddingLeft;
-            box.y += size.borderTop + size.paddingTop;
-            box.width += size.borderLeft + size.borderRight + size.paddingLeft + size.paddingRight;
-            box.height += size.borderTop + size.borderBottom + size.paddingTop + size.paddingBottom;
+        public toBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
+            rect.x += size.borderLeft + size.paddingLeft;
+            rect.y += size.borderTop + size.paddingTop;
+            rect.width += size.borderLeft + size.borderRight + size.paddingLeft + size.paddingRight;
+            rect.height += size.borderTop + size.borderBottom + size.paddingTop + size.paddingBottom;
         }
     }
     class ClipBoxModel implements IBoxModel {
-        private _clip: geom.Box2D = new geom.Box2D();
-        public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
-            var clip = geom.Box2D.getClip(size.element, size.style, this._clip);
-            box.x -= clip.x;
-            box.y -= clip.y;
-            box.width -= size.width - clip.width;
-            box.height -= size.height - clip.height;
+        private _clip: geom.Rect2D = new geom.Rect2D();
+        public fromBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
+            var clip = geom.Rect2D.getClip(size.element, size.style, this._clip);
+            rect.x -= clip.x;
+            rect.y -= clip.y;
+            rect.width -= size.width - clip.width;
+            rect.height -= size.height - clip.height;
         }
-        public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
-            var clip = geom.Box2D.getClip(size.element, size.style, this._clip);
-            box.x += clip.x;
-            box.y += clip.y;
-            box.width += size.width - clip.width;
-            box.height += size.height - clip.height;
+        public toBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
+            var clip = geom.Rect2D.getClip(size.element, size.style, this._clip);
+            rect.x += clip.x;
+            rect.y += clip.y;
+            rect.width += size.width - clip.width;
+            rect.height += size.height - clip.height;
         }
     }
     class ScrollBoxModel implements IBoxModel {
@@ -100,53 +100,53 @@ module jsidea.layout {
             }
             return new geom.Point2D(scrollLeft, scrollTop);
         }
-        public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
+        public fromBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
             var scroll = this.getScroll(size.element);
 
-            BoxModel.PADDING.toBorderBox(size, box);
-            box.x += scroll.x;
-            box.y += scroll.y;
-            box.width += size.element.scrollWidth - size.width;
-            box.height += size.element.scrollHeight - size.height;
+            BoxModel.PADDING.toBorderBox(size, rect);
+            rect.x += scroll.x;
+            rect.y += scroll.y;
+            rect.width += size.element.scrollWidth - size.width;
+            rect.height += size.element.scrollHeight - size.height;
         }
-        public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
+        public toBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
             var scroll = this.getScroll(size.element);
 
-            BoxModel.PADDING.toBorderBox(size, box);
-            box.x -= scroll.x;
-            box.y -= scroll.y;
-            box.width -= size.element.scrollWidth - size.width;
-            box.height -= size.element.scrollHeight - size.height;
+            BoxModel.PADDING.toBorderBox(size, rect);
+            rect.x -= scroll.x;
+            rect.y -= scroll.y;
+            rect.width -= size.element.scrollWidth - size.width;
+            rect.height -= size.element.scrollHeight - size.height;
         }
     }
     class CanvasBoxModel implements IBoxModel {
         protected check(size: BoxSizing): boolean {
             return size.element && size.element instanceof HTMLCanvasElement;
         }
-        public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
+        public fromBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
             if (this.check(size)) {
                 var element = <HTMLCanvasElement | HTMLImageElement> size.element;
                 var scX = element.width / (element.clientWidth - (size.paddingLeft + size.paddingRight));
                 var scY = element.height / (element.clientHeight - (size.paddingTop + size.paddingBottom));
-                box.width *= scX;
-                box.height *= scY;
-                box.x *= scX;
-                box.y *= scY;
-                box.x += size.paddingLeft + size.borderLeft;
-                box.y += size.paddingTop + size.borderTop;
+                rect.width *= scX;
+                rect.height *= scY;
+                rect.x *= scX;
+                rect.y *= scY;
+                rect.x += size.paddingLeft + size.borderLeft;
+                rect.y += size.paddingTop + size.borderTop;
             }
         }
-        public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
+        public toBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
             if (this.check(size)) {
                 var element = <HTMLCanvasElement | HTMLImageElement> size.element;
-                box.x -= size.paddingLeft + size.borderLeft;
-                box.y -= size.paddingTop + size.borderTop;
+                rect.x -= size.paddingLeft + size.borderLeft;
+                rect.y -= size.paddingTop + size.borderTop;
                 var scX = element.width / (element.clientWidth - (size.paddingLeft + size.paddingRight));
                 var scY = element.height / (element.clientHeight - (size.paddingTop + size.paddingBottom));
-                box.width /= scX;
-                box.height /= scY;
-                box.x /= scX;
-                box.y /= scY;
+                rect.width /= scX;
+                rect.height /= scY;
+                rect.x /= scX;
+                rect.y /= scY;
             }
         }
     }
@@ -159,7 +159,7 @@ module jsidea.layout {
         private _image = new Image();
         protected _imageWidth = 0;
         protected _imageHeight = 0;
-        protected getBackgroundBox(size: BoxSizing, ret: geom.Box2D = new geom.Box2D()): geom.Box2D {
+        protected getBackgroundBox(size: BoxSizing, ret: geom.Rect2D = new geom.Rect2D()): geom.Rect2D {
             var src = size.style.backgroundImage.replace(/url\((['"])?(.*?)\1\)/gi, '$2').split(',')[0];
             var width;
             var height;
@@ -243,23 +243,23 @@ module jsidea.layout {
 
             return ret.setTo(pt.x, pt.y, width, height);
         }
-        public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
+        public fromBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
             var bb = this.getBackgroundBox(size);
-            box.x -= bb.x;
-            box.y -= bb.y;
-            box.width -= size.width - bb.width;
-            box.height -= size.height - bb.height;
+            rect.x -= bb.x;
+            rect.y -= bb.y;
+            rect.width -= size.width - bb.width;
+            rect.height -= size.height - bb.height;
         }
-        public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
+        public toBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
             var bb = this.getBackgroundBox(size);
-            box.x += bb.x;
-            box.y += bb.y;
-            box.width += size.width - bb.width;
-            box.height += size.height - bb.height;
+            rect.x += bb.x;
+            rect.y += bb.y;
+            rect.width += size.width - bb.width;
+            rect.height += size.height - bb.height;
         }
     }
     class AttachmentBoxModel extends BackgroundBoxModel {
-        protected getBackgroundBox(size: BoxSizing, ret: geom.Box2D = new geom.Box2D()): geom.Box2D {
+        protected getBackgroundBox(size: BoxSizing, ret: geom.Rect2D = new geom.Rect2D()): geom.Rect2D {
             super.getBackgroundBox(size, ret);
             //TODO: implement attachment handling correctly
             var attachment = size.style.backgroundAttachment;
@@ -286,33 +286,33 @@ module jsidea.layout {
             }
             return ret;
         }
-        public fromBorderBox(size: BoxSizing, box: geom.Box2D): void {
+        public fromBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
             var bb = this.getBackgroundBox(size);
-            box.x -= bb.x;
-            box.y -= bb.y;
+            rect.x -= bb.x;
+            rect.y -= bb.y;
             var scaleX = bb.width / this._imageWidth;
             var scaleY = bb.height / this._imageHeight;
-            box.x /= scaleX;
-            box.y /= scaleY;
-            box.width -= size.width - bb.width;
-            box.height -= size.height - bb.height;
+            rect.x /= scaleX;
+            rect.y /= scaleY;
+            rect.width -= size.width - bb.width;
+            rect.height -= size.height - bb.height;
         }
-        public toBorderBox(size: BoxSizing, box: geom.Box2D): void {
+        public toBorderBox(size: BoxSizing, rect: geom.Rect2D): void {
             var bb = this.getBackgroundBox(size);
             var scaleX = bb.width / this._imageWidth;
             var scaleY = bb.height / this._imageHeight;
-            box.x *= scaleX;
-            box.y *= scaleY;
-            box.x += bb.x;
-            box.y += bb.y;
-            box.width += size.width - bb.width;
-            box.height += size.height - bb.height;
+            rect.x *= scaleX;
+            rect.y *= scaleY;
+            rect.x += bb.x;
+            rect.y += bb.y;
+            rect.width += size.width - bb.width;
+            rect.height += size.height - bb.height;
         }
     }
     export class BoxModel {
         public static MARGIN: IBoxModel = new MarginBoxModel();
         public static BORDER: IBoxModel = new BorderBoxModel();
-//        public static BOX_SIZING: IBoxModel = new BoxSizingBoxModel();
+        //        public static BOX_SIZING: IBoxModel = new BoxSizingBoxModel();
         public static PADDING: IBoxModel = new PaddingBoxModel();
         public static CONTENT: IBoxModel = new ContentBoxModel();
         public static CANVAS: IBoxModel = new CanvasBoxModel();

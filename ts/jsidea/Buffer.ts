@@ -47,10 +47,10 @@ module jsidea {
         
         //jsidea.layout.Position
         public static _APPLY_POSITION = new geom.Matrix3D();
-        public static _APPLY_POSITION_SIZE_FROM = new geom.Box2D();
-        public static _APPLY_POSITION_SIZE_TO = new geom.Box2D();
+        public static _APPLY_POSITION_SIZE_FROM = new geom.Rect2D();
+        public static _APPLY_POSITION_SIZE_TO = new geom.Rect2D();
         
         //jsidea.layout.BoxModel
-        public static _POINT_MODEL = new geom.Box2D();
+        public static _POINT_MODEL = new geom.Rect2D();
     }
 }

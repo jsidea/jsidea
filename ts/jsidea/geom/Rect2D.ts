@@ -3,7 +3,7 @@ module jsidea.geom {
         width: number;
         height: number;
     }
-    export class Box2D implements IRectangleValue {
+    export class Rect2D implements IRectangleValue {
 
         constructor(
             public x: number = 0,
@@ -12,15 +12,15 @@ module jsidea.geom {
             public height: number = 0) {
         }
 
-        public clone(): Box2D {
-            return new Box2D(
+        public clone(): Rect2D {
+            return new Rect2D(
                 this.x,
                 this.y,
                 this.width,
                 this.height);
         }
 
-        public setTo(x: number, y: number, width: number, height: number): Box2D {
+        public setTo(x: number, y: number, width: number, height: number): Rect2D {
             this.x = x;
             this.y = y;
             this.width = width;
@@ -29,7 +29,7 @@ module jsidea.geom {
             return this;
         }
 
-        public setCSS(clipCSS: string): Box2D {
+        public setCSS(clipCSS: string): Rect2D {
             if (!clipCSS || clipCSS == "auto")
                 return this;
             //TODO: using a regex -> performance testing
@@ -60,7 +60,6 @@ module jsidea.geom {
         }
 
         public center(ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
-
             return ret.setTo(this.x + this.width * 0.5, this.y + this.width * 0.5);
         }
 
@@ -88,7 +87,17 @@ module jsidea.geom {
             return true;
         }
 
-        public copyFromClientRect(rect: ClientRect): Box2D {
+        public intersects(r: IRectangleValue): boolean {
+            if (this.contains(r.x, r.y)
+                || this.contains(r.x + r.width, r.y + r.height)
+                || this.contains(r.x + r.width, r.y)
+                || this.contains(r.x, r.y + r.height)
+                )
+                return true;
+            return false;
+        }
+
+        public copyFromClientRect(rect: ClientRect): Rect2D {
             this.x = rect.left;
             this.y = rect.top;
             this.width = rect.width;
@@ -103,37 +112,16 @@ module jsidea.geom {
         public set right(value: number) {
             this.width = value - this.x;
         }
-        
+
         public get bottom(): number {
             return this.y + this.height;
         }
-        
+
         public set bottom(value: number) {
             this.height = value - this.y;
         }
 
-        public intersects(r: IRectangleValue): boolean {
-            if (this.contains(r.x, r.y)
-                || this.contains(r.x + r.width, r.y + r.height)
-                || this.contains(r.x + r.width, r.y)
-                || this.contains(r.x, r.y + r.height)
-                )
-                return true;
-            return false;
-        }
-
-        //        public static extract(visual: HTMLElement, ret: Point3D = new Point3D()): Box2D {
-        //            //            
-        //            return new Box2D(0, 0,
-        //                visual.offsetWidth,
-        //                visual.offsetHeight);
-        ////            var bnds = visual.getClientRects()[0];
-        ////            return new Box2D(bnds.left, bnds.top,
-        ////                bnds.width,
-        ////                bnds.height);
-        //        }
-        
-        public static getBounds(element: HTMLElement, ret: Box2D = new Box2D()): Box2D {
+        public static getBounds(element: HTMLElement, ret: Rect2D = new Rect2D()): Rect2D {
             ret.copyFromClientRect(element.getBoundingClientRect());
             if (system.Browser.isWebKit) {
                 ret.x += document.body.scrollLeft;
@@ -146,7 +134,7 @@ module jsidea.geom {
             return ret;
         }
 
-        public static getClip(element: HTMLElement, style: CSSStyleDeclaration, ret: geom.Box2D = new geom.Box2D()): geom.Box2D {
+        public static getClip(element: HTMLElement, style: CSSStyleDeclaration, ret: geom.Rect2D = new geom.Rect2D()): geom.Rect2D {
             if (!style.clip || style.clip == "auto") {
                 ret.x = 0;
                 ret.y = 0;
@@ -163,7 +151,7 @@ module jsidea.geom {
 
         public static qualifiedClassName: string = "jsidea.geom.Box2D";
         public toString(): string {
-            return "[" + Box2D.qualifiedClassName
+            return "[" + Rect2D.qualifiedClassName
                 + " x=" + this.x
                 + " y=" + this.y
                 + " width=" + this.width

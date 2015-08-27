@@ -1,34 +1,37 @@
 module jsidea.geom {
     export interface IQuadValue {
-
+        p1: geom.Point3D;
+        p2: geom.Point3D;
+        p3: geom.Point3D;
+        p4: geom.Point3D;
     }
     export class Quad implements IQuadValue {
 
         constructor(
-            public a: geom.Point3D = new geom.Point3D(),
-            public b: geom.Point3D = new geom.Point3D(),
-            public c: geom.Point3D = new geom.Point3D(),
-            public d: geom.Point3D = new geom.Point3D()
+            public p1: geom.Point3D = new geom.Point3D(),
+            public p2: geom.Point3D = new geom.Point3D(),
+            public p3: geom.Point3D = new geom.Point3D(),
+            public p4: geom.Point3D = new geom.Point3D()
             ) {
         }
 
         public clone(): Quad {
             return new Quad(
-                this.a.clone(),
-                this.b.clone(),
-                this.c.clone(),
-                this.d.clone());
+                this.p1.clone(),
+                this.p2.clone(),
+                this.p3.clone(),
+                this.p4.clone());
         }
 
         public setTo(
-            a: geom.Point3D,
-            b: geom.Point3D,
-            c: geom.Point3D,
-            d: geom.Point3D): Quad {
-            this.a.copyFrom(a);
-            this.b.copyFrom(b);
-            this.c.copyFrom(c);
-            this.d.copyFrom(d);
+            p1: geom.Point3D,
+            p2: geom.Point3D,
+            p3: geom.Point3D,
+            p4: geom.Point3D): Quad {
+            this.p1.copyFrom(p1);
+            this.p2.copyFrom(p2);
+            this.p3.copyFrom(p3);
+            this.p4.copyFrom(p4);
 
             return this;
         }
@@ -42,19 +45,19 @@ module jsidea.geom {
             var pt = new geom.Point2D(x, y);
 
             var int = null;
-            int = this.intersection(c, pt, this.a, this.b);
+            int = this.intersection(c, pt, this.p1, this.p2);
             if (int)
                 return int;
-            
-            int = this.intersection(c, pt, this.b, this.c);
+
+            int = this.intersection(c, pt, this.p2, this.p3);
             if (int)
                 return int;
-            
-            int = this.intersection(c, pt, this.c, this.d);
+
+            int = this.intersection(c, pt, this.p3, this.p4);
             if (int)
                 return int;
-            
-            int = this.intersection(c, pt, this.d, this.a);
+
+            int = this.intersection(c, pt, this.p4, this.p1);
             if (int)
                 return int;
 
@@ -70,17 +73,17 @@ module jsidea.geom {
                 int = geom.Point2D.intersection(c, pt, a, b);
         }
 
-        public outerBox(ret: geom.Box2D = new geom.Box2D()): geom.Box2D {
-            ret.x = Math.min(this.a.x, this.b.x, this.c.x, this.d.x);
-            ret.y = Math.min(this.a.y, this.b.y, this.c.y, this.d.y);
-            ret.width = Math.max(this.a.x, this.b.x, this.c.x, this.d.x) - ret.x;
-            ret.height = Math.max(this.a.y, this.b.y, this.c.y, this.d.y) - ret.y;
+        public outerBox(ret: geom.Rect2D = new geom.Rect2D()): geom.Rect2D {
+            ret.x = Math.min(this.p1.x, this.p2.x, this.p3.x, this.p4.x);
+            ret.y = Math.min(this.p1.y, this.p2.y, this.p3.y, this.p4.y);
+            ret.width = Math.max(this.p1.x, this.p2.x, this.p3.x, this.p4.x) - ret.x;
+            ret.height = Math.max(this.p1.y, this.p2.y, this.p3.y, this.p4.y) - ret.y;
             return ret;
         }
 
-        public innerBox(ret: geom.Box2D = new geom.Box2D()): geom.Box2D {
-            var x = [this.a.x, this.b.x, this.c.x, this.d.x];
-            var y = [this.a.y, this.b.y, this.c.y, this.d.y];
+        public innerBox(ret: geom.Rect2D = new geom.Rect2D()): geom.Rect2D {
+            var x = [this.p1.x, this.p2.x, this.p3.x, this.p4.x];
+            var y = [this.p1.y, this.p2.y, this.p3.y, this.p4.y];
             x.sort(this.sortNumber);
             y.sort(this.sortNumber);
             ret.x = x[1];
@@ -89,13 +92,13 @@ module jsidea.geom {
             ret.height = y[2] - ret.y;
             return ret;
         }
-        
-        private sortNumber(a:number, b:number):number{
-            return a - b;    
+
+        private sortNumber(a: number, b: number): number {
+            return a - b;
         }
 
-        public copyFrom(value: Quad): Quad {
-            return this.setTo(value.a, value.b, value.c, value.d);
+        public copyFrom(value: IQuadValue): Quad {
+            return this.setTo(value.p1, value.p2, value.p3, value.p4);
         }
 
         public dispose(): void {
@@ -103,11 +106,11 @@ module jsidea.geom {
 
         public static qualifiedClassName: string = "jsidea.geom.Quad";
         public toString(): string {
-            return "[" + Box2D.qualifiedClassName
-                + " a=" + this.a.toString()
-                + " b=" + this.b.toString()
-                + " c=" + this.c.toString()
-                + " d=" + this.d.toString()
+            return "[" + Rect2D.qualifiedClassName
+                + " a=" + this.p1.toString()
+                + " b=" + this.p2.toString()
+                + " c=" + this.p3.toString()
+                + " d=" + this.p4.toString()
                 + "]";
         }
     }

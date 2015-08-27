@@ -5,7 +5,7 @@ module jsidea.geom {
         public fromBox: layout.IBoxModel = layout.BoxModel.BORDER;
         public matrix: Matrix3D = new Matrix3D();
         public boxSizing: layout.BoxSizing = new layout.BoxSizing();
-        
+
         private _sceneTransform: Matrix3D[] = [];
         private _inverseSceneTransform: Matrix3D[] = [];
 
@@ -40,7 +40,7 @@ module jsidea.geom {
             this._inverseSceneTransform = this._sceneTransform.slice(0, this._sceneTransform.length).reverse();
             for (var i = 0; i < this._inverseSceneTransform.length; ++i)
                 this._inverseSceneTransform[i] = this._inverseSceneTransform[i].clone().invert();
-            
+
             return this;
         }
 
@@ -50,7 +50,7 @@ module jsidea.geom {
             this._inverseSceneTransform = [];
             this.boxSizing.clear();
             this.matrix.identity();
-            
+
             return this;
         }
 
@@ -87,17 +87,17 @@ module jsidea.geom {
             return this.localToLocal(to, pt.x, pt.y, pt.z, fromBox, toBox, ret);
         }
 
-        public localToLocalQuadY(
+        public localToLocalQuad(
             to: Transform,
             quad: Quad,
             fromBox?: layout.IBoxModel,
             toBox?: layout.IBoxModel,
             ret: Quad = new Quad()): Quad {
 
-            this.localToLocalPoint(to, quad.a, fromBox, toBox, ret.a);
-            this.localToLocalPoint(to, quad.b, fromBox, toBox, ret.b);
-            this.localToLocalPoint(to, quad.c, fromBox, toBox, ret.c);
-            this.localToLocalPoint(to, quad.d, fromBox, toBox, ret.d);
+            this.localToLocalPoint(to, quad.p1, fromBox, toBox, ret.p1);
+            this.localToLocalPoint(to, quad.p2, fromBox, toBox, ret.p2);
+            this.localToLocalPoint(to, quad.p3, fromBox, toBox, ret.p3);
+            this.localToLocalPoint(to, quad.p4, fromBox, toBox, ret.p4);
             return ret;
         }
 
@@ -130,10 +130,10 @@ module jsidea.geom {
             toBox?: layout.IBoxModel,
             ret: Quad = new Quad()): Quad {
 
-            this.globalToLocalPoint(quad.a, fromBox, toBox, ret.a);
-            this.globalToLocalPoint(quad.b, fromBox, toBox, ret.b);
-            this.globalToLocalPoint(quad.c, fromBox, toBox, ret.c);
-            this.globalToLocalPoint(quad.d, fromBox, toBox, ret.d);
+            this.globalToLocalPoint(quad.p1, fromBox, toBox, ret.p1);
+            this.globalToLocalPoint(quad.p2, fromBox, toBox, ret.p2);
+            this.globalToLocalPoint(quad.p3, fromBox, toBox, ret.p3);
+            this.globalToLocalPoint(quad.p4, fromBox, toBox, ret.p4);
             return ret;
         }
 
@@ -174,10 +174,10 @@ module jsidea.geom {
             fromBox?: layout.IBoxModel,
             toBox?: layout.IBoxModel,
             ret: Quad = new Quad()): Quad {
-            this.localToGlobalPoint(quad.a, fromBox, toBox, ret.a);
-            this.localToGlobalPoint(quad.b, fromBox, toBox, ret.b);
-            this.localToGlobalPoint(quad.c, fromBox, toBox, ret.c);
-            this.localToGlobalPoint(quad.d, fromBox, toBox, ret.d);
+            this.localToGlobalPoint(quad.p1, fromBox, toBox, ret.p1);
+            this.localToGlobalPoint(quad.p2, fromBox, toBox, ret.p2);
+            this.localToGlobalPoint(quad.p3, fromBox, toBox, ret.p3);
+            this.localToGlobalPoint(quad.p4, fromBox, toBox, ret.p4);
             return ret;
         }
 
@@ -203,6 +203,16 @@ module jsidea.geom {
             this.boxSizing.point(ret, layout.BoxModel.BORDER, toBox || this.toBox);
 
             return ret;
+        }
+
+        public dispose(): void {
+            this.element = null;
+            this.toBox = null;
+            this.fromBox = null;
+            this.matrix = null;
+            this.boxSizing = null;
+            this._sceneTransform = null;
+            this._inverseSceneTransform = null;
         }
 
         public static qualifiedClassName: string = "jsidea.geom.Transform";

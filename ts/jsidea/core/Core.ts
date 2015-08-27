@@ -1,9 +1,4 @@
 //basic classes and interfaces
-interface IDisposable {
-    dispose(): void;
-}
-
-//basic classes and interfaces
 interface Window {
     app: jsidea.system.Application;
 }
