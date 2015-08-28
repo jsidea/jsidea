@@ -196,7 +196,7 @@ module jsidea.test {
                 g.bounds(b);
                 g.bounds(c);
                 g.bounds(d);
-                g.bounds(xc, layout.BoxModel.PADDING);
+                g.bounds(xc, layout.BoxModel.ATTACHMENT);
                 g.bounds(can);
             };
             document.addEventListener("click", draw);

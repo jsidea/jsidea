@@ -34,8 +34,6 @@ module jsidea.display {
                 d.y = box.bottom;
             }
 
-            from.fromBox = layout.BoxModel.BORDER;
-
             var to = geom.Transform.create(can);
             to.toBox = layout.BoxModel.CANVAS;
 

@@ -163,8 +163,11 @@ module jsidea.layout {
             ret.height = this.height;
             if (boxModel)
                 this.convert(ret, BoxModel.BORDER, boxModel);
-            ret.x *= -1;
-            ret.y *= -1;
+            
+            var pt = new geom.Point3D(0, 0);
+            this.transform(pt, boxModel, BoxModel.BORDER);
+            ret.x = pt.x;
+            ret.y = pt.y;
             if (toBox && toBox != BoxModel.BORDER)
                 this.convert(ret, BoxModel.BORDER, toBox);
             return ret;
