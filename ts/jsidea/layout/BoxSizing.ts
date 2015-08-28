@@ -150,28 +150,37 @@ module jsidea.layout {
             return this;
         }
 
-        public getBox(fromBox?: IBoxModel, toBox?: IBoxModel, ret: geom.Rect2D = new geom.Rect2D()): geom.Rect2D {
+        /**
+        * Calculates the bounds of the box-model relative to the toBox.
+        * @param boxModel The size/bounds-boxModel.
+        * @param toBox Where the bounds should be relative to.
+        * @return The bounds of the box-model relative to the toBox.
+        */
+        public bounds(boxModel?: IBoxModel, toBox?: IBoxModel, ret: geom.Rect2D = new geom.Rect2D()): geom.Rect2D {
             ret.x = 0;
             ret.y = 0;
             ret.width = this.width;
             ret.height = this.height;
-            return this.convert(ret, fromBox, toBox);
+            if (boxModel)
+                this.convert(ret, BoxModel.BORDER, boxModel);
+            ret.x *= -1;
+            ret.y *= -1;
+            if (toBox && toBox != BoxModel.BORDER)
+                this.convert(ret, BoxModel.BORDER, toBox);
+            return ret;
         }
         
-        //converts sizes between different boxes
-        public convert(rect: geom.Rect2D, fromBox?: IBoxModel, toBox?: IBoxModel): geom.Rect2D {
-            if (toBox === fromBox)
-                return rect;
-            if (fromBox)
-                fromBox.toBorderBox(this, rect);
-            if (toBox)
-                toBox.fromBorderBox(this, rect);
-            return rect;
-        }
-
-        public point(point: geom.Point3D, fromBox?: IBoxModel, toBox?: IBoxModel): geom.Point3D {
+        /**
+        * Transforms a point from one box-model to another. It does not clone the point, it will change it.
+        * @param point The point to transform. The coordinate system should be the fromBox-model.
+        * @param fromBox Where the point coordinates coming from.
+        * @param toBox The target coordinate-system/box-model.
+        * @return The transformed point.
+        */
+        public transform(point: geom.Point3D, fromBox?: IBoxModel, toBox?: IBoxModel): geom.Point3D {
             if (toBox == fromBox)
                 return point;
+            //TODO: optimize
             //            var box = Buffer._POINT_MODEL;
             var box = new geom.Rect2D();
             box.x = point.x;
@@ -180,6 +189,23 @@ module jsidea.layout {
             box.height = this.height;
             this.convert(box, fromBox, toBox);
             return point.setTo(box.x, box.y, 0);
+        }
+        
+        /**
+        * Converts sizes between different boxes.
+        * @param rect The rect to transform. The coordinate system should be the fromBox-model.
+        * @param fromBox Where the point coordinates coming from.
+        * @param toBox The target coordinate-system/box-model.
+        * @return The transformed rectangle.
+        */
+        private convert(rect: geom.Rect2D, fromBox?: IBoxModel, toBox?: IBoxModel): geom.Rect2D {
+            if (toBox === fromBox)
+                return rect;
+            if (fromBox)
+                fromBox.toBorderBox(this, rect);
+            if (toBox)
+                toBox.fromBorderBox(this, rect);
+            return rect;
         }
 
         public dispose(): void {

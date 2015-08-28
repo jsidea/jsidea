@@ -148,14 +148,14 @@ module jsidea.geom {
             ret.setTo(x, y, z);
             
             //apply box model transformations
-            this.boxSizing.point(ret, fromBox || this.fromBox, layout.BoxModel.BORDER);
+            this.boxSizing.transform(ret, fromBox || this.fromBox, layout.BoxModel.BORDER);
             
             //unproject from parent to child
             for (var i = 0; i < this._inverseSceneTransform.length; ++i)
                 ret = this._inverseSceneTransform[i].unproject(ret, ret);
 
             //apply box model transformations
-            this.boxSizing.point(ret, layout.BoxModel.BORDER, toBox || this.toBox);
+            this.boxSizing.transform(ret, layout.BoxModel.BORDER, toBox || this.toBox);
 
             return ret;
         }
@@ -192,7 +192,7 @@ module jsidea.geom {
             ret.setTo(x, y, z);
             
             //apply from-box model transformations
-            this.boxSizing.point(ret, fromBox || this.fromBox, layout.BoxModel.BORDER);            
+            this.boxSizing.transform(ret, fromBox || this.fromBox, layout.BoxModel.BORDER);            
             
             //project from child to parent
             var l = this._sceneTransform.length;
@@ -200,7 +200,7 @@ module jsidea.geom {
                 ret = this._sceneTransform[i].project(ret, ret);
             
             //apply to-box model transformations
-            this.boxSizing.point(ret, layout.BoxModel.BORDER, toBox || this.toBox);
+            this.boxSizing.transform(ret, layout.BoxModel.BORDER, toBox || this.toBox);
 
             return ret;
         }

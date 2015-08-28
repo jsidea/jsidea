@@ -92,6 +92,12 @@ module jsidea.test {
 
             var a = document.createElement("div");
             a.id = "a-cont";
+            
+            var tes = document.createElement("div");
+            tes.id = "tes-cont";
+            tes.style.fontSize = "100px";
+            con.appendChild(tes);
+            
             var b = document.createElement("div");
             b.id = "b-cont";
             var c = document.createElement("div");
@@ -114,7 +120,7 @@ module jsidea.test {
             //            pos.to.minY = 0;
             
             //drag settings
-            var dragMode = layout.DragMode.BORDER_BOTTOM_RIGHT_INNER;
+            var dragMode = layout.DragMode.BACKGROUND;
             pos.mode = dragMode.positionMode;
             pos.to.boxModel = dragMode.boxModel;
             var invertX = dragMode.invertX;
@@ -137,7 +143,7 @@ module jsidea.test {
                 cursor.setTo(evt.pageX, evt.pageY, 0);
                 transform.update(target);
                 var loc = transform.globalToLocalPoint(cursor, layout.BoxModel.BORDER, pos.to.boxModel);
-                box = transform.boxSizing.getBox(layout.BoxModel.BORDER, pos.to.boxModel, box);
+                box = transform.boxSizing.bounds(pos.to.boxModel, null, box);
                 //                box = transform.boxSizing.getBox(pos.to.boxModel, null, box);
                 pivot.x = invertX ? (box.width - loc.x) : loc.x;
                 pivot.y = invertY ? (box.height - loc.y) : loc.y;
@@ -156,7 +162,7 @@ module jsidea.test {
 
                 cursor.setTo(evt.pageX, evt.pageY, 0);
                 boxSizing.update(target, layout.Style.create(target));
-                box = boxSizing.getBox(layout.BoxModel.BORDER, pos.to.boxModel, box);
+                box = boxSizing.bounds(pos.to.boxModel, null, box);
                 pos.to.x = invertX ? (box.width - pivot.x) : pivot.x;
                 pos.to.y = invertY ? (box.height - pivot.y) : pivot.y;
                 
@@ -173,19 +179,25 @@ module jsidea.test {
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
             });
+            
+            document.addEventListener("mousemove",(evt) => {
+                var pt = geom.Transform.create(xc).globalToLocal(evt.pageX, evt.pageY, 0, null, layout.BoxModel.ATTACHMENT);
+                tes.textContent = Math.round(pt.x) + " , " + Math.round(pt.y);
+                });
 
 //            document.addEventListener("click", () => this.logChain(xc));
             
             var draw = () => {
                 ctx.clearRect(0, 0, can.width, can.height);
-                this.drawBoundingBox(ctx, vie);
-                this.drawBoundingBox(ctx, con);
-                this.drawBoundingBox(ctx, a);
-                this.drawBoundingBox(ctx, b);
-                this.drawBoundingBox(ctx, c);
-                this.drawBoundingBox(ctx, d);
-                this.drawBoundingBox(ctx, xc);
-                this.drawBoundingBox(ctx, can);
+                var g = display.Graphics.get(ctx);
+                g.bounds(vie);
+                g.bounds(con);
+                g.bounds(a);
+                g.bounds(b);
+                g.bounds(c);
+                g.bounds(d);
+                g.bounds(xc, layout.BoxModel.PADDING);
+                g.bounds(can);
             };
             document.addEventListener("click", draw);
 
@@ -236,35 +248,35 @@ module jsidea.test {
             }
         }
 
-        private drawBoundingBox(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
-            var can: HTMLElement = ctx.canvas;
-
-            var a = new geom.Point3D(0, 0, 0);
-            var b = new geom.Point3D(e.offsetWidth, 0, 0);
-            var c = new geom.Point3D(e.offsetWidth, e.offsetHeight, 0);
-            var d = new geom.Point3D(0, e.offsetHeight, 0);
-
-            var from = geom.Transform.create(e);
-            from.fromBox = layout.BoxModel.BORDER;
-
-            var to = geom.Transform.create(can);
-            to.toBox = layout.BoxModel.CANVAS;
-
-            a = from.localToLocal(to, a.x, a.y);
-            b = from.localToLocal(to, b.x, b.y);
-            c = from.localToLocal(to, c.x, c.y);
-            d = from.localToLocal(to, d.x, d.y);
-
-            ctx.beginPath();
-            //            ctx.setLineDash([4, 4]);
-            ctx.lineWidth = 2;
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.lineTo(c.x, c.y);
-            ctx.lineTo(d.x, d.y);
-            ctx.lineTo(a.x, a.y);
-            ctx.stroke();
-        }
+//        private drawBoundingBox(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
+//            var can: HTMLElement = ctx.canvas;
+//
+//            var a = new geom.Point3D(0, 0, 0);
+//            var b = new geom.Point3D(e.offsetWidth, 0, 0);
+//            var c = new geom.Point3D(e.offsetWidth, e.offsetHeight, 0);
+//            var d = new geom.Point3D(0, e.offsetHeight, 0);
+//
+//            var from = geom.Transform.create(e);
+//            from.fromBox = layout.BoxModel.BORDER;
+//
+//            var to = geom.Transform.create(can);
+//            to.toBox = layout.BoxModel.CANVAS;
+//
+//            a = from.localToLocal(to, a.x, a.y);
+//            b = from.localToLocal(to, b.x, b.y);
+//            c = from.localToLocal(to, c.x, c.y);
+//            d = from.localToLocal(to, d.x, d.y);
+//
+//            ctx.beginPath();
+//            //            ctx.setLineDash([4, 4]);
+//            ctx.lineWidth = 2;
+//            ctx.moveTo(a.x, a.y);
+//            ctx.lineTo(b.x, b.y);
+//            ctx.lineTo(c.x, c.y);
+//            ctx.lineTo(d.x, d.y);
+//            ctx.lineTo(a.x, a.y);
+//            ctx.stroke();
+//        }
 
         private drawCross(ctx, x: number, y: number): void {
             ctx.beginPath();

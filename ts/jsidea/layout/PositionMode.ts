@@ -73,7 +73,7 @@ module jsidea.layout {
                         this._sizeParent.update(node.parent.element, node.parent.style);
                         position.x = node.position.x + this._sizeParent.paddingLeft - this._size.marginLeft;
                         position.y = node.position.y + this._sizeParent.paddingTop - this._size.marginTop;
-                        this._sizeParent.point(position, BoxModel.BORDER, BoxModel.CONTENT);
+                        this._sizeParent.transform(position, BoxModel.BORDER, BoxModel.CONTENT);
                     }
                     return offset.add(
                         position.x,
@@ -378,7 +378,7 @@ module jsidea.layout {
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var rect = this._rect;
             this._boxSizing.update(element, style);
-            this._boxSizing.getBox(BoxModel.BACKGROUND, BoxModel.PADDING, rect);
+            this._boxSizing.bounds(BoxModel.BACKGROUND, BoxModel.PADDING, rect);
             return offset.add(
                 rect.x,
                 rect.y,

@@ -73,10 +73,10 @@ module jsidea.layout {
             mode.clamp(point, element, style);
             
             //TODO: use the correct box model
-            var fromBox = this.to.boxModel || BoxModel.BORDER;
+            var toBox = this.to.boxModel || BoxModel.BORDER;
 
             var size = BoxSizing.create(element, style);
-            var box = size.getBox(fromBox, BoxModel.BORDER);
+            var box = size.bounds(toBox);
             this.clamp(point, box.width, box.height);
             
             //apply the final point
@@ -97,12 +97,12 @@ module jsidea.layout {
             var fromBox = this.from.boxModel || BoxModel.BORDER;
             
             //transform box-models of "to"
-            var sizeTo = this._to.boxSizing.getBox(BoxModel.BORDER, toBox);
+            var sizeTo = this._to.boxSizing.bounds(toBox);
             var toX: number = math.Number.relation(this.to.x, sizeTo.width, 0) + math.Number.relation(this.to.offsetX, sizeTo.width, 0);
             var toY: number = math.Number.relation(this.to.y, sizeTo.height, 0) + math.Number.relation(this.to.offsetY, sizeTo.height, 0);
             
             //transform box-models of "from"
-            var sizeFrom = this._from.boxSizing.getBox(BoxModel.BORDER, fromBox);
+            var sizeFrom = this._from.boxSizing.bounds(fromBox);
             var fromX: number = math.Number.relation(this.from.x, sizeFrom.width, 0) + math.Number.relation(this.from.offsetX, sizeFrom.width, 0);
             var fromY: number = math.Number.relation(this.from.y, sizeFrom.height, 0) + math.Number.relation(this.from.offsetY, sizeFrom.height, 0);
             
@@ -133,8 +133,8 @@ module jsidea.layout {
                     var boundsBox = this.bounds.boxModel || BoxModel.BORDER;
 
                     this._bounds.update(this.bounds.element, this.bounds.transformMode);
-                    var boundsSize = this._bounds.boxSizing.getBox(BoxModel.BORDER, boundsBox);
-                    var toSize = this._to.boxSizing.getBox(BoxModel.BORDER, toBox);
+                    var boundsSize = this._bounds.boxSizing.bounds(boundsBox);
+                    var toSize = this._to.boxSizing.bounds(toBox);
 
                     lc = this._to.clamp(this._bounds, lc, toSize.width, toSize.height, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
                     lc = this._to.clamp(this._bounds, lc, 0, toSize.height, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
