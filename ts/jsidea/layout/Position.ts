@@ -63,15 +63,15 @@ module jsidea.layout {
             mode = mode || this.mode || PositionMode.TRANSFORM;
 
             //the un-clamped point
-//            var style = Style.create(element);
+            //            var style = Style.create(element);
             var point = this.calc(element);
             var style = this._to.size.style;
             var size = this._to.size;
-//            console.log(point.x, point.y);
+            //            console.log(point.x, point.y);
             
-//            var pt = mode.transform(new geom.Point3D(), element, style);
-//            point.x = math.Number.roundTo(point.x, 50);
-//            point.y = math.Number.roundTo(point.y, 50);
+            //            var pt = mode.transform(new geom.Point3D(), element, style);
+            //            point.x = math.Number.roundTo(point.x, 50);
+            //            point.y = math.Number.roundTo(point.y, 50);
             
             //the point in "Position"-space
             mode.transform(point, element, style);
@@ -89,37 +89,63 @@ module jsidea.layout {
             //apply the final point
             mode.apply(point, element, style);
             
-//            var to = geom.Transform.create(element.parentElement);
-//            var gl = to.localToGlobal(point.x, point.y, 0);
-//            gl.x = math.Number.roundTo(gl.x, 50);
-//            gl.y = math.Number.roundTo(gl.y, 50);
-//            var lc = geom.Transform.create(element.parentElement).globalToLocal(gl.x, gl.y, 0);
-//            point.x = lc.x;
-//            point.y = lc.y;
-//            mode.apply(point, element, layout.Style.create(element));
+            //            var to = geom.Transform.create(element.parentElement);
+            //            var gl = to.localToGlobal(point.x, point.y, 0);
+            //            gl.x = math.Number.roundTo(gl.x, 50);
+            //            gl.y = math.Number.roundTo(gl.y, 50);
+            //            var lc = geom.Transform.create(element.parentElement).globalToLocal(gl.x, gl.y, 0);
+            //            point.x = lc.x;
+            //            point.y = lc.y;
+            //            mode.apply(point, element, layout.Style.create(element));
 
+            //            var to = geom.Transform.create(element);
+            //            var gl = to.localToGlobal(0, 0, 0);
+            //            gl.x = math.Number.roundTo(gl.x, 50);
+            //            gl.y = math.Number.roundTo(gl.y, 50);
+            //            var lc = to.globalToLocal(gl.x, gl.y, 0);
+            //            to.matrix.prependPositionRaw(lc.x, lc.y, 0);
+            //            point.x = to.matrix.m41;
+            //            point.y = to.matrix.m42;
+            //            point.z = 0;
+            //            mode.apply(point, element, layout.Style.create(element));
+            
+            //            var to = geom.Transform.create(element);
+            //            var gl = to.localToGlobal(0, 0, 0);
+            //            gl.x = math.Number.roundTo(gl.x, 50);
+            //            gl.y = math.Number.roundTo(gl.y, 50);
+            //            var lc = to.globalToLocalPoint(gl);
+            //            to.matrix.prependPositionRaw(lc.x, lc.y, 0);
+            //            point.x = to.matrix.m41;
+            //            point.y = to.matrix.m42;
+            //            point.z = to.matrix.m43;
+            //            mode.transform(point, element, to.size.style);
+            //            mode.apply(point, element, to.size.style);
+            
 //            var to = geom.Transform.create(element);
 //            var gl = to.localToGlobal(0, 0, 0);
 //            gl.x = math.Number.roundTo(gl.x, 50);
 //            gl.y = math.Number.roundTo(gl.y, 50);
-//            var lc = to.globalToLocal(gl.x, gl.y, 0);
+//            var lc = to.globalToLocalPoint(gl);
 //            to.matrix.prependPositionRaw(lc.x, lc.y, 0);
 //            point.x = to.matrix.m41;
 //            point.y = to.matrix.m42;
-//            point.z = 0;
-//            mode.apply(point, element, layout.Style.create(element));
-            
-            var to = geom.Transform.create(element);
+//            point.z = to.matrix.m43;
+//            mode.transform(point, element, to.size.style);
+//            mode.apply(point, element, to.size.style);
+        }
+
+        private snap(to: geom.Transform): geom.Point3D {
             var gl = to.localToGlobal(0, 0, 0);
             gl.x = math.Number.roundTo(gl.x, 50);
             gl.y = math.Number.roundTo(gl.y, 50);
-            var lc = to.globalToLocal(gl.x, gl.y, 0);
+            var lc = to.globalToLocalPoint(gl);
             to.matrix.prependPositionRaw(lc.x, lc.y, 0);
+
+            var point: geom.Point3D = new geom.Point3D();
             point.x = to.matrix.m41;
             point.y = to.matrix.m42;
-            point.z = 0;
-            mode.transform(point, element, to.size.style);
-            mode.apply(point, element, to.size.style);
+            point.z = to.matrix.m43;
+            return point;
         }
 
         public calc(element: HTMLElement, ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
@@ -161,30 +187,48 @@ module jsidea.layout {
             lc.y -= toY;
             
             //keep in bounds
-            if (this.bounds.element) {
-                //                if (this.bounds.element == element)
-                //                    console.warn("The bounds element cannot be the \"to\"-element.");
-                //                else 
-                if (element.contains(this.bounds.element))
-                    console.warn("The bounds element cannot be a child-element of the \"to\"-element.");
-                else {
-                    var toBox = this.bounds.toBoxModel || BoxModel.BORDER;
-                    var boundsBox = this.bounds.boxModel || BoxModel.BORDER;
+//            if (this.bounds.element) {
+//                //                if (this.bounds.element == element)
+//                //                    console.warn("The bounds element cannot be the \"to\"-element.");
+//                //                else 
+//                if (element.contains(this.bounds.element))
+//                    console.warn("The bounds element cannot be a child-element of the \"to\"-element.");
+//                else {
+//                    var toBox = this.bounds.toBoxModel || BoxModel.BORDER;
+//                    var boundsBox = this.bounds.boxModel || BoxModel.BORDER;
+//
+//                    this._bounds.update(this.bounds.element, this.bounds.transformMode);
+//                    var boundsSize = this._bounds.size.bounds(boundsBox);
+//                    var toSize = this._to.size.bounds(toBox);
+//
+//                    lc = this._to.clamp(this._bounds, lc, toSize.width, toSize.height, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
+//                    lc = this._to.clamp(this._bounds, lc, 0, toSize.height, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
+//                    lc = this._to.clamp(this._bounds, lc, toSize.width, 0, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
+//                    lc = this._to.clamp(this._bounds, lc, 0, 0, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
+//                }
+//            }
+            
 
-                    this._bounds.update(this.bounds.element, this.bounds.transformMode);
-                    var boundsSize = this._bounds.size.bounds(boundsBox);
-                    var toSize = this._to.size.bounds(toBox);
+            var mt = new geom.Matrix3D();
+            mt.appendPositionRaw(lc.x, lc.y, 0);
+            this._to.prepend(mt);
 
-                    lc = this._to.clamp(this._bounds, lc, toSize.width, toSize.height, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
-                    lc = this._to.clamp(this._bounds, lc, 0, toSize.height, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
-                    lc = this._to.clamp(this._bounds, lc, toSize.width, 0, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
-                    lc = this._to.clamp(this._bounds, lc, 0, 0, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
-                }
-            }
+            var point = this.snap(this._to);
+            return point;
             
             //prepend the local offset
             var mat = this._to.matrix.clone();
             mat.prependPositionRaw(lc.x, lc.y, 0);
+            
+            //            var to = geom.Transform.create(element);
+            //            var gl = to.localToGlobal(0, 0, 0);
+            //            gl.x = math.Number.roundTo(gl.x, 50);
+            //            gl.y = math.Number.roundTo(gl.y, 50);
+            //            var lc = to.globalToLocalPoint(gl);
+            //            to.matrix.prependPositionRaw(lc.x, lc.y, 0);
+            //            point.x = to.matrix.m41;
+            //            point.y = to.matrix.m42;
+            //            point.z = to.matrix.m43;
 
             return mat.getPosition(ret);
         }

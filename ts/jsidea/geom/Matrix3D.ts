@@ -1100,8 +1100,6 @@ module jsidea.geom {
             return ret;
         }
 
-
-
         public static qualifiedClassName: string = "jsidea.geom.Matrix3D";
         public toString(fractionDigits: number = 3): string {
             return "[" + Matrix3D.qualifiedClassName + " \n"

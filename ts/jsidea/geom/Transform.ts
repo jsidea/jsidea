@@ -44,6 +44,26 @@ module jsidea.geom {
             return this;
         }
 
+        public append(matrix: Matrix3D): Transform {
+            matrix = matrix.clone();
+
+            this.matrix.append(matrix);
+            this._sceneTransform[0].append(matrix);
+            this._inverseSceneTransform[this._sceneTransform.length - 1] = this._sceneTransform[0].clone().invert();
+
+            return this;
+        }
+
+        public prepend(matrix: Matrix3D): Transform {
+            matrix = matrix.clone();
+
+            this.matrix.prepend(matrix);
+            this._sceneTransform[0].prepend(matrix);
+            this._inverseSceneTransform[this._sceneTransform.length - 1] = this._sceneTransform[0].clone().invert();
+
+            return this;
+        }
+
         public clear(): Transform {
             this.element = null;
             this._sceneTransform = [];

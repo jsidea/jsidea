@@ -192,7 +192,7 @@ module jsidea.test {
 
 
 
-            document.addEventListener("click",() => this.logChain(xc));
+//            document.addEventListener("click",() => this.logChain(xc));
 
             var draw = () => {
                 var g = display.Graphics.get(ctx);

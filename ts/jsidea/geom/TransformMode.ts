@@ -94,8 +94,48 @@ module jsidea.geom {
             }
             if (last && matrices.indexOf(last) < 0)
                 matrices.push(last);
+            
+            
+//            if(matrices.length > 1)
+//            {
+//                var ne = [matrices[0]];
+//                var l = matrices.length;
+//                for(var i = 1; i < l; ++i)
+//                {
+//                    matrices[0].append(matrices[i]);
+//                }
+//                return ne;
+//            }
+            
             return matrices;
         }
+        
+//        private static extractPerspective(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
+//            if (!matrix)
+//                matrix = new geom.Matrix3D();
+//            if (!node)
+//                return matrix;
+//
+//            var element: HTMLElement = node.element;
+//            var style: CSSStyleDeclaration = node.style;
+//            
+//            //-------
+//            //perspective/focalLength/nearFarDistance/frustumLength or whatever you wanna call it
+//            //-------
+//            if (node && node.perspective) {
+//                var perspective = node.perspective;
+//                var parentStyle: CSSStyleDeclaration = node.style;
+//                var perspectiveOrigin = parentStyle.perspectiveOrigin.split(" ");
+//                var perspectiveOriginX = math.Number.relation(perspectiveOrigin[0], element.parentElement.offsetWidth, 0);
+//                var perspectiveOriginY = math.Number.relation(perspectiveOrigin[1], element.parentElement.offsetHeight, 0);
+//
+//                matrix.appendPositionRaw(-perspectiveOriginX, -perspectiveOriginY, 0);
+//                matrix.appendPerspective(perspective);
+//                matrix.appendPositionRaw(perspectiveOriginX, perspectiveOriginY, 0);
+//            }
+//
+//            return matrix;
+//        }
 
         private static extractMatrix(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
             if (!matrix)
