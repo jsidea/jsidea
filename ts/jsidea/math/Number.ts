@@ -1,4 +1,12 @@
 module jsidea.math {
+    export interface ILimit {
+        minX?: any;
+        maxX?: any;
+        minY?: any;
+        maxY?: any;
+        minZ?: any;
+        maxZ?: any;
+    }
     export class Number {
 
         public static RAD_TO_DEG: number = 180 / Math.PI;
@@ -65,6 +73,22 @@ module jsidea.math {
             if (dif != dif % 180)
                 dif = (dif < 0) ? dif + 360 : dif - 360;
             return dif;
+        }
+        
+        public static limits(point: geom.Point3D, limits: ILimit, width: number, height: number, depth: number = 1000): geom.Point3D {
+            if (limits.minX !== undefined)
+                point.x = Math.max(point.x, Number.relation(limits.minX, width, point.x));
+            if (limits.maxX !== undefined)
+                point.x = Math.min(point.x, Number.relation(limits.maxX, width, point.x));
+            if (limits.minY !== undefined)
+                point.y = Math.max(point.y, Number.relation(limits.minY, height, point.y));
+            if (limits.maxY !== undefined)
+                point.y = Math.min(point.y, Number.relation(limits.maxY, height, point.y));
+            if (limits.minZ !== undefined)
+                point.z = Math.max(point.z, Number.relation(limits.minZ, depth, point.z));
+            if (limits.maxY !== undefined)
+                point.z = Math.min(point.z, Number.relation(limits.maxZ, depth, point.z));
+            return point;
         }
     }
 }

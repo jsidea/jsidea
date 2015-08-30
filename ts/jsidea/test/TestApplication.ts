@@ -125,13 +125,17 @@ module jsidea.test {
             });
 
 
+            var snap = new layout.Snap();
+            snap.grid.element = vie;
+            snap.grid.boxModel = layout.BoxModel.PADDING;
+            snap.to.boxModel = layout.BoxModel.BORDER;
+            
             var pos = new layout.Position();
-            //            pos.bounds.element = a;
-            //            pos.to.minX = 0;
-            //            pos.to.minY = 0;
+            pos.snap = snap;
+
             //drag settings
-            var dragMode = layout.DragMode.TOP_LEFT;
-            pos.mode = dragMode.positionMode;
+            var dragMode = layout.DragMode.TRANSFORM;
+            pos.move.mode = dragMode.positionMode;
             pos.to.boxModel = dragMode.boxModel;
             var invertX = dragMode.invertX;
             var invertY = dragMode.invertY;
@@ -170,6 +174,7 @@ module jsidea.test {
                 
                 //                console.log(document.elementFromPoint(evt.pageX, evt.pageY));
 
+//                var transform = geom.Transform.create(target);
                 cursor.setTo(evt.pageX, evt.pageY, 0);
                 size.update(target, layout.Style.create(target));
                 box = size.bounds(pos.to.boxModel, null, box);
@@ -178,7 +183,7 @@ module jsidea.test {
 
                 pos.from.x = cursor.x;
                 pos.from.y = cursor.y;
-                pos.apply(target);
+                layout.Position.apply(pos, target);
 
                 //                console.log(layout.Style.create(target).clip);
             });
