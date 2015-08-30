@@ -57,9 +57,31 @@ module jsidea.geom {
         constructor() {
         }
 
-        public static create(visual: HTMLElement, style: CSSStyleDeclaration = null, ret = new Matrix3D()): Matrix3D {
-            if (visual.ownerDocument) {
-                style = style || layout.Style.create(visual)
+        public static create(element: HTMLElement, style: CSSStyleDeclaration = null, ret = new Matrix3D()): Matrix3D {
+            if (element.ownerDocument) {
+                style = style || layout.Style.create(element);
+                return ret.setCSS(style.transform);
+            }
+            ret.identity();
+            return ret;
+        }
+
+        public static createOrigin(element: HTMLElement, style: CSSStyleDeclaration = null, ret = new Matrix3D()): Matrix3D {
+            if (element.ownerDocument) {
+                style = style || layout.Style.create(element);
+
+                ret.identity();
+                
+                var origin = style.transformOrigin ? style.transformOrigin.split(" ") : [];
+                var originX = math.Number.relation(origin[0], element.offsetWidth, element.offsetWidth * 0.5);
+                var originY = math.Number.relation(origin[1], element.offsetHeight, element.offsetHeight * 0.5);
+                var originZ = math.Number.parse(origin[2], 0);
+
+                //not vice versa: not adding than subtracting like some docs mentioned
+                ret.appendPositionRaw(-originX, -originY, -originZ);
+                ret.appendCSS(style.transform);
+                ret.appendPositionRaw(originX, originY, originZ);
+
                 return ret.setCSS(style.transform);
             }
             ret.identity();
@@ -304,35 +326,6 @@ module jsidea.geom {
             return ret.setTo(x, y, z, w);
         }
         
-        //from homegeneous (euclid) to cartesian FLATTENED!!!! like a projection
-        public deltaProject(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
-            var z = point.z;
-            var w = point.x * this.m14 + point.y * this.m24 + z * this.m34 + this.m44;
-            var x = point.x * this.m11 + point.y * this.m21 + z * this.m31;
-            var y = point.x * this.m12 + point.y * this.m22 + z * this.m32;
-
-            if (w == 0)
-                w = 0.0001;
-
-            x /= w;
-            y /= w;
-
-            //lets call it "hasenfuss"
-            //look at the developer tools of firefox and chrome -> 
-            //ff and chrome do it wrong: the highlighted bounding box failed to be correct
-            //getBoundingClientRect
-            //            if (w < 0) {
-            //                x -= this.m41;
-            //                y -= this.m42;
-            //                x *= 1 / w;
-            //                y *= 1 / w;
-            //                x += this.m41;
-            //                y += this.m42;
-            //            }
-
-            return ret.setTo(x, y, z, w);
-        }
-        
         //from homegeneous (euclid) to cartesian
         public transform3D(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
             var x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41;
@@ -355,12 +348,7 @@ module jsidea.geom {
             var y = point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + point.w * this.m42;
             var z = point.x * this.m13 + point.y * this.m23 + point.z * this.m33 + point.w * this.m43;
             var w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + point.w * this.m44;
-            
-            //            ret.x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41;
-            //            ret.y = point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + this.m42;
-            //            ret.z = point.x * this.m13 + point.y * this.m23 + point.z * this.m33 + this.m43;
-            //            ret.w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + this.m44;
-            
+
             return ret.setTo(x, y, z, w);
         }
 

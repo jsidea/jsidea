@@ -1,10 +1,10 @@
 module jsidea.layout {
-    export class BoxSizing {
+    export class Size {
 
         public element: HTMLElement = null;
         public style: CSSStyleDeclaration;
-        public width: number = 0;
-        public height: number = 0;
+        public offsetWidth: number = 0;
+        public offsetHeight: number = 0;
         public parentWidth: number = 0;
         public parentHeight: number = 0;
 
@@ -23,25 +23,25 @@ module jsidea.layout {
         public paddingBottom: number = 0;
         public paddingLeft: number = 0;
 
-        constructor(element: HTMLElement = null, style?: CSSStyleDeclaration) {
+        constructor(element?: HTMLElement, style?: CSSStyleDeclaration) {
             if (element)
                 this.update(element, style);
         }
 
-        public static create(element: HTMLElement = null, style?: CSSStyleDeclaration): BoxSizing {
-            return new BoxSizing(element, style);
+        public static create(element?: HTMLElement, style?: CSSStyleDeclaration): Size {
+            return new Size(element, style);
         }
 
-        public update(element: HTMLElement, style?: CSSStyleDeclaration): BoxSizing {
+        public update(element: HTMLElement, style?: CSSStyleDeclaration): Size {
             if (!element)
                 return this.clear();
-            style = style || window.getComputedStyle(element);
+            style = style || layout.Style.create(element);
 
             this.style = style;
             this.element = element;
 
-            this.width = element.offsetWidth;
-            this.height = element.offsetHeight;
+            this.offsetWidth = element.offsetWidth;
+            this.offsetHeight = element.offsetHeight;
 
             if (element.parentElement) {
                 this.parentWidth = element.parentElement.clientWidth;
@@ -72,11 +72,11 @@ module jsidea.layout {
             return this;
         }
 
-        public copyFrom(size: BoxSizing): BoxSizing {
+        public copyFrom(size: Size): Size {
             this.element = size.element;
             this.style = size.style;
-            this.width = size.width;
-            this.height = size.height;
+            this.offsetWidth = size.offsetWidth;
+            this.offsetHeight = size.offsetHeight;
             this.parentWidth = size.parentWidth;
             this.parentHeight = size.parentHeight;
 
@@ -98,15 +98,15 @@ module jsidea.layout {
             return this;
         }
 
-        public clone(): BoxSizing {
-            return (new BoxSizing()).copyFrom(this);
+        public clone(): Size {
+            return (new Size()).copyFrom(this);
         }
 
-        public clear(): BoxSizing {
+        public clear(): Size {
             this.element = null;
             this.style = null;
-            this.width = 0;
-            this.height = 0;
+            this.offsetWidth = 0;
+            this.offsetHeight = 0;
             this.parentWidth = 0;
             this.parentHeight = 0;
 
@@ -128,7 +128,7 @@ module jsidea.layout {
             return this;
         }
 
-        public apply(element: HTMLElement): BoxSizing {
+        public apply(element: HTMLElement): Size {
             var style = element.style;
             //TODO:
             //keep units here (percentage should keep percentage)
@@ -151,25 +151,23 @@ module jsidea.layout {
         }
 
         /**
-        * Calculates the bounds of the box-model relative to the toBox.
+        * Calculates the bounds of the box-model relative to the toBox-model.
         * @param boxModel The size/bounds-boxModel.
         * @param toBox Where the bounds should be relative to.
         * @return The bounds of the box-model relative to the toBox.
         */
         public bounds(boxModel?: IBoxModel, toBox?: IBoxModel, ret: geom.Rect2D = new geom.Rect2D()): geom.Rect2D {
-            ret.x = 0;
-            ret.y = 0;
-            ret.width = this.width;
-            ret.height = this.height;
-            if (boxModel)
-                this.convert(ret, BoxModel.BORDER, boxModel);
-            
+            boxModel = boxModel || BoxModel.BORDER;
+            toBox = toBox || BoxModel.BORDER;
+
             var pt = new geom.Point3D(0, 0);
-            this.transform(pt, boxModel, BoxModel.BORDER);
+            this.transform(pt, boxModel, toBox);
+
             ret.x = pt.x;
             ret.y = pt.y;
-            if (toBox && toBox != BoxModel.BORDER)
-                this.convert(ret, BoxModel.BORDER, toBox);
+            ret.width = boxModel.width(this);
+            ret.height = boxModel.height(this);
+
             return ret;
         }
         
@@ -183,32 +181,21 @@ module jsidea.layout {
         public transform(point: geom.Point3D, fromBox?: IBoxModel, toBox?: IBoxModel): geom.Point3D {
             if (toBox == fromBox)
                 return point;
-            //TODO: optimize
-            //            var box = Buffer._POINT_MODEL;
-            var box = new geom.Rect2D();
-            box.x = point.x;
-            box.y = point.y;
-            box.width = this.width;
-            box.height = this.height;
-            this.convert(box, fromBox, toBox);
-            return point.setTo(box.x, box.y, 0);
+            if (fromBox)
+                fromBox.toBorderBox(this, point);
+            if (toBox)
+                toBox.fromBorderBox(this, point);
+            return point;
         }
         
-        /**
-        * Converts sizes between different boxes.
-        * @param rect The rect to transform. The coordinate system should be the fromBox-model.
-        * @param fromBox Where the point coordinates coming from.
-        * @param toBox The target coordinate-system/box-model.
-        * @return The transformed rectangle.
-        */
-        private convert(rect: geom.Rect2D, fromBox?: IBoxModel, toBox?: IBoxModel): geom.Rect2D {
-            if (toBox === fromBox)
-                return rect;
-            if (fromBox)
-                fromBox.toBorderBox(this, rect);
-            if (toBox)
-                toBox.fromBorderBox(this, rect);
-            return rect;
+        public width(boxModel?:IBoxModel):number
+        {
+            return (boxModel || BoxModel.BORDER).width(this);    
+        }
+        
+        public height(boxModel?:IBoxModel):number
+        {
+            return (boxModel || BoxModel.BORDER).height(this);    
         }
 
         public dispose(): void {
@@ -217,7 +204,7 @@ module jsidea.layout {
 
         public static qualifiedClassName: string = "jsidea.layout.Size";
         public toString(): string {
-            return "[" + BoxSizing.qualifiedClassName + "]";
+            return "[" + Size.qualifiedClassName + "]";
         }
     }
 }

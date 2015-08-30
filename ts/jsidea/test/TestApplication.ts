@@ -89,15 +89,20 @@ module jsidea.test {
             can.width = 1920;
             can.height = 1080;
             var ctx = <CanvasRenderingContext2D> can.getContext("2d");
+            //            ctx.translate(100, 100);
+            //            ctx.scale(2, 2);
+            //            ctx.rotate(45);
+            //            ctx = can.getContext("2d");
+            //            console.log("CURRENT TRANSFORM", ctx.getTransform());
 
             var a = document.createElement("div");
             a.id = "a-cont";
-            
+
             var tes = document.createElement("div");
             tes.id = "tes-cont";
             tes.style.fontSize = "100px";
             con.appendChild(tes);
-            
+
             var b = document.createElement("div");
             b.id = "b-cont";
             var c = document.createElement("div");
@@ -114,13 +119,18 @@ module jsidea.test {
             con.appendChild(a);
             document.body.appendChild(can);
 
+            document.addEventListener("mousemove",(evt) => {
+                var pt = geom.Transform.create(xc).globalToLocal(evt.pageX, evt.pageY, 0, null, layout.BoxModel.ATTACHMENT);
+                tes.textContent = Math.round(pt.x) + " , " + Math.round(pt.y);
+            });
+
+
             var pos = new layout.Position();
             //            pos.bounds.element = a;
             //            pos.to.minX = 0;
             //            pos.to.minY = 0;
-            
             //drag settings
-            var dragMode = layout.DragMode.BACKGROUND;
+            var dragMode = layout.DragMode.TOP_LEFT;
             pos.mode = dragMode.positionMode;
             pos.to.boxModel = dragMode.boxModel;
             var invertX = dragMode.invertX;
@@ -130,7 +140,7 @@ module jsidea.test {
             var pivot = new geom.Point3D();
             var box = new geom.Rect2D();
             var transform = geom.Transform.create();
-            var boxSizing: layout.BoxSizing = layout.BoxSizing.create();
+            var size: layout.Size = layout.Size.create();
             var cursor = new geom.Point3D();
             
             //drag begin
@@ -143,11 +153,11 @@ module jsidea.test {
                 cursor.setTo(evt.pageX, evt.pageY, 0);
                 transform.update(target);
                 var loc = transform.globalToLocalPoint(cursor, layout.BoxModel.BORDER, pos.to.boxModel);
-                box = transform.boxSizing.bounds(pos.to.boxModel, null, box);
+                box = transform.size.bounds(pos.to.boxModel, null, box);
                 //                box = transform.boxSizing.getBox(pos.to.boxModel, null, box);
                 pivot.x = invertX ? (box.width - loc.x) : loc.x;
                 pivot.y = invertY ? (box.height - loc.y) : loc.y;
-//                console.log("PIVOT", pivot.x, pivot.y, "LOC", loc.x, loc.y);
+                //                console.log("PIVOT", pivot.x, pivot.y, "LOC", loc.x, loc.y);
 
             });
             //drag
@@ -158,19 +168,19 @@ module jsidea.test {
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
                 
-//                console.log(document.elementFromPoint(evt.pageX, evt.pageY));
+                //                console.log(document.elementFromPoint(evt.pageX, evt.pageY));
 
                 cursor.setTo(evt.pageX, evt.pageY, 0);
-                boxSizing.update(target, layout.Style.create(target));
-                box = boxSizing.bounds(pos.to.boxModel, null, box);
+                size.update(target, layout.Style.create(target));
+                box = size.bounds(pos.to.boxModel, null, box);
                 pos.to.x = invertX ? (box.width - pivot.x) : pivot.x;
                 pos.to.y = invertY ? (box.height - pivot.y) : pivot.y;
-                
+
                 pos.from.x = cursor.x;
                 pos.from.y = cursor.y;
                 pos.apply(target);
 
-//                console.log(layout.Style.create(target).clip);
+                //                console.log(layout.Style.create(target).clip);
             });
             //drag end
             document.addEventListener("mouseup",(evt) => {
@@ -179,25 +189,23 @@ module jsidea.test {
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
             });
-            
-            document.addEventListener("mousemove",(evt) => {
-                var pt = geom.Transform.create(xc).globalToLocal(evt.pageX, evt.pageY, 0, null, layout.BoxModel.ATTACHMENT);
-                tes.textContent = Math.round(pt.x) + " , " + Math.round(pt.y);
-                });
 
-//            document.addEventListener("click", () => this.logChain(xc));
-            
+
+
+            document.addEventListener("click",() => this.logChain(xc));
+
             var draw = () => {
-                ctx.clearRect(0, 0, can.width, can.height);
                 var g = display.Graphics.get(ctx);
-                g.bounds(vie);
+                g.clear();
+                g.bounds(vie);//, layout.BoxModel.PADDING);
                 g.bounds(con);
                 g.bounds(a);
                 g.bounds(b);
                 g.bounds(c);
                 g.bounds(d);
-                g.bounds(xc, layout.BoxModel.ATTACHMENT);
+                g.bounds(xc);//, layout.BoxModel.ATTACHMENT);
                 g.bounds(can);
+                g.stroke("#00FF00", 4);
             };
             document.addEventListener("click", draw);
 
@@ -243,50 +251,9 @@ module jsidea.test {
         private drawOffsetChain(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
             while (e && e.parentElement != document.body.parentElement) {
                 var sc = layout.StyleChain.create(e);
-                this.drawCross(ctx, sc.offset.x, sc.offset.y);
+                display.Graphics.get(ctx).cross(sc.offset.x, sc.offset.y, 20).stroke();
                 e = e.parentElement;
             }
-        }
-
-//        private drawBoundingBox(ctx: CanvasRenderingContext2D, e: HTMLElement): void {
-//            var can: HTMLElement = ctx.canvas;
-//
-//            var a = new geom.Point3D(0, 0, 0);
-//            var b = new geom.Point3D(e.offsetWidth, 0, 0);
-//            var c = new geom.Point3D(e.offsetWidth, e.offsetHeight, 0);
-//            var d = new geom.Point3D(0, e.offsetHeight, 0);
-//
-//            var from = geom.Transform.create(e);
-//            from.fromBox = layout.BoxModel.BORDER;
-//
-//            var to = geom.Transform.create(can);
-//            to.toBox = layout.BoxModel.CANVAS;
-//
-//            a = from.localToLocal(to, a.x, a.y);
-//            b = from.localToLocal(to, b.x, b.y);
-//            c = from.localToLocal(to, c.x, c.y);
-//            d = from.localToLocal(to, d.x, d.y);
-//
-//            ctx.beginPath();
-//            //            ctx.setLineDash([4, 4]);
-//            ctx.lineWidth = 2;
-//            ctx.moveTo(a.x, a.y);
-//            ctx.lineTo(b.x, b.y);
-//            ctx.lineTo(c.x, c.y);
-//            ctx.lineTo(d.x, d.y);
-//            ctx.lineTo(a.x, a.y);
-//            ctx.stroke();
-//        }
-
-        private drawCross(ctx, x: number, y: number): void {
-            ctx.beginPath();
-            ctx.lineWidth = 2;
-            var size = 20;
-            ctx.moveTo(x + size, y);
-            ctx.lineTo(x - size, y);
-            ctx.moveTo(x, y + size);
-            ctx.lineTo(x, y - size);
-            ctx.stroke();
         }
 
         private logChain(f: HTMLElement): void {
@@ -301,22 +268,28 @@ module jsidea.test {
                 var scaleOff = node.parentScroll ? node.parentScroll.element : null;
                 var res = ([
                     text.Text.conc(10, " ", node.element.id ? node.element.id : node.element.nodeName),
-                    text.Text.conc(16, " ", "PARENT", ofp ? (ofp.id ? ofp.id : ofp.nodeName) : "NONE"),
-                    text.Text.conc(16, " ", "PARENT_C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
+//                    text.Text.conc(16, " ", "PARENT", ofp ? (ofp.id ? ofp.id : ofp.nodeName) : "NONE"),
+//                    text.Text.conc(16, " ", "PARENT_C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
+                    
                     //                    text.Text.conc(18, " ", "SCROLL_C", scaleOff ? (scaleOff.id ? scaleOff.id : scaleOff.nodeName) : "NONE"),
                     //                    text.Text.conc(18, " ", "PARENT_B", calcedPar ? (calcedPar.id ? calcedPar.id : calcedPar.nodeName) : "NONE"),
-                    text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
-                    text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
+                    
+//                    text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
+//                    text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
+//                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3d),
+                    
                     //                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
                     //                    text.Text.conc(12, " ", "ACC", node.isAccumulatable),
-                    text.Text.conc(18, " ", "SCROLL", node.element.scrollLeft, node.element.scrollTop),
-                    //                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
+                    //                    text.Text.conc(18, " ", "SCROLL", node.element.scrollLeft, node.element.scrollTop),
+//                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
+                    text.Text.conc(18, " ", "TRANSFORMED", node.style.transform),
                     //                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),
-                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
-                    text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
-                    text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),
-                    text.Text.conc(18, " ", "OVERFLOW", node.style.overflow),
-                    text.Text.conc(18, " ", "POSITION", node.style.position, node.isSticked)
+                    
+//                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
+//                    text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
+//                    text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),
+//                    text.Text.conc(18, " ", "OVERFLOW", node.style.overflow),
+//                    text.Text.conc(18, " ", "POSITION", node.style.position, node.isSticked)
                 ]).join(" ");
                 console.log(res);
                 node = node.child;

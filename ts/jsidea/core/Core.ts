@@ -1,8 +1,4 @@
-//basic classes and interfaces
-interface Window {
-    app: jsidea.system.Application;
-}
-
+//polyfills and missing TypeScript references
 interface HTMLElement {
     matches(selector: string): boolean;
 }
@@ -11,8 +7,20 @@ interface Object {
     observe(beingObserved: any, callback: (update: any) => any, types?: string[]): void;
 }
 
+interface CanvasRenderingContext2D {
+    getTransform(): number[];
+}
+
+interface HTMLCanvasElement {
+    hasContext(): string;
+}
+
+//basic classes and interfaces
+interface Window {
+    app: jsidea.system.Application;
+}
+
 //hook
-//$(window).ready(() => {
 document.addEventListener("DOMContentLoaded",() => {
     var qualifiedClassName = document.body.getAttribute("data-application");
     if (!qualifiedClassName) {

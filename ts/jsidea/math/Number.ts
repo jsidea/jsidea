@@ -9,12 +9,24 @@ module jsidea.math {
                 return value;
             }
             else if (typeof value == "string") {
-                value = (<string>value).trim();
+                value = (<string>value).trim().toLowerCase();
                 if (value.indexOf("%") > 0) {
-                    return (math.Number.parse(value.replace("%", ""), defaultValue) / 100) * relativeSize;
+                    return (Number.parse(value.replace("%", ""), defaultValue) / 100) * relativeSize;
                 }
-                else if (value.indexOf("px") > 0) {
-                    return math.Number.parse(value.replace("px", ""), defaultValue);
+                else if (value.indexOf("px") > 0 || value.indexOf("pt") > 0) {
+                    return Number.parse(value.replace("px", ""), defaultValue);
+                }
+                else if (value.indexOf("vw") > 0) {
+                    return (Number.parse(value.replace("vw", ""), defaultValue) / 100) * window.innerWidth;
+                }
+                else if (value.indexOf("vh") > 0) {
+                    return (Number.parse(value.replace("vh", ""), defaultValue) / 100) * window.innerHeight;
+                }
+                else if (value.indexOf("vm") > 0) {
+                    return (Number.parse(value.replace("vm", ""), defaultValue) / 100) * Math.min(window.innerWidth, window.innerHeight);
+                }
+                else if (value.indexOf("em") > 0) {
+                    return Number.parse(value.replace("em", ""), defaultValue);
                 }
                 else if (value == "top" || value == "left")
                     return 0;

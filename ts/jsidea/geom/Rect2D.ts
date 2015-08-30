@@ -29,6 +29,18 @@ module jsidea.geom {
             return this;
         }
 
+        public toQuad(ret: Quad = new Quad()): Quad {
+            ret.p1.x = this.x;
+            ret.p1.y = this.y;
+            ret.p2.x = this.right;
+            ret.p2.y = this.y;
+            ret.p3.x = this.right;
+            ret.p3.y = this.bottom;
+            ret.p4.x = this.x;
+            ret.p4.y = this.bottom;
+            return ret;
+        }
+
         public setCSS(clipCSS: string): Rect2D {
             if (!clipCSS || clipCSS == "auto")
                 return this;
@@ -124,6 +136,21 @@ module jsidea.geom {
         public static getBounds(element: HTMLElement, ret: Rect2D = new Rect2D()): Rect2D {
             ret.copyFromClientRect(element.getBoundingClientRect());
             if (system.Browser.isWebKit) {
+//                var style = layout.Style.create(element);
+//                if (style.transformStyle == "preserve-3d" && style.transform.indexOf("matrix3d") >= 0) {
+//                    var mat = geom.Matrix3D.create(element, style);
+//                    var bnd = mat.bounds(0, 0, element.offsetWidth, element.offsetHeight);
+//                    var pt = mat.transformRaw(element.offsetWidth, element.offsetHeight, 0);
+////                    console.log(element.clientLeft, element.offsetWidth, bnd.toString());
+////                    console.log(element.offsetWidth - bnd.width);
+////                    console.log(element.offsetHeight - bnd.height);
+//                    console.log(bnd.width, bnd.height, ret.width, ret.height);
+//                    ret.x -= bnd.width - ret.width;
+//                    ret.y -= bnd.height - ret.height;
+////                    ret.width = bnd.width;
+////                    ret.height = bnd.height;
+//                }
+
                 ret.x += document.body.scrollLeft;
                 ret.y += document.body.scrollTop;
             }

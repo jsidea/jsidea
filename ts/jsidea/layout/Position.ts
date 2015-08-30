@@ -63,8 +63,15 @@ module jsidea.layout {
             mode = mode || this.mode || PositionMode.TRANSFORM;
 
             //the un-clamped point
-            var style = Style.create(element);
+//            var style = Style.create(element);
             var point = this.calc(element);
+            var style = this._to.size.style;
+            var size = this._to.size;
+//            console.log(point.x, point.y);
+            
+//            var pt = mode.transform(new geom.Point3D(), element, style);
+//            point.x = math.Number.roundTo(point.x, 50);
+//            point.y = math.Number.roundTo(point.y, 50);
             
             //the point in "Position"-space
             mode.transform(point, element, style);
@@ -75,12 +82,44 @@ module jsidea.layout {
             //TODO: use the correct box model
             var toBox = this.to.boxModel || BoxModel.BORDER;
 
-            var size = BoxSizing.create(element, style);
             var box = size.bounds(toBox);
+
             this.clamp(point, box.width, box.height);
             
             //apply the final point
             mode.apply(point, element, style);
+            
+//            var to = geom.Transform.create(element.parentElement);
+//            var gl = to.localToGlobal(point.x, point.y, 0);
+//            gl.x = math.Number.roundTo(gl.x, 50);
+//            gl.y = math.Number.roundTo(gl.y, 50);
+//            var lc = geom.Transform.create(element.parentElement).globalToLocal(gl.x, gl.y, 0);
+//            point.x = lc.x;
+//            point.y = lc.y;
+//            mode.apply(point, element, layout.Style.create(element));
+
+//            var to = geom.Transform.create(element);
+//            var gl = to.localToGlobal(0, 0, 0);
+//            gl.x = math.Number.roundTo(gl.x, 50);
+//            gl.y = math.Number.roundTo(gl.y, 50);
+//            var lc = to.globalToLocal(gl.x, gl.y, 0);
+//            to.matrix.prependPositionRaw(lc.x, lc.y, 0);
+//            point.x = to.matrix.m41;
+//            point.y = to.matrix.m42;
+//            point.z = 0;
+//            mode.apply(point, element, layout.Style.create(element));
+            
+            var to = geom.Transform.create(element);
+            var gl = to.localToGlobal(0, 0, 0);
+            gl.x = math.Number.roundTo(gl.x, 50);
+            gl.y = math.Number.roundTo(gl.y, 50);
+            var lc = to.globalToLocal(gl.x, gl.y, 0);
+            to.matrix.prependPositionRaw(lc.x, lc.y, 0);
+            point.x = to.matrix.m41;
+            point.y = to.matrix.m42;
+            point.z = 0;
+            mode.transform(point, element, to.size.style);
+            mode.apply(point, element, to.size.style);
         }
 
         public calc(element: HTMLElement, ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
@@ -97,12 +136,12 @@ module jsidea.layout {
             var fromBox = this.from.boxModel || BoxModel.BORDER;
             
             //transform box-models of "to"
-            var sizeTo = this._to.boxSizing.bounds(toBox);
+            var sizeTo = this._to.size.bounds(toBox);
             var toX: number = math.Number.relation(this.to.x, sizeTo.width, 0) + math.Number.relation(this.to.offsetX, sizeTo.width, 0);
             var toY: number = math.Number.relation(this.to.y, sizeTo.height, 0) + math.Number.relation(this.to.offsetY, sizeTo.height, 0);
             
             //transform box-models of "from"
-            var sizeFrom = this._from.boxSizing.bounds(fromBox);
+            var sizeFrom = this._from.size.bounds(fromBox);
             var fromX: number = math.Number.relation(this.from.x, sizeFrom.width, 0) + math.Number.relation(this.from.offsetX, sizeFrom.width, 0);
             var fromY: number = math.Number.relation(this.from.y, sizeFrom.height, 0) + math.Number.relation(this.from.offsetY, sizeFrom.height, 0);
             
@@ -133,8 +172,8 @@ module jsidea.layout {
                     var boundsBox = this.bounds.boxModel || BoxModel.BORDER;
 
                     this._bounds.update(this.bounds.element, this.bounds.transformMode);
-                    var boundsSize = this._bounds.boxSizing.bounds(boundsBox);
-                    var toSize = this._to.boxSizing.bounds(toBox);
+                    var boundsSize = this._bounds.size.bounds(boundsBox);
+                    var toSize = this._to.size.bounds(toBox);
 
                     lc = this._to.clamp(this._bounds, lc, toSize.width, toSize.height, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);
                     lc = this._to.clamp(this._bounds, lc, 0, toSize.height, 0, boundsSize.width, 0, boundsSize.height, boundsBox, toBox);

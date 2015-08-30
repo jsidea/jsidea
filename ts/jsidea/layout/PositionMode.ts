@@ -24,13 +24,12 @@ module jsidea.layout {
                 matrix.m43 *= 1 / (window.innerWidth / window.outerWidth);
             element.style.transform = matrix.getCSS();
         }
-
         public clamp(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
         }
     }
     class TopLeftMode implements IPositionMode {
-        private _sizeParent: BoxSizing = new BoxSizing();
-        private _size: BoxSizing = new BoxSizing();
+        private _sizeParent: Size = new Size();
+        private _size: Size = new Size();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             //!IMPORTANT: style needs to be an computed style not the element's style-property
             
@@ -131,7 +130,6 @@ module jsidea.layout {
             if (!isNaN(point.y))
                 element.style.top = Math.round(point.y) + "px";
         }
-
         public clamp(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
         }
     }
@@ -159,7 +157,6 @@ module jsidea.layout {
 
             return offset;
         }
-
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             if (style.position === "static") {
                 console.warn("You cannot apply TopLeftModeClamped to an static element.");
@@ -170,7 +167,6 @@ module jsidea.layout {
             if (!isNaN(point.y))
                 element.style.top = Math.round(point.y) + "px";
         }
-
         public clamp(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
         }
     }
@@ -189,7 +185,6 @@ module jsidea.layout {
 
             return offset;
         }
-
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             if (!isNaN(point.x))
                 element.style.marginLeft = Math.round(point.x) + "px";
@@ -219,7 +214,6 @@ module jsidea.layout {
 
             return offset;
         }
-
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             if (!isNaN(point.x))
                 element.style.marginRight = Math.round(point.x) + "px";
@@ -231,7 +225,7 @@ module jsidea.layout {
         }
     }
     class BottomRightMode implements IPositionMode {
-        private _size: BoxSizing = new BoxSizing();
+        private _size: Size = new Size();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var offsetX = offset.x;
             var offsetY = offset.y;
@@ -313,7 +307,6 @@ module jsidea.layout {
             if (!isNaN(point.y))
                 element.style.bottom = Math.round(point.y) + "px";
         }
-
         public clamp(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             //            var leftAuto = style.left == "auto";
             //            var minWidth = math.Number.parse(style.minWidth, 0);
@@ -348,7 +341,6 @@ module jsidea.layout {
             if (!isNaN(point.y))
                 element.style.bottom = Math.round(point.y) + "px";
         }
-
         public clamp(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
         }
     }
@@ -368,32 +360,29 @@ module jsidea.layout {
             if (!isNaN(point.y))
                 element.style.top = Math.round(point.y) + "px";
         }
-
         public clamp(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
         }
     }
     class BackgroundMode implements IPositionMode {
         private _rect = new geom.Rect2D();
-        private _boxSizing = new BoxSizing();
+        private _size = new Size();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var rect = this._rect;
-            this._boxSizing.update(element, style);
-            this._boxSizing.bounds(BoxModel.BACKGROUND, BoxModel.PADDING, rect);
+            this._size.update(element, style);
+            this._size.bounds(BoxModel.BACKGROUND, BoxModel.PADDING, rect);
             return offset.add(
                 rect.x,
                 rect.y,
                 0);
         }
-
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             element.style.backgroundPosition = Math.round(point.x) + "px " + Math.round(point.y) + "px";
         }
-
         public clamp(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
         }
     }
     class BorderTopLeftMode implements IPositionMode {
-        private _boxSizing = new BoxSizing();
+        private _boxSizing = new Size();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             this._boxSizing.update(element, style);
             return offset.add(
@@ -401,14 +390,12 @@ module jsidea.layout {
                 this._boxSizing.borderTop,
                 0);
         }
-
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             this._boxSizing.update(element, style);
             var left = isNaN(point.x) ? this._boxSizing.borderLeft : Math.round(point.x);
             var top = isNaN(point.y) ? this._boxSizing.borderTop : Math.round(point.y);
             element.style.borderWidth = top + "px " + this._boxSizing.borderRight + "px " + this._boxSizing.borderBottom + "px " + left + "px";
         }
-
         public clamp(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             //clamp min
             point.x = Math.max(point.x, 0);
@@ -416,9 +403,9 @@ module jsidea.layout {
         }
     }
     class BorderBottomRightInnerMode implements IPositionMode {
-        private _boxSizing = new BoxSizing();
+        private _size = new Size();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
-            var bs = this._boxSizing;
+            var bs = this._size;
             bs.update(element, style);
 
             //if horizontal border increases inside
@@ -441,22 +428,20 @@ module jsidea.layout {
 
             return offset;
         }
-
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
-            this._boxSizing.update(element, style);
-            var right = isNaN(point.x) ? this._boxSizing.borderRight : Math.round(point.x);
-            var bottom = isNaN(point.y) ? this._boxSizing.borderBottom : Math.round(point.y);
-            element.style.borderWidth = this._boxSizing.borderTop + "px " + right + "px " + bottom + "px " + this._boxSizing.borderLeft + "px";
+            this._size.update(element, style);
+            var right = isNaN(point.x) ? this._size.borderRight : Math.round(point.x);
+            var bottom = isNaN(point.y) ? this._size.borderBottom : Math.round(point.y);
+            element.style.borderWidth = this._size.borderTop + "px " + right + "px " + bottom + "px " + this._size.borderLeft + "px";
         }
-
         public clamp(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
-            var bs = this._boxSizing;
+            var bs = this._size;
             bs.update(element, style);
             //if horizontal border increases inside
             if (style.boxSizing == "border-box" || (style.left != "auto" && style.right != "auto")) {
                 point.x = Math.max(point.x, 0);
                 var minWidth = math.Number.parse(style.minWidth, 0);
-                var maxX = bs.width - (bs.borderLeft + bs.paddingLeft + bs.paddingRight) - minWidth;
+                var maxX = bs.offsetWidth - (bs.borderLeft + bs.paddingLeft + bs.paddingRight) - minWidth;
                 point.x = Math.min(maxX, point.x);
             }
             else {
@@ -468,7 +453,7 @@ module jsidea.layout {
                 //clamp
                 point.y = Math.max(point.y, 0);
                 var minHeight = math.Number.parse(style.minHeight, 0);
-                var maxY = bs.height - (bs.borderTop + bs.paddingTop + bs.paddingBottom) - minHeight;
+                var maxY = bs.offsetHeight - (bs.borderTop + bs.paddingTop + bs.paddingBottom) - minHeight;
                 point.y = Math.min(maxY, point.y);
             }
             else {
@@ -477,9 +462,9 @@ module jsidea.layout {
         }
     }
     class BorderBottomRightOuterMode implements IPositionMode {
-        private _boxSizing = new BoxSizing();
+        private _size = new Size();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
-            var bs = this._boxSizing;
+            var bs = this._size;
             bs.update(element, style);
 
             //if horizontal border increases inside
@@ -496,12 +481,11 @@ module jsidea.layout {
 
             return offset;
         }
-
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
-            this._boxSizing.update(element, style);
-            var right = isNaN(point.x) ? this._boxSizing.borderRight : Math.round(point.x);
-            var bottom = isNaN(point.y) ? this._boxSizing.borderBottom : Math.round(point.y);
-            element.style.borderWidth = this._boxSizing.borderTop + "px " + right + "px " + bottom + "px " + this._boxSizing.borderLeft + "px";
+            this._size.update(element, style);
+            var right = isNaN(point.x) ? this._size.borderRight : Math.round(point.x);
+            var bottom = isNaN(point.y) ? this._size.borderBottom : Math.round(point.y);
+            element.style.borderWidth = this._size.borderTop + "px " + right + "px " + bottom + "px " + this._size.borderLeft + "px";
         }
 
         public clamp(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
@@ -537,7 +521,6 @@ module jsidea.layout {
             if (!isNaN(point.y))
                 element.scrollTop = point.y;
         }
-
         public clamp(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
             point.x = Math.max(point.x, 0);
             point.y = Math.max(point.y, 0);
@@ -564,7 +547,6 @@ module jsidea.layout {
                 clip.y = point.y;
             element.style.clip = clip.getCSS();
         }
-
         public clamp(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
         }
     }

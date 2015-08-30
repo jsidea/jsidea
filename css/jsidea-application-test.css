@@ -592,23 +592,25 @@
 	position: relative;
 	width: 512px;
 	height: 512px;
+	/* left: 50vh; */
 	transform: rotateY(45deg);
 	/* perspective: 400px;
 	transform-style: preserve-3d; */
 	/* perspective-origin: 0px 0px; */
 	/* overflow:scroll; */
+	/* transform-style: preserve-3d; */
 }
 
 .test-17 #d-cont {
 	/* box-sizing: border-box; */
 	position: relative;
-	
+	transform-style: preserve-3d;
 	/* transform: rotateY(15deg) rotate(25deg); */
 	/* transform-origin: 0px 0px; */
-	transform-style: preserve-3d;
-	transform: rotateY(-25deg);
+	transform: rotateY(-45deg);
 }
 
 .test-17 #x-cont {
 	transform: rotate(25deg);
+	transform-origin: 0px 0px;
 }

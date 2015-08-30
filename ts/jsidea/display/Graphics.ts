@@ -3,93 +3,88 @@ module jsidea.display {
 
         private static _instance: Graphics = new Graphics();
         public static get(ctx: CanvasRenderingContext2D): Graphics {
-            Graphics._instance._context = ctx;
+            Graphics._instance._ctx = ctx;
             return Graphics._instance;
         }
 
-        private _context: CanvasRenderingContext2D;
+        private _ctx: CanvasRenderingContext2D;
 
-        public bounds(e: HTMLElement, boxModel?: layout.IBoxModel): void {
-            var ctx = this._context;
+        public bounds(element: HTMLElement, boxModel?: layout.IBoxModel): Graphics {
+            var ctx = this._ctx;
             var can: HTMLElement = ctx.canvas;
             boxModel = boxModel || layout.BoxModel.BORDER;
 
-            var a = new geom.Point3D(0, 0, 0);
-            var b = new geom.Point3D(e.offsetWidth, 0, 0);
-            var c = new geom.Point3D(e.offsetWidth, e.offsetHeight, 0);
-            var d = new geom.Point3D(0, e.offsetHeight, 0);
-            
-            var from = geom.Transform.create(e);
-            
-            if(boxModel != layout.BoxModel.BORDER)
-            {
-                var box = from.boxSizing.bounds(boxModel);
-                a.x = box.x;
-                a.y = box.y;
-                b.x = box.right;
-                b.y = box.y;
-                c.x = box.right;
-                c.y = box.bottom;
-                d.x = box.x;
-                d.y = box.bottom;
-            }
-
+            var from = geom.Transform.create(element);
             var to = geom.Transform.create(can);
-            to.toBox = layout.BoxModel.CANVAS;
+            var quad = from.size.bounds(boxModel).toQuad();
+            quad = from.localToLocalQuad(to, quad, null, layout.BoxModel.CANVAS, quad);
+            this.quad(quad);
 
-            a = from.localToLocal(to, a.x, a.y);
-            b = from.localToLocal(to, b.x, b.y);
-            c = from.localToLocal(to, c.x, c.y);
-            d = from.localToLocal(to, d.x, d.y);
-
-            ctx.beginPath();
-            ctx.lineWidth = 2;
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.lineTo(c.x, c.y);
-            ctx.lineTo(d.x, d.y);
-            ctx.lineTo(a.x, a.y);
-            ctx.stroke();
+            return this;
         }
 
-        public cross(x: number, y: number, size: number): void {
-            var ctx = this._context;
+        public strokeColor(color: string): Graphics {
+            var ctx = this._ctx;
+            ctx.strokeStyle = color;
+            return this;
+        }
+        
+        public lineWidth(lineWidth: number): Graphics {
+            var ctx = this._ctx;
+            ctx.lineWidth = lineWidth;
+            return this;
+        }
 
+        public stroke(color?: string, lineWidth?: number): Graphics {
+            var ctx = this._ctx;
+            ctx.closePath();
+            if (color !== undefined)
+                this.strokeColor(color);
+            if (lineWidth !== undefined)
+                this.lineWidth(lineWidth);
+            ctx.stroke();
             ctx.beginPath();
+            return this;
+        }
+
+        public cross(x: number, y: number, size: number): Graphics {
+            var ctx = this._ctx;
+
             ctx.moveTo(x + size, y);
             ctx.lineTo(x - size, y);
             ctx.moveTo(x, y + size);
             ctx.lineTo(x, y - size);
-            ctx.closePath();
+            return this;
         }
 
-        public quad(quad: geom.Quad): void {
-            var ctx = this._context;
+        public quad(quad: geom.Quad): Graphics {
+            var ctx = this._ctx;
 
-            ctx.beginPath();
             ctx.moveTo(quad.p1.x, quad.p1.y);
             ctx.lineTo(quad.p2.x, quad.p2.y);
             ctx.lineTo(quad.p3.x, quad.p3.y);
             ctx.lineTo(quad.p4.x, quad.p4.y);
             ctx.lineTo(quad.p1.x, quad.p1.y);
-            ctx.closePath();
+            return this;
         }
 
-        public box(box: geom.Rect2D): void {
-            var ctx = this._context;
+        public rect(box: geom.Rect2D): Graphics {
+            var ctx = this._ctx;
 
-            ctx.beginPath();
             ctx.moveTo(box.x, box.y);
             ctx.lineTo(box.x + box.width, box.y);
             ctx.lineTo(box.x + box.width, box.y + box.height);
             ctx.lineTo(box.x, box.y + box.height);
             ctx.lineTo(box.x, box.y);
-            ctx.closePath();
+            return this;
         }
 
-        public clear(): void {
-            var ctx = this._context;
+        public clear(): Graphics {
+            var ctx = this._ctx;
+            ctx.closePath();
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.beginPath();
+            return this;
         }
     }
 }
