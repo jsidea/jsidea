@@ -67,6 +67,10 @@ module jsidea.math {
             var r: number = value % mod;
             return (r < (mod * 0.5)) ? value - r : value + (mod - r);
         }
+        
+        public static floorTo(value: number, mod: number): number {
+            return value - (value % mod);
+        }
 
         public shortRotation(startRotation: number, endRotation: number): number {
             var dif: number = (endRotation - startRotation) % 360;

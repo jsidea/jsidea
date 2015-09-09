@@ -65,6 +65,26 @@ module jsidea.layout {
             return size.offsetHeight - (size.borderTop + size.borderBottom + size.paddingTop + size.paddingBottom);
         }
     }
+    class NormalDeviceCoordinatesBoxModel implements IBoxModel {
+        public fromBorderBox(size: Size, point: geom.Point3D): void {
+            point.x /= size.offsetWidth * 0.5;
+            point.y /= size.offsetHeight * 0.5;
+            point.x -= 1;
+            point.y -= 1;
+        }
+        public toBorderBox(size: Size, point: geom.Point3D): void {
+            point.x += 1;
+            point.y += 1;
+            point.x *= size.offsetWidth * 0.5;
+            point.y *= size.offsetHeight * 0.5;
+        }
+        public width(size: Size): number {
+            return size.offsetWidth - (size.borderLeft + size.borderRight + size.paddingLeft + size.paddingRight);
+        }
+        public height(size: Size): number {
+            return size.offsetHeight - (size.borderTop + size.borderBottom + size.paddingTop + size.paddingBottom);
+        }
+    }
     class ClipBoxModel implements IBoxModel {
         private _clip: geom.Rect2D = new geom.Rect2D();
         public fromBorderBox(size: Size, point: geom.Point3D): void {
@@ -87,29 +107,19 @@ module jsidea.layout {
         }
     }
     class ScrollBoxModel implements IBoxModel {
-        private getScroll(element: HTMLElement): geom.Point2D {
-            var scrollLeft = element.scrollLeft;
-            var scrollTop = element.scrollTop;
-            if (system.Browser.isWebKit) {
-                if (element == element.ownerDocument.body) {
-                    scrollLeft = 0;
-                    scrollTop = 0;
-                }
-                else if (system.Browser.isWebKit && element == element.ownerDocument.documentElement) {
-                    scrollLeft = element.ownerDocument.body.scrollLeft;
-                    scrollTop = element.ownerDocument.body.scrollTop;
-                }
-            }
+        private getScroll(size: Size): geom.Point2D {
+            var scrollLeft = size.scrollLeft;
+            var scrollTop = size.scrollTop;
             return new geom.Point2D(scrollLeft, scrollTop);
         }
         public fromBorderBox(size: Size, point: geom.Point3D): void {
-            var scroll = this.getScroll(size.element);
+            var scroll = this.getScroll(size);
             BoxModel.PADDING.toBorderBox(size, point);
             point.x += scroll.x;
             point.y += scroll.y;
         }
         public toBorderBox(size: Size, point: geom.Point3D): void {
-            var scroll = this.getScroll(size.element);
+            var scroll = this.getScroll(size);
             BoxModel.PADDING.toBorderBox(size, point);
             point.x -= scroll.x;
             point.y -= scroll.y;
@@ -315,8 +325,8 @@ module jsidea.layout {
             if (attachment == "scroll")
             { }
             else if (attachment == "local") {
-                ret.x -= size.element.scrollLeft;
-                ret.y -= size.element.scrollTop;
+                ret.x -= size.scrollLeft;
+                ret.y -= size.scrollTop;
             }
             else if (attachment == "fixed") {
                 if (system.Browser.isWebKit) {
@@ -362,6 +372,7 @@ module jsidea.layout {
         public static CANVAS: IBoxModel = new CanvasBoxModel();
         public static BACKGROUND: IBoxModel = new BackgroundBoxModel();
         public static ATTACHMENT: IBoxModel = new AttachmentBoxModel();
+        public static NDC: IBoxModel = new NormalDeviceCoordinatesBoxModel();
         public static SCROLL: IBoxModel = new ScrollBoxModel();
         public static IMAGE: IBoxModel = new ImageBoxModel();
         public static CLIP: IBoxModel = new ClipBoxModel();

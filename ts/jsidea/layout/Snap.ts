@@ -40,11 +40,16 @@ module jsidea.layout {
             var grid = Snap._grid.update(gridElement);
             var mode = snap.mode || SnapMode.BASIC;
 
-            var off = new geom.Point3D();
+            //transform box-models of "to"
+            var sizeTo = transform.size.bounds(toBox);
+            var toX: number = math.Number.relation(snap.to.x, sizeTo.width, 0) + math.Number.relation(snap.to.offsetX, sizeTo.width, 0);
+            var toY: number = math.Number.relation(snap.to.y, sizeTo.height, 0) + math.Number.relation(snap.to.offsetY, sizeTo.height, 0);
+            
+            var off = new geom.Point3D(toX, toY);
             var point = transform.localToLocalPoint(grid, off, toBox, gridBox);
 
             //snap in actual coordinate-system
-            mode.transform(snap, transform, point);            
+            mode.transform(snap, transform, point);   
 
             var lc = grid.localToLocalPoint(transform, point, gridBox, toBox);
             lc.subPoint(off);

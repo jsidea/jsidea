@@ -321,6 +321,7 @@ module jsidea.geom {
                 y *= 1 / w;
                 x += this.m41;
                 y += this.m42;
+                console.log("AHHH");
             }
 
             return ret.setTo(x, y, z, w);

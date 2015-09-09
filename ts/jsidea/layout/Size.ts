@@ -22,6 +22,9 @@ module jsidea.layout {
         public paddingRight: number = 0;
         public paddingBottom: number = 0;
         public paddingLeft: number = 0;
+        
+        public scrollLeft: number = 0;
+        public scrollTop: number = 0;
 
         constructor(element?: HTMLElement, style?: CSSStyleDeclaration) {
             if (element)
@@ -42,6 +45,19 @@ module jsidea.layout {
 
             this.offsetWidth = element.offsetWidth;
             this.offsetHeight = element.offsetHeight;
+            this.scrollLeft = element.scrollLeft;
+            this.scrollTop = element.scrollTop;
+            
+            if (system.Browser.isWebKit) {
+                if (element == element.ownerDocument.body) {
+                    this.scrollLeft = 0;
+                    this.scrollTop = 0;
+                }
+                else if (system.Browser.isWebKit && element == element.ownerDocument.documentElement) {
+                    this.scrollLeft = element.ownerDocument.body.scrollLeft;
+                    this.scrollTop = element.ownerDocument.body.scrollTop;
+                }
+            }
 
             if (element.parentElement) {
                 this.parentWidth = element.parentElement.clientWidth;
@@ -105,6 +121,10 @@ module jsidea.layout {
         public clear(): Size {
             this.element = null;
             this.style = null;
+            
+            this.scrollLeft = 0;
+            this.scrollTop = 0;
+            
             this.offsetWidth = 0;
             this.offsetHeight = 0;
             this.parentWidth = 0;

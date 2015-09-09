@@ -4,8 +4,8 @@ module jsidea.layout {
     }
     class BasicSnapMode implements ISnapMode{
         public transform(snap:Snap, transform:geom.Transform, point: geom.Point3D): void {
-            point.x = math.Number.roundTo(point.x, 30);
-            point.y = math.Number.roundTo(point.y, 30);
+            point.x = math.Number.roundTo(point.x, 60);
+            point.y = math.Number.roundTo(point.y, 60);
         }
     }
     export class SnapMode{

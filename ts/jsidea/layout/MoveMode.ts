@@ -1,10 +1,12 @@
 module jsidea.layout {
     export interface IMoveMode {
+        willChange: string;
         transform(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D;
         clamp(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void;
         apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void;
     }
     class TransformMode implements IMoveMode {
+        public willChange: string = "transform";
         private _matrix: geom.Matrix3D = new geom.Matrix3D();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             return offset;
@@ -28,6 +30,7 @@ module jsidea.layout {
         }
     }
     class TopLeftMode implements IMoveMode {
+        public willChange: string = "top, left";
         private _sizeParent: Size = new Size();
         private _size: Size = new Size();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
@@ -134,6 +137,7 @@ module jsidea.layout {
         }
     }
     class TopLeftClampedMode implements IMoveMode {
+        public willChange: string = "top, left";
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var offsetX = offset.x;
             var offsetY = offset.y;
@@ -171,6 +175,7 @@ module jsidea.layout {
         }
     }
     class MarginTopLeftMode implements IMoveMode {
+        public willChange: string = "auto";
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var leftAuto = style.marginLeft == "auto";
             var topAuto = style.marginTop == "auto";
@@ -196,6 +201,7 @@ module jsidea.layout {
         }
     }
     class MarginBottomRightMode implements IMoveMode {
+        public willChange: string = "auto";
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var rightAuto = style.marginRight == "auto";
             var bottomAuto = style.marginBottom == "auto";
@@ -225,6 +231,7 @@ module jsidea.layout {
         }
     }
     class BottomRightMode implements IMoveMode {
+        public willChange: string = "bottom, right";
         private _size: Size = new Size();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var offsetX = offset.x;
@@ -326,6 +333,7 @@ module jsidea.layout {
         }
     }
     class BottomLeftMode implements IMoveMode {
+        public willChange: string = "bottom, left";
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var bottom = MoveMode.BOTTOM_RIGHT.transform(offset.clone(), element, style);
             var left = MoveMode.TOP_LEFT.transform(offset.clone(), element, style);
@@ -345,6 +353,7 @@ module jsidea.layout {
         }
     }
     class TopRightMode implements IMoveMode {
+        public willChange: string = "top, right";
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var top = MoveMode.TOP_LEFT.transform(offset.clone(), element, style);
             var right = MoveMode.BOTTOM_RIGHT.transform(offset.clone(), element, style);
@@ -364,6 +373,7 @@ module jsidea.layout {
         }
     }
     class BackgroundMode implements IMoveMode {
+        public willChange: string = "contents";
         private _rect = new geom.Rect2D();
         private _size = new Size();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
@@ -382,6 +392,7 @@ module jsidea.layout {
         }
     }
     class BorderTopLeftMode implements IMoveMode {
+        public willChange: string = "contents";
         private _boxSizing = new Size();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             this._boxSizing.update(element, style);
@@ -403,6 +414,7 @@ module jsidea.layout {
         }
     }
     class BorderBottomRightInnerMode implements IMoveMode {
+        public willChange: string = "contents";
         private _size = new Size();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var bs = this._size;
@@ -462,6 +474,7 @@ module jsidea.layout {
         }
     }
     class BorderBottomRightOuterMode implements IMoveMode {
+        public willChange: string = "contents";
         private _size = new Size();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var bs = this._size;
@@ -494,6 +507,7 @@ module jsidea.layout {
         }
     }
     class ScrollMode implements IMoveMode {
+        public willChange: string = "scroll-position";
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var scrollLeft = element.scrollLeft;
             var scrollTop = element.scrollTop;
@@ -528,6 +542,7 @@ module jsidea.layout {
         }
     }
     class ClipMode implements IMoveMode {
+        public willChange: string = "contents";
         private _clip: geom.Rect2D = new geom.Rect2D();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var clip = geom.Rect2D.getClip(element, style, this._clip);
@@ -551,6 +566,7 @@ module jsidea.layout {
         }
     }
     class ClipBottomRightMode implements IMoveMode {
+        public willChange: string = "contents";
         private _clip: geom.Rect2D = new geom.Rect2D();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var clip = geom.Rect2D.getClip(element, style, this._clip);

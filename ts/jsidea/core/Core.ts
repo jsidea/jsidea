@@ -11,6 +11,15 @@ interface CanvasRenderingContext2D {
     getTransform(): number[];
 }
 
+interface CSSStyleDeclaration {
+    willChange: string;
+}
+
+
+interface MSStyleCSSProperties {
+    willChange: string;
+}
+
 interface HTMLCanvasElement {
     hasContext(): string;
 }

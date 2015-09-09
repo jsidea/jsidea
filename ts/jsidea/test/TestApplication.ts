@@ -120,21 +120,23 @@ module jsidea.test {
             document.body.appendChild(can);
 
             document.addEventListener("mousemove",(evt) => {
-                var pt = geom.Transform.create(xc).globalToLocal(evt.pageX, evt.pageY, 0, null, layout.BoxModel.ATTACHMENT);
-                tes.textContent = Math.round(pt.x) + " , " + Math.round(pt.y);
+                var pt = geom.Transform.create(xc).globalToLocal(evt.pageX, evt.pageY, 0, null, layout.BoxModel.BORDER);
+                tes.textContent = Math.round(pt.x) + " " + Math.round(pt.y);
             });
 
 
             var snap = new layout.Snap();
-            snap.grid.element = vie;
+            snap.grid.element = document.documentElement;
             snap.grid.boxModel = layout.BoxModel.PADDING;
-            snap.to.boxModel = layout.BoxModel.BORDER;
-            
-            var pos = new layout.Position();
+            snap.to.x = 0;//"100%";
+            snap.to.y = 0;//"100%";
+            snap.to.boxModel = layout.BoxModel.SCROLL;
+
+            var pos = new layout.Layout();
             pos.snap = snap;
 
             //drag settings
-            var dragMode = layout.DragMode.TRANSFORM;
+            var dragMode = layout.DragMode.SCROLL;
             pos.move.mode = dragMode.positionMode;
             pos.to.boxModel = dragMode.boxModel;
             var invertX = dragMode.invertX;
@@ -154,14 +156,16 @@ module jsidea.test {
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
 
+                var mode = pos.move.mode || layout.MoveMode.TRANSFORM;
+                target.style.willChange = mode.willChange;
+
                 cursor.setTo(evt.pageX, evt.pageY, 0);
                 transform.update(target);
+                console.log(transform.size.style.willChange);
                 var loc = transform.globalToLocalPoint(cursor, layout.BoxModel.BORDER, pos.to.boxModel);
                 box = transform.size.bounds(pos.to.boxModel, null, box);
-                //                box = transform.boxSizing.getBox(pos.to.boxModel, null, box);
                 pivot.x = invertX ? (box.width - loc.x) : loc.x;
                 pivot.y = invertY ? (box.height - loc.y) : loc.y;
-                //                console.log("PIVOT", pivot.x, pivot.y, "LOC", loc.x, loc.y);
 
             });
             //drag
@@ -171,10 +175,7 @@ module jsidea.test {
 
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
-                
-                //                console.log(document.elementFromPoint(evt.pageX, evt.pageY));
 
-//                var transform = geom.Transform.create(target);
                 cursor.setTo(evt.pageX, evt.pageY, 0);
                 size.update(target, layout.Style.create(target));
                 box = size.bounds(pos.to.boxModel, null, box);
@@ -183,21 +184,19 @@ module jsidea.test {
 
                 pos.from.x = cursor.x;
                 pos.from.y = cursor.y;
-                layout.Position.apply(pos, target);
-
-                //                console.log(layout.Style.create(target).clip);
+                layout.Layout.apply(pos, target);
             });
             //drag end
             document.addEventListener("mouseup",(evt) => {
+                if (target)
+                    target.style.willChange = "auto";
                 target = null;
 
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
             });
 
-
-
-//            document.addEventListener("click",() => this.logChain(xc));
+            //            document.addEventListener("click",() => this.logChain(xc));
 
             var draw = () => {
                 var g = display.Graphics.get(ctx);
@@ -273,28 +272,28 @@ module jsidea.test {
                 var scaleOff = node.parentScroll ? node.parentScroll.element : null;
                 var res = ([
                     text.Text.conc(10, " ", node.element.id ? node.element.id : node.element.nodeName),
-//                    text.Text.conc(16, " ", "PARENT", ofp ? (ofp.id ? ofp.id : ofp.nodeName) : "NONE"),
-//                    text.Text.conc(16, " ", "PARENT_C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
+                    //                    text.Text.conc(16, " ", "PARENT", ofp ? (ofp.id ? ofp.id : ofp.nodeName) : "NONE"),
+                    //                    text.Text.conc(16, " ", "PARENT_C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
                     
                     //                    text.Text.conc(18, " ", "SCROLL_C", scaleOff ? (scaleOff.id ? scaleOff.id : scaleOff.nodeName) : "NONE"),
                     //                    text.Text.conc(18, " ", "PARENT_B", calcedPar ? (calcedPar.id ? calcedPar.id : calcedPar.nodeName) : "NONE"),
                     
-//                    text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
-//                    text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
-//                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3d),
+                    //                    text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
+                    //                    text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
+                    //                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3d),
                     
                     //                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
                     //                    text.Text.conc(12, " ", "ACC", node.isAccumulatable),
                     //                    text.Text.conc(18, " ", "SCROLL", node.element.scrollLeft, node.element.scrollTop),
-//                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
+                    //                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
                     text.Text.conc(18, " ", "TRANSFORMED", node.style.transform),
                     //                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),
                     
-//                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
-//                    text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
-//                    text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),
-//                    text.Text.conc(18, " ", "OVERFLOW", node.style.overflow),
-//                    text.Text.conc(18, " ", "POSITION", node.style.position, node.isSticked)
+                    //                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
+                    //                    text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
+                    //                    text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),
+                    //                    text.Text.conc(18, " ", "OVERFLOW", node.style.overflow),
+                    //                    text.Text.conc(18, " ", "POSITION", node.style.position, node.isSticked)
                 ]).join(" ");
                 console.log(res);
                 node = node.child;

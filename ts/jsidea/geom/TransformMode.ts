@@ -95,7 +95,6 @@ module jsidea.geom {
             if (last && matrices.indexOf(last) < 0)
                 matrices.push(last);
             
-            
 //            if(matrices.length > 1)
 //            {
 //                var ne = [matrices[0]];

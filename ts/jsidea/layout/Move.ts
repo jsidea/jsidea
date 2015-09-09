@@ -66,7 +66,7 @@ module jsidea.layout {
 
         public static qualifiedClassName: string = "jsidea.layout.Move";
         public toString(): string {
-            return "[" + Position.qualifiedClassName + "]";
+            return "[" + Layout.qualifiedClassName + "]";
         }
     }
 }
