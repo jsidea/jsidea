@@ -34,3 +34,4 @@
 /// <reference path='ts/jsidea/action/EventCircuit.ts' />
 /// <reference path='ts/jsidea/Buffer.ts' />
 /// <reference path='ts/jsidea/test/TestApplication.ts' />
+/// <reference path='ts/jsidea/test/SimboxApplication.ts' />

@@ -3,4 +3,5 @@
 <css_scripts>
 	<src>jsidea-application.css</src>
 	<src>jsidea-application-test.css</src>
+	<src>jsidea-simbox.css</src>
 </css_scripts>

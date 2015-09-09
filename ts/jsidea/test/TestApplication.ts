@@ -2,10 +2,7 @@ module jsidea.test {
     export class TestApplication extends jsidea.system.Application {
         constructor() {
             super();
-        }
 
-        //@override abstract
-        public create(): void {
             this.testGeometryUtils();
             //                                    this.testAffineFit();
             //            this.testMatrix();

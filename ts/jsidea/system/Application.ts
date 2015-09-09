@@ -13,13 +13,7 @@ module jsidea.system {
             
             this.autoActive = true;
             this.autoTick = true;
-            //abstract create method
-            this.create();
-            //initial tick
             this.tick();
-        }
-
-        public create(): void {
         }
 
         public get active(): boolean {
