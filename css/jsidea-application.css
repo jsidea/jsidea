@@ -34,7 +34,7 @@ body {
 	/* transform-style: preserve-3d; */
 	/* transform-style: preserve-3d;
 	transform: translateX(128px) rotate(30deg); */
-	/* border: 100px solid #EEEEEE; */
+	border: 100px solid #EEEEEE;
 	/* padding: 50px; */
 	/* position: absolute; */
 	/* border: 25px solid #EEEEEE; */
@@ -44,7 +44,7 @@ body {
 	/* transform: translateX(128px); */
 	/* transform: translateX(0px); */
 	/* transform: rotate(10deg); */
-	background-color: #EEEEEE;
+	background-color: #FFFFFF;
 }
 
 #canvas-item {

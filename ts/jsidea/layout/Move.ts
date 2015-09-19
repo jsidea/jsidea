@@ -33,13 +33,13 @@ module jsidea.layout {
             return this;
         }
 
-        public static apply(move: Move, transform: geom.Transform): void {
+        public static apply(options: Move, transform: Transform): void {
             if (!transform)
                 return;
-            move = move || Move.DEFAULT;
+            options = options || Move.DEFAULT;
             
-            var mode = move.mode || MoveMode.TRANSFORM;
-            var point = move.position.clone();
+            var mode = options.mode || MoveMode.TRANSFORM;
+            var point = options.position.clone();
             var style = transform.size.style;
             var size = transform.size;
             var element = transform.element;
@@ -48,9 +48,9 @@ module jsidea.layout {
             mode.transform(point, element, style);
             
             //clamp by "limits" property
-            var toBox = move.limits.boxModel || BoxModel.BORDER;
-            var box = size.bounds(toBox);
-            math.Number.limits(point, move.limits, box.width, box.height);
+            var toBox = options.limits.boxModel || BoxModel.BORDER;
+            var bounds = size.bounds(toBox);
+            math.Number.limits(point, options.limits, bounds.width, bounds.height);
             
             //clamp it by its "natural" limits
             mode.clamp(point, element, style);
@@ -66,7 +66,7 @@ module jsidea.layout {
 
         public static qualifiedClassName: string = "jsidea.layout.Move";
         public toString(): string {
-            return "[" + Layout.qualifiedClassName + "]";
+            return "[" + Position.qualifiedClassName + "]";
         }
     }
 }

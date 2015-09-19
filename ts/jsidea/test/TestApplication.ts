@@ -4,73 +4,6 @@ module jsidea.test {
             super();
 
             this.testGeometryUtils();
-            //                                    this.testAffineFit();
-            //            this.testMatrix();
-            //            this.testSize();
-        }
-
-        private testSize(): void {
-
-            var view = document.getElementById("view");
-            var cont = document.getElementById("content");
-            var a = document.createElement("div");
-            a.id = "x-cont";
-            cont.appendChild(a);
-
-            //            setTimeout(() => {
-            //                var size = layout.Size.create(a);
-            //                var box = size.getBox(layout.BoxModel.BACKGROUND);
-            //                a.style.backgroundSize = Math.round(box.width) + "px " + Math.round(box.height) + "px";
-            //                a.style.backgroundPosition = Math.round(box.x) + "px " + Math.round(box.y) + "px";
-            //            }, 1000);
-            
-            var tr = geom.Transform.create();
-            document.addEventListener("click",(e) => {
-                tr.update(a);
-                var lc = tr.globalToLocal(e.pageX, e.pageY, 0, null, layout.BoxModel.ATTACHMENT);
-                console.log(lc.x, lc.y);
-            });
-        }
-
-        private testMatrix(): void {
-
-            var scale = new geom.Matrix2D();
-            scale.setScale({ x: 2, y: 2 });
-            var translate = new geom.Matrix2D();
-            translate.setPosition({ x: 10, y: 10 });
-
-            var a = scale.clone().append(translate);
-            var b = translate.clone().append(scale);
-
-
-            console.log("scaling");
-            console.log(scale.toStringTable());
-
-            console.log("translate");
-            console.log(translate.toStringTable());
-
-            console.log("A");
-            console.log(a.toStringTable());
-            console.log("B");
-            console.log(b.toStringTable());
-        }
-
-        private testAffineFit(): void {
-
-            var view = document.getElementById("view");
-            var cont = document.getElementById("content");
-            var a = document.createElement("div");
-            a.id = "x-cont";
-
-            view.style.perspective = "500px";
-            cont.style.transform = "perspective(-300px) rotateY(-45deg)";
-            //            cont.style.transformStyle = "preserve-3d";
-            //            a.style.transform = "rotateY(45deg)";
-
-
-            cont.appendChild(a);
-
-
         }
 
         private testGeometryUtils(): void {
@@ -86,6 +19,7 @@ module jsidea.test {
             can.width = 1920;
             can.height = 1080;
             var ctx = <CanvasRenderingContext2D> can.getContext("2d");
+            var teste = `asdfasdf ${can.id}`;
             //            ctx.translate(100, 100);
             //            ctx.scale(2, 2);
             //            ctx.rotate(45);
@@ -117,33 +51,33 @@ module jsidea.test {
             document.body.appendChild(can);
 
             document.addEventListener("mousemove",(evt) => {
-                var pt = geom.Transform.create(xc).globalToLocal(evt.pageX, evt.pageY, 0, null, layout.BoxModel.BORDER);
+                var pt = layout.Transform.create(xc).globalToLocal(evt.pageX, evt.pageY, 0, null, layout.BoxModel.BORDER);
                 tes.textContent = Math.round(pt.x) + " " + Math.round(pt.y);
             });
 
+            var mode = layout.MoveMode.TRANSFORM;
 
             var snap = new layout.Snap();
             snap.grid.element = document.documentElement;
             snap.grid.boxModel = layout.BoxModel.PADDING;
             snap.to.x = 0;//"100%";
             snap.to.y = 0;//"100%";
-            snap.to.boxModel = layout.BoxModel.SCROLL;
+            snap.to.boxModel = mode.boxModel;
 
-            var pos = new layout.Layout();
+            var pos = new layout.Position();
             pos.snap = snap;
 
             //drag settings
-            var dragMode = layout.DragMode.SCROLL;
-            pos.move.mode = dragMode.positionMode;
-            pos.to.boxModel = dragMode.boxModel;
-            var invertX = dragMode.invertX;
-            var invertY = dragMode.invertY;
+            pos.move.mode = mode;
+            pos.to.boxModel = mode.boxModel;
+            var invertX = mode.invertX;
+            var invertY = mode.invertY;
 
             var target: HTMLElement = null;
             var pivot = new geom.Point3D();
             var box = new geom.Rect2D();
-            var transform = geom.Transform.create();
-            var size: layout.Size = layout.Size.create();
+            var transform = layout.Transform.create();
+            var size: layout.Box = layout.Box.create();
             var cursor = new geom.Point3D();
             
             //drag begin
@@ -158,7 +92,7 @@ module jsidea.test {
 
                 cursor.setTo(evt.pageX, evt.pageY, 0);
                 transform.update(target);
-                console.log(transform.size.style.willChange);
+
                 var loc = transform.globalToLocalPoint(cursor, layout.BoxModel.BORDER, pos.to.boxModel);
                 box = transform.size.bounds(pos.to.boxModel, null, box);
                 pivot.x = invertX ? (box.width - loc.x) : loc.x;
@@ -181,7 +115,7 @@ module jsidea.test {
 
                 pos.from.x = cursor.x;
                 pos.from.y = cursor.y;
-                layout.Layout.apply(pos, target);
+                layout.Position.apply(pos, target);
             });
             //drag end
             document.addEventListener("mouseup",(evt) => {
@@ -225,6 +159,19 @@ module jsidea.test {
                 }
             }
             document.addEventListener("keyup", setTest);
+        }
+
+        private testAffineFit(): void {
+            var view = document.getElementById("view");
+            var cont = document.getElementById("content");
+            var a = document.createElement("div");
+            a.id = "x-cont";
+
+            view.style.perspective = "500px";
+            cont.style.transform = "perspective(-300px) rotateY(-45deg)";
+            //            cont.style.transformStyle = "preserve-3d";
+            //            a.style.transform = "rotateY(45deg)";
+            cont.appendChild(a);
         }
 
         private testMutationObserver(): void {
@@ -323,17 +270,3 @@ module jsidea.test {
         }
     }
 }
-
-//interface JQuery {
-//    globalToLocal(x: number, y: number, z?: number): jsidea.geom.IPoint3DValue;
-//    localToGlobal(x: number, y: number, z?: number): jsidea.geom.IPoint3DValue;
-//}
-//
-//(function($) {
-//    $.fn.globalToLocal = function(x: number, y: number, z: number = 0) {
-//        return jsidea.geom.Transform.create(this[0]).globalToLocal(x, y, z);
-//    };
-//    $.fn.localToGlobal = function(x: number, y: number, z: number = 0) {
-//        return jsidea.geom.Transform.create(this[0]).localToGlobal(x, y, z);
-//    };
-//} (jQuery));

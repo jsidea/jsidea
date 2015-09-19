@@ -1,8 +1,9 @@
 module jsidea.layout {
-    export class Size {
+    export class Box {
 
         public element: HTMLElement = null;
         public style: CSSStyleDeclaration;
+
         public offsetWidth: number = 0;
         public offsetHeight: number = 0;
         public parentWidth: number = 0;
@@ -22,7 +23,7 @@ module jsidea.layout {
         public paddingRight: number = 0;
         public paddingBottom: number = 0;
         public paddingLeft: number = 0;
-        
+
         public scrollLeft: number = 0;
         public scrollTop: number = 0;
 
@@ -31,11 +32,11 @@ module jsidea.layout {
                 this.update(element, style);
         }
 
-        public static create(element?: HTMLElement, style?: CSSStyleDeclaration): Size {
-            return new Size(element, style);
+        public static create(element?: HTMLElement, style?: CSSStyleDeclaration): Box {
+            return new Box(element, style);
         }
 
-        public update(element: HTMLElement, style?: CSSStyleDeclaration): Size {
+        public update(element: HTMLElement, style?: CSSStyleDeclaration): Box {
             if (!element)
                 return this.clear();
             style = style || layout.Style.create(element);
@@ -47,7 +48,7 @@ module jsidea.layout {
             this.offsetHeight = element.offsetHeight;
             this.scrollLeft = element.scrollLeft;
             this.scrollTop = element.scrollTop;
-            
+
             if (system.Browser.isWebKit) {
                 if (element == element.ownerDocument.body) {
                     this.scrollLeft = 0;
@@ -88,7 +89,7 @@ module jsidea.layout {
             return this;
         }
 
-        public copyFrom(size: Size): Size {
+        public copyFrom(size: Box): Box {
             this.element = size.element;
             this.style = size.style;
             this.offsetWidth = size.offsetWidth;
@@ -114,17 +115,17 @@ module jsidea.layout {
             return this;
         }
 
-        public clone(): Size {
-            return (new Size()).copyFrom(this);
+        public clone(): Box {
+            return (new Box()).copyFrom(this);
         }
 
-        public clear(): Size {
+        public clear(): Box {
             this.element = null;
             this.style = null;
-            
+
             this.scrollLeft = 0;
             this.scrollTop = 0;
-            
+
             this.offsetWidth = 0;
             this.offsetHeight = 0;
             this.parentWidth = 0;
@@ -148,7 +149,7 @@ module jsidea.layout {
             return this;
         }
 
-        public apply(element: HTMLElement): Size {
+        public apply(element: HTMLElement): Box {
             var style = element.style;
             //TODO:
             //keep units here (percentage should keep percentage)
@@ -207,15 +208,13 @@ module jsidea.layout {
                 toBox.fromBorderBox(this, point);
             return point;
         }
-        
-        public width(boxModel?:IBoxModel):number
-        {
-            return (boxModel || BoxModel.BORDER).width(this);    
+
+        public width(boxModel?: IBoxModel): number {
+            return (boxModel || BoxModel.BORDER).width(this);
         }
-        
-        public height(boxModel?:IBoxModel):number
-        {
-            return (boxModel || BoxModel.BORDER).height(this);    
+
+        public height(boxModel?: IBoxModel): number {
+            return (boxModel || BoxModel.BORDER).height(this);
         }
 
         public dispose(): void {
@@ -224,7 +223,15 @@ module jsidea.layout {
 
         public static qualifiedClassName: string = "jsidea.layout.Size";
         public toString(): string {
-            return "[" + Size.qualifiedClassName + "]";
+            return "[" + Box.qualifiedClassName + "]";
+        }
+
+        public static lookup(boxSizing: string): IBoxModel {
+            for (var model in BoxModel) {
+                if ((<IBoxModel>model).name == boxSizing)//v != this && 
+                    return model;
+            }
+            return null;
         }
     }
 }

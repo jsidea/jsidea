@@ -1,41 +1,41 @@
 module jsidea.layout {
-    export interface ILayoutTo {
+    export interface IPositionTo {
         x?: any;
         y?: any;
         offsetX?: any;
         offsetY?: any;
         boxModel?: IBoxModel;
     }
-    export interface ILayoutFrom extends ILayoutTo, math.ILimit {
+    export interface IPositionFrom extends IPositionTo, math.ILimit {
         element?: HTMLElement;
     }
-    export interface ILayoutBounds extends math.ILimit {
+    export interface IPositionBounds extends math.ILimit {
         element?: HTMLElement;
         boxModel?: IBoxModel;
         toBoxModel?: IBoxModel;
     }
-    export class Layout {
-        public to: ILayoutTo = {};
-        public from: ILayoutFrom = {};
-        public bounds: ILayoutBounds = {};
+    export class Position {
+        public to: IPositionTo = {};
+        public from: IPositionFrom = {};
+        public bounds: IPositionBounds = {};
         public snap: Snap = null;
         public move: Move = new Move();
 
-        private static _from: geom.Transform = new geom.Transform();
-        private static _bounds: geom.Transform = new geom.Transform();
+        private static _from: Transform = new Transform();
+        private static _bounds: Transform = new Transform();
 
         constructor() {
         }
 
-        public static create(): Layout {
-            return new Layout();
+        public static create(): Position {
+            return new Position();
         }
 
-        public clone(): Layout {
-            return (new Layout()).copyFrom(this);
+        public clone(): Position {
+            return (new Position()).copyFrom(this);
         }
 
-        public copyFrom(position: Layout): Layout {
+        public copyFrom(position: Position): Position {
             this.to = position.to;
             this.from = position.from;
             this.bounds = position.bounds;
@@ -43,28 +43,34 @@ module jsidea.layout {
             return this;
         }
 
-        public static apply(position: Layout, element: HTMLElement): geom.Transform {
+        public static apply(position: Position, element: HTMLElement): void {
             if (!element)
                 return null;
-            var transform = geom.Transform.create(element);
-            Layout.transform(position, transform);
-            transform.matrix.getPosition(position.move.position);
+            
+            var transform = Transform.create(element);
+            Position.calc(position, transform, position.move.position);
             Move.apply(position.move, transform);
-            return transform;
+
+            if (position.snap) {
+                //maybe optional
+                position.snap.move.mode = position.move.mode;
+                
+                Snap.apply(position.snap, element);
+            }
         }
 
-        public static element(position: Layout, element: HTMLElement): geom.Transform {
-            return Layout.transform(position, geom.Transform.create(element));
+        public static calcByElement(position: Position, element: HTMLElement): geom.Point3D {
+            return Position.calc(position, Transform.create(element));
         }
 
-        public static transform(position: Layout, transform: geom.Transform): geom.Transform {
+        public static calc(position: Position, transform: Transform, ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
             if (!transform)
-                return null;
+                return ret;
 
             //retrieve "of"-element
             var fromElement = position.from.element || transform.element.ownerDocument.documentElement;
 
-            Layout._from.update(fromElement);
+            Position._from.update(fromElement);
 
             var toBox = position.to.boxModel || BoxModel.BORDER;
             var fromBox = position.from.boxModel || BoxModel.BORDER;
@@ -75,7 +81,7 @@ module jsidea.layout {
             var toY: number = math.Number.relation(position.to.y, sizeTo.height, 0) + math.Number.relation(position.to.offsetY, sizeTo.height, 0);
             
             //transform box-models of "from"
-            var sizeFrom = Layout._from.size.bounds(fromBox);
+            var sizeFrom = Position._from.size.bounds(fromBox);
             var fromX: number = math.Number.relation(position.from.x, sizeFrom.width, 0) + math.Number.relation(position.from.offsetX, sizeFrom.width, 0);
             var fromY: number = math.Number.relation(position.from.y, sizeFrom.height, 0) + math.Number.relation(position.from.offsetY, sizeFrom.height, 0);
             
@@ -90,25 +96,16 @@ module jsidea.layout {
                 fromY = Math.min(fromY, math.Number.relation(position.from.maxY, sizeFrom.height, fromY)); 
 
             //calc local position
-            var lc = Layout._from.localToLocal(transform, fromX, fromY, 0, fromBox, toBox);
+            var lc = Position._from.localToLocal(transform, fromX, fromY, 0, fromBox, toBox);
             lc.x -= toX;
             lc.y -= toY;
+            lc.z = 0;
 
-            //            transform.size.scrollLeft -= lc.x;
-            //            transform.size.scrollTop -= lc.y;
-            
             var matrix = new geom.Matrix3D();
             matrix.appendPositionRaw(lc.x, lc.y, 0);
-            transform.prepend(matrix);
+            matrix.append(transform.matrix);
 
-            if (position.snap)
-                Snap.transform(position.snap, transform);
-
-            //            var matrix = new geom.Matrix3D();
-            //            matrix.appendPositionRaw(lc.x, lc.y, 0);
-            //            transform.prepend(matrix);
-
-            return transform;
+            return matrix.getPosition(ret);
         }
 
         public dispose(): void {
@@ -120,7 +117,7 @@ module jsidea.layout {
 
         public static qualifiedClassName: string = "jsidea.layout.Layout";
         public toString(): string {
-            return "[" + Layout.qualifiedClassName + "]";
+            return "[" + Position.qualifiedClassName + "]";
         }
     }
 }

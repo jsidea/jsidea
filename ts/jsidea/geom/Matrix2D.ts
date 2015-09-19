@@ -32,13 +32,13 @@ module jsidea.geom {
 
         constructor() {
         }
-        
+
         public static create(element: HTMLElement = null, ret = new Matrix2D()): Matrix2D {
             if (element && element.ownerDocument)
                 return ret.setCSS(window.getComputedStyle(element).transform);
             return ret.identity();
         }
-        
+
         public static parse(cssStr: string, ret = new Matrix2D()): Matrix2D {
             return ret.setCSS(cssStr);
         }
@@ -192,7 +192,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendPosition(offset: IPoint2DValue): Matrix2D {
-            return this.append(this.makePosition(offset, Buffer._APPEND_POSITION_2D));;
+            return this.append(this.makePosition(offset, _APPEND_POSITION_2D));;
         }
         
         /**
@@ -202,7 +202,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendPositionRaw(x: number, y: number): Matrix2D {
-            return this.appendPosition(Buffer._APPEND_POSITON_RAW_2D.setTo(x, y));
+            return this.appendPosition(_APPEND_POSITON_RAW_2D.setTo(x, y));
         }
 
         /**
@@ -211,7 +211,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependPosition(offset: IPoint2DValue): Matrix2D {
-            return this.prepend(this.makePosition(offset, Buffer._PREPEND_POSITION_2D));
+            return this.prepend(this.makePosition(offset, _PREPEND_POSITION_2D));
         }
         
         /**
@@ -221,7 +221,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependPositionRaw(x: number, y: number): Matrix2D {
-            return this.prependPosition(Buffer._PREPEND_POSITION_RAW_2D.setTo(x, y));
+            return this.prependPosition(_PREPEND_POSITION_RAW_2D.setTo(x, y));
         }
 
         /**
@@ -263,7 +263,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendScale(scale: IPoint2DValue): Matrix2D {
-            this.append(this.makeScale(scale, Buffer._APPEND_SCALE_2D));
+            this.append(this.makeScale(scale, _APPEND_SCALE_2D));
             return this;
         }
         
@@ -274,7 +274,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendScaleRaw(x: number, y: number): Matrix2D {
-            return this.appendScale(Buffer._APPEND_SCALE_RAW_2D.setTo(x, y));
+            return this.appendScale(_APPEND_SCALE_RAW_2D.setTo(x, y));
         }
 
         /**
@@ -283,7 +283,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependScale(scale: IPoint2DValue): Matrix2D {
-            return this.prepend(this.makeScale(scale, Buffer._PREPEND_SCALE_2D));
+            return this.prepend(this.makeScale(scale, _PREPEND_SCALE_2D));
         }
         
         /**
@@ -293,7 +293,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependScaleRaw(x: number, y: number): Matrix2D {
-            return this.prependScale(Buffer._PREPEND_SCALE_RAW_2D.setTo(x, y));
+            return this.prependScale(_PREPEND_SCALE_RAW_2D.setTo(x, y));
         }
 
         /**
@@ -338,7 +338,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendSkew(skew: IPoint2DValue): Matrix2D {
-            return this.append(this.makeSkew(skew, Buffer._APPEND_SKEW_2D));
+            return this.append(this.makeSkew(skew, _APPEND_SKEW_2D));
         }
         
         /**
@@ -348,7 +348,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendSkewRaw(x: number, y: number): Matrix2D {
-            return this.appendSkew(Buffer._APPEND_SKEW_RAW_2D.setTo(x, y));
+            return this.appendSkew(_APPEND_SKEW_RAW_2D.setTo(x, y));
         }
 
         /**
@@ -357,7 +357,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependSkew(skew: IPoint2DValue): Matrix2D {
-            return this.prepend(this.makeSkew(skew, Buffer._PREPEND_SKEW_2D));
+            return this.prepend(this.makeSkew(skew, _PREPEND_SKEW_2D));
         }
         
         /**
@@ -367,7 +367,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependSkewRaw(x: number, y: number): Matrix2D {
-            return this.prependSkew(Buffer._PREPEND_SKEW_RAW_2D.setTo(x, y));
+            return this.prependSkew(_PREPEND_SKEW_RAW_2D.setTo(x, y));
         }
         
         /**
@@ -434,7 +434,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependRotation(angle: number): Matrix2D {
-            return this.prepend(this.makeRotation(angle, Buffer._PREPEND_ROTATION_RAW_2D));
+            return this.prepend(this.makeRotation(angle, _PREPEND_ROTATION_RAW_2D));
         }
 
         public compose(target: IComposition2D): Matrix2D {
@@ -500,7 +500,7 @@ module jsidea.geom {
             }
 
             if (cssString.indexOf("matrix3d") >= 0)
-                return this.setMatrix3D(Buffer._SET_CSS_2D.setCSS(cssString));
+                return this.setMatrix3D(_SET_CSS_2D.setCSS(cssString));
 
             var trans = cssString.replace("matrix(", "").replace(")", "").split(",");
             this.m11 = math.Number.parse(trans[0], 1);
@@ -557,7 +557,7 @@ module jsidea.geom {
             data[5] = b.m31 * a.m12 + b.m32 * a.m22 + a.m32;
             return ret.setData(data);
         }
-        
+
         public toStringTable(fractionDigits: number = 3): string {
             return "m11=" + this.m11.toFixed(fractionDigits)
                 + "\tm21=" + this.m21.toFixed(fractionDigits)
@@ -569,12 +569,27 @@ module jsidea.geom {
                 + "\tm23=" + (0).toFixed(fractionDigits)
                 + "\tm33=" + (1).toFixed(fractionDigits);
         }
-        
+
         public static qualifiedClassName: string = "jsidea.geom.Matrix2D";
         public toString(fractionDigits: number = 3): string {
             return "[" + Matrix2D.qualifiedClassName + " \n"
                 + this.toStringTable(fractionDigits)
                 + "\n]";
-        }        
+        }
     }
+
+    var _SET_CSS_2D: Matrix3D = new Matrix3D();
+    var _PREPEND_ROTATION_RAW_2D = new Matrix2D();
+    var _APPEND_POSITION_2D = new Matrix2D();
+    var _PREPEND_POSITION_2D = new Matrix2D();
+    var _APPEND_POSITON_RAW_2D = new Point2D();
+    var _PREPEND_POSITION_RAW_2D = new Point2D();
+    var _APPEND_SCALE_2D = new Matrix2D();
+    var _PREPEND_SCALE_2D = new Matrix2D();
+    var _APPEND_SCALE_RAW_2D = new Point2D();
+    var _PREPEND_SCALE_RAW_2D = new Point2D();
+    var _APPEND_SKEW_2D = new Matrix2D();
+    var _PREPEND_SKEW_2D = new Matrix2D();
+    var _APPEND_SKEW_RAW_2D = new Point2D();
+    var _PREPEND_SKEW_RAW_2D = new Point2D();
 }

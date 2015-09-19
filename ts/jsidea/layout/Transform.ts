@@ -1,13 +1,21 @@
-module jsidea.geom {
+module jsidea.layout {
+    export interface IPosition {
+        top?: number;
+        right?: number;
+        bottom?: number;
+        left?: number;
+
+    }
     export class Transform {
         public element: HTMLElement;
-        public toBox: layout.IBoxModel = layout.BoxModel.BORDER;
-        public fromBox: layout.IBoxModel = layout.BoxModel.BORDER;
-        public matrix: Matrix3D = new Matrix3D();
-        public size: layout.Size = new layout.Size();
+        public toBox: IBoxModel = BoxModel.BORDER;
+        public fromBox: IBoxModel = BoxModel.BORDER;
+        public matrix: geom.Matrix3D = new geom.Matrix3D();
+        public size: Box = new Box();
+        public position: IPosition = {};
 
-        private _sceneTransform: Matrix3D[] = [];
-        private _inverseSceneTransform: Matrix3D[] = [];
+        private _sceneTransform: geom.Matrix3D[] = [];
+        private _inverseSceneTransform: geom.Matrix3D[] = [];
 
         constructor(element?: HTMLElement, mode?: ITransformMode) {
             if (element)
@@ -44,7 +52,7 @@ module jsidea.geom {
             return this;
         }
 
-        public append(matrix: Matrix3D): Transform {
+        public append(matrix: geom.Matrix3D): Transform {
             matrix = matrix.clone();
 
             this.matrix.append(matrix);
@@ -54,7 +62,7 @@ module jsidea.geom {
             return this;
         }
 
-        public prepend(matrix: Matrix3D): Transform {
+        public prepend(matrix: geom.Matrix3D): Transform {
             matrix = matrix.clone();
 
             this.matrix.prepend(matrix);
@@ -76,16 +84,16 @@ module jsidea.geom {
 
         public clamp(
             to: Transform,
-            pt: Point3D,
+            pt: geom.Point3D,
             offsetX: number,
             offsetY: number,
             minX: number,
             maxX: number,
             minY: number,
             maxY: number,
-            fromBox?: layout.IBoxModel,
-            toBox?: layout.IBoxModel,
-            ret: Point3D = new Point3D()): Point3D {
+            fromBox?: IBoxModel,
+            toBox?: IBoxModel,
+            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
 
             var lc = this.localToLocal(to, pt.x + offsetX, pt.y + offsetY, pt.z, toBox, fromBox, ret);
             lc.x = math.Number.clamp(lc.x, minX, maxX);
@@ -99,20 +107,20 @@ module jsidea.geom {
 
         public localToLocalPoint(
             to: Transform,
-            pt: Point3D,
-            fromBox?: layout.IBoxModel,
-            toBox?: layout.IBoxModel,
-            ret: Point3D = new Point3D()): Point3D {
+            pt: geom.Point3D,
+            fromBox?: IBoxModel,
+            toBox?: IBoxModel,
+            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
 
             return this.localToLocal(to, pt.x, pt.y, pt.z, fromBox, toBox, ret);
         }
 
         public localToLocalQuad(
             to: Transform,
-            quad: Quad,
-            fromBox?: layout.IBoxModel,
-            toBox?: layout.IBoxModel,
-            ret: Quad = new Quad()): Quad {
+            quad: geom.Quad,
+            fromBox?: IBoxModel,
+            toBox?: IBoxModel,
+            ret: geom.Quad = new geom.Quad()): geom.Quad {
 
             this.localToLocalPoint(to, quad.p1, fromBox, toBox, ret.p1);
             this.localToLocalPoint(to, quad.p2, fromBox, toBox, ret.p2);
@@ -126,9 +134,9 @@ module jsidea.geom {
             x: number,
             y: number,
             z: number = 0,
-            fromBox?: layout.IBoxModel,
-            toBox?: layout.IBoxModel,
-            ret: Point3D = new Point3D()): Point3D {
+            fromBox?: IBoxModel,
+            toBox?: IBoxModel,
+            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
 
             ret.setTo(x, y, z);
             var gl = this.localToGlobalPoint(ret, fromBox, layout.BoxModel.BORDER, ret);
@@ -136,19 +144,19 @@ module jsidea.geom {
         }
 
         public globalToLocalPoint(
-            point: Point3D,
-            fromBox?: layout.IBoxModel,
-            toBox?: layout.IBoxModel,
-            ret: Point3D = new Point3D()): Point3D {
+            point: geom.Point3D,
+            fromBox?: IBoxModel,
+            toBox?: IBoxModel,
+            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
 
             return this.globalToLocal(point.x, point.y, point.z, fromBox, toBox, ret);
         }
 
         public globalToLocalQuad(
-            quad: Quad,
-            fromBox?: layout.IBoxModel,
-            toBox?: layout.IBoxModel,
-            ret: Quad = new Quad()): Quad {
+            quad: geom.Quad,
+            fromBox?: IBoxModel,
+            toBox?: IBoxModel,
+            ret: geom.Quad = new geom.Quad()): geom.Quad {
 
             this.globalToLocalPoint(quad.p1, fromBox, toBox, ret.p1);
             this.globalToLocalPoint(quad.p2, fromBox, toBox, ret.p2);
@@ -161,9 +169,9 @@ module jsidea.geom {
             x: number,
             y: number,
             z: number = 0,
-            fromBox?: layout.IBoxModel,
-            toBox?: layout.IBoxModel,
-            ret: Point3D = new Point3D()): Point3D {
+            fromBox?: IBoxModel,
+            toBox?: IBoxModel,
+            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
 
             ret.setTo(x, y, z);
             
@@ -181,19 +189,19 @@ module jsidea.geom {
         }
 
         public localToGlobalPoint(
-            point: Point3D,
-            fromBox?: layout.IBoxModel,
-            toBox?: layout.IBoxModel,
-            ret: Point3D = new Point3D()): Point3D {
+            point: geom.Point3D,
+            fromBox?: IBoxModel,
+            toBox?: IBoxModel,
+            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
 
             return this.localToGlobal(point.x, point.y, point.z, fromBox, toBox, ret);
         }
 
         public localToGlobalQuad(
-            quad: Quad,
-            fromBox?: layout.IBoxModel,
-            toBox?: layout.IBoxModel,
-            ret: Quad = new Quad()): Quad {
+            quad: geom.Quad,
+            fromBox?: IBoxModel,
+            toBox?: IBoxModel,
+            ret: geom.Quad = new geom.Quad()): geom.Quad {
             this.localToGlobalPoint(quad.p1, fromBox, toBox, ret.p1);
             this.localToGlobalPoint(quad.p2, fromBox, toBox, ret.p2);
             this.localToGlobalPoint(quad.p3, fromBox, toBox, ret.p3);
@@ -205,9 +213,9 @@ module jsidea.geom {
             x: number,
             y: number,
             z: number = 0,
-            fromBox?: layout.IBoxModel,
-            toBox?: layout.IBoxModel,
-            ret: Point3D = new Point3D()): Point3D {
+            fromBox?: IBoxModel,
+            toBox?: IBoxModel,
+            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
 
             ret.setTo(x, y, z);
             

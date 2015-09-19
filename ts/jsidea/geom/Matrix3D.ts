@@ -71,7 +71,7 @@ module jsidea.geom {
                 style = style || layout.Style.create(element);
 
                 ret.identity();
-                
+
                 var origin = style.transformOrigin ? style.transformOrigin.split(" ") : [];
                 var originX = math.Number.relation(origin[0], element.offsetWidth, element.offsetWidth * 0.5);
                 var originY = math.Number.relation(origin[1], element.offsetHeight, element.offsetHeight * 0.5);
@@ -248,11 +248,11 @@ module jsidea.geom {
         }
 
         public deltaTransformRaw(x: number, y: number, z: number, ret: Point3D = new Point3D()): Point3D {
-            return this.deltaTransform(Buffer._DELTA_TRANSFORM_RAW_3D.setTo(x, y, z), ret);
+            return this.deltaTransform(_DELTA_TRANSFORM_RAW_3D.setTo(x, y, z), ret);
         }
 
         public unprojectInverted(point: IPoint2DValue, ret: Point3D = new Point3D()): Point3D {
-            return Buffer._INVERT_PROJECT_3D.copyFrom(this).invert().unproject(point, ret);
+            return _INVERT_PROJECT_3D.copyFrom(this).invert().unproject(point, ret);
         }
         
         //based on http://code.metager.de/source/xref/mozilla/B2G/gecko/gfx/thebes/gfx3DMatrix.cpp#651
@@ -292,7 +292,7 @@ module jsidea.geom {
         }
 
         public projectInverted(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
-            return Buffer._INVERT_PROJECT_3D.copyFrom(this).invert().project(point, ret);
+            return _INVERT_PROJECT_3D.copyFrom(this).invert().project(point, ret);
         }
 
         //from homegeneous (euclid) to cartesian FLATTENED!!!! like a projection
@@ -354,7 +354,7 @@ module jsidea.geom {
         }
 
         public transformRaw(x: number, y: number, z: number, ret: Point3D = new Point3D()): Point3D {
-            return this.transform(Buffer._TRANSFORM_RAW_3D.setTo(x, y, z), ret);
+            return this.transform(_TRANSFORM_RAW_3D.setTo(x, y, z), ret);
         }
 
         public append(b: IMatrix3DValue): Matrix3D {
@@ -388,6 +388,21 @@ module jsidea.geom {
             this.m43 = position.z;
             return this;
         }
+        
+        /**
+        * Sets the given position.
+        * @param position The new position.
+        * @return this-chained.
+        */
+        public setPositionSafe(position: IPoint3DValue): Matrix3D {
+            if (!isNaN(position.x))
+                this.m41 = position.x;
+            if (!isNaN(position.y))
+                this.m42 = position.y;
+            if (!isNaN(position.z))
+                this.m43 = position.z;
+            return this;
+        }
 
         /**
         * Creates a new position/translation-matrix.
@@ -407,7 +422,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendPosition(position: IPoint3DValue): Matrix3D {
-            return this.append(Matrix3D.makePosition(position, Buffer._APPEND_POSITION_3D));
+            return this.append(Matrix3D.makePosition(position, _APPEND_POSITION_3D));
         }
         
         /**
@@ -418,7 +433,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendPositionRaw(x: number, y: number, z: number): Matrix3D {
-            return this.appendPosition(Buffer._APPEND_POSITION_RAW_3D.setTo(x, y, z));
+            return this.appendPosition(_APPEND_POSITION_RAW_3D.setTo(x, y, z));
         }
 
         /**
@@ -427,7 +442,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependPosition(position: IPoint3DValue): Matrix3D {
-            return this.prepend(Matrix3D.makePosition(position, Buffer._PREPEND_POSITION_3D));
+            return this.prepend(Matrix3D.makePosition(position, _PREPEND_POSITION_3D));
         }   
         
         /**
@@ -439,7 +454,7 @@ module jsidea.geom {
         */
 
         public prependPositionRaw(x: number, y: number, z: number): Matrix3D {
-            return this.prependPosition(Buffer._PREPEND_POSITION_RAW_3D.setTo(x, y, z, 0));
+            return this.prependPosition(_PREPEND_POSITION_RAW_3D.setTo(x, y, z, 0));
         }
         
         /**
@@ -483,7 +498,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendScale(scale: IPoint3DValue): Matrix3D {
-            return this.append(Matrix3D.makeScale(scale, Buffer._APPEND_SCALE_3D));
+            return this.append(Matrix3D.makeScale(scale, _APPEND_SCALE_3D));
         }
         
         /**
@@ -492,7 +507,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendScaleRaw(x: number, y: number, z: number): Matrix3D {
-            return this.appendScale(Buffer._APPEND_SCALE_RAW_3D.setTo(x, y, z));
+            return this.appendScale(_APPEND_SCALE_RAW_3D.setTo(x, y, z));
         }
 
         /**
@@ -501,7 +516,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependScale(scale: IPoint3DValue): Matrix3D {
-            return this.prepend(Matrix3D.makeScale(scale, Buffer._PREPEND_SCALE_3D));
+            return this.prepend(Matrix3D.makeScale(scale, _PREPEND_SCALE_3D));
         }
         
         /**
@@ -512,7 +527,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependScaleRaw(x: number, y: number, z: number): Matrix3D {
-            return this.prependScale(Buffer._APPEND_SCALE_RAW_3D.setTo(x, y, z));
+            return this.prependScale(_APPEND_SCALE_RAW_3D.setTo(x, y, z));
         }
         
         /**
@@ -550,7 +565,7 @@ module jsidea.geom {
         */
 
         public setSkewRaw(x: number, y: number, z: number): Matrix3D {
-            return this.setSkew(Buffer._SET_SKEW_RAW_3D.setTo(x, y, z));
+            return this.setSkew(_SET_SKEW_RAW_3D.setTo(x, y, z));
         }
 
         /**
@@ -570,7 +585,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendSkew(skew: IPoint3DValue): Matrix3D {
-            return this.append(Matrix3D.makeSkew(skew, Buffer._APPEND_SCALE_3D));
+            return this.append(Matrix3D.makeSkew(skew, _APPEND_SCALE_3D));
         }
 
         /**
@@ -579,7 +594,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependSkew(skew: IPoint3DValue): Matrix3D {
-            return this.prepend(Matrix3D.makeSkew(skew, Buffer._PREPEND_SKEW_3D));
+            return this.prepend(Matrix3D.makeSkew(skew, _PREPEND_SKEW_3D));
         }
         
         /**
@@ -588,7 +603,7 @@ module jsidea.geom {
         * @return The rotation-point.
         */
         public getRotation(ret: Point3D = new Point3D()): Point3D {
-            var m = this.getRotationMatrix(Buffer._GET_ROTATION_3D);
+            var m = this.getRotationMatrix(_GET_ROTATION_3D);
             ret.y = -Math.asin(math.Number.clamp(m.m13, -1, 1)) * math.Number.RAD_TO_DEG;
             if (Math.abs(this.m13) < 0.99999) {
                 ret.x = Math.atan2(-m.m23, m.m33) * math.Number.RAD_TO_DEG;
@@ -688,7 +703,7 @@ module jsidea.geom {
         public appendPerspective(perspective: number): Matrix3D {
             if (!perspective)
                 return this;
-            return this.append(Matrix3D.makePerspective(perspective, Buffer._APPEND_PERSPECTIVE_3D));
+            return this.append(Matrix3D.makePerspective(perspective, _APPEND_PERSPECTIVE_3D));
         }
 
         /**
@@ -697,7 +712,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependPerspective(perspective: number): Matrix3D {
-            return this.prepend(Matrix3D.makePerspective(perspective, Buffer._PREPEND_PERSPECTIVE_3D));
+            return this.prepend(Matrix3D.makePerspective(perspective, _PREPEND_PERSPECTIVE_3D));
         }
 
         public getPerspective(): number {
@@ -820,8 +835,10 @@ module jsidea.geom {
                 return this.identity();
             }
 
-            if (cssString.indexOf("matrix3d") < 0)
-                return this.setMatrix2D(Buffer._SET_CSS_3D.setCSS(cssString));
+            if (cssString.indexOf("matrix3d") < 0) {
+                _SET_CSS_3D = _SET_CSS_3D || new geom.Matrix2D();
+                return this.setMatrix2D(_SET_CSS_3D.setCSS(cssString));
+            }
 
             var trans = cssString.replace("matrix3d(", "").replace(")", "").split(",");
             this.m11 = math.Number.parse(trans[0], 1);
@@ -846,13 +863,13 @@ module jsidea.geom {
         public appendCSS(cssString: string): Matrix3D {
             if (!cssString || cssString == "none")
                 return this;
-            return this.append(Buffer._APPEND_CSS_3D.setCSS(cssString));
+            return this.append(_APPEND_CSS_3D.setCSS(cssString));
         }
 
         public prependCSS(cssString: string): Matrix3D {
             if (!cssString || cssString == "none")
                 return this;
-            return this.prepend(Buffer._PREPEND_CSS_3D.setCSS(cssString));
+            return this.prepend(_PREPEND_CSS_3D.setCSS(cssString));
         }
 
         public getMatrix2D(ret: Matrix2D = new Matrix2D()): Matrix2D {
@@ -1108,4 +1125,27 @@ module jsidea.geom {
                 + "\n]";
         }
     }
+    
+    //jsidea.geom.Matrix3D
+    var _APPEND_POSITION_3D = new Matrix3D();
+    var _PREPEND_POSITION_3D = new Matrix3D();
+    var _APPEND_PERSPECTIVE_3D = new Matrix3D();
+    var _PREPEND_PERSPECTIVE_3D = new Matrix3D();
+    var _APPEND_SCALE_3D = new Matrix3D();
+    var _PREPEND_SCALE_3D = new Matrix3D();
+    var _APPEND_SCALE_RAW_3D = new Point3D();
+    var _PREPEND_SCALE_RAW_3D = new Point3D();
+    var _APPEND_SKEW_3D = new Matrix3D();
+    var _PREPEND_SKEW_3D = new Matrix3D();
+    var _GET_ROTATION_3D = new Matrix3D();
+    var _DELTA_TRANSFORM_RAW_3D = new Point3D();
+    var _TRANSFORM_RAW_3D = new Point3D();
+    var _APPEND_POSITION_RAW_3D = new Point3D();
+    var _PREPEND_POSITION_RAW_3D = new Point3D();
+    var _SET_SKEW_RAW_3D: Point3D = new Point3D();
+    //prevent cross referencing (unresolvable creation)
+    var _SET_CSS_3D: Matrix2D = null;
+    var _APPEND_CSS_3D = new Matrix3D();
+    var _PREPEND_CSS_3D = new Matrix3D();
+    var _INVERT_PROJECT_3D = new Matrix3D();
 }

@@ -38,11 +38,11 @@ document.addEventListener("DOMContentLoaded",() => {
     var path = qualifiedClassName.split(".");
     var hook = window[path[0]];
     for (var i = 1; i < path.length; ++i) {
-        hook = hook[path[i]];
         if (!hook) {
             console.warn("Application '" + qualifiedClassName + "' is undefined.");
             return;
         }
+        hook = hook[path[i]];
     }
     if (hook.prototype instanceof jsidea.system.Application) {
     }

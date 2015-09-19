@@ -14,8 +14,8 @@ module jsidea.display {
             var can: HTMLElement = ctx.canvas;
             boxModel = boxModel || layout.BoxModel.BORDER;
 
-            var from = geom.Transform.create(element);
-            var to = geom.Transform.create(can);
+            var from = layout.Transform.create(element);
+            var to = layout.Transform.create(can);
             var quad = from.size.bounds(boxModel).toQuad();
             quad = from.localToLocalQuad(to, quad, null, layout.BoxModel.CANVAS, quad);
             this.quad(quad);
