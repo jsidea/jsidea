@@ -2,7 +2,7 @@
 <!DOCTYPE project>
 <project name="jsidea" xmlns:ac="antlib:net.sf.antcontrib">
 	<property name="ROOT" value="${basedir}" />
-	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="authoring/plugins/ant-contrib-1.0b3.jar" />
+	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="build/ant-contrib-1.0b3.jar" />
 
 	<condition property="tsc" value="C:/Users/${user.name}/AppData/Roaming/npm/tsc.cmd">
 		<os family="windows" />
@@ -36,8 +36,8 @@
 	<property name="JS_DIST" value="${JS_DIR_DIST}/${BUILD}.libs.js" />
 	<property name="PHP_DIR" value="${PROJECT_PATH}/php" />
 	<property name="PHP_DIR_DIST" value="${PROJECT_BIN}/php" />
-	<property name="YUI" value="${PROJECT_PATH}/authoring/plugins/yuicompressor.jar" />
-	<property name="GRUNT_DIR" value="${PROJECT_PATH}/authoring/plugins" />
+	<property name="YUI" value="${PROJECT_PATH}/build/yuicompressor.jar" />
+	<property name="GRUNT_DIR" value="${PROJECT_PATH}/build" />
 	<property name="GRUNT_CSS_FILE" value="${GRUNT_DIR}/file.css" />
 	<property name="GRUNT_FILE" value="${GRUNT_DIR}/Gruntfile.js" />
 

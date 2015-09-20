@@ -5,7 +5,7 @@ module.exports = function(grunt) {
 	var tasks = [];
 	var npmTasks = [];
 	var config = {};
-	var root = "../../../jsidea";
+	var root = "../../jsidea";
 
 	// setup autoprefixer
 	if (grunt.option("autoprefixer") == "on") {
