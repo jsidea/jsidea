@@ -43,7 +43,7 @@ module jsidea.geom {
             var c = this.center();
             var pt = new geom.Point2D(x, y);
 
-            var int = null;
+            var int: geom.Point2D = null;
             int = this.intersection(c, pt, this.p1, this.p2);
             if (int)
                 return int;
@@ -63,13 +63,12 @@ module jsidea.geom {
             return new geom.Point2D(x, y);
         }
 
-        private intersection(c: geom.IPoint2DValue, pt: geom.IPoint2DValue, a: geom.IPoint2DValue, b: geom.IPoint2DValue): void {
-            var int = null;
+        private intersection(c: geom.IPoint2DValue, pt: geom.IPoint2DValue, a: geom.IPoint2DValue, b: geom.IPoint2DValue): geom.Point2D {
             var max = Math.max(geom.Point2D.distance(c, a), geom.Point2D.distance(c, b));
             if (geom.Point2D.distance(pt, c) > max)
-                int = null;
+                return null;
             else
-                int = geom.Point2D.intersection(c, pt, a, b);
+                return geom.Point2D.intersection(c, pt, a, b);
         }
 
         public outerBox(ret: geom.Rect2D = new geom.Rect2D()): geom.Rect2D {
@@ -103,9 +102,8 @@ module jsidea.geom {
         public dispose(): void {
         }
 
-        public static qualifiedClassName: string = "jsidea.geom.Quad";
         public toString(): string {
-            return "[" + Rect2D.qualifiedClassName
+            return "[ jsidea.geom.Quad" 
                 + " a=" + this.p1.toString()
                 + " b=" + this.p2.toString()
                 + " c=" + this.p3.toString()

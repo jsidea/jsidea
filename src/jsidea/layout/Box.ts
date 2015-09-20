@@ -221,11 +221,6 @@ module jsidea.layout {
             this.clear();
         }
 
-        public static qualifiedClassName: string = "jsidea.layout.Size";
-        public toString(): string {
-            return "[" + Box.qualifiedClassName + "]";
-        }
-
         public static lookup(boxSizing: string): IBoxModel {
             for (var model in BoxModel) {
                 if ((<IBoxModel>model).name == boxSizing)//v != this && 

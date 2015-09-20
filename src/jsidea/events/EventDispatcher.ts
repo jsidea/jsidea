@@ -7,7 +7,7 @@ module jsidea.events {
     }
     export class EventDispatcher implements IEventDispatcher {
 
-        private _listener: IEventListener[] = [];
+        private _listener = new model.Dictonary<string, IEventListener[]>();
         private _scope: any;
 
         constructor(scope: any = null) {
@@ -48,21 +48,16 @@ module jsidea.events {
         public getListeners(
             type: string,
             useCapture: boolean = false): IEventListener[] {
-
-            var capType = type + (useCapture ? '1' : '0');
-            if (!(capType in this._listener))
-                this._listener[capType] = [];
-            return this._listener[capType];
+            var key = type + (useCapture ? '1' : '0');
+            var listener = this._listener.getValue(key);
+            if (!listener)
+                return this._listener.setValue(key, []);
+            return listener;
         }
 
         public dispose(): void {
             this._listener = null;
             this._scope = null;
-        }
-
-        public static qualifiedClassName: string = "jsidea.events.EventDispatcher";
-        public toString(): string {
-            return "[" + EventDispatcher.qualifiedClassName + "]";
         }
     }
 }

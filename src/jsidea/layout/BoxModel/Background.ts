@@ -7,8 +7,8 @@ module jsidea.layout.BoxModel {
         protected _imageHeight = 0;
         protected getBackgroundBox(size: Box, ret: geom.Rect2D = new geom.Rect2D()): geom.Rect2D {
             var src = size.style.backgroundImage.replace(/url\((['"])?(.*?)\1\)/gi, '$2').split(',')[0];
-            var width;
-            var height;
+            var width: number;
+            var height: number;
             if (!src || src == "none") {
                 width = size.offsetWidth;
                 height = size.offsetHeight;

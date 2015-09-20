@@ -242,10 +242,5 @@ module jsidea.layout {
             this._sceneTransform = null;
             this._inverseSceneTransform = null;
         }
-
-        public static qualifiedClassName: string = "jsidea.geom.Transform";
-        public toString(): string {
-            return "[" + Transform.qualifiedClassName + "]";
-        }
     }
 }

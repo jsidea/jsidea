@@ -235,9 +235,8 @@ module jsidea.geom {
         //                math.Number.parse(style.borderTopWidth, 0));
         //        }
         
-        public static qualifiedClassName: string = "jsidea.geom.Point2D";
         public toString(): string {
-            return "[" + Point2D.qualifiedClassName +
+            return "[ jsidea.geom.Point2D" +
                 " x=" + this.x +
                 " y=" + this.y + "]";
         }

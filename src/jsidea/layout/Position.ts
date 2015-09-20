@@ -114,10 +114,5 @@ module jsidea.layout {
             this.bounds = null;
             this.move = null;
         }
-
-        public static qualifiedClassName: string = "jsidea.layout.Layout";
-        public toString(): string {
-            return "[" + Position.qualifiedClassName + "]";
-        }
     }
 }

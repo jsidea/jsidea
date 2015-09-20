@@ -41,9 +41,9 @@ module jsidea.test {
             this._crosshair = document.getElementById("crosshair");
             this._tipElement = document.getElementById("tip");
             this._handleElement = document.getElementById("handle");
-            this._cameraSelect = <HTMLSelectElement> document.getElementById("camera-select");
-            this._tipSelect = <HTMLSelectElement> document.getElementById("tip-select");
-            this._handleSelect = <HTMLSelectElement> document.getElementById("handle-select");
+            this._cameraSelect = <HTMLSelectElement>document.getElementById("camera-select");
+            this._tipSelect = <HTMLSelectElement>document.getElementById("tip-select");
+            this._handleSelect = <HTMLSelectElement>document.getElementById("handle-select");
 
             this._socket = new WebSocket(this._host);
             this._socket.onopen = () => console.log("OPEN");
@@ -59,8 +59,8 @@ module jsidea.test {
             //            this._tipSelect.onkeyup = () => this.refresh();
             //            this._handleSelect.onchange = () => this.refresh();
             //            this._handleSelect.onkeyup = () => this.refresh();
-            document.documentElement.addEventListener("keyup",() => this.refresh());
-            document.documentElement.addEventListener("change",() => this.refresh());
+            document.documentElement.addEventListener("keyup", () => this.refresh());
+            document.documentElement.addEventListener("change", () => this.refresh());
         }
 
         private refresh(): void {
@@ -75,16 +75,22 @@ module jsidea.test {
             
             //camera matrix
             var camSelect = this._cameraSelect;
-            this._camera.setData(data[camSelect.options[camSelect.selectedIndex].value]);
+            var opt: HTMLOptionElement = camSelect.options[camSelect.selectedIndex];
+            var mat: number[] = (<any>data)[opt.value];
+            this._camera.setData(mat);
             
             //tip position
             var tipSelect = this._tipSelect;
-            this._tip.setData(data[tipSelect.options[tipSelect.selectedIndex].value]);
+            var opt: HTMLOptionElement = tipSelect.options[tipSelect.selectedIndex];
+            var mat: number[] = (<any>data)[opt.value];
+            this._tip.setData(mat);
             this._camera.transform(this._tip, this._tip);
             
             //handle position
             var handleSelect = this._handleSelect;
-            this._handle.setData(data[handleSelect.options[handleSelect.selectedIndex].value]);
+            var opt: HTMLOptionElement = handleSelect.options[handleSelect.selectedIndex];
+            var mat: number[] = (<any>data)[opt.value];
+            this._handle.setData(mat);
             this._camera.transform(this._handle, this._handle);
 
             //update the dom-elements layout
@@ -107,11 +113,6 @@ module jsidea.test {
             offX -= this._handle.x * this._scale.x;
             offY -= this._handle.y * this._scale.y;
             this._handleElement.style.transform = "translate(" + offX + "px, " + offY + "px)";
-        }
-
-        public static qualifiedClassName: string = "jsidea.test.SimboxApplication";
-        public toString(): string {
-            return "[" + SimboxApplication.qualifiedClassName + "]";
         }
     }
 }

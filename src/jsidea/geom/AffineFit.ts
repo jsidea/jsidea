@@ -245,10 +245,5 @@ module jsidea.geom {
 
             return true;
         }
-
-        public static qualifiedClassName: string = "jsidea.geom.AffineFit";
-        public toString(): string {
-            return "[" + AffineFit.qualifiedClassName + "]";
-        }
     }
 }

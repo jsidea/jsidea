@@ -570,9 +570,8 @@ module jsidea.geom {
                 + "\tm33=" + (1).toFixed(fractionDigits);
         }
 
-        public static qualifiedClassName: string = "jsidea.geom.Matrix2D";
         public toString(fractionDigits: number = 3): string {
-            return "[" + Matrix2D.qualifiedClassName + " \n"
+            return "[ jsidea.geom.Matrix2D \n"
                 + this.toStringTable(fractionDigits)
                 + "\n]";
         }

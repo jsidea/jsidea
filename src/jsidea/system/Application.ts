@@ -123,8 +123,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!qualifiedClassName) {
         return;
     }
-    var path = qualifiedClassName.split(".");
-    var hook = window[path[0]];
+    var path: string[] = qualifiedClassName.split(".");
+    var hook: any = window[<any>path[0]];
     for (var i = 1; i < path.length; ++i) {
         if (!hook) {
             console.warn("Application '" + qualifiedClassName + "' is undefined.");

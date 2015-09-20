@@ -245,29 +245,24 @@ module jsidea.test {
             }
         }
 
-        private testObserver(): void {
-            var d = document.createElement("div");
-            d.textContent = "A";
-            document.body.appendChild(d);
-            var o = d[0];
-            Object.observe(o, function(a): void {
-                console.log(a);
-            });
-            o.style.width = "200px";
-            o.style.height = "200px";
-            o.style.backgroundColor = "#FF00FF";
-            //ARRGHHH funzt nit
-        }
+//        private testObserver(): void {
+//            var d = document.createElement("div");
+//            d.textContent = "A";
+//            document.body.appendChild(d);
+//            var o = d[0];
+//            Object.observe(o, function(a): void {
+//                console.log(a);
+//            });
+//            o.style.width = "200px";
+//            o.style.height = "200px";
+//            o.style.backgroundColor = "#FF00FF";
+//            //ARRGHHH funzt nit
+//        }
 
         private testEventDispatcher(): void {
             var d = new jsidea.events.EventDispatcher();
             //            d.bind("click.setup",(e: jsidea.events.IEvent) => console.log(e.eventType));
             //            d.trigger(".setup");
-        }
-
-        public static qualifiedClassName: string = "jsidea.test.TestApplication";
-        public toString(): string {
-            return "[" + TestApplication.qualifiedClassName + "]";
         }
     }
 }

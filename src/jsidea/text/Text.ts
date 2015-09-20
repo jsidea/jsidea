@@ -16,7 +16,7 @@ module jsidea.text {
             return text;
         }
 
-        public static conc(length: number, char: string = " ", ...args): string {
+        public static conc(length: number, char: string = " ", ...args: any[]): string {
 
             return this.fill(args.join(" "), length, char);
         }

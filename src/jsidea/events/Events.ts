@@ -20,10 +20,5 @@ module jsidea.events {
         public static MOUSE_OUT: string = "mouseout";
         public static MOUSE_OVER: string = "mouseover";
         public static MOUSE_DRAG: string = "mousedrag";
-        
-        public static qualifiedClassName: string = "jsidea.events.Events";
-        public toString(): string {
-            return "[" + Events.qualifiedClassName + "]";
-        }
     }
 }

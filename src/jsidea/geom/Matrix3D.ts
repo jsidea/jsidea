@@ -764,7 +764,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public invert(): Matrix3D {
-            var data = [];
+            var data:number[] = [];
 
             var n11 = this.m11, n12 = this.m12, n13 = this.m13, n14 = this.m14;
             var n21 = this.m21, n22 = this.m22, n23 = this.m23, n24 = this.m24;

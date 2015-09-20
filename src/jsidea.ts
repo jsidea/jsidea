@@ -13,7 +13,6 @@
 /// <reference path='jsidea/text/Text.ts' />
 
 //jsidea.model
-/// <reference path='jsidea/model/Ressource.ts' />
 /// <reference path='jsidea/model/Dictionary.ts' />
 
 //jsidea.geom

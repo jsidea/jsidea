@@ -78,7 +78,7 @@ module jsidea.system {
             var nVer = navigator.appVersion;
             var nAgt = navigator.userAgent.toLowerCase();
             var fullVersion = '' + parseFloat(navigator.appVersion);
-            var nameOffset, verOffset, ix;
+            var nameOffset: number, verOffset: number, ix: number;
             if ((verOffset = nAgt.indexOf("opr/")) != -1) {
                 fullVersion = nAgt.substring(verOffset + 4);
             }
@@ -142,10 +142,5 @@ module jsidea.system {
                 return "Gecko";
             return "";
         })();
-
-        public static qualifiedClassName: string = "jsidea.system.Caps";
-        public toString(): string {
-            return "[" + Browser.qualifiedClassName + "]";
-        }
     }
 }

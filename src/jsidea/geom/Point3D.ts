@@ -266,9 +266,8 @@ module jsidea.geom {
             return new Point3D(vector.x - 2 * dp * normal.x, vector.y - 2 * dp * normal.y, vector.z - 2 * dp * normal.z);
         }
         
-        public static qualifiedClassName: string = "jsidea.geom.Point3D";
         public toString(): string {
-            return "[" + Point3D.qualifiedClassName +
+            return "[ jsidea.geom.Point3D" +
                 " x=" + this.x +
                 " y=" + this.y +
                 " z=" + this.z +
