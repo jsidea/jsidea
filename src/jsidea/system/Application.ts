@@ -1,7 +1,5 @@
 module jsidea.system {
     export class Application extends jsidea.events.EventDispatcher {
-
-        private _version: jsidea.core.IVersion;
         private _active: boolean = false;
         private _autoActive: boolean = false;
         private _autoTick: boolean = false;
@@ -73,10 +71,6 @@ module jsidea.system {
             this.refreshTickInterval();
         }
 
-        public get version(): jsidea.core.IVersion {
-            return this._version;
-        }
-
         private onVisibilityChange(): void {
             this.active = document.visibilityState == "visible";
         }
@@ -97,3 +91,27 @@ module jsidea.system {
         }
     }
 }
+
+//hook
+document.addEventListener("DOMContentLoaded",() => {
+    var qualifiedClassName = document.body.getAttribute("data-application");
+    if (!qualifiedClassName) {
+        return;
+    }
+    var path = qualifiedClassName.split(".");
+    var hook = window[path[0]];
+    for (var i = 1; i < path.length; ++i) {
+        if (!hook) {
+            console.warn("Application '" + qualifiedClassName + "' is undefined.");
+            return;
+        }
+        hook = hook[path[i]];
+    }
+    if (hook.prototype instanceof jsidea.system.Application) {
+    }
+    else {
+        console.warn("Application " + hook + " does not inherit from jsidea.system.Application");
+        return;
+    }
+    var app = new hook();
+});

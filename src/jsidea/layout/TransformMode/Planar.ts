@@ -1,5 +1,5 @@
 module jsidea.layout.TransformMode {
-    class Matrix implements ITransformMode {
+    class Planar implements ITransformMode {
         public extract(transform: Transform, style: CSSStyleDeclaration): geom.Matrix3D[] {
             var element = transform.element;
             var globalBounds = geom.Rect2D.getBounds(element);
@@ -27,5 +27,5 @@ module jsidea.layout.TransformMode {
         }
     }
 
-    export var MATRIX: ITransformMode = new Matrix();
+    export var PLANAR: ITransformMode = new Planar();
 }

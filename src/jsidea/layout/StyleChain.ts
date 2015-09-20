@@ -73,7 +73,7 @@ module jsidea.layout {
             if (!element)
                 return null;
 
-            style = style || Style.create(element);
+            style = style || window.getComputedStyle(element);
 
             return { element: element, style: style, position: null };
         }
@@ -85,7 +85,7 @@ module jsidea.layout {
             //collect from child to root
             var nodes: INodeLite[] = [];
             while (element) {
-                var style = layout.Style.create(element);
+                var style = window.getComputedStyle(element);
                 var node: INodeLite = {
                     element: element,
                     first: null,

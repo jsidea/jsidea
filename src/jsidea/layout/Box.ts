@@ -39,7 +39,7 @@ module jsidea.layout {
         public update(element: HTMLElement, style?: CSSStyleDeclaration): Box {
             if (!element)
                 return this.clear();
-            style = style || layout.Style.create(element);
+            style = style || window.getComputedStyle(element);
 
             this.style = style;
             this.element = element;

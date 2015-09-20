@@ -108,7 +108,7 @@ module jsidea.test {
                 evt.stopImmediatePropagation();
 
                 cursor.setTo(evt.pageX, evt.pageY, 0);
-                size.update(target, layout.Style.create(target));
+                size.update(target, window.getComputedStyle(target));
                 box = size.bounds(pos.to.boxModel, null, box);
                 pos.to.x = invertX ? (box.width - pivot.x) : pivot.x;
                 pos.to.y = invertY ? (box.height - pivot.y) : pivot.y;

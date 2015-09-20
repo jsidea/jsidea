@@ -1,5 +1,5 @@
 module jsidea.layout.TransformMode {
-    class Box implements ITransformMode {
+    class Rectangle implements ITransformMode {
         public extract(transform: Transform, style: CSSStyleDeclaration): geom.Matrix3D[] {
             var element = transform.element;
             var globalBounds = geom.Rect2D.getBounds(element);
@@ -9,5 +9,5 @@ module jsidea.layout.TransformMode {
         }
     }
 
-    export var BOX: ITransformMode = new Box();
+    export var RECTANGLE: ITransformMode = new Rectangle();
 }

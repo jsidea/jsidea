@@ -59,7 +59,7 @@ module jsidea.geom {
 
         public static create(element: HTMLElement, style: CSSStyleDeclaration = null, ret = new Matrix3D()): Matrix3D {
             if (element.ownerDocument) {
-                style = style || layout.Style.create(element);
+                style = style || window.getComputedStyle(element);
                 return ret.setCSS(style.transform);
             }
             ret.identity();
@@ -68,7 +68,7 @@ module jsidea.geom {
 
         public static createOrigin(element: HTMLElement, style: CSSStyleDeclaration = null, ret = new Matrix3D()): Matrix3D {
             if (element.ownerDocument) {
-                style = style || layout.Style.create(element);
+                style = style || window.getComputedStyle(element);
 
                 ret.identity();
 

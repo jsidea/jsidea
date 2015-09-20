@@ -16,7 +16,7 @@ module jsidea.layout {
         boxModel?: IBoxModel;
     }
     export class Snap {
-        public mode: ISnapMode = SnapMode.BASIC;
+        public mode: ISnapMode = null;
         public to: ISnapTo = {};
         public grid: ISnapGrid = {};
         public move: Move = new Move();

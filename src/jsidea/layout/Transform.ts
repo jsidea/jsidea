@@ -34,12 +34,12 @@ module jsidea.layout {
 
             //use the most lightweight mode
             //if no mode is given
-            mode = mode || TransformMode.BOX;
+            mode = mode || TransformMode.RECTANGLE;
             
             //FORCE FOR TESTING
             mode = TransformMode.PERSPECTIVE;
 
-            var style = layout.Style.create(element);
+            var style = window.getComputedStyle(element);
             this.size.update(element, style);
             this.matrix.setCSS(style.transform);
             this._sceneTransform = mode.extract(this, style);

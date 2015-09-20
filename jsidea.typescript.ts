@@ -1,80 +1,91 @@
-/// <reference path='ts/definitions/jquery.d.ts' />
-/// <reference path='ts/jsidea/core/Core.ts' />
-/// <reference path='ts/jsidea/core/Version.ts' />
-/// <reference path='ts/jsidea/events/Events.ts' />
-/// <reference path='ts/jsidea/events/EventDispatcher.ts' />
-/// <reference path='ts/jsidea/system/Browser.ts' />
-/// <reference path='ts/jsidea/system/Application.ts' />
-/// <reference path='ts/jsidea/math/Number.ts' />
-/// <reference path='ts/jsidea/text/Text.ts' />
-/// <reference path='ts/jsidea/model/Ressource.ts' />
-/// <reference path='ts/jsidea/model/Dictionary.ts' />
-/// <reference path='ts/jsidea/geom/Point2D.ts' />
-/// <reference path='ts/jsidea/geom/Point3D.ts' />
-/// <reference path='ts/jsidea/geom/Matrix3D.ts' />
-/// <reference path='ts/jsidea/geom/Matrix2D.ts' />
-/// <reference path='ts/jsidea/geom/Plane3D.ts' />
-/// <reference path='ts/jsidea/geom/AffineFit.ts' />
-/// <reference path='ts/jsidea/geom/Rect2D.ts' />
-/// <reference path='ts/jsidea/layout/Style.ts' />
+/// <reference path='src/javascript.ts' />
 
-//BOX-MODELS
-/// <reference path='ts/jsidea/layout/BoxModel/IBoxModel.ts' />
-/// <reference path='ts/jsidea/layout/BoxModel/Margin.ts' />
-/// <reference path='ts/jsidea/layout/BoxModel/Border.ts' />
-/// <reference path='ts/jsidea/layout/BoxModel/Padding.ts' />
-/// <reference path='ts/jsidea/layout/BoxModel/Content.ts' />
-/// <reference path='ts/jsidea/layout/BoxModel/Background.ts' />
-/// <reference path='ts/jsidea/layout/BoxModel/Attachment.ts' />
-/// <reference path='ts/jsidea/layout/BoxModel/Canvas.ts' />
-/// <reference path='ts/jsidea/layout/BoxModel/Clip.ts' />
-/// <reference path='ts/jsidea/layout/BoxModel/Image.ts' />
-/// <reference path='ts/jsidea/layout/BoxModel/NormalDeviceCoordinates.ts' />
-/// <reference path='ts/jsidea/layout/BoxModel/Scroll.ts' />
-//BOX
-/// <reference path='ts/jsidea/layout/Box.ts' />
+//jsidea.events
+/// <reference path='src/jsidea/events/Events.ts' />
+/// <reference path='src/jsidea/events/EventDispatcher.ts' />
 
-/// <reference path='ts/jsidea/layout/StyleChain.ts' />
+//jsidea.system
+/// <reference path='src/jsidea/system/Browser.ts' />
+/// <reference path='src/jsidea/system/Application.ts' />
 
-//MOVE-MODES
-/// <reference path='ts/jsidea/layout/MoveMode/IMoveMode.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/Transform.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/Background.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/BorderBottomRightInner.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/BorderBottomRightOuter.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/BorderTopLeft.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/BottomRight.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/BottomLeft.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/ClipBottomRight.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/Clip.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/MarginBottomRight.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/MarginTopLeft.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/Scroll.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/TopLeft.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/TopLeftClamped.ts' />
-/// <reference path='ts/jsidea/layout/MoveMode/TopRight.ts' />
-//MOVE
-/// <reference path='ts/jsidea/layout/Move.ts' />
+//jsidea.math
+/// <reference path='src/jsidea/math/Number.ts' />
 
-//TRANSFORM-MODES
-/// <reference path='ts/jsidea/layout/TransformMode/ITransformMode.ts' />
-/// <reference path='ts/jsidea/layout/TransformMode/Box.ts' />
-/// <reference path='ts/jsidea/layout/TransformMode/Perspective.ts' />
-/// <reference path='ts/jsidea/layout/TransformMode/Test.ts' />
-/// <reference path='ts/jsidea/layout/TransformMode/Transform.ts' />
-//TRANSFORM
-/// <reference path='ts/jsidea/layout/Transform.ts' />
+//jsidea.text
+/// <reference path='src/jsidea/text/Text.ts' />
 
-/// <reference path='ts/jsidea/layout/Position.ts' />
+//jsidea.model
+/// <reference path='src/jsidea/model/Ressource.ts' />
+/// <reference path='src/jsidea/model/Dictionary.ts' />
 
-/// <reference path='ts/jsidea/layout/SnapMode/ISnapMode.ts' />
-/// <reference path='ts/jsidea/layout/SnapMode/Basic.ts' />
-/// <reference path='ts/jsidea/layout/Snap.ts' />
+//jsidea.geom
+/// <reference path='src/jsidea/geom/Point2D.ts' />
+/// <reference path='src/jsidea/geom/Point3D.ts' />
+/// <reference path='src/jsidea/geom/Matrix3D.ts' />
+/// <reference path='src/jsidea/geom/Matrix2D.ts' />
+/// <reference path='src/jsidea/geom/Plane3D.ts' />
+/// <reference path='src/jsidea/geom/AffineFit.ts' />
+/// <reference path='src/jsidea/geom/Rect2D.ts' />
+/// <reference path='src/jsidea/geom/Quad.ts' />
 
-/// <reference path='ts/jsidea/geom/Quad.ts' />
-/// <reference path='ts/jsidea/display/Graphics.ts' />
-/// <reference path='ts/jsidea/action/Cursor.ts' />
-/// <reference path='ts/jsidea/action/EventCircuit.ts' />
+//jsidea.layout.BoxModel
+/// <reference path='src/jsidea/layout/BoxModel/IBoxModel.ts' />
+/// <reference path='src/jsidea/layout/BoxModel/Margin.ts' />
+/// <reference path='src/jsidea/layout/BoxModel/Border.ts' />
+/// <reference path='src/jsidea/layout/BoxModel/Padding.ts' />
+/// <reference path='src/jsidea/layout/BoxModel/Content.ts' />
+/// <reference path='src/jsidea/layout/BoxModel/Background.ts' />
+/// <reference path='src/jsidea/layout/BoxModel/Attachment.ts' />
+/// <reference path='src/jsidea/layout/BoxModel/Canvas.ts' />
+/// <reference path='src/jsidea/layout/BoxModel/Clip.ts' />
+/// <reference path='src/jsidea/layout/BoxModel/Image.ts' />
+/// <reference path='src/jsidea/layout/BoxModel/NormalDeviceCoordinates.ts' />
+/// <reference path='src/jsidea/layout/BoxModel/Scroll.ts' />
 
-/// <reference path='ts/jsidea/test/TestApplication.ts' />
-/// <reference path='ts/jsidea/test/SimboxApplication.ts' />
+//jsidea.layout
+/// <reference path='src/jsidea/layout/Box.ts' />
+/// <reference path='src/jsidea/layout/StyleChain.ts' />
+/// <reference path='src/jsidea/layout/Move.ts' />
+/// <reference path='src/jsidea/layout/Transform.ts' />
+/// <reference path='src/jsidea/layout/Position.ts' />
+/// <reference path='src/jsidea/layout/Snap.ts' />
+
+//jsidea.layout.MoveMode
+/// <reference path='src/jsidea/layout/MoveMode/IMoveMode.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/Transform.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/Background.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/BorderBottomRightInner.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/BorderBottomRightOuter.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/BorderTopLeft.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/BottomRight.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/BottomLeft.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/ClipBottomRight.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/Clip.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/MarginBottomRight.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/MarginTopLeft.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/Scroll.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/TopLeft.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/TopLeftClamped.ts' />
+/// <reference path='src/jsidea/layout/MoveMode/TopRight.ts' />
+
+//jsidea.layout.TransformMode
+/// <reference path='src/jsidea/layout/TransformMode/ITransformMode.ts' />
+/// <reference path='src/jsidea/layout/TransformMode/Rectangle.ts' />
+/// <reference path='src/jsidea/layout/TransformMode/Perspective.ts' />
+/// <reference path='src/jsidea/layout/TransformMode/Test.ts' />
+/// <reference path='src/jsidea/layout/TransformMode/Planar.ts' />
+
+//jsidea.layout.SnapMode
+/// <reference path='src/jsidea/layout/SnapMode/ISnapMode.ts' />
+/// <reference path='src/jsidea/layout/SnapMode/Basic.ts' />
+
+//jsidea.display
+/// <reference path='src/jsidea/display/Graphics.ts' />
+
+//jsidea.action
+/// <reference path='src/jsidea/action/Cursor.ts' />
+/// <reference path='src/jsidea/action/EventCircuit.ts' />
+
+//jsidea.test
+/// <reference path='src/jsidea/test/TestApplication.ts' />
+/// <reference path='src/jsidea/test/SimboxApplication.ts' />
