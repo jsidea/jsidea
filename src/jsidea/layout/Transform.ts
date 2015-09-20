@@ -1,22 +1,13 @@
 module jsidea.layout {
-    export interface IPosition {
-        top?: number;
-        right?: number;
-        bottom?: number;
-        left?: number;
-
-    }
     export class Transform {
         public element: HTMLElement;
         public toBox: IBoxModel = BoxModel.BORDER;
         public fromBox: IBoxModel = BoxModel.BORDER;
         public matrix: geom.Matrix3D = new geom.Matrix3D();
+        public sceneTransform: geom.Matrix3D = new geom.Matrix3D();
+        public inverseSceneTransform: geom.Matrix3D = new geom.Matrix3D();
         public size: Box = new Box();
-        public position: IPosition = {};
-
-        private _sceneTransform: geom.Matrix3D[] = [];
-        private _inverseSceneTransform: geom.Matrix3D[] = [];
-
+        
         constructor(element?: HTMLElement, mode?: ITransformMode) {
             if (element)
                 this.update(element, mode);
@@ -42,12 +33,8 @@ module jsidea.layout {
             var style = window.getComputedStyle(element);
             this.size.update(element, style);
             this.matrix.setCSS(style.transform);
-            this._sceneTransform = mode.extract(this, style);
-
-            //create inverse
-            this._inverseSceneTransform = this._sceneTransform.slice(0, this._sceneTransform.length).reverse();
-            for (var i = 0; i < this._inverseSceneTransform.length; ++i)
-                this._inverseSceneTransform[i] = this._inverseSceneTransform[i].clone().invert();
+            this.sceneTransform = mode.extract(this, style);
+            this.inverseSceneTransform = this.sceneTransform.clone().invert();
 
             return this;
         }
@@ -56,8 +43,8 @@ module jsidea.layout {
             matrix = matrix.clone();
 
             this.matrix.append(matrix);
-            this._sceneTransform[0].append(matrix);
-            this._inverseSceneTransform[this._sceneTransform.length - 1] = this._sceneTransform[0].clone().invert();
+            this.sceneTransform[0].append(matrix);
+            this.inverseSceneTransform = this.sceneTransform.clone().invert();
 
             return this;
         }
@@ -66,16 +53,14 @@ module jsidea.layout {
             matrix = matrix.clone();
 
             this.matrix.prepend(matrix);
-            this._sceneTransform[0].prepend(matrix);
-            this._inverseSceneTransform[this._sceneTransform.length - 1] = this._sceneTransform[0].clone().invert();
+            this.sceneTransform.prepend(matrix);
+            this.inverseSceneTransform = this.sceneTransform.clone().invert();
 
             return this;
         }
 
         public clear(): Transform {
             this.element = null;
-            this._sceneTransform = [];
-            this._inverseSceneTransform = [];
             this.size.clear();
             this.matrix.identity();
 
@@ -179,8 +164,7 @@ module jsidea.layout {
             this.size.transform(ret, fromBox || this.fromBox, layout.BoxModel.BORDER);
             
             //unproject from parent to child
-            for (var i = 0; i < this._inverseSceneTransform.length; ++i)
-                ret = this._inverseSceneTransform[i].unproject(ret, ret);
+            this.inverseSceneTransform.unproject(ret, ret);
 
             //apply box model transformations
             this.size.transform(ret, layout.BoxModel.BORDER, toBox || this.toBox);
@@ -223,9 +207,7 @@ module jsidea.layout {
             this.size.transform(ret, fromBox || this.fromBox, layout.BoxModel.BORDER);            
             
             //project from child to parent
-            var l = this._sceneTransform.length;
-            for (var i = 0; i < l; ++i)
-                ret = this._sceneTransform[i].project(ret, ret);
+            this.sceneTransform.project(ret, ret);
             
             //apply to-box model transformations
             this.size.transform(ret, layout.BoxModel.BORDER, toBox || this.toBox);
@@ -239,8 +221,8 @@ module jsidea.layout {
             this.fromBox = null;
             this.matrix = null;
             this.size = null;
-            this._sceneTransform = null;
-            this._inverseSceneTransform = null;
+            this.sceneTransform = null;
+            this.inverseSceneTransform = null;
         }
     }
 }

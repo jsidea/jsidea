@@ -128,7 +128,7 @@ module jsidea.test {
                 evt.stopImmediatePropagation();
             });
 
-            //            document.addEventListener("click",() => this.logChain(xc));
+                        document.addEventListener("click",() => this.logChain(xc));
 
             var draw = () => {
                 var g = display.Graphics.get(ctx);
@@ -228,10 +228,10 @@ module jsidea.test {
                     //                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3d),
                     
                     //                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
-                    //                    text.Text.conc(12, " ", "ACC", node.isAccumulatable),
+                                        text.Text.conc(12, " ", "ACC", node.isAccumulatable),
                     //                    text.Text.conc(18, " ", "SCROLL", node.element.scrollLeft, node.element.scrollTop),
                     //                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
-                    text.Text.conc(18, " ", "TRANSFORMED", node.style.transform),
+//                    text.Text.conc(18, " ", "TRANSFORMED", node.style.transform),
                     //                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),
                     
                     //                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),

@@ -896,8 +896,6 @@ module jsidea.geom {
         }
 
         public is2D(): boolean {
-            if (this.isIdentity())
-                return true;
             return (this.m31 == 0 && this.m32 == 0 && this.m33 == 1 && this.m34 == 0 && this.m43 == 0 && this.m44 == 1);
         }
 
