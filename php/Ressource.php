@@ -1,12 +1,12 @@
 <?php
 class Ressource {
 	public static function debug($build) {
-		echo self::importCSS ( $build);
-		echo self::importJavaScript ( $build);
-		echo self::importTypeScript ( $build);
+		echo self::importCSS ( $build );
+		echo self::importJavaScript ( $build );
+		echo self::importTypeScript ( $build );
 	}
 	public static function build($build) {
-		$projectPathRelative = self::resolveProjectPathRelative ( );
+		$projectPathRelative = self::resolveProjectPathRelative ();
 		echo self::importCSSOnline ( "$projectPathRelative/bin/$build/css/$build.min.css" );
 		echo self::importJavaScriptOnline ( "$projectPathRelative/bin/$build/js/$build.libs.min.js" );
 		echo self::importJavaScriptOnline ( "$projectPathRelative/bin/$build/js/$build.min.js" );
@@ -15,27 +15,28 @@ class Ressource {
 		return self::parseXML ( array (
 				'Ressource',
 				'encodeCSS' 
-		), "CSS", $build, $build . ".css.xml" );
+		), "CSS", $build, "build/" . $build . "/" . $build . ".css.xml" );
 	}
 	private static function importJavaScript($build) {
 		return self::parseXML ( array (
 				'Ressource',
 				'encodeJavaScript' 
-		), "JavaScript", $build, $build . ".javascript.xml" );
+		), "JavaScript", $build, "build/" . $build . "/" . $build . ".javascript.xml" );
 	}
 	private static function importTypeScript($build) {
 		$result = "<!-- $build/TypeScript -->\n";
-		$projectPathRelative = self::resolveProjectPathRelative (  );
-		$projectPath = self::resolveProjectPathAbsolute (  );
-		$refs = file_get_contents ( $projectPath . "/" . $build . ".typescript.ts" );
+		$projectPathRelative = self::resolveProjectPathRelative ();
+		$projectPath = self::resolveProjectPathAbsolute ();
+		$refs = file_get_contents ( $projectPath . "/src/" . $build . ".ts" );
 		preg_match_all ( "/path.*\=.*[\"\'].*[\"\']/i", $refs, $out );
 		$res = $out [0];
 		for($i = 0; $i < count ( $res ); ++ $i) {
 			$importPath = $res [$i];
 			$importPath = preg_replace ( "/path.*\=[\"\']/i", "", $importPath );
 			$importPath = preg_replace ( "/\.ts.*[\"\']*/i", ".js", $importPath );
-			if (strpos ( $importPath, ".." ) === false && strpos ( $importPath, "definitions/" ) === false)
-				$result .= "<script type='text/javascript' src='$projectPathRelative/$importPath'></script>\n";
+			// if (strpos ( $importPath, ".." ) === false && strpos ( $importPath, "definitions/" ) === false)
+			if (strpos ( $importPath, "definitions/" ) === false)
+				$result .= "<script type='text/javascript' src='$projectPathRelative/src/$importPath'></script>\n";
 		}
 		return $result;
 	}
@@ -60,7 +61,7 @@ class Ressource {
 		return $result;
 	}
 	private static function resolveProjectPathRelative() {
-		$abs = self::resolveProjectPathAbsolute (  );
+		$abs = self::resolveProjectPathAbsolute ();
 		$abs = str_replace ( '\\', '/', $abs );
 		$root = $_SERVER ['DOCUMENT_ROOT'];
 		$root = str_replace ( '\\', '/', $root );
@@ -68,8 +69,8 @@ class Ressource {
 	}
 	private static function parseXML($encoderFunction, $type, $build, $referencesFileName) {
 		$result = "<!-- $build/$type -->\n";
-		$projectPathRelative = self::resolveProjectPathRelative ( );
-		$projectPath = self::resolveProjectPathAbsolute ( );
+		$projectPathRelative = self::resolveProjectPathRelative ();
+		$projectPath = self::resolveProjectPathAbsolute ();
 		$xmlString = file_get_contents ( $projectPath . "/" . $referencesFileName );
 		$scripts = new SimpleXMLElement ( $xmlString );
 		$sources = $scripts->src;

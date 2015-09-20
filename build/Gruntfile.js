@@ -35,7 +35,7 @@ module.exports = function(grunt) {
 					name : build,
 					target : 'es5'
 				},
-				src : [ root + '/' + build + '.typescript.ts' ]
+				src : [ root + '/src/' + build + '.ts' ]
 			}
 		}
 	}

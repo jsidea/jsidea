@@ -5,10 +5,10 @@ module jsidea.system {
         private _autoTick: boolean = false;
         private _frameRate: number = 60;
         private _tickInterval: number = 0;
-        
+
         constructor() {
             super();
-            
+
             this.autoActive = true;
             this.autoTick = true;
             this.tick();
@@ -54,8 +54,8 @@ module jsidea.system {
         }
 
         public tick(): void {
-//            this.broadcast(jsidea.events.Event.TICK);
-            var evt = document.createEvent("Event");       
+            //            this.broadcast(jsidea.events.Event.TICK);
+            var evt = document.createEvent("Event");
             evt.initEvent("tick", true, true);
             document.dispatchEvent(evt);
         }
@@ -92,8 +92,33 @@ module jsidea.system {
     }
 }
 
+interface HTMLElement {
+    matches(selector: string): boolean;
+}
+
+interface Object {
+    observe(beingObserved: any, callback: (update: any) => any, types?: string[]): void;
+}
+
+interface CanvasRenderingContext2D {
+    getTransform(): number[];
+}
+
+interface CSSStyleDeclaration {
+    willChange: string;
+}
+
+
+interface MSStyleCSSProperties {
+    willChange: string;
+}
+
+interface HTMLCanvasElement {
+    hasContext(): string;
+}
+
 //hook
-document.addEventListener("DOMContentLoaded",() => {
+document.addEventListener("DOMContentLoaded", () => {
     var qualifiedClassName = document.body.getAttribute("data-application");
     if (!qualifiedClassName) {
         return;

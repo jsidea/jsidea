@@ -19,9 +19,9 @@
 	</condition>
 
 	<property name="BUILD" value="jsidea" />
-	<property name="REFERENCES_CSS_FILE_NAME" value="${BUILD}.css.xml" />
-	<property name="REFERENCES_JS_FILE_NAME" value="${BUILD}.javascript.xml" />
-	<property name="REFERENCES_TS_FILE_NAME" value="${BUILD}.typescript.ts" />
+	<property name="REFERENCES_CSS_FILE_NAME" value="build/${BUILD}/${BUILD}.css.xml" />
+	<property name="REFERENCES_JS_FILE_NAME" value="build/${BUILD}/${BUILD}.javascript.xml" />
+	<property name="REFERENCES_TS_FILE_NAME" value="src/${BUILD}.ts" />
 	<property name="PROJECT_NAME" value="${ant.project.name}" />
 	<property name="PROJECT_PATH" value="${basedir}" />
 	<property name="PROJECT_BIN" value="${basedir}/bin/${BUILD}" />

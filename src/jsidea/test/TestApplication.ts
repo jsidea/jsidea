@@ -4,6 +4,7 @@ module jsidea.test {
             super();
 
             this.testGeometryUtils();
+            //asfd - de:keyboard :)
         }
 
         private testGeometryUtils(): void {
