@@ -8,7 +8,7 @@ module jsidea.system {
         public static isInternetExplorer = (navigator.userAgent.indexOf("MSIE") != -1) || !!navigator.userAgent.match(/Trident.*rv[ :]*11\./);
         public static isEdge = /edge\//i.test(navigator.userAgent);
         public static isYandex = /yandex/i.test(navigator.userAgent);
-        public static browserName: string = (() => {
+        public static name: string = (() => {
             if (Browser.isOpera)
                 return "Opera";
             if (Browser.isChrome)
@@ -24,7 +24,7 @@ module jsidea.system {
             return "";
         })();
         //source: http://www.javascripter.net/faq/browsern.htm
-        public static versionFull: string = (() => {
+        public static version: string = (() => {
             var nVer = navigator.appVersion;
             var nAgt = navigator.userAgent.toLowerCase();
             var fullVersion = '' + parseFloat(navigator.appVersion);
@@ -73,6 +73,6 @@ module jsidea.system {
                 fullVersion = "";
             return fullVersion;
         })();
-        public static version: number = parseInt(Browser.versionFull);
+        public static major: number = parseInt(Browser.version);
     }
 }

@@ -5,7 +5,7 @@ module jsidea.system {
         public static isMac = /mac/i.test(navigator.appVersion);
         public static isUnix = /x11/i.test(navigator.appVersion);
         public static isLinux = /linux/i.test(navigator.appVersion);
-        public static osName: string = (() => {
+        public static name: string = (() => {
             if (System.isWindows)
                 return "Windows";
             if (System.isMac)
