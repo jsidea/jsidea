@@ -248,11 +248,11 @@ module jsidea.geom {
         }
 
         public deltaTransformRaw(x: number, y: number, z: number, ret: Point3D = new Point3D()): Point3D {
-            return this.deltaTransform(_DELTA_TRANSFORM_RAW_3D.setTo(x, y, z), ret);
+            return this.deltaTransform(_POINT.setTo(x, y, z), ret);
         }
 
         public unprojectInverted(point: IPoint2DValue, ret: Point3D = new Point3D()): Point3D {
-            return _INVERT_PROJECT_3D.copyFrom(this).invert().unproject(point, ret);
+            return _MATRIX3D.copyFrom(this).invert().unproject(point, ret);
         }
         
         //based on http://code.metager.de/source/xref/mozilla/B2G/gecko/gfx/thebes/gfx3DMatrix.cpp#651
@@ -292,7 +292,7 @@ module jsidea.geom {
         }
 
         public projectInverted(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
-            return _INVERT_PROJECT_3D.copyFrom(this).invert().project(point, ret);
+            return _MATRIX3D.copyFrom(this).invert().project(point, ret);
         }
 
         //from homegeneous (euclid) to cartesian FLATTENED!!!! like a projection
@@ -321,7 +321,6 @@ module jsidea.geom {
                 y *= 1 / w;
                 x += this.m41;
                 y += this.m42;
-                console.log("AHHH");
             }
 
             return ret.setTo(x, y, z, w);
@@ -354,7 +353,7 @@ module jsidea.geom {
         }
 
         public transformRaw(x: number, y: number, z: number, ret: Point3D = new Point3D()): Point3D {
-            return this.transform(_TRANSFORM_RAW_3D.setTo(x, y, z), ret);
+            return this.transform(_POINT.setTo(x, y, z), ret);
         }
 
         public append(b: IMatrix3DValue): Matrix3D {
@@ -422,7 +421,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendPosition(position: IPoint3DValue): Matrix3D {
-            return this.append(Matrix3D.makePosition(position, _APPEND_POSITION_3D));
+            return this.append(Matrix3D.makePosition(position, _MATRIX3D));
         }
         
         /**
@@ -433,7 +432,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendPositionRaw(x: number, y: number, z: number): Matrix3D {
-            return this.appendPosition(_APPEND_POSITION_RAW_3D.setTo(x, y, z));
+            return this.appendPosition(_POINT.setTo(x, y, z));
         }
 
         /**
@@ -442,7 +441,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependPosition(position: IPoint3DValue): Matrix3D {
-            return this.prepend(Matrix3D.makePosition(position, _PREPEND_POSITION_3D));
+            return this.prepend(Matrix3D.makePosition(position, _MATRIX3D));
         }   
         
         /**
@@ -454,7 +453,7 @@ module jsidea.geom {
         */
 
         public prependPositionRaw(x: number, y: number, z: number): Matrix3D {
-            return this.prependPosition(_PREPEND_POSITION_RAW_3D.setTo(x, y, z, 0));
+            return this.prependPosition(_POINT.setTo(x, y, z, 0));
         }
         
         /**
@@ -498,7 +497,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendScale(scale: IPoint3DValue): Matrix3D {
-            return this.append(Matrix3D.makeScale(scale, _APPEND_SCALE_3D));
+            return this.append(Matrix3D.makeScale(scale, _MATRIX3D));
         }
         
         /**
@@ -507,7 +506,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendScaleRaw(x: number, y: number, z: number): Matrix3D {
-            return this.appendScale(_APPEND_SCALE_RAW_3D.setTo(x, y, z));
+            return this.appendScale(_POINT.setTo(x, y, z));
         }
 
         /**
@@ -516,7 +515,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependScale(scale: IPoint3DValue): Matrix3D {
-            return this.prepend(Matrix3D.makeScale(scale, _PREPEND_SCALE_3D));
+            return this.prepend(Matrix3D.makeScale(scale, _MATRIX3D));
         }
         
         /**
@@ -527,7 +526,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependScaleRaw(x: number, y: number, z: number): Matrix3D {
-            return this.prependScale(_APPEND_SCALE_RAW_3D.setTo(x, y, z));
+            return this.prependScale(_POINT.setTo(x, y, z));
         }
         
         /**
@@ -565,7 +564,7 @@ module jsidea.geom {
         */
 
         public setSkewRaw(x: number, y: number, z: number): Matrix3D {
-            return this.setSkew(_SET_SKEW_RAW_3D.setTo(x, y, z));
+            return this.setSkew(_POINT.setTo(x, y, z));
         }
 
         /**
@@ -585,7 +584,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendSkew(skew: IPoint3DValue): Matrix3D {
-            return this.append(Matrix3D.makeSkew(skew, _APPEND_SCALE_3D));
+            return this.append(Matrix3D.makeSkew(skew, _MATRIX3D));
         }
 
         /**
@@ -594,7 +593,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependSkew(skew: IPoint3DValue): Matrix3D {
-            return this.prepend(Matrix3D.makeSkew(skew, _PREPEND_SKEW_3D));
+            return this.prepend(Matrix3D.makeSkew(skew, _MATRIX3D));
         }
         
         /**
@@ -603,7 +602,7 @@ module jsidea.geom {
         * @return The rotation-point.
         */
         public getRotation(ret: Point3D = new Point3D()): Point3D {
-            var m = this.getRotationMatrix(_GET_ROTATION_3D);
+            var m = this.getRotationMatrix(_MATRIX3D);
             ret.y = -Math.asin(math.Number.clamp(m.m13, -1, 1)) * math.Number.RAD_TO_DEG;
             if (Math.abs(this.m13) < 0.99999) {
                 ret.x = Math.atan2(-m.m23, m.m33) * math.Number.RAD_TO_DEG;
@@ -703,7 +702,7 @@ module jsidea.geom {
         public appendPerspective(perspective: number): Matrix3D {
             if (!perspective)
                 return this;
-            return this.append(Matrix3D.makePerspective(perspective, _APPEND_PERSPECTIVE_3D));
+            return this.append(Matrix3D.makePerspective(perspective, _MATRIX3D));
         }
 
         /**
@@ -712,7 +711,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependPerspective(perspective: number): Matrix3D {
-            return this.prepend(Matrix3D.makePerspective(perspective, _PREPEND_PERSPECTIVE_3D));
+            return this.prepend(Matrix3D.makePerspective(perspective, _MATRIX3D));
         }
 
         public getPerspective(): number {
@@ -756,15 +755,16 @@ module jsidea.geom {
                 rotation: this.getRotation()
             };
         }
-
+        
         /**
         * Inverts the matrix.
         * -> based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
         * -> based on https://github.com/mrdoob/three.js/blob/master/src/math/Matrix4.js
         * @return this-chained.
         */
-        public invert(): Matrix3D {
-            var data:number[] = [];
+        public invert(target?: Matrix3D): Matrix3D {
+            target = target || this;
+            var data: number[] = [];
 
             var n11 = this.m11, n12 = this.m12, n13 = this.m13, n14 = this.m14;
             var n21 = this.m21, n22 = this.m22, n23 = this.m23, n24 = this.m24;
@@ -795,9 +795,9 @@ module jsidea.geom {
             data[14] = n13 * n22 * n41 - n12 * n23 * n41 - n13 * n21 * n42 + n11 * n23 * n42 + n12 * n21 * n43 - n11 * n22 * n43;
             data[15] = n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33;
 
-            this.setData(data);
-            this.scalar(1 / det);
-            return this;
+            target.setData(data);
+            target.scalar(1 / det);
+            return target;
         }
 
         public getCSS2D(fractionalDigits: number = 6): string {
@@ -836,8 +836,15 @@ module jsidea.geom {
             }
 
             if (cssString.indexOf("matrix3d") < 0) {
-                _SET_CSS_3D = _SET_CSS_3D || new geom.Matrix2D();
-                return this.setMatrix2D(_SET_CSS_3D.setCSS(cssString));
+                var trans = cssString.replace("matrix(", "").replace(")", "").split(",");
+                this.identity();
+                this.m11 = math.Number.parse(trans[0], 1);
+                this.m12 = math.Number.parse(trans[1], 0);
+                this.m21 = math.Number.parse(trans[2], 0);
+                this.m22 = math.Number.parse(trans[3], 1);
+                this.m41 = math.Number.parse(trans[4], 0);
+                this.m42 = math.Number.parse(trans[5], 0);
+                return this;
             }
 
             var trans = cssString.replace("matrix3d(", "").replace(")", "").split(",");
@@ -860,38 +867,31 @@ module jsidea.geom {
             return this;
         }
 
-        public appendCSS(cssString: string): Matrix3D {
+        public appendCSS(cssString: string, force2D: boolean = false): Matrix3D {
             if (!cssString || cssString == "none")
                 return this;
-            return this.append(_APPEND_CSS_3D.setCSS(cssString));
+            if (force2D && cssString.indexOf("matrix3d") >= 0)
+                return this.append(_MATRIX3D.setCSS(cssString).flatten());
+            return this.append(_MATRIX3D.setCSS(cssString));
         }
 
-        public prependCSS(cssString: string): Matrix3D {
+        public prependCSS(cssString: string, force2D: boolean = false): Matrix3D {
             if (!cssString || cssString == "none")
                 return this;
-            return this.prepend(_PREPEND_CSS_3D.setCSS(cssString));
+            if (force2D && cssString.indexOf("matrix3d") >= 0)
+                return this.prepend(_MATRIX3D.setCSS(cssString).flatten());
+            return this.prepend(_MATRIX3D.setCSS(cssString));
         }
 
-        public getMatrix2D(ret: Matrix2D = new Matrix2D()): Matrix2D {
-            ret.identity();
-            ret.m11 = this.m11;//a = 0
-            ret.m12 = this.m12;//b = 1
-            ret.m21 = this.m21;//c = 4 
-            ret.m22 = this.m22;//d = 4
-            ret.m31 = this.m41;//tx = 11
-            ret.m32 = this.m42;//ty = 12
-            return ret;
-        }
-
-        public setMatrix2D(target: IMatrix2DValue): Matrix3D {
-            this.identity();
-            this.m11 = target.m11;
-            this.m21 = target.m21;
-            this.m12 = target.m12;
-            this.m22 = target.m22;
-            this.m41 = target.m31;
-            this.m42 = target.m32;
-
+        public flatten(): Matrix3D {
+            this.m31 = 0;
+            this.m32 = 0;
+            this.m33 = 1;
+            this.m34 = 0;
+            this.m44 = 1;
+            this.m14 = 0;
+            this.m24 = 0;
+            this.m43 = 0;
             return this;
         }
 
@@ -902,48 +902,7 @@ module jsidea.geom {
         public is3D(): boolean {
             return !this.is2D();
         }
-        
-        //        //SOURCE: http://code.metager.de/source/xref/mozilla/B2G/gecko/gfx/thebes/gfx3DMatrix.cpp#651
-        //        public project(point: IPoint2DValue): Point3D {
-        //            var p = new Point3D(point.x, point.y, 0);
-        //            var q = new Point3D(point.x, point.y, 1);
-        //
-        //            var pBack = this.transform3D(p);
-        //            var qBack = this.transform3D(q);
-        //            var uBack = qBack.sub(pBack);
-        //            var t = -pBack.z / uBack.z;
-        //            return new Point3D(pBack.x + t * uBack.x, pBack.y + t * uBack.y, 0, 1);
-        //        }
-        
-        //source: http://code.metager.de/source/xref/mozilla/firefox/gfx/thebes/gfx3DMatrix.cpp#Transform4D
-        //        public project(point: IPoint2DValue): Point3D {
-        //            // Solving for z when z' = 0 gives us:
-        //            var z = -(point.x * this.m13 + point.y * this.m23 + this.m43) / this.m33;
-        //
-        //            // Compute the transformed point
-        //            return this.transform(new Point3D(point.x, point.y, z, 1));
-        //        }
 
-        //        public changeBasis(origin: IPoint2DValue): Matrix3D {
-        //            this.prependPositionRaw(-origin.x, -origin.y, 0);
-        //            return this.appendPositionRaw(origin.x, origin.y, 0);
-        //            //            this.prependPositionRaw(origin.x, origin.y, 0);
-        //            //            return this.appendPositionRaw(-origin.x, -origin.y, 0);
-        //        }
-
-        //        public getNormalVector(): Point3D {
-        //            // Define a plane in transformed space as the transformations
-        //            // of 3 points on the z=0 screen plane.
-        //            var a = this.transform3D(new Point3D(0, 0, 0));
-        //            var b = this.transform3D(new Point3D(0, 1, 0));
-        //            var c = this.transform3D(new Point3D(1, 0, 0));
-        //
-        //            // Convert to two vectors on the surface of the plane.
-        //            var ab = b.sub(a);
-        //            var ac = c.sub(a);
-        //            return ac.cross(ab);
-        //        }
-        
         public bounds(x: number, y: number, width: number, height: number, ret = new geom.Rect2D()): geom.Rect2D {
             var ptA = new geom.Point3D(x, y);
             var ptB = new geom.Point3D(x + width, y);
@@ -961,25 +920,6 @@ module jsidea.geom {
             var height = Math.max(ptA.y, ptB.y, ptC.y, ptD.y) - y;
 
             return ret.setTo(x, y, width, height);
-        }
-
-        public toStringTable(fractionDigits: number = 3): string {
-            return "m11=" + this.m11.toFixed(fractionDigits)
-                + "\tm21=" + this.m21.toFixed(fractionDigits)
-                + "\tm31=" + this.m31.toFixed(fractionDigits)
-                + "\tm41=" + this.m41.toFixed(fractionDigits)
-                + "\nm12=" + this.m12.toFixed(fractionDigits)
-                + "\tm22=" + this.m22.toFixed(fractionDigits)
-                + "\tm32=" + this.m32.toFixed(fractionDigits)
-                + "\tm42=" + this.m42.toFixed(fractionDigits)
-                + "\nm13=" + this.m13.toFixed(fractionDigits)
-                + "\tm23=" + this.m23.toFixed(fractionDigits)
-                + "\tm33=" + this.m33.toFixed(fractionDigits)
-                + "\tm43=" + this.m43.toFixed(fractionDigits)
-                + "\nm14=" + this.m14.toFixed(fractionDigits)
-                + "\tm24=" + this.m24.toFixed(fractionDigits)
-                + "\tm34=" + this.m34.toFixed(fractionDigits)
-                + "\tm44=" + this.m44.toFixed(fractionDigits);
         }
 
         public lookAt(eye: Point3D, target: Point3D, up: Point3D): Matrix3D {
@@ -1115,35 +1055,33 @@ module jsidea.geom {
 
             return ret;
         }
+        
+        public toStringTable(fractionDigits: number = 3): string {
+            return "m11=" + this.m11.toFixed(fractionDigits)
+                + "\tm21=" + this.m21.toFixed(fractionDigits)
+                + "\tm31=" + this.m31.toFixed(fractionDigits)
+                + "\tm41=" + this.m41.toFixed(fractionDigits)
+                + "\nm12=" + this.m12.toFixed(fractionDigits)
+                + "\tm22=" + this.m22.toFixed(fractionDigits)
+                + "\tm32=" + this.m32.toFixed(fractionDigits)
+                + "\tm42=" + this.m42.toFixed(fractionDigits)
+                + "\nm13=" + this.m13.toFixed(fractionDigits)
+                + "\tm23=" + this.m23.toFixed(fractionDigits)
+                + "\tm33=" + this.m33.toFixed(fractionDigits)
+                + "\tm43=" + this.m43.toFixed(fractionDigits)
+                + "\nm14=" + this.m14.toFixed(fractionDigits)
+                + "\tm24=" + this.m24.toFixed(fractionDigits)
+                + "\tm34=" + this.m34.toFixed(fractionDigits)
+                + "\tm44=" + this.m44.toFixed(fractionDigits);
+        }
 
-        public static qualifiedClassName: string = "jsidea.geom.Matrix3D";
         public toString(fractionDigits: number = 3): string {
-            return "[" + Matrix3D.qualifiedClassName + " \n"
+            return "[ jsidea.geom.Matrix3D \n"
                 + this.toStringTable(fractionDigits)
                 + "\n]";
         }
     }
-    
-    //jsidea.geom.Matrix3D
-    var _APPEND_POSITION_3D = new Matrix3D();
-    var _PREPEND_POSITION_3D = new Matrix3D();
-    var _APPEND_PERSPECTIVE_3D = new Matrix3D();
-    var _PREPEND_PERSPECTIVE_3D = new Matrix3D();
-    var _APPEND_SCALE_3D = new Matrix3D();
-    var _PREPEND_SCALE_3D = new Matrix3D();
-    var _APPEND_SCALE_RAW_3D = new Point3D();
-    var _PREPEND_SCALE_RAW_3D = new Point3D();
-    var _APPEND_SKEW_3D = new Matrix3D();
-    var _PREPEND_SKEW_3D = new Matrix3D();
-    var _GET_ROTATION_3D = new Matrix3D();
-    var _DELTA_TRANSFORM_RAW_3D = new Point3D();
-    var _TRANSFORM_RAW_3D = new Point3D();
-    var _APPEND_POSITION_RAW_3D = new Point3D();
-    var _PREPEND_POSITION_RAW_3D = new Point3D();
-    var _SET_SKEW_RAW_3D: Point3D = new Point3D();
-    //prevent cross referencing (unresolvable creation)
-    var _SET_CSS_3D: Matrix2D = null;
-    var _APPEND_CSS_3D = new Matrix3D();
-    var _PREPEND_CSS_3D = new Matrix3D();
-    var _INVERT_PROJECT_3D = new Matrix3D();
+
+    var _POINT: Point3D = new Point3D();
+    var _MATRIX3D = new Matrix3D();
 }

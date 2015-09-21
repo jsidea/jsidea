@@ -3,7 +3,9 @@
 /// <reference path='jsidea/events/EventDispatcher.ts' />
 
 //jsidea.system
+/// <reference path='jsidea/system/System.ts' />
 /// <reference path='jsidea/system/Browser.ts' />
+/// <reference path='jsidea/system/Engine.ts' />
 /// <reference path='jsidea/system/Application.ts' />
 
 //jsidea.math
@@ -20,7 +22,6 @@
 /// <reference path='jsidea/geom/Point3D.ts' />
 /// <reference path='jsidea/geom/Matrix3D.ts' />
 /// <reference path='jsidea/geom/Matrix2D.ts' />
-/// <reference path='jsidea/geom/Plane3D.ts' />
 /// <reference path='jsidea/geom/AffineFit.ts' />
 /// <reference path='jsidea/geom/Rect2D.ts' />
 /// <reference path='jsidea/geom/Quad.ts' />

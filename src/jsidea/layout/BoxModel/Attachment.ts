@@ -12,7 +12,7 @@ module jsidea.layout.BoxModel {
                 ret.y -= size.scrollTop;
             }
             else if (attachment == "fixed") {
-                if (system.Browser.isWebKit) {
+                if (system.Engine.isWebKit) {
                     ret.x += size.element.ownerDocument.body.scrollLeft;
                     ret.y += size.element.ownerDocument.body.scrollTop;
                 }

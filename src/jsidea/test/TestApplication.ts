@@ -19,7 +19,7 @@ module jsidea.test {
             can.id = "can";
             can.width = 1920;
             can.height = 1080;
-            var ctx = <CanvasRenderingContext2D> can.getContext("2d");
+            var ctx = <CanvasRenderingContext2D>can.getContext("2d");
             var teste = `asdfasdf ${can.id}`;
             //            ctx.translate(100, 100);
             //            ctx.scale(2, 2);
@@ -51,7 +51,7 @@ module jsidea.test {
             con.appendChild(a);
             document.body.appendChild(can);
 
-            document.addEventListener("mousemove",(evt) => {
+            document.addEventListener("mousemove", (evt) => {
                 var pt = layout.Transform.create(xc).globalToLocal(evt.pageX, evt.pageY, 0, null, layout.BoxModel.BORDER);
                 tes.textContent = Math.round(pt.x) + " " + Math.round(pt.y);
             });
@@ -82,8 +82,8 @@ module jsidea.test {
             var cursor = new geom.Point3D();
             
             //drag begin
-            document.addEventListener("mousedown",(evt) => {
-                target = <HTMLElement> evt.target;
+            document.addEventListener("mousedown", (evt) => {
+                target = <HTMLElement>evt.target;
 
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
@@ -101,7 +101,7 @@ module jsidea.test {
 
             });
             //drag
-            document.addEventListener("mousemove",(evt) => {
+            document.addEventListener("mousemove", (evt) => {
                 if (!target)
                     return;
 
@@ -119,7 +119,7 @@ module jsidea.test {
                 layout.Position.apply(pos, target);
             });
             //drag end
-            document.addEventListener("mouseup",(evt) => {
+            document.addEventListener("mouseup", (evt) => {
                 if (target)
                     target.style.willChange = "auto";
                 target = null;
@@ -128,7 +128,7 @@ module jsidea.test {
                 evt.stopImmediatePropagation();
             });
 
-                        document.addEventListener("click",() => this.logChain(xc));
+            //                        document.addEventListener("click",() => this.logChain(xc));
 
             var draw = () => {
                 var g = display.Graphics.get(ctx);
@@ -210,7 +210,7 @@ module jsidea.test {
             if (node)
                 node = node.first;
             while (node) {
-                var ofp = <HTMLElement> node.element.offsetParent;
+                var ofp = <HTMLElement>node.element.offsetParent;
                 var calcedOff = node.offsetParent ? node.offsetParent.element : null;
                 //                var calced = geom.Transform.getParentBlock(node);
                 //                var calcedPar = calced ? calced.element : null;
@@ -228,10 +228,10 @@ module jsidea.test {
                     //                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3d),
                     
                     //                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
-                                        text.Text.conc(12, " ", "ACC", node.isAccumulatable),
+                    text.Text.conc(12, " ", "FORCED_2D", node.isForced2D),
                     //                    text.Text.conc(18, " ", "SCROLL", node.element.scrollLeft, node.element.scrollTop),
                     //                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
-//                    text.Text.conc(18, " ", "TRANSFORMED", node.style.transform),
+                    //                    text.Text.conc(18, " ", "TRANSFORMED", node.style.transform),
                     //                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),
                     
                     //                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
@@ -245,19 +245,19 @@ module jsidea.test {
             }
         }
 
-//        private testObserver(): void {
-//            var d = document.createElement("div");
-//            d.textContent = "A";
-//            document.body.appendChild(d);
-//            var o = d[0];
-//            Object.observe(o, function(a): void {
-//                console.log(a);
-//            });
-//            o.style.width = "200px";
-//            o.style.height = "200px";
-//            o.style.backgroundColor = "#FF00FF";
-//            //ARRGHHH funzt nit
-//        }
+        //        private testObserver(): void {
+        //            var d = document.createElement("div");
+        //            d.textContent = "A";
+        //            document.body.appendChild(d);
+        //            var o = d[0];
+        //            Object.observe(o, function(a): void {
+        //                console.log(a);
+        //            });
+        //            o.style.width = "200px";
+        //            o.style.height = "200px";
+        //            o.style.backgroundColor = "#FF00FF";
+        //            //ARRGHHH funzt nit
+        //        }
 
         private testEventDispatcher(): void {
             var d = new jsidea.events.EventDispatcher();

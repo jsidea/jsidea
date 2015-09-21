@@ -1,6 +1,6 @@
 module jsidea.layout {
     export class Transform {
-        public element: HTMLElement;
+        public element: HTMLElement = null;
         public toBox: IBoxModel = BoxModel.BORDER;
         public fromBox: IBoxModel = BoxModel.BORDER;
         public matrix: geom.Matrix3D = new geom.Matrix3D();
@@ -23,18 +23,19 @@ module jsidea.layout {
 
             this.element = element;
 
+            //if no mode is given, then
             //use the most lightweight mode
-            //if no mode is given
             mode = mode || TransformMode.RECTANGLE;
             
             //FORCE FOR TESTING
-            mode = TransformMode.PERSPECTIVE;
+            mode = TransformMode.PLANAR;
 
             var style = window.getComputedStyle(element);
             this.size.update(element, style);
             this.matrix.setCSS(style.transform);
-            this.sceneTransform = mode.extract(this, style);
-            this.inverseSceneTransform = this.sceneTransform.clone().invert();
+            this.sceneTransform.identity();
+            mode.extract(this, this.sceneTransform);
+            this.sceneTransform.invert(this.inverseSceneTransform);
 
             return this;
         }
@@ -43,8 +44,8 @@ module jsidea.layout {
             matrix = matrix.clone();
 
             this.matrix.append(matrix);
-            this.sceneTransform[0].append(matrix);
-            this.inverseSceneTransform = this.sceneTransform.clone().invert();
+            this.sceneTransform.append(matrix);
+            this.sceneTransform.invert(this.inverseSceneTransform);
 
             return this;
         }
@@ -54,7 +55,7 @@ module jsidea.layout {
 
             this.matrix.prepend(matrix);
             this.sceneTransform.prepend(matrix);
-            this.inverseSceneTransform = this.sceneTransform.clone().invert();
+            this.sceneTransform.invert(this.inverseSceneTransform);
 
             return this;
         }

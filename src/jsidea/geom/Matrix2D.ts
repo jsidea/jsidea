@@ -192,7 +192,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendPosition(offset: IPoint2DValue): Matrix2D {
-            return this.append(this.makePosition(offset, _APPEND_POSITION_2D));;
+            return this.append(this.makePosition(offset, _MATRIX2D));;
         }
         
         /**
@@ -202,7 +202,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendPositionRaw(x: number, y: number): Matrix2D {
-            return this.appendPosition(_APPEND_POSITON_RAW_2D.setTo(x, y));
+            return this.appendPosition(_POINT.setTo(x, y));
         }
 
         /**
@@ -211,7 +211,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependPosition(offset: IPoint2DValue): Matrix2D {
-            return this.prepend(this.makePosition(offset, _PREPEND_POSITION_2D));
+            return this.prepend(this.makePosition(offset, _MATRIX2D));
         }
         
         /**
@@ -221,7 +221,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependPositionRaw(x: number, y: number): Matrix2D {
-            return this.prependPosition(_PREPEND_POSITION_RAW_2D.setTo(x, y));
+            return this.prependPosition(_POINT.setTo(x, y));
         }
 
         /**
@@ -263,7 +263,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendScale(scale: IPoint2DValue): Matrix2D {
-            this.append(this.makeScale(scale, _APPEND_SCALE_2D));
+            this.append(this.makeScale(scale, _MATRIX2D));
             return this;
         }
         
@@ -274,7 +274,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendScaleRaw(x: number, y: number): Matrix2D {
-            return this.appendScale(_APPEND_SCALE_RAW_2D.setTo(x, y));
+            return this.appendScale(_POINT.setTo(x, y));
         }
 
         /**
@@ -283,7 +283,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependScale(scale: IPoint2DValue): Matrix2D {
-            return this.prepend(this.makeScale(scale, _PREPEND_SCALE_2D));
+            return this.prepend(this.makeScale(scale, _MATRIX2D));
         }
         
         /**
@@ -293,7 +293,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependScaleRaw(x: number, y: number): Matrix2D {
-            return this.prependScale(_PREPEND_SCALE_RAW_2D.setTo(x, y));
+            return this.prependScale(_POINT.setTo(x, y));
         }
 
         /**
@@ -338,7 +338,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendSkew(skew: IPoint2DValue): Matrix2D {
-            return this.append(this.makeSkew(skew, _APPEND_SKEW_2D));
+            return this.append(this.makeSkew(skew, _MATRIX2D));
         }
         
         /**
@@ -348,7 +348,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public appendSkewRaw(x: number, y: number): Matrix2D {
-            return this.appendSkew(_APPEND_SKEW_RAW_2D.setTo(x, y));
+            return this.appendSkew(_POINT.setTo(x, y));
         }
 
         /**
@@ -357,7 +357,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependSkew(skew: IPoint2DValue): Matrix2D {
-            return this.prepend(this.makeSkew(skew, _PREPEND_SKEW_2D));
+            return this.prepend(this.makeSkew(skew, _MATRIX2D));
         }
         
         /**
@@ -367,7 +367,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependSkewRaw(x: number, y: number): Matrix2D {
-            return this.prependSkew(_PREPEND_SKEW_RAW_2D.setTo(x, y));
+            return this.prependSkew(_POINT.setTo(x, y));
         }
         
         /**
@@ -434,7 +434,7 @@ module jsidea.geom {
         * @return this-chained.
         */
         public prependRotation(angle: number): Matrix2D {
-            return this.prepend(this.makeRotation(angle, _PREPEND_ROTATION_RAW_2D));
+            return this.prepend(this.makeRotation(angle, _MATRIX2D));
         }
 
         public compose(target: IComposition2D): Matrix2D {
@@ -499,8 +499,16 @@ module jsidea.geom {
                 return this.identity();
             }
 
-            if (cssString.indexOf("matrix3d") >= 0)
-                return this.setMatrix3D(_SET_CSS_2D.setCSS(cssString));
+            if (cssString.indexOf("matrix3d") >= 0) {
+                var trans = cssString.replace("matrix3d(", "").replace(")", "").split(",");
+                this.m11 = math.Number.parse(trans[0], 1);
+                this.m12 = math.Number.parse(trans[1], 0);
+                this.m21 = math.Number.parse(trans[4], 0);
+                this.m22 = math.Number.parse(trans[5], 1);
+                this.m31 = math.Number.parse(trans[12], 0);
+                this.m32 = math.Number.parse(trans[13], 0);
+                return this;
+            }
 
             var trans = cssString.replace("matrix(", "").replace(")", "").split(",");
             this.m11 = math.Number.parse(trans[0], 1);
@@ -539,14 +547,6 @@ module jsidea.geom {
             return this;
         }
 
-        public getMatrix3D(ret: Matrix3D = new Matrix3D()): Matrix3D {
-            return ret.setMatrix2D(this);
-        }
-
-        public setMatrix3D(target: Matrix3D): Matrix2D {
-            return target.getMatrix2D(this);
-        }
-
         public static multiply(a: IMatrix2DValue, b: IMatrix2DValue, ret: Matrix2D = new Matrix2D()): Matrix2D {
             var data: number[] = [];
             data[0] = b.m11 * a.m11 + b.m12 * a.m21;
@@ -577,18 +577,6 @@ module jsidea.geom {
         }
     }
 
-    var _SET_CSS_2D: Matrix3D = new Matrix3D();
-    var _PREPEND_ROTATION_RAW_2D = new Matrix2D();
-    var _APPEND_POSITION_2D = new Matrix2D();
-    var _PREPEND_POSITION_2D = new Matrix2D();
-    var _APPEND_POSITON_RAW_2D = new Point2D();
-    var _PREPEND_POSITION_RAW_2D = new Point2D();
-    var _APPEND_SCALE_2D = new Matrix2D();
-    var _PREPEND_SCALE_2D = new Matrix2D();
-    var _APPEND_SCALE_RAW_2D = new Point2D();
-    var _PREPEND_SCALE_RAW_2D = new Point2D();
-    var _APPEND_SKEW_2D = new Matrix2D();
-    var _PREPEND_SKEW_2D = new Matrix2D();
-    var _APPEND_SKEW_RAW_2D = new Point2D();
-    var _PREPEND_SKEW_RAW_2D = new Point2D();
+    var _MATRIX2D = new Matrix2D();
+    var _POINT = new Point2D();
 }

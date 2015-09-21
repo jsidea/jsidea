@@ -45,7 +45,7 @@ module jsidea.geom {
                 return this;
             //TODO: using a regex -> performance testing
             var str = clipCSS.toLowerCase().replace("rect(", "").replace(")", "");
-            var values = system.Browser.isWebKit ? str.split(" ") : str.split(",");
+            var values = system.Engine.isWebKit ? str.split(" ") : str.split(",");
 
             this.x = math.Number.parse(values[3], 0);
             this.y = math.Number.parse(values[0], 0);
@@ -134,7 +134,7 @@ module jsidea.geom {
 
         public static getBounds(element: HTMLElement, ret: Rect2D = new Rect2D()): Rect2D {
             ret.copyFromClientRect(element.getBoundingClientRect());
-            if (system.Browser.isWebKit) {
+            if (system.Engine.isWebKit) {
                 //                var style = layout.Style.create(element);
                 //                if (style.transformStyle == "preserve-3d" && style.transform.indexOf("matrix3d") >= 0) {
                 //                    var mat = geom.Matrix3D.create(element, style);

@@ -214,27 +214,6 @@ module jsidea.geom {
             return ret.setTo(xInt, yInt);
         }
         
-        //        public static extractPerspectiveOrigin(visual: HTMLElement, bounds: Box2D = Box2D.extract(visual), ret: Point2D = new Point2D()): Point2D {
-        //            var style: CSSStyleDeclaration = window.getComputedStyle(visual);
-        //            var vals = style.perspectiveOrigin.split(" ");
-        //            return ret.setTo(
-        //                math.Number.parseRelation(vals[0], bounds.width, 0),
-        //                math.Number.parseRelation(vals[1], bounds.height, 0));
-        //        }
-        //        
-        //        public static extractPosition(visual: HTMLElement, ret: Point2D = new Point2D()): Point2D {
-        //            return ret.setTo(
-        //                visual.offsetLeft,
-        //                visual.offsetTop);
-        //        }
-        //        
-        //        public static extractBorder(visual: HTMLElement, ret: Point2D = new Point2D()): Point2D {
-        //            var style: CSSStyleDeclaration = window.getComputedStyle(visual);
-        //            return ret.setTo(
-        //                math.Number.parse(style.borderLeftWidth, 0),
-        //                math.Number.parse(style.borderTopWidth, 0));
-        //        }
-        
         public toString(): string {
             return "[ jsidea.geom.Point2D" +
                 " x=" + this.x +

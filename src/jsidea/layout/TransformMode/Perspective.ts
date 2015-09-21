@@ -1,28 +1,20 @@
 module jsidea.layout.TransformMode {
     class Perspective implements ITransformMode {
         private static _matrix: geom.Matrix3D = new geom.Matrix3D();
-        public extract(transform: Transform, style: CSSStyleDeclaration): geom.Matrix3D {
+        public extract(transform: Transform, matrix: geom.Matrix3D): void {
             var element = transform.element;
             var node = layout.StyleChain.create(element);
-            return Perspective.extractSceneMatrix(node);
-        }
-
-        private static extractSceneMatrix(node: layout.INode): geom.Matrix3D {
-            //collect matrices up to root
-            var m: geom.Matrix3D = new geom.Matrix3D();
+            
+            //accumulate matrix
             while (node) {
-                //if last is not null, last becomes the base for the transformation
-                //its like appending the current node.transform (parent-transform) to the last transform (child-transform)
-                this.extractMatrix(node, m);
-                if (node && node.isSticked) {
+                this.extractMatrix(node, matrix);
+                if (node && node.isSticked)
                     break;
-                }
                 node = node.parent;
             }
-            return m;
         }
 
-        private static extractMatrix(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
+        private extractMatrix(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
             if (!matrix)
                 matrix = new geom.Matrix3D();
             if (!node)
@@ -40,19 +32,11 @@ module jsidea.layout.TransformMode {
                 var originY = math.Number.relation(origin[1], element.offsetHeight, element.offsetHeight * 0.5);
                 var originZ = math.Number.parse(origin[2], 0);
 
-                //just reduce it to the 2D-plane
-                if (!node.isAccumulatable) {
-                    node.isAccumulatable = true;
-                    matrix.appendPositionRaw(-originX, -originY, -originZ);
-                    matrix.appendCSS(this._matrix.setCSS(style.transform).getCSS2D());
-                    matrix.appendPositionRaw(originX, originY, originZ);
-                }
-                else {
-                    //not vice versa: not adding than subtracting like some docs mentioned
-                    matrix.appendPositionRaw(-originX, -originY, -originZ);
-                    matrix.appendCSS(style.transform);
-                    matrix.appendPositionRaw(originX, originY, originZ);
-                }
+                matrix.appendPositionRaw(-originX, -originY, -originZ);
+                //if the parent is flattened (not preserve-3d) 
+                //then just reduce it to the 2D-plane
+                matrix.appendCSS(style.transform, node.isForced2D);
+                matrix.appendPositionRaw(originX, originY, originZ);
             }
             
             //------

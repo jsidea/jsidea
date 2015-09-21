@@ -16,7 +16,7 @@ module jsidea.layout.MoveMode {
                 matrix.m43 = point.z;
 
             //WebKit bug
-            if (system.Browser.isWebKit)
+            if (system.Engine.isWebKit)
                 matrix.m43 *= 1 / (window.innerWidth / window.outerWidth);
             element.style.transform = matrix.getCSS();
         }

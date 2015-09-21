@@ -7,6 +7,7 @@ module jsidea.layout {
         style: CSSStyleDeclaration;
         position: geom.Point2D;
     }
+
     export interface INodeLite {
         element: HTMLElement;
         style: CSSStyleDeclaration;
@@ -22,8 +23,9 @@ module jsidea.layout {
         isPreserved3d: boolean;
         isScrollable: boolean;
         perspective: number;
-        isAccumulatable: boolean;
+        isForced2D: boolean;
     }
+
     export interface INode extends INodeLite {
         //re-cast
         first: INode;
@@ -101,7 +103,7 @@ module jsidea.layout {
                     isHTML: element == html,
                     isBody: element == body,
                     style: style,
-                    isAccumulatable: true
+                    isForced2D: false
                 }
                 
                 //maybe its not needed
@@ -109,9 +111,9 @@ module jsidea.layout {
                     node.isPreserved3d = false;
                 
                 //webkit ignores perspective set on scroll elements
-                node.perspective = (system.Browser.isWebKit && node.isTransformed && node.isScrollable) ? 0 : math.Number.parse(style.perspective, 0);
+                node.perspective = (system.Engine.isWebKit && node.isTransformed && node.isScrollable) ? 0 : math.Number.parse(style.perspective, 0);
 
-                element._node = <INode> node;
+                element._node = <INode>node;
                 nodes.push(node);
                 element = element.parentElement;
             }
@@ -126,7 +128,7 @@ module jsidea.layout {
                 node.depth = depth++;
                 node.child = nodes[(nodes.length - node.depth) - 1];
                 node.parent = nodes[(nodes.length - node.depth) + 1];
-                node.isAccumulatable = this.getIsAccumulatable(node);
+                node.isForced2D = this.getIsForced2D(node);
                 node = node.child;
             }
 
@@ -148,7 +150,7 @@ module jsidea.layout {
             var isPreserved3dChild = false;
             var isFixedChild = false;
             var isPerspectiveChild = false;
-            var node = <INode> chain.first;
+            var node = <INode>chain.first;
             while (node) {
                 var style = node.style;
                 var element = node.element;
@@ -166,7 +168,7 @@ module jsidea.layout {
                 node.offsetLeft = element.offsetLeft;
                 node.offsetTop = element.offsetTop;
 
-                if (system.Browser.isWebKit) {
+                if (system.Engine.isWebKit) {
                     if (node.isHTML) {
                         node.offsetLeft = node.element.ownerDocument.body.offsetLeft;
                         node.offsetTop = node.element.ownerDocument.body.offsetTop;
@@ -208,7 +210,7 @@ module jsidea.layout {
                 node = node.child;
             }
 
-            return <INode> chain;
+            return <INode>chain;
         }
 
         //returns the local position the direct parent
@@ -332,7 +334,7 @@ module jsidea.layout {
             
             //add scroll value only if reference of the element is the window not the body
             if (node.isStickedChild) {
-                if (system.Browser.isWebKit) {
+                if (system.Engine.isWebKit) {
                     ret.x -= node.element.ownerDocument.body.scrollLeft;
                     ret.y -= node.element.ownerDocument.body.scrollTop;
                 }
@@ -384,27 +386,27 @@ module jsidea.layout {
             return ret;
         }
 
-        private static getIsAccumulatable(node: INodeLite): boolean {
+        private static getIsForced2D(node: INodeLite): boolean {
             //ie11 has no "working" preserve-3d, but window.getComputedStyle includes the preserve-3d value? 
             if (system.Browser.isInternetExplorer)
-                return true;
+                return false;
             
             //in any case, if an element has only 2d-transforms or its the document-root item
             //the transform can be accumulated to the parent transform
             if (node.isBody || !node.isTransformed3D)
-                return true;
+                return false;
 
             //tricky stuff: only firefox does reflect/compute the "correct" transformStyle value.
             //Firefox does NOT reflect the "grouping"-overrides and this is how its concepted.
             //But what about the "opacity"-property. Opacity does not override the preserve-3d (not always, webkit does under some conditions).
             //http://dev.w3.org/csswg/css-transforms/#grouping-property-values
             if (!node.parent.isPreserved3d && node.parent.perspective == 0)
-                return false;
+                return true;
 
             if (node.parent.isScrollable)
-                return false;
+                return true;
 
-            return true;
+            return false;
         }
 
         private static addCorrectOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
@@ -414,7 +416,7 @@ module jsidea.layout {
             ret.x += node.offsetLeft;
             ret.y += node.offsetTop;
 
-            if (system.Browser.isWebKit) {
+            if (system.Engine.isWebKit) {
                 this.getCorrectOffsetWebkit(node, ret);
             } else if (system.Browser.isFirefox) {
                 this.getCorrectOffsetFirefox(node, ret);
@@ -476,7 +478,7 @@ module jsidea.layout {
             if (
                 (node.isAbsolute || node.isFixedZombie)
                 && node.offsetParent.isScrollable
-                ) {
+            ) {
                 ret.x += node.offsetParent.clientLeft;
                 ret.y += node.offsetParent.clientTop;
             }

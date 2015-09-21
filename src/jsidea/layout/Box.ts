@@ -49,12 +49,12 @@ module jsidea.layout {
             this.scrollLeft = element.scrollLeft;
             this.scrollTop = element.scrollTop;
 
-            if (system.Browser.isWebKit) {
+            if (system.Engine.isWebKit) {
                 if (element == element.ownerDocument.body) {
                     this.scrollLeft = 0;
                     this.scrollTop = 0;
                 }
-                else if (system.Browser.isWebKit && element == element.ownerDocument.documentElement) {
+                else if (system.Engine.isWebKit && element == element.ownerDocument.documentElement) {
                     this.scrollLeft = element.ownerDocument.body.scrollLeft;
                     this.scrollTop = element.ownerDocument.body.scrollTop;
                 }

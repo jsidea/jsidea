@@ -9,7 +9,7 @@ module jsidea.layout.MoveMode {
             var leftAuto = style.left == "auto";
             var topAuto = style.top == "auto";
             if (leftAuto || topAuto) {
-                if (system.Browser.isWebKit) {
+                if (system.Engine.isWebKit) {
                     var node = StyleChain.create(element);
                     var position = new geom.Point3D();
                     if (node.isRelative) {

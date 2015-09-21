@@ -6,7 +6,7 @@ module jsidea.layout.MoveMode {
             var scrollLeft = element.scrollLeft;
             var scrollTop = element.scrollTop;
 
-            if (!system.Browser.isWebKit && element.ownerDocument.body == element) {
+            if (!system.Engine.isWebKit && element.ownerDocument.body == element) {
                 scrollLeft = element.ownerDocument.documentElement.scrollLeft;
                 scrollTop = element.ownerDocument.documentElement.scrollTop;
             }
@@ -21,7 +21,7 @@ module jsidea.layout.MoveMode {
             return offset;
         }
         public apply(point: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): void {
-            if (!system.Browser.isWebKit && element == element.ownerDocument.body) {
+            if (!system.Engine.isWebKit && element == element.ownerDocument.body) {
                 element = element.ownerDocument.documentElement;
             }
             if (!isNaN(point.x))
