@@ -96,36 +96,31 @@ class ExportExtractor {
             return '';
         }
     }
-    private getClassName(node: ts.Node): string {
-        if (!(<any>node).name) {
-            if ((<any>node).left)
-                return (<any>node).left + "." + (<any>node).right;
-            else if ((<any>node).text)
-                return (<any>node).text;
-            return "";
-        }
-        return (<any>node).name ? (<any>node).name.text : "";
-    }
-
-    private getQualifiedClassName(node: ts.Node): string {
-        if (!node)
-            return "";
-        var name = "";//this.getClassName(node);
-        while (node) {
-            var cls = this.getClassName(node);
-            if (cls)
-                name = name + (name ? "." : "") + cls;
-            if (!node.parent)
-                node = node.body;
-            else
-                node = node.parent;
-        }
-
-        return name;
-    }
 
     private getDeclarationFullName(declaration: Declaration): string {
-        return this.getQualifiedClassName(declaration);// + '.' + declaration.name.text;
+        if (!declaration)
+            return "";
+        var name = "";
+        while (declaration) {
+            var cls: string;
+            if (!(<any>declaration).name) {
+                if ((<any>declaration).left)
+                    cls = (<any>declaration).left + "." + (<any>declaration).right;
+                else if ((<any>declaration).text)
+                    cls = (<any>declaration).text;
+                else
+                    cls = "";
+            }
+            else
+                cls = (<any>declaration).name ? (<any>declaration).name.text : "";
+            if (cls)
+                name = name + (name ? "." : "") + cls;
+            if (!declaration.parent)
+                declaration = (<any>declaration).body;
+            else
+                declaration = (<any>declaration).parent;
+        }
+        return name;
     }
 
     private exportNeeded() {
@@ -299,7 +294,7 @@ class UsageExtractor {
             for (var max = 1; max < parts.length + 1; max++) {
                 this.addUsageToCurrentFile(parts.slice(0, max).join('.'), expr);
                 if (this.isInModule()) {
-//                    this.addUsageToCurrentFile("PPP" + this.currentModuleFullName() + '.' + parts.slice(0, max).join('.'), expr);
+                    //                    this.addUsageToCurrentFile("PPP" + this.currentModuleFullName() + '.' + parts.slice(0, max).join('.'), expr);
                     this.addUsageToCurrentFile(this.moduleStack[0].name.text + '.' + parts.slice(0, max).join('.'), expr);
                 }
             }

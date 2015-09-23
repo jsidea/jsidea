@@ -76,33 +76,30 @@ var ExportExtractor = (function () {
             return '';
         }
     };
-    ExportExtractor.prototype.getClassName = function (node) {
-        if (!node.name) {
-            if (node.left)
-                return node.left + "." + node.right;
-            else if (node.text)
-                return node.text;
+    ExportExtractor.prototype.getDeclarationFullName = function (declaration) {
+        if (!declaration)
             return "";
-        }
-        return node.name ? node.name.text : "";
-    };
-    ExportExtractor.prototype.getQualifiedClassName = function (node) {
-        if (!node)
-            return "";
-        var name = ""; //this.getClassName(node);
-        while (node) {
-            var cls = this.getClassName(node);
+        var name = "";
+        while (declaration) {
+            var cls;
+            if (!declaration.name) {
+                if (declaration.left)
+                    cls = declaration.left + "." + declaration.right;
+                else if (declaration.text)
+                    cls = declaration.text;
+                else
+                    cls = "";
+            }
+            else
+                cls = declaration.name ? declaration.name.text : "";
             if (cls)
                 name = name + (name ? "." : "") + cls;
-            if (!node.parent)
-                node = node.body;
+            if (!declaration.parent)
+                declaration = declaration.body;
             else
-                node = node.parent;
+                declaration = declaration.parent;
         }
         return name;
-    };
-    ExportExtractor.prototype.getDeclarationFullName = function (declaration) {
-        return this.getQualifiedClassName(declaration); // + '.' + declaration.name.text;
     };
     ExportExtractor.prototype.exportNeeded = function () {
         return this.moduleStack.length > 0;
