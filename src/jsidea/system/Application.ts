@@ -85,58 +85,31 @@ module jsidea.system {
             super.dispose();
         }
 
-        public static qualifiedClassName: string = "jsidea.core.Application";
-        public toString(): string {
-            return "[" + Application.qualifiedClassName + "]";
+        public static hook(qualifiedClassName: string): void {
+            if (!qualifiedClassName) {
+                return;
+            }
+            var path: string[] = qualifiedClassName.split(".");
+            var hook: any = window[<any>path[0]];
+            for (var i = 1; i < path.length; ++i) {
+                if (!hook) {
+                    console.warn("Application '" + qualifiedClassName + "' is undefined.");
+                    return;
+                }
+                hook = hook[path[i]];
+            }
+            if (hook.prototype instanceof jsidea.system.Application) {
+            }
+            else {
+                console.warn("Application " + hook + " does not inherit from jsidea.system.Application");
+                return;
+            }
+            var app = new hook();
         }
     }
+    
+    //hook
+    document.addEventListener("DOMContentLoaded", () => {
+        Application.hook(document.body.getAttribute("data-application"));
+    });
 }
-
-interface HTMLElement {
-    matches(selector: string): boolean;
-}
-
-interface Object {
-    observe(beingObserved: any, callback: (update: any) => any, types?: string[]): void;
-}
-
-interface CanvasRenderingContext2D {
-    getTransform(): number[];
-}
-
-interface CSSStyleDeclaration {
-    willChange: string;
-}
-
-
-interface MSStyleCSSProperties {
-    willChange: string;
-}
-
-interface HTMLCanvasElement {
-    hasContext(): string;
-}
-
-//hook
-document.addEventListener("DOMContentLoaded", () => {
-    var qualifiedClassName = document.body.getAttribute("data-application");
-    if (!qualifiedClassName) {
-        return;
-    }
-    var path: string[] = qualifiedClassName.split(".");
-    var hook: any = window[<any>path[0]];
-    for (var i = 1; i < path.length; ++i) {
-        if (!hook) {
-            console.warn("Application '" + qualifiedClassName + "' is undefined.");
-            return;
-        }
-        hook = hook[path[i]];
-    }
-    if (hook.prototype instanceof jsidea.system.Application) {
-    }
-    else {
-        console.warn("Application " + hook + " does not inherit from jsidea.system.Application");
-        return;
-    }
-    var app = new hook();
-});

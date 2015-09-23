@@ -1,6 +1,3 @@
-interface Element {
-    _node: jsidea.layout.INode;
-}
 module jsidea.layout {
     export interface INodePosition {
         element: HTMLElement;
@@ -113,7 +110,7 @@ module jsidea.layout {
                 //webkit ignores perspective set on scroll elements
                 node.perspective = (system.Engine.isWebKit && node.isTransformed && node.isScrollable) ? 0 : math.Number.parse(style.perspective, 0);
 
-                element._node = <INode>node;
+                (<any>element)._node = <INode>node;
                 nodes.push(node);
                 element = element.parentElement;
             }
@@ -182,7 +179,7 @@ module jsidea.layout {
                 node.clientLeft = element.clientLeft;
                 node.clientTop = element.clientTop;
                 node.isTransformedChild = isTransformedChild;
-                node.offsetParentRaw = node.element.offsetParent ? node.element.offsetParent._node : null;
+                node.offsetParentRaw = node.element.offsetParent ? (<any>node.element.offsetParent)._node : null;
                 node.isSticked = this.getIsSticked(node);
                 node.isFixedZombie = node.isFixed && !node.isSticked;
                 node.isStickedChild = this.getIsStickedChild(node);
