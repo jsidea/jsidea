@@ -85,8 +85,8 @@
 /// <reference path='jsidea/action/EventCircuit.ts' />
 
 //jsidea.test
-/// <reference path='jsidea/test/TestApplication.ts' />
-/// <reference path='jsidea/test/SimboxApplication.ts' />
+/// <reference path='jsidea/test/Test.ts' />
+/// <reference path='jsidea/test/Simbox.ts' />
 
 interface HTMLElement {
     matches(selector: string): boolean;
@@ -103,7 +103,6 @@ interface CanvasRenderingContext2D {
 interface CSSStyleDeclaration {
     willChange: string;
 }
-
 
 interface MSStyleCSSProperties {
     willChange: string;

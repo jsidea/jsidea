@@ -1,5 +1,5 @@
 module jsidea.test {
-    export class TestApplication extends jsidea.system.Application {
+    export class Test extends jsidea.system.Application {
         constructor() {
             super();
 

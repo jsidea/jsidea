@@ -385,7 +385,32 @@ var usg = new UsageExtractor();
 var usageReport = usg.findUsages(sourceFiles);
 var dpm = new DependencyManager();
 var tree = dpm.createDepdencyTree(expReportC, usageReport);
-console.log(tree);
+//console.log(tree);
+
+
+function correctFileName(fileName: string): string {
+    fileName = fileName.replace("../src/", "");
+    fileName = fileName.replace(/\//gi, ".");
+    var idx = fileName.lastIndexOf(".ts");
+    return fileName.substring(0, idx);
+}
+Object.keys(tree).forEach(fileName => {
+    var val = tree[fileName];
+    delete tree[fileName];
+    fileName = correctFileName(fileName);
+    tree[fileName] = val;
+    var l = val.length;
+    for (var i = 0; i < l; ++i)
+        val[i] = correctFileName(val[i]);
+});
+
+import fs = require('fs');
+fs.writeFile("depedencies.json", JSON.stringify(tree, null, 2), function(err) {
+    if (err) {
+        return console.log(err);
+    }
+}); 
+
 //console.log(expReportC["jsidea.layout.Transform"]);
 //console.log(expReport);
 //console.log(usageReport["../src/jsidea/display/Graphics.ts"]);
