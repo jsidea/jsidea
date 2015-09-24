@@ -1,3 +1,5 @@
+//TODO: include license/source
+//author: not me
 var ts = require("typescript");
 var glob = require("glob");
 var ExportExtractor = (function () {
@@ -65,16 +67,6 @@ var ExportExtractor = (function () {
     ExportExtractor.prototype.processFile = function (file) {
         this.currentFile = file;
         this.processNode(file);
-    };
-    ExportExtractor.prototype.getCurrentModuleFullName = function () {
-        if (this.moduleStack.length) {
-            return this.moduleStack.map(function (moduleDeclaration) {
-                return moduleDeclaration.name.text;
-            }).join('.');
-        }
-        else {
-            return '';
-        }
     };
     ExportExtractor.prototype.getDeclarationFullName = function (declaration) {
         if (!declaration)
@@ -220,8 +212,32 @@ var UsageExtractor = (function () {
             this.addUsageToCurrentFile(this.currentModuleFullName() + '.' + id.text, id);
         }
     };
+    UsageExtractor.prototype.getDeclarationFullName = function (declaration) {
+        if (!declaration)
+            return "";
+        var name = "";
+        while (declaration) {
+            var cls;
+            if (!declaration.name) {
+                if (declaration.left)
+                    cls = declaration.left + "." + declaration.right;
+                else if (declaration.text)
+                    cls = declaration.text;
+                else
+                    cls = "";
+            }
+            else
+                cls = declaration.name ? declaration.name.text : "";
+            if (cls)
+                name = name + (name ? "." : "") + cls;
+            if (!declaration.parent)
+                declaration = declaration.body;
+            else
+                declaration = declaration.parent;
+        }
+        return name;
+    };
     UsageExtractor.prototype.addUsageToCurrentFile = function (usage, file) {
-        file.pos;
         if (!this.report.hasOwnProperty(this.currentFile.fileName)) {
             this.report[this.currentFile.fileName] = [];
         }
@@ -237,7 +253,15 @@ var UsageExtractor = (function () {
                 this.addUsageToCurrentFile(parts.slice(0, max).join('.'), expr);
                 if (this.isInModule()) {
                     //                    this.addUsageToCurrentFile("PPP" + this.currentModuleFullName() + '.' + parts.slice(0, max).join('.'), expr);
-                    this.addUsageToCurrentFile(this.moduleStack[0].name.text + '.' + parts.slice(0, max).join('.'), expr);
+                    var clas = parts.slice(0, max).join('.');
+                    //                    var modName = "";
+                    //                    for (var i = 0; i < this.moduleStack.length; ++i)
+                    //                        if (this.moduleStack[i].name && this.moduleStack[i].name.text) {
+                    //                            modName += this.moduleStack[i].name.text + ".";
+                    //                            this.addUsageToCurrentFile(modName + clas, expr);
+                    //                        }
+                    var modName = this.currentModuleFullName();
+                    this.addUsageToCurrentFile(modName + clas, expr);
                 }
             }
         }
@@ -340,7 +364,7 @@ Object.keys(tree).forEach(function (fileName) {
         val[i] = correctFileName(val[i]);
 });
 var fs = require('fs');
-fs.writeFile("depedencies.json", JSON.stringify(tree, null, 2), function (err) {
+fs.writeFile("dependency.json", JSON.stringify(tree, null, 2), function (err) {
     if (err) {
         return console.log(err);
     }
@@ -348,3 +372,5 @@ fs.writeFile("depedencies.json", JSON.stringify(tree, null, 2), function (err) {
 //console.log(expReportC["jsidea.layout.Transform"]);
 //console.log(expReport);
 //console.log(usageReport["../src/jsidea/display/Graphics.ts"]);
+//console.log(usageReport["../src/jsidea/layout/Transform.ts"]);
+console.log(usageReport["../src/jsidea/layout/TransformMode/Planar.ts"]);

@@ -6,7 +6,7 @@
 <title>jsidea</title>
 <?php include (realpath ( dirname ( __FILE__ ) . '/../php/Ressource.php')); Ressource::debug ( "jsidea" );?>
 </head>
-<body data-application="jsidea.test.SimboxApplication">
+<body data-application="jsidea.test.Simbox">
 	<select id="camera-select">
 		<option>camStatic</option>
 		<option>camDynamicTip</option>

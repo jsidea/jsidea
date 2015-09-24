@@ -87,6 +87,7 @@
 //jsidea.test
 /// <reference path='jsidea/test/Test.ts' />
 /// <reference path='jsidea/test/Simbox.ts' />
+/// <reference path='jsidea/test/Dependency.ts' />
 
 interface HTMLElement {
     matches(selector: string): boolean;

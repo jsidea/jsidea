@@ -1,0 +1,129 @@
+{
+  "jsidea.action.Cursor": [
+    "jsidea.events.EventDispatcher"
+  ],
+  "jsidea.action.EventCircuit": [
+    "jsidea.events.EventDispatcher"
+  ],
+  "jsidea.display.Graphics": [],
+  "jsidea.events.EventDispatcher": [],
+  "jsidea.events.Events": [],
+  "jsidea.geom.AffineFit": [
+    "jsidea.geom.Point2D",
+    "jsidea.geom.Matrix2D",
+    "jsidea.geom.Point3D",
+    "jsidea.geom.Matrix3D"
+  ],
+  "jsidea.geom.Matrix2D": [
+    "jsidea.geom.Point2D"
+  ],
+  "jsidea.geom.Matrix3D": [
+    "jsidea.geom.Point3D",
+    "jsidea.geom.Point2D",
+    "jsidea.geom.Rect2D"
+  ],
+  "jsidea.geom.Point2D": [],
+  "jsidea.geom.Point3D": [
+    "jsidea.geom.Point2D"
+  ],
+  "jsidea.geom.Quad": [
+    "jsidea.geom.Point3D",
+    "jsidea.geom.Point2D",
+    "jsidea.geom.Rect2D"
+  ],
+  "jsidea.geom.Rect2D": [
+    "jsidea.geom.Point2D",
+    "jsidea.geom.Quad"
+  ],
+  "jsidea.layout.Box": [
+    "jsidea.layout.BoxModel.IBoxModel"
+  ],
+  "jsidea.layout.BoxModel.Attachment": [
+    "jsidea.layout.BoxModel.Background"
+  ],
+  "jsidea.layout.BoxModel.Background": [],
+  "jsidea.layout.BoxModel.Border": [],
+  "jsidea.layout.BoxModel.Canvas": [],
+  "jsidea.layout.BoxModel.Clip": [],
+  "jsidea.layout.BoxModel.Content": [],
+  "jsidea.layout.BoxModel.IBoxModel": [
+    "jsidea.layout.Box"
+  ],
+  "jsidea.layout.BoxModel.Image": [],
+  "jsidea.layout.BoxModel.Margin": [],
+  "jsidea.layout.BoxModel.NormalDeviceCoordinates": [],
+  "jsidea.layout.BoxModel.Padding": [],
+  "jsidea.layout.BoxModel.Scroll": [],
+  "jsidea.layout.Move": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.layout.Transform"
+  ],
+  "jsidea.layout.MoveMode.Background": [],
+  "jsidea.layout.MoveMode.BorderBottomRightInner": [],
+  "jsidea.layout.MoveMode.BorderBottomRightOuter": [],
+  "jsidea.layout.MoveMode.BorderTopLeft": [],
+  "jsidea.layout.MoveMode.BottomLeft": [],
+  "jsidea.layout.MoveMode.BottomRight": [],
+  "jsidea.layout.MoveMode.Clip": [],
+  "jsidea.layout.MoveMode.ClipBottomRight": [],
+  "jsidea.layout.MoveMode.IMoveMode": [
+    "jsidea.layout.BoxModel.IBoxModel"
+  ],
+  "jsidea.layout.MoveMode.MarginBottomRight": [],
+  "jsidea.layout.MoveMode.MarginTopLeft": [],
+  "jsidea.layout.MoveMode.Scroll": [],
+  "jsidea.layout.MoveMode.TopLeft": [],
+  "jsidea.layout.MoveMode.TopLeftClamped": [],
+  "jsidea.layout.MoveMode.TopRight": [],
+  "jsidea.layout.MoveMode.Transform": [],
+  "jsidea.layout.Position": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.Snap",
+    "jsidea.layout.Move",
+    "jsidea.layout.Transform"
+  ],
+  "jsidea.layout.Snap": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.SnapMode.ISnapMode",
+    "jsidea.layout.Move",
+    "jsidea.layout.Transform"
+  ],
+  "jsidea.layout.SnapMode.Basic": [],
+  "jsidea.layout.SnapMode.ISnapMode": [
+    "jsidea.layout.Snap",
+    "jsidea.layout.Transform"
+  ],
+  "jsidea.layout.StyleChain": [],
+  "jsidea.layout.Transform": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.Box",
+    "jsidea.layout.TransformMode.ITransformMode"
+  ],
+  "jsidea.layout.TransformMode.ITransformMode": [
+    "jsidea.layout.Transform"
+  ],
+  "jsidea.layout.TransformMode.Perspective": [],
+  "jsidea.layout.TransformMode.Planar": [],
+  "jsidea.layout.TransformMode.Rectangle": [],
+  "jsidea.layout.TransformMode.Test": [],
+  "jsidea.math.Number": [],
+  "jsidea.model.Dictionary": [],
+  "jsidea.system.Application": [
+    "jsidea.events.EventDispatcher"
+  ],
+  "jsidea.system.Browser": [],
+  "jsidea.system.Engine": [],
+  "jsidea.system.System": [],
+  "jsidea.test.Dependency": [
+    "jsidea.system.Application"
+  ],
+  "jsidea.test.Simbox": [
+    "jsidea.system.Application"
+  ],
+  "jsidea.test.Test": [
+    "jsidea.system.Application",
+    "jsidea.events.EventDispatcher"
+  ],
+  "jsidea.text.Text": []
+}

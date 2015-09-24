@@ -3,6 +3,13 @@ module jsidea.test {
         constructor() {
             super();
 
+            var vie = document.createElement("div");
+            vie.id = "view";
+            document.body.appendChild(vie);
+            var con = document.createElement("div");
+            con.id = "content";
+            vie.appendChild(con);
+            
             this.testGeometryUtils();
             //asfd - de:keyboard :)
         }

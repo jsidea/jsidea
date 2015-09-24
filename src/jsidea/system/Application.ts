@@ -96,9 +96,15 @@ module jsidea.system {
                     console.warn("Application '" + qualifiedClassName + "' is undefined.");
                     return;
                 }
+                
                 hook = hook[path[i]];
             }
-            if (hook.prototype instanceof jsidea.system.Application) {
+            if(!hook)
+            {
+                console.warn("Application '" + qualifiedClassName + "' is undefined.");                
+                return;
+            }
+            else if (hook && hook.prototype instanceof jsidea.system.Application) {
             }
             else {
                 console.warn("Application " + hook + " does not inherit from jsidea.system.Application");
@@ -107,9 +113,8 @@ module jsidea.system {
             var app = new hook();
         }
     }
-    
-    //hook
-    document.addEventListener("DOMContentLoaded", () => {
-        Application.hook(document.body.getAttribute("data-application"));
-    });
 }
+//hook
+document.addEventListener("DOMContentLoaded", () => {
+    jsidea.system.Application.hook(document.body.getAttribute("data-application"));
+});

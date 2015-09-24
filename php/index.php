@@ -6,9 +6,6 @@
 <title>jsidea</title>
 <?php include (realpath ( dirname ( __FILE__ ) . '/../php/Ressource.php')); Ressource::debug ( "jsidea" );?>
 </head>
-<body data-application="jsidea.test.TestApplication">
-	<div id="view">
-		<div id="content"></div>
-	</div>
+<body data-application="jsidea.test.Dependency">
 </body>
 </html>

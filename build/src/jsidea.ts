@@ -1,3 +1,6 @@
+//TODO: include license/source
+//author: not me
+
 import ts = require("typescript");
 import glob = require("glob");
 
@@ -86,15 +89,6 @@ class ExportExtractor {
     private processFile(file: ts.SourceFile) {
         this.currentFile = file;
         this.processNode(file);
-    }
-
-    private getCurrentModuleFullName(): string {
-        if (this.moduleStack.length) {
-            return this.moduleStack.map(moduleDeclaration =>
-                moduleDeclaration.name.text).join('.');
-        } else {
-            return '';
-        }
     }
 
     private getDeclarationFullName(declaration: Declaration): string {
@@ -277,8 +271,34 @@ class UsageExtractor {
         }
     }
 
+    private getDeclarationFullName(declaration: Declaration): string {
+        if (!declaration)
+            return "";
+        var name = "";
+        while (declaration) {
+            var cls: string;
+            if (!(<any>declaration).name) {
+                if ((<any>declaration).left)
+                    cls = (<any>declaration).left + "." + (<any>declaration).right;
+                else if ((<any>declaration).text)
+                    cls = (<any>declaration).text;
+                else
+                    cls = "";
+            }
+            else
+                cls = (<any>declaration).name ? (<any>declaration).name.text : "";
+            if (cls)
+                name = name + (name ? "." : "") + cls;
+            if (!declaration.parent)
+                declaration = (<any>declaration).body;
+            else
+                declaration = (<any>declaration).parent;
+        }
+        return name;
+    }
+    
     private addUsageToCurrentFile(usage: string, file: ts.Node) {
-        file.pos
+        
         if (!this.report.hasOwnProperty(this.currentFile.fileName)) {
             this.report[this.currentFile.fileName] = [];
         }
@@ -295,7 +315,18 @@ class UsageExtractor {
                 this.addUsageToCurrentFile(parts.slice(0, max).join('.'), expr);
                 if (this.isInModule()) {
                     //                    this.addUsageToCurrentFile("PPP" + this.currentModuleFullName() + '.' + parts.slice(0, max).join('.'), expr);
-                    this.addUsageToCurrentFile(this.moduleStack[0].name.text + '.' + parts.slice(0, max).join('.'), expr);
+                    var clas = parts.slice(0, max).join('.');
+//                    var modName = "";
+//                    for (var i = 0; i < this.moduleStack.length; ++i)
+//                        if (this.moduleStack[i].name && this.moduleStack[i].name.text) {
+//                            modName += this.moduleStack[i].name.text + ".";
+//                            this.addUsageToCurrentFile(modName + clas, expr);
+//                        }
+                    
+                    var modName = this.currentModuleFullName();
+                    this.addUsageToCurrentFile(modName + clas, expr);
+                    
+//                    this.addUsageToCurrentFile(this.getDeclarationFullName(expr), expr);
                 }
             }
         }
@@ -405,7 +436,7 @@ Object.keys(tree).forEach(fileName => {
 });
 
 import fs = require('fs');
-fs.writeFile("depedencies.json", JSON.stringify(tree, null, 2), function(err) {
+fs.writeFile("dependency.json", JSON.stringify(tree, null, 2), function(err) {
     if (err) {
         return console.log(err);
     }
@@ -414,3 +445,5 @@ fs.writeFile("depedencies.json", JSON.stringify(tree, null, 2), function(err) {
 //console.log(expReportC["jsidea.layout.Transform"]);
 //console.log(expReport);
 //console.log(usageReport["../src/jsidea/display/Graphics.ts"]);
+//console.log(usageReport["../src/jsidea/layout/Transform.ts"]);
+console.log(usageReport["../src/jsidea/layout/TransformMode/Planar.ts"]);

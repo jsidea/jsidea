@@ -1,0 +1,39 @@
+#list {
+	width: 1200px;
+	-moz-column-count: 3;
+	-moz-column-gap: 0;
+}
+
+.entry {
+	border: 1px solid #FF0000;
+	line-height: 30px;
+	height: 30px;
+	width: 100%;
+}
+
+.entry,.entry * {
+	position: relative;
+}
+
+.checkbox {
+	position: absolute;
+	height: 30px;
+	width: 30px;
+}
+
+.entry[data-dependent='1'] .checkbox {
+	background-color: #0000FF;
+}
+
+.entry[data-checked='1'] .checkbox {
+	background-color: #00FF00;
+}
+
+.label {
+	display: inline-box;
+	margin-left: 10px;
+}
+
+.entry[data-checked='1'] .label {
+	background-color: #00FF00;
+}
