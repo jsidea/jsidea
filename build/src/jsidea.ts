@@ -1,255 +1,153 @@
-//TODO: include license/source
-//author: not me
-
 import ts = require("typescript");
 import glob = require("glob");
+import fs = require('fs');
 
-
-type ExportedReport = {
-    [index: string]: string[]
-};
-
-type ComplexDeclaration = ts.ModuleDeclaration
-    | ts.ClassDeclaration
-    | ts.InterfaceDeclaration;
-
-type Declaration = ComplexDeclaration | ts.VariableDeclaration;
-
-type ExportedReportBySymbolName = {
-    [index: string]: string[]
-}
-
-class ExportExtractor {
-    private result: ExportedReport = {};
-    private options: ts.CompilerOptions = {
-        noLib: true
-    };
-    private host = ts.createCompilerHost(this.options);
-    private program: ts.Program = null;
-    private moduleStack: ts.ModuleDeclaration[] = [];
-    private currentFile: ts.SourceFile = null;
-
-    getReport(sourceFiles: string[]): ExportedReport {
-        this.host = ts.createCompilerHost(this.options)
-        this.program = ts.createProgram(sourceFiles, this.options, this.host)
-        this.program.getSourceFiles().forEach(file => this.processFile(file));
-
-        var report = this.result;
-        Object.keys(report).forEach(fileName => {
-            var signatures = report[fileName];
-            var l = signatures.length;
-            for (var i = 1; i < l; ++i) {
-                signatures[i] = signatures[0] + "." + signatures[i];
-            }
-            if (l > 1)
-                signatures.splice(0, 1);
-        });
-
-
-        return report;
-    }
-
-    convertReport(report: ExportedReport): ExportedReportBySymbolName {
-        var result: ExportedReportBySymbolName = {};
-        Object.keys(report).forEach(fileName => {
-            report[fileName].forEach(symbol => {
-                if (!result.hasOwnProperty(symbol)) {
-                    result[symbol] = [];
-                }
-                if (result[symbol].indexOf(fileName) === -1) {
-                    result[symbol].push(fileName);
-                }
-            });
-        });
-        return result;
-    }
-
-    private addToReport(report: ExportedReport, fileName: string, obj: any) {
-        //        console.log("ADD TO REPORT", fileName, obj);
-        if (!report.hasOwnProperty(fileName)) {
-            report[fileName] = [];
-        }
-        if (report[fileName].indexOf(obj) === -1) {
-            report[fileName].push(obj);
-        }
-    }
-
-    private isExported(node: ComplexDeclaration): boolean {
-        if (!node.modifiers) {
-            return false;
-        }
-        return node.modifiers.some(node => node.kind ===
-            ts.SyntaxKind.ExportKeyword);
-    }
-
-    private isVarExported(node: ts.VariableDeclaration): boolean {
-        return (node.flags & ts.NodeFlags.Export) !== 0;
-    }
-
-    private processFile(file: ts.SourceFile) {
-        this.currentFile = file;
-        this.processNode(file);
-    }
-
-    private getDeclarationFullName(declaration: Declaration): string {
-        if (!declaration)
-            return "";
-        var name = "";
-        while (declaration) {
-            var cls: string;
-            if (!(<any>declaration).name) {
-                if ((<any>declaration).left)
-                    cls = (<any>declaration).left + "." + (<any>declaration).right;
-                else if ((<any>declaration).text)
-                    cls = (<any>declaration).text;
-                else
-                    cls = "";
-            }
-            else
-                cls = (<any>declaration).name ? (<any>declaration).name.text : "";
-            if (cls)
-                name = name + (name ? "." : "") + cls;
-            if (!declaration.parent)
-                declaration = (<any>declaration).body;
-            else
-                declaration = (<any>declaration).parent;
-        }
-        return name;
-    }
-
-    private exportNeeded() {
-        return this.moduleStack.length > 0;
-    }
-
-    private processComplexDeclaration(node: ComplexDeclaration) {
-        var complexDeclaration = <ts.ModuleDeclaration>node;
-        if (!this.exportNeeded() || this.isExported(complexDeclaration)) {
-            this.addToReport(this.result, this.currentFile.fileName,
-                this.getDeclarationFullName(complexDeclaration));
-        } else {
-        }
-    }
-
-    private processVarDeclaration(node: ts.VariableDeclaration) {
-        var variableDeclaration = <ts.VariableDeclaration>node;
-        if (!node.parent || !this.exportNeeded() || this.isVarExported(variableDeclaration)) {
-            this.addToReport(this.result, this.currentFile.fileName,
-                this.getDeclarationFullName(variableDeclaration));
-        } else {
-            //            if (node.name && node.name.text == "TRANSFORM") {
-            //                for (var p in node)
-            //                    console.log(p, node[p]);
-            //                console.log("ARRGH", node.getFullText(this.currentFile), !this.exportNeeded(), this.isVarExported(variableDeclaration), node.flags);
-            //            }
-        }
-    }
-
-    private _c = 0;
-    private processNode(node: ts.Node) {
-        var skipChildren = false;
-        switch (node.kind) {
-            case ts.SyntaxKind.ModuleDeclaration:
-                this.processComplexDeclaration(<ComplexDeclaration>node);
-                this.moduleStack.push(<ts.ModuleDeclaration>node);
-                break;
-            case ts.SyntaxKind.ClassDeclaration:
-                this.processComplexDeclaration(<ComplexDeclaration>node);
-                skipChildren = true;
-                break;
-            case ts.SyntaxKind.InterfaceDeclaration:
-                this.processComplexDeclaration(<ComplexDeclaration>node);
-                break;
-            case ts.SyntaxKind.EnumDeclaration:
-                this.processComplexDeclaration(<ComplexDeclaration>node);
-                break;
-            case ts.SyntaxKind.VariableDeclaration:
-                this.processVarDeclaration(<ts.VariableDeclaration>node);
-                break;
-            //            case ts.SyntaxKind.Identifier:
-            ////                console.log(node);
-            ////                console.log("ID", node);
-            //                break;
-            ////           default:
-            //                console.log(node.kind, node);
-        }
-
-        //        if (node.name && node.name.text == "TRANSFORM")
-        //            console.log(node, node.kind);
-
-        //        if (!this.skipInternal) {
-        //            if (this._c++ < 10)
-        //                console.log(node);
-        if (!skipChildren)
-            ts.forEachChild(node, node => this.processNode(node));
-        //        }
-
-        if (node.kind == ts.SyntaxKind.ModuleDeclaration)
-            this.moduleStack.pop();
-    }
-}
-
-var tsAlias = <any>ts;
-
-type UsageReport = {
+type Result = {
     [fileName: string]: string[];
 }
 
-type UsageFileReport = {
-    [fileName: string]: ts.Node[];
+abstract class BaseProcessor {
+    public result: Result = null;
+
+    protected _host: ts.CompilerHost;
+    protected _program: ts.Program;
+    protected _options: ts.CompilerOptions = { noLib: true };
+    protected _file: ts.SourceFile;
+
+    public run(sourceFiles: string[]): void {
+        this.prepare(sourceFiles);
+        this._host = ts.createCompilerHost(this._options)
+        this._program = ts.createProgram(sourceFiles, this._options, this._host)
+        this._program.getSourceFiles().forEach(file => { this._file = file; this.processNode(file) });
+        this.finalize();
+    }
+
+    protected abstract processNode(node: ts.Node): void;
+
+    protected getQualifiedName(node: ts.Node): string {
+        var symbol: ts.Symbol = this.getSymbol(node);
+        if (!symbol)
+            return "";
+        return this._program.getTypeChecker().getFullyQualifiedName(symbol);
+    }
+
+    protected getName(node: ts.Node): string {
+        var path = this.getPath(node);
+        return path ? path[path.length - 1] : "";
+    }
+
+    protected getPath(node: ts.Node): string[] {
+        var qname = this.getQualifiedName(node);
+        if (qname)
+            return qname.split(".");
+        return null;
+    }
+
+    protected getSymbol(node: ts.Node): ts.Symbol {
+        var symbol: ts.Symbol = this._program.getTypeChecker().getSymbolAtLocation(node);
+        if (!symbol)
+            symbol = (<any>node).symbol;
+        return symbol;
+    }
+
+    protected addQualifiedName(qualifiedName: string): void {
+        if (!qualifiedName)
+            return;
+        var fileName: string = String(this._file.fileName);
+        if (!this.result.hasOwnProperty(fileName))
+            this.result[fileName] = [];
+        if (this.result[fileName].indexOf(qualifiedName) === -1) {
+            this.result[fileName].push(qualifiedName);
+        }
+    }
+
+    protected prepare(sourceFiles: string[]): void {
+        this.result = {};
+    }
+
+
+    protected finalize(): void { }
 }
 
-class UsageExtractor {
+class ExportProcessor extends BaseProcessor {
+    public association: Result = null;
 
-    private program: ts.Program = null;
-    private currentFile: ts.SourceFile;
-    private report: UsageReport = {};
+    private _stack: ts.ModuleDeclaration[] = [];
 
-    findUsages(sourceFiles: string[]): UsageReport {
-        var options: ts.CompilerOptions = { noLib: true };
-        var host = ts.createCompilerHost(options)
-        this.program = ts.createProgram(sourceFiles, options, host)
-        this.program.getSourceFiles().forEach(file => this.processFile(file));
-        return this.report;
+    protected prepare(sourceFiles: string[]): void {
+        super.prepare(sourceFiles);
+        this.association = {};
     }
 
-    private processFile(file: ts.SourceFile) {
-        this.currentFile = file;
-        this.processNode(file);
+    protected processNode(node: ts.Node): void {
+        if (node.kind == ts.SyntaxKind.ModuleDeclaration)
+            this._stack.push(<ts.ModuleDeclaration>node);
+
+        switch (node.kind) {
+            case ts.SyntaxKind.ModuleDeclaration:
+            case ts.SyntaxKind.ClassDeclaration:
+            case ts.SyntaxKind.InterfaceDeclaration:
+            case ts.SyntaxKind.EnumDeclaration:
+            case ts.SyntaxKind.VariableDeclaration:
+                this.extract(node);
+        }
+
+        var skipChildren = node.kind == ts.SyntaxKind.ClassDeclaration;
+        if (!skipChildren)
+            ts.forEachChild(node, node => this.processNode(node));
+
+        if (node.kind == ts.SyntaxKind.ModuleDeclaration)
+            this._stack.pop();
     }
 
-    private processNode(node: ts.Node) {
+    private extract(node: ts.Node) {
+        if (this.isExported(node)) {
+            this.addQualifiedName(this.getQualifiedName(node));
+        }
+    }
+
+    private isExported(node: ts.Node): boolean {
+        if (this._stack.length == 0)
+            return false;
+        var name = this.getName(node);
+        var mod: any = this._stack[this._stack.length - 1];
+        return mod.symbol ? Boolean(mod.symbol.exports.hasOwnProperty(name)) : false;
+    }
+
+    protected finalize(): void {
+        Object.keys(this.result).forEach(fileName => {
+            this.result[fileName].forEach(symbol => {
+                if (!this.association.hasOwnProperty(symbol)) {
+                    this.association[symbol] = [];
+                }
+                if (this.association[symbol].indexOf(fileName) === -1) {
+                    this.association[symbol].push(fileName);
+                }
+            });
+        });
+    }
+}
+
+class ImportProcessor extends BaseProcessor {
+    protected processNode(node: ts.Node): void {
         if (node.kind === ts.SyntaxKind.Identifier) {
-            var identifier = <ts.Identifier>node;
-            this.addNode(node);
+            this.extract(node);
         } else if (node.kind === ts.SyntaxKind.PropertyAccessExpression) {
-            return this.addNode(node);
+            return this.extract(node);
         }
 
         ts.forEachChild(node, node => this.processNode(node));
     }
 
-    private addUsageToCurrentFile(usage: string, file: ts.Node) {
-
-        if (!this.report.hasOwnProperty(this.currentFile.fileName)) {
-            this.report[this.currentFile.fileName] = [];
-        }
-        if (this.report[this.currentFile.fileName].indexOf(usage) === -1) {
-            this.report[this.currentFile.fileName].push(usage);
-        }
-    }
-
-    private addNode(node: ts.Node) {
-        var fullName = this.getFullName(node);
+    private extract(node: ts.Node): void {
+        var fullName = this.getQualifiedName(node);
         if (fullName) {
-            this.addUsageToCurrentFile(this.getFullName(node), node);
+            this.addQualifiedName(fullName);
         }
     }
 
-    private getFullName(node: ts.Node): string {
-        var symbol = this.program.getTypeChecker().getSymbolAtLocation(node);
-        if (!symbol)
-            return null;
-        return this.program.getTypeChecker().getFullyQualifiedName(symbol);
+    protected finalize(): void {
+
     }
 }
 
@@ -264,8 +162,7 @@ function pushIfNotContained(arr: any[], obj: any) {
 }
 
 class DependencyManager {
-
-    createDepdencyTree(bySymbolExportReport: ExportedReportBySymbolName, usageReport: UsageReport): DependencyTree {
+    createDepdencyTree(bySymbolExportReport: Result, usageReport: Result): DependencyTree {
         var tree: DependencyTree = {};
         Object.keys(usageReport).forEach(fileName => {
             usageReport[fileName].forEach(symbol => {
@@ -276,7 +173,6 @@ class DependencyManager {
         });
         return tree;
     }
-
     sortFromDepdencyTree(tree: DependencyTree): string[] {
         var sortedFiles = [];
         Object.keys(tree).forEach(fileWithDepdendencies => {
@@ -313,21 +209,15 @@ class DependencyManager {
     }
 }
 
-//var sourceFiles = glob.sync('./../src/jsidea.ts');
-//var sourceFiles = glob.sync('./../src/jsidea/layout/MoveMode/Transform.ts');
 var sourceFiles = glob.sync('./../src/jsidea/**/**.ts');
-
-var exp = new ExportExtractor();
-var expReport = exp.getReport(sourceFiles);
-var expReportC = exp.convertReport(expReport);
-var usg = new UsageExtractor();
-var usageReport = usg.findUsages(sourceFiles);
+var im = new ImportProcessor();
+im.run(sourceFiles);
+var ex = new ExportProcessor();
+ex.run(sourceFiles);
 var dpm = new DependencyManager();
-var tree = dpm.createDepdencyTree(expReportC, usageReport);
-//console.log(tree);
+var tree = dpm.createDepdencyTree(ex.association, im.result);
 
-
-function correctFileName(fileName: string): string {
+function fileNameToQualifiedName(fileName: string): string {
     fileName = fileName.replace("../src/", "");
     fileName = fileName.replace(/\//gi, ".");
     var idx = fileName.lastIndexOf(".ts");
@@ -336,22 +226,15 @@ function correctFileName(fileName: string): string {
 Object.keys(tree).forEach(fileName => {
     var val = tree[fileName];
     delete tree[fileName];
-    fileName = correctFileName(fileName);
+    fileName = fileNameToQualifiedName(fileName);
     tree[fileName] = val;
     var l = val.length;
     for (var i = 0; i < l; ++i)
-        val[i] = correctFileName(val[i]);
+        val[i] = fileNameToQualifiedName(val[i]);
 });
 
-import fs = require('fs');
 fs.writeFile("dependency.json", JSON.stringify(tree, null, 2), function(err) {
     if (err) {
         return console.log(err);
     }
-}); 
-
-//console.log(expReportC["jsidea.layout.Transform"]);
-//console.log(expReport);
-//console.log(usageReport["../src/jsidea/display/Graphics.ts"]);
-//console.log(usageReport["../src/jsidea/layout/Transform.ts"]);
-console.log(usageReport["../src/jsidea/layout/TransformMode/Planar.ts"]);
+});

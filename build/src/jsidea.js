@@ -1,203 +1,143 @@
-//TODO: include license/source
-//author: not me
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var ts = require("typescript");
 var glob = require("glob");
-var ExportExtractor = (function () {
-    function ExportExtractor() {
-        this.result = {};
-        this.options = {
-            noLib: true
-        };
-        this.host = ts.createCompilerHost(this.options);
-        this.program = null;
-        this.moduleStack = [];
-        this.currentFile = null;
-        this._c = 0;
+var fs = require('fs');
+var BaseProcessor = (function () {
+    function BaseProcessor() {
+        this.result = null;
+        this._options = { noLib: true };
     }
-    ExportExtractor.prototype.getReport = function (sourceFiles) {
+    BaseProcessor.prototype.run = function (sourceFiles) {
         var _this = this;
-        this.host = ts.createCompilerHost(this.options);
-        this.program = ts.createProgram(sourceFiles, this.options, this.host);
-        this.program.getSourceFiles().forEach(function (file) { return _this.processFile(file); });
-        var report = this.result;
-        Object.keys(report).forEach(function (fileName) {
-            var signatures = report[fileName];
-            var l = signatures.length;
-            for (var i = 1; i < l; ++i) {
-                signatures[i] = signatures[0] + "." + signatures[i];
-            }
-            if (l > 1)
-                signatures.splice(0, 1);
-        });
-        return report;
+        this.prepare(sourceFiles);
+        this._host = ts.createCompilerHost(this._options);
+        this._program = ts.createProgram(sourceFiles, this._options, this._host);
+        this._program.getSourceFiles().forEach(function (file) { _this._file = file; _this.processNode(file); });
+        this.finalize();
     };
-    ExportExtractor.prototype.convertReport = function (report) {
-        var result = {};
-        Object.keys(report).forEach(function (fileName) {
-            report[fileName].forEach(function (symbol) {
-                if (!result.hasOwnProperty(symbol)) {
-                    result[symbol] = [];
+    BaseProcessor.prototype.getQualifiedName = function (node) {
+        var symbol = this.getSymbol(node);
+        if (!symbol)
+            return "";
+        return this._program.getTypeChecker().getFullyQualifiedName(symbol);
+    };
+    BaseProcessor.prototype.getName = function (node) {
+        var path = this.getPath(node);
+        return path ? path[path.length - 1] : "";
+    };
+    BaseProcessor.prototype.getPath = function (node) {
+        var qname = this.getQualifiedName(node);
+        if (qname)
+            return qname.split(".");
+        return null;
+    };
+    BaseProcessor.prototype.getSymbol = function (node) {
+        var symbol = this._program.getTypeChecker().getSymbolAtLocation(node);
+        if (!symbol)
+            symbol = node.symbol;
+        return symbol;
+    };
+    BaseProcessor.prototype.addQualifiedName = function (qualifiedName) {
+        if (!qualifiedName)
+            return;
+        var fileName = String(this._file.fileName);
+        if (!this.result.hasOwnProperty(fileName))
+            this.result[fileName] = [];
+        if (this.result[fileName].indexOf(qualifiedName) === -1) {
+            this.result[fileName].push(qualifiedName);
+        }
+    };
+    BaseProcessor.prototype.prepare = function (sourceFiles) {
+        this.result = {};
+    };
+    BaseProcessor.prototype.finalize = function () { };
+    return BaseProcessor;
+})();
+var ExportProcessor = (function (_super) {
+    __extends(ExportProcessor, _super);
+    function ExportProcessor() {
+        _super.apply(this, arguments);
+        this.association = null;
+        this._stack = [];
+    }
+    ExportProcessor.prototype.prepare = function (sourceFiles) {
+        _super.prototype.prepare.call(this, sourceFiles);
+        this.association = {};
+    };
+    ExportProcessor.prototype.processNode = function (node) {
+        var _this = this;
+        if (node.kind == 216 /* ModuleDeclaration */)
+            this._stack.push(node);
+        switch (node.kind) {
+            case 216 /* ModuleDeclaration */:
+            case 212 /* ClassDeclaration */:
+            case 213 /* InterfaceDeclaration */:
+            case 215 /* EnumDeclaration */:
+            case 209 /* VariableDeclaration */:
+                this.extract(node);
+        }
+        var skipChildren = node.kind == 212 /* ClassDeclaration */;
+        if (!skipChildren)
+            ts.forEachChild(node, function (node) { return _this.processNode(node); });
+        if (node.kind == 216 /* ModuleDeclaration */)
+            this._stack.pop();
+    };
+    ExportProcessor.prototype.extract = function (node) {
+        if (this.isExported(node)) {
+            this.addQualifiedName(this.getQualifiedName(node));
+        }
+    };
+    ExportProcessor.prototype.isExported = function (node) {
+        if (this._stack.length == 0)
+            return false;
+        var name = this.getName(node);
+        var mod = this._stack[this._stack.length - 1];
+        return mod.symbol ? Boolean(mod.symbol.exports.hasOwnProperty(name)) : false;
+    };
+    ExportProcessor.prototype.finalize = function () {
+        var _this = this;
+        Object.keys(this.result).forEach(function (fileName) {
+            _this.result[fileName].forEach(function (symbol) {
+                if (!_this.association.hasOwnProperty(symbol)) {
+                    _this.association[symbol] = [];
                 }
-                if (result[symbol].indexOf(fileName) === -1) {
-                    result[symbol].push(fileName);
+                if (_this.association[symbol].indexOf(fileName) === -1) {
+                    _this.association[symbol].push(fileName);
                 }
             });
         });
-        return result;
     };
-    ExportExtractor.prototype.addToReport = function (report, fileName, obj) {
-        //        console.log("ADD TO REPORT", fileName, obj);
-        if (!report.hasOwnProperty(fileName)) {
-            report[fileName] = [];
-        }
-        if (report[fileName].indexOf(obj) === -1) {
-            report[fileName].push(obj);
-        }
-    };
-    ExportExtractor.prototype.isExported = function (node) {
-        if (!node.modifiers) {
-            return false;
-        }
-        return node.modifiers.some(function (node) { return node.kind ===
-            80 /* ExportKeyword */; });
-    };
-    ExportExtractor.prototype.isVarExported = function (node) {
-        return (node.flags & 1 /* Export */) !== 0;
-    };
-    ExportExtractor.prototype.processFile = function (file) {
-        this.currentFile = file;
-        this.processNode(file);
-    };
-    ExportExtractor.prototype.getDeclarationFullName = function (declaration) {
-        if (!declaration)
-            return "";
-        var name = "";
-        while (declaration) {
-            var cls;
-            if (!declaration.name) {
-                if (declaration.left)
-                    cls = declaration.left + "." + declaration.right;
-                else if (declaration.text)
-                    cls = declaration.text;
-                else
-                    cls = "";
-            }
-            else
-                cls = declaration.name ? declaration.name.text : "";
-            if (cls)
-                name = name + (name ? "." : "") + cls;
-            if (!declaration.parent)
-                declaration = declaration.body;
-            else
-                declaration = declaration.parent;
-        }
-        return name;
-    };
-    ExportExtractor.prototype.exportNeeded = function () {
-        return this.moduleStack.length > 0;
-    };
-    ExportExtractor.prototype.processComplexDeclaration = function (node) {
-        var complexDeclaration = node;
-        if (!this.exportNeeded() || this.isExported(complexDeclaration)) {
-            this.addToReport(this.result, this.currentFile.fileName, this.getDeclarationFullName(complexDeclaration));
-        }
-        else {
-        }
-    };
-    ExportExtractor.prototype.processVarDeclaration = function (node) {
-        var variableDeclaration = node;
-        if (!node.parent || !this.exportNeeded() || this.isVarExported(variableDeclaration)) {
-            this.addToReport(this.result, this.currentFile.fileName, this.getDeclarationFullName(variableDeclaration));
-        }
-        else {
-        }
-    };
-    ExportExtractor.prototype.processNode = function (node) {
-        var _this = this;
-        var skipChildren = false;
-        switch (node.kind) {
-            case 216 /* ModuleDeclaration */:
-                this.processComplexDeclaration(node);
-                this.moduleStack.push(node);
-                break;
-            case 212 /* ClassDeclaration */:
-                this.processComplexDeclaration(node);
-                skipChildren = true;
-                break;
-            case 213 /* InterfaceDeclaration */:
-                this.processComplexDeclaration(node);
-                break;
-            case 215 /* EnumDeclaration */:
-                this.processComplexDeclaration(node);
-                break;
-            case 209 /* VariableDeclaration */:
-                this.processVarDeclaration(node);
-                break;
-        }
-        //        if (node.name && node.name.text == "TRANSFORM")
-        //            console.log(node, node.kind);
-        //        if (!this.skipInternal) {
-        //            if (this._c++ < 10)
-        //                console.log(node);
-        if (!skipChildren)
-            ts.forEachChild(node, function (node) { return _this.processNode(node); });
-        //        }
-        if (node.kind == 216 /* ModuleDeclaration */)
-            this.moduleStack.pop();
-    };
-    return ExportExtractor;
-})();
-var tsAlias = ts;
-var UsageExtractor = (function () {
-    function UsageExtractor() {
-        this.program = null;
-        this.report = {};
+    return ExportProcessor;
+})(BaseProcessor);
+var ImportProcessor = (function (_super) {
+    __extends(ImportProcessor, _super);
+    function ImportProcessor() {
+        _super.apply(this, arguments);
     }
-    UsageExtractor.prototype.findUsages = function (sourceFiles) {
-        var _this = this;
-        var options = { noLib: true };
-        var host = ts.createCompilerHost(options);
-        this.program = ts.createProgram(sourceFiles, options, host);
-        this.program.getSourceFiles().forEach(function (file) { return _this.processFile(file); });
-        return this.report;
-    };
-    UsageExtractor.prototype.processFile = function (file) {
-        this.currentFile = file;
-        this.processNode(file);
-    };
-    UsageExtractor.prototype.processNode = function (node) {
+    ImportProcessor.prototype.processNode = function (node) {
         var _this = this;
         if (node.kind === 67 /* Identifier */) {
-            var identifier = node;
-            this.addNode(node);
+            this.extract(node);
         }
         else if (node.kind === 164 /* PropertyAccessExpression */) {
-            return this.addNode(node);
+            return this.extract(node);
         }
         ts.forEachChild(node, function (node) { return _this.processNode(node); });
     };
-    UsageExtractor.prototype.addUsageToCurrentFile = function (usage, file) {
-        if (!this.report.hasOwnProperty(this.currentFile.fileName)) {
-            this.report[this.currentFile.fileName] = [];
-        }
-        if (this.report[this.currentFile.fileName].indexOf(usage) === -1) {
-            this.report[this.currentFile.fileName].push(usage);
-        }
-    };
-    UsageExtractor.prototype.addNode = function (node) {
-        var fullName = this.getFullName(node);
+    ImportProcessor.prototype.extract = function (node) {
+        var fullName = this.getQualifiedName(node);
         if (fullName) {
-            this.addUsageToCurrentFile(this.getFullName(node), node);
+            this.addQualifiedName(fullName);
         }
     };
-    UsageExtractor.prototype.getFullName = function (node) {
-        var symbol = this.program.getTypeChecker().getSymbolAtLocation(node);
-        if (!symbol)
-            return null;
-        return this.program.getTypeChecker().getFullyQualifiedName(symbol);
+    ImportProcessor.prototype.finalize = function () {
     };
-    return UsageExtractor;
-})();
+    return ImportProcessor;
+})(BaseProcessor);
 function pushIfNotContained(arr, obj) {
     if (arr.indexOf(obj) === -1) {
         arr.push(obj);
@@ -254,18 +194,14 @@ var DependencyManager = (function () {
     };
     return DependencyManager;
 })();
-//var sourceFiles = glob.sync('./../src/jsidea.ts');
-//var sourceFiles = glob.sync('./../src/jsidea/layout/MoveMode/Transform.ts');
 var sourceFiles = glob.sync('./../src/jsidea/**/**.ts');
-var exp = new ExportExtractor();
-var expReport = exp.getReport(sourceFiles);
-var expReportC = exp.convertReport(expReport);
-var usg = new UsageExtractor();
-var usageReport = usg.findUsages(sourceFiles);
+var im = new ImportProcessor();
+im.run(sourceFiles);
+var ex = new ExportProcessor();
+ex.run(sourceFiles);
 var dpm = new DependencyManager();
-var tree = dpm.createDepdencyTree(expReportC, usageReport);
-//console.log(tree);
-function correctFileName(fileName) {
+var tree = dpm.createDepdencyTree(ex.association, im.result);
+function fileNameToQualifiedName(fileName) {
     fileName = fileName.replace("../src/", "");
     fileName = fileName.replace(/\//gi, ".");
     var idx = fileName.lastIndexOf(".ts");
@@ -274,20 +210,14 @@ function correctFileName(fileName) {
 Object.keys(tree).forEach(function (fileName) {
     var val = tree[fileName];
     delete tree[fileName];
-    fileName = correctFileName(fileName);
+    fileName = fileNameToQualifiedName(fileName);
     tree[fileName] = val;
     var l = val.length;
     for (var i = 0; i < l; ++i)
-        val[i] = correctFileName(val[i]);
+        val[i] = fileNameToQualifiedName(val[i]);
 });
-var fs = require('fs');
 fs.writeFile("dependency.json", JSON.stringify(tree, null, 2), function (err) {
     if (err) {
         return console.log(err);
     }
 });
-//console.log(expReportC["jsidea.layout.Transform"]);
-//console.log(expReport);
-//console.log(usageReport["../src/jsidea/display/Graphics.ts"]);
-//console.log(usageReport["../src/jsidea/layout/Transform.ts"]);
-console.log(usageReport["../src/jsidea/layout/TransformMode/Planar.ts"]);
