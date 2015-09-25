@@ -190,10 +190,6 @@ class ExportExtractor {
 
 var tsAlias = <any>ts;
 
-function kindToString(kind: number): string {
-    return tsAlias.SyntaxKind[kind];
-}
-
 type UsageReport = {
     [fileName: string]: string[];
 }
@@ -204,17 +200,14 @@ type UsageFileReport = {
 
 class UsageExtractor {
 
-    private options: ts.CompilerOptions = {
-        noLib: true
-    };
-    private host = ts.createCompilerHost(this.options);
     private program: ts.Program = null;
     private currentFile: ts.SourceFile;
     private report: UsageReport = {};
 
     findUsages(sourceFiles: string[]): UsageReport {
-        this.host = ts.createCompilerHost(this.options)
-        this.program = ts.createProgram(sourceFiles, this.options, this.host)
+        var options: ts.CompilerOptions = { noLib: true };
+        var host = ts.createCompilerHost(options)
+        this.program = ts.createProgram(sourceFiles, options, host)
         this.program.getSourceFiles().forEach(file => this.processFile(file));
         return this.report;
     }
@@ -224,81 +217,19 @@ class UsageExtractor {
         this.processNode(file);
     }
 
-    private visitChildren = true;
-
-    private moduleStack: ts.ModuleDeclaration[] = [];
-
     private processNode(node: ts.Node) {
-        if (node.kind === ts.SyntaxKind.ModuleDeclaration) {
-            this.moduleStack.push(<ts.ModuleDeclaration>node);
-        }
-
         if (node.kind === ts.SyntaxKind.Identifier) {
             var identifier = <ts.Identifier>node;
-            //console.log(`Identifier: ${identifier.text} <= ${kindToString(identifier.parent.kind)}`);
-            this.processIdentifier(identifier);
+            this.addNode(node);
         } else if (node.kind === ts.SyntaxKind.PropertyAccessExpression) {
-            this.processPropertyAccessExpression(<ts.PropertyAccessExpression>node);
-            this.visitChildren = false;
+            return this.addNode(node);
         }
 
-        if (this.visitChildren) {
-            ts.forEachChild(node, node => this.processNode(node));
-        }
-        this.visitChildren = true;
-
-        if (node.kind === ts.SyntaxKind.ModuleDeclaration) {
-            this.moduleStack.pop();
-        }
+        ts.forEachChild(node, node => this.processNode(node));
     }
 
-    private isInModule(): boolean {
-        return this.moduleStack.length > 0;
-    }
-
-    private currentModuleFullName(): string {
-        if (this.moduleStack.length) {
-            return this.moduleStack.map(moduleDeclaration => moduleDeclaration.name.text).join('.');
-        } else {
-            return '';
-        }
-    }
-
-    private processIdentifier(id: ts.Identifier) {
-        this.addUsageToCurrentFile(id.text, id);
-        if (this.isInModule()) {
-            this.addUsageToCurrentFile(this.currentModuleFullName() + '.' + id.text, id);
-        }
-    }
-
-    private getDeclarationFullName(declaration: Declaration): string {
-        if (!declaration)
-            return "";
-        var name = "";
-        while (declaration) {
-            var cls: string;
-            if (!(<any>declaration).name) {
-                if ((<any>declaration).left)
-                    cls = (<any>declaration).left + "." + (<any>declaration).right;
-                else if ((<any>declaration).text)
-                    cls = (<any>declaration).text;
-                else
-                    cls = "";
-            }
-            else
-                cls = (<any>declaration).name ? (<any>declaration).name.text : "";
-            if (cls)
-                name = name + (name ? "." : "") + cls;
-            if (!declaration.parent)
-                declaration = (<any>declaration).body;
-            else
-                declaration = (<any>declaration).parent;
-        }
-        return name;
-    }
-    
     private addUsageToCurrentFile(usage: string, file: ts.Node) {
-        
+
         if (!this.report.hasOwnProperty(this.currentFile.fileName)) {
             this.report[this.currentFile.fileName] = [];
         }
@@ -307,41 +238,18 @@ class UsageExtractor {
         }
     }
 
-    private processPropertyAccessExpression(expr: ts.PropertyAccessExpression) {
-        var fullName = this.getFullNameFromPropertyAccessExpression(expr);
-        if (fullName != null) {
-            var parts = fullName.split('.');
-            for (var max = 1; max < parts.length + 1; max++) {
-                this.addUsageToCurrentFile(parts.slice(0, max).join('.'), expr);
-                if (this.isInModule()) {
-                    //                    this.addUsageToCurrentFile("PPP" + this.currentModuleFullName() + '.' + parts.slice(0, max).join('.'), expr);
-                    var clas = parts.slice(0, max).join('.');
-//                    var modName = "";
-//                    for (var i = 0; i < this.moduleStack.length; ++i)
-//                        if (this.moduleStack[i].name && this.moduleStack[i].name.text) {
-//                            modName += this.moduleStack[i].name.text + ".";
-//                            this.addUsageToCurrentFile(modName + clas, expr);
-//                        }
-                    
-                    var modName = this.currentModuleFullName();
-                    this.addUsageToCurrentFile(modName + clas, expr);
-                    
-//                    this.addUsageToCurrentFile(this.getDeclarationFullName(expr), expr);
-                }
-            }
+    private addNode(node: ts.Node) {
+        var fullName = this.getFullName(node);
+        if (fullName) {
+            this.addUsageToCurrentFile(this.getFullName(node), node);
         }
     }
 
-    private getFullNameFromPropertyAccessExpression(expr: ts.PropertyAccessExpression): string {
-        if (expr.expression.kind === ts.SyntaxKind.Identifier) {
-            return (<ts.Identifier>expr.expression).text + '.' + expr.name.text;
-        } else if (expr.expression.kind === ts.SyntaxKind.PropertyAccessExpression) {
-            var prop = <ts.PropertyAccessExpression>expr.expression;
-            return this.getFullNameFromPropertyAccessExpression(prop) + '.' + expr.name.text;
-        } else {
-            this.processNode(expr.expression);
+    private getFullName(node: ts.Node): string {
+        var symbol = this.program.getTypeChecker().getSymbolAtLocation(node);
+        if (!symbol)
             return null;
-        }
+        return this.program.getTypeChecker().getFullyQualifiedName(symbol);
     }
 }
 

@@ -1,12 +1,22 @@
 {
   "jsidea.action.Cursor": [
-    "jsidea.events.EventDispatcher"
+    "jsidea.events.EventDispatcher",
+    "jsidea.geom.Point2D"
   ],
   "jsidea.action.EventCircuit": [
-    "jsidea.events.EventDispatcher"
+    "jsidea.events.EventDispatcher",
+    "jsidea.geom.Point2D"
   ],
-  "jsidea.display.Graphics": [],
-  "jsidea.events.EventDispatcher": [],
+  "jsidea.display.Graphics": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.BoxModel.Border",
+    "jsidea.layout.BoxModel.Canvas",
+    "jsidea.geom.Quad",
+    "jsidea.geom.Rect2D"
+  ],
+  "jsidea.events.EventDispatcher": [
+    "jsidea.model.Dictionary"
+  ],
   "jsidea.events.Events": [],
   "jsidea.geom.AffineFit": [
     "jsidea.geom.Point2D",
@@ -36,78 +46,248 @@
     "jsidea.geom.Quad"
   ],
   "jsidea.layout.Box": [
-    "jsidea.layout.BoxModel.IBoxModel"
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.geom.Rect2D",
+    "jsidea.layout.BoxModel.Border",
+    "jsidea.geom.Point3D"
   ],
   "jsidea.layout.BoxModel.Attachment": [
-    "jsidea.layout.BoxModel.Background"
-  ],
-  "jsidea.layout.BoxModel.Background": [],
-  "jsidea.layout.BoxModel.Border": [],
-  "jsidea.layout.BoxModel.Canvas": [],
-  "jsidea.layout.BoxModel.Clip": [],
-  "jsidea.layout.BoxModel.Content": [],
-  "jsidea.layout.BoxModel.IBoxModel": [
-    "jsidea.layout.Box"
-  ],
-  "jsidea.layout.BoxModel.Image": [],
-  "jsidea.layout.BoxModel.Margin": [],
-  "jsidea.layout.BoxModel.NormalDeviceCoordinates": [],
-  "jsidea.layout.BoxModel.Padding": [],
-  "jsidea.layout.BoxModel.Scroll": [],
-  "jsidea.layout.Move": [
-    "jsidea.layout.BoxModel.IBoxModel",
-    "jsidea.layout.MoveMode.IMoveMode",
-    "jsidea.layout.Transform"
-  ],
-  "jsidea.layout.MoveMode.Background": [],
-  "jsidea.layout.MoveMode.BorderBottomRightInner": [],
-  "jsidea.layout.MoveMode.BorderBottomRightOuter": [],
-  "jsidea.layout.MoveMode.BorderTopLeft": [],
-  "jsidea.layout.MoveMode.BottomLeft": [],
-  "jsidea.layout.MoveMode.BottomRight": [],
-  "jsidea.layout.MoveMode.Clip": [],
-  "jsidea.layout.MoveMode.ClipBottomRight": [],
-  "jsidea.layout.MoveMode.IMoveMode": [
+    "jsidea.layout.BoxModel.Background",
+    "jsidea.layout.Box",
+    "jsidea.geom.Rect2D",
+    "jsidea.layout.BoxModel.Padding",
+    "jsidea.layout.BoxModel.Border",
+    "jsidea.geom.Point3D",
     "jsidea.layout.BoxModel.IBoxModel"
   ],
-  "jsidea.layout.MoveMode.MarginBottomRight": [],
-  "jsidea.layout.MoveMode.MarginTopLeft": [],
-  "jsidea.layout.MoveMode.Scroll": [],
-  "jsidea.layout.MoveMode.TopLeft": [],
-  "jsidea.layout.MoveMode.TopLeftClamped": [],
-  "jsidea.layout.MoveMode.TopRight": [],
-  "jsidea.layout.MoveMode.Transform": [],
+  "jsidea.layout.BoxModel.Background": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.geom.Point3D",
+    "jsidea.layout.Box",
+    "jsidea.geom.Rect2D",
+    "jsidea.layout.BoxModel.Padding",
+    "jsidea.layout.BoxModel.Border"
+  ],
+  "jsidea.layout.BoxModel.Border": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.BoxModel.Canvas": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.geom.Matrix2D",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.BoxModel.Clip": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.geom.Rect2D",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.BoxModel.Content": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.BoxModel.IBoxModel": [
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.BoxModel.Image": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.BoxModel.Margin": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.BoxModel.NormalDeviceCoordinates": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.BoxModel.Padding": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.BoxModel.Scroll": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point2D",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.Move": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.geom.Point3D",
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.layout.Transform",
+    "jsidea.layout.MoveMode.Transform",
+    "jsidea.layout.BoxModel.Border"
+  ],
+  "jsidea.layout.MoveMode.Background": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.BoxModel.Background",
+    "jsidea.geom.Rect2D",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D",
+    "jsidea.layout.BoxModel.Padding"
+  ],
+  "jsidea.layout.MoveMode.BorderBottomRightInner": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.BoxModel.Border",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.MoveMode.BorderBottomRightOuter": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.MoveMode.BorderTopLeft": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.MoveMode.BottomLeft": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.MoveMode.BottomRight": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.MoveMode.Clip": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.BoxModel.Clip",
+    "jsidea.geom.Rect2D",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.MoveMode.ClipBottomRight": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.BoxModel.Clip",
+    "jsidea.geom.Rect2D",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.MoveMode.IMoveMode": [
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.MoveMode.MarginBottomRight": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.MoveMode.MarginTopLeft": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.MoveMode.Scroll": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.BoxModel.Scroll",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.MoveMode.TopLeft": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.layout.Box",
+    "jsidea.geom.Point3D",
+    "jsidea.layout.BoxModel.Border",
+    "jsidea.layout.BoxModel.Content"
+  ],
+  "jsidea.layout.MoveMode.TopLeftClamped": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.MoveMode.TopRight": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.geom.Point3D"
+  ],
+  "jsidea.layout.MoveMode.Transform": [
+    "jsidea.layout.MoveMode.IMoveMode",
+    "jsidea.geom.Matrix3D",
+    "jsidea.geom.Point3D"
+  ],
   "jsidea.layout.Position": [
     "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.math.Number",
     "jsidea.layout.Snap",
     "jsidea.layout.Move",
-    "jsidea.layout.Transform"
+    "jsidea.layout.Transform",
+    "jsidea.geom.Point3D",
+    "jsidea.layout.BoxModel.Border",
+    "jsidea.geom.Matrix3D"
   ],
   "jsidea.layout.Snap": [
     "jsidea.layout.BoxModel.IBoxModel",
     "jsidea.layout.SnapMode.ISnapMode",
     "jsidea.layout.Move",
-    "jsidea.layout.Transform"
+    "jsidea.layout.Transform",
+    "jsidea.geom.Point3D",
+    "jsidea.layout.BoxModel.Border",
+    "jsidea.layout.SnapMode.Basic",
+    "jsidea.geom.Matrix3D"
   ],
-  "jsidea.layout.SnapMode.Basic": [],
+  "jsidea.layout.SnapMode.Basic": [
+    "jsidea.layout.SnapMode.ISnapMode",
+    "jsidea.layout.Snap",
+    "jsidea.layout.Transform",
+    "jsidea.geom.Point3D"
+  ],
   "jsidea.layout.SnapMode.ISnapMode": [
     "jsidea.layout.Snap",
-    "jsidea.layout.Transform"
+    "jsidea.layout.Transform",
+    "jsidea.geom.Point3D"
   ],
-  "jsidea.layout.StyleChain": [],
+  "jsidea.layout.StyleChain": [
+    "jsidea.geom.Point2D"
+  ],
   "jsidea.layout.Transform": [
     "jsidea.layout.BoxModel.IBoxModel",
+    "jsidea.layout.BoxModel.Border",
+    "jsidea.geom.Matrix3D",
     "jsidea.layout.Box",
-    "jsidea.layout.TransformMode.ITransformMode"
+    "jsidea.layout.TransformMode.ITransformMode",
+    "jsidea.layout.TransformMode.Rectangle",
+    "jsidea.layout.TransformMode.Planar",
+    "jsidea.geom.Point3D",
+    "jsidea.geom.Quad"
   ],
   "jsidea.layout.TransformMode.ITransformMode": [
-    "jsidea.layout.Transform"
+    "jsidea.layout.Transform",
+    "jsidea.geom.Matrix3D"
   ],
-  "jsidea.layout.TransformMode.Perspective": [],
-  "jsidea.layout.TransformMode.Planar": [],
-  "jsidea.layout.TransformMode.Rectangle": [],
-  "jsidea.layout.TransformMode.Test": [],
-  "jsidea.math.Number": [],
+  "jsidea.layout.TransformMode.Perspective": [
+    "jsidea.layout.TransformMode.ITransformMode",
+    "jsidea.geom.Matrix3D",
+    "jsidea.layout.Transform",
+    "jsidea.layout.StyleChain"
+  ],
+  "jsidea.layout.TransformMode.Planar": [
+    "jsidea.layout.TransformMode.ITransformMode",
+    "jsidea.layout.Transform",
+    "jsidea.geom.Matrix3D"
+  ],
+  "jsidea.layout.TransformMode.Rectangle": [
+    "jsidea.layout.TransformMode.ITransformMode",
+    "jsidea.layout.Transform",
+    "jsidea.geom.Matrix3D"
+  ],
+  "jsidea.layout.TransformMode.Test": [
+    "jsidea.layout.TransformMode.ITransformMode",
+    "jsidea.layout.Transform",
+    "jsidea.geom.Matrix3D"
+  ],
+  "jsidea.math.Number": [
+    "jsidea.geom.Point3D"
+  ],
   "jsidea.model.Dictionary": [],
   "jsidea.system.Application": [
     "jsidea.events.EventDispatcher"
@@ -119,10 +299,20 @@
     "jsidea.system.Application"
   ],
   "jsidea.test.Simbox": [
-    "jsidea.system.Application"
+    "jsidea.system.Application",
+    "jsidea.geom.Matrix3D",
+    "jsidea.geom.Point3D"
   ],
   "jsidea.test.Test": [
     "jsidea.system.Application",
+    "jsidea.layout.BoxModel.Border",
+    "jsidea.layout.MoveMode.Transform",
+    "jsidea.layout.Snap",
+    "jsidea.layout.BoxModel.Padding",
+    "jsidea.layout.Position",
+    "jsidea.geom.Point3D",
+    "jsidea.geom.Rect2D",
+    "jsidea.layout.Box",
     "jsidea.events.EventDispatcher"
   ],
   "jsidea.text.Text": []

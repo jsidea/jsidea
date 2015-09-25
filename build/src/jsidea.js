@@ -148,24 +148,16 @@ var ExportExtractor = (function () {
     return ExportExtractor;
 })();
 var tsAlias = ts;
-function kindToString(kind) {
-    return tsAlias.SyntaxKind[kind];
-}
 var UsageExtractor = (function () {
     function UsageExtractor() {
-        this.options = {
-            noLib: true
-        };
-        this.host = ts.createCompilerHost(this.options);
         this.program = null;
         this.report = {};
-        this.visitChildren = true;
-        this.moduleStack = [];
     }
     UsageExtractor.prototype.findUsages = function (sourceFiles) {
         var _this = this;
-        this.host = ts.createCompilerHost(this.options);
-        this.program = ts.createProgram(sourceFiles, this.options, this.host);
+        var options = { noLib: true };
+        var host = ts.createCompilerHost(options);
+        this.program = ts.createProgram(sourceFiles, options, host);
         this.program.getSourceFiles().forEach(function (file) { return _this.processFile(file); });
         return this.report;
     };
@@ -175,67 +167,14 @@ var UsageExtractor = (function () {
     };
     UsageExtractor.prototype.processNode = function (node) {
         var _this = this;
-        if (node.kind === 216 /* ModuleDeclaration */) {
-            this.moduleStack.push(node);
-        }
         if (node.kind === 67 /* Identifier */) {
             var identifier = node;
-            //console.log(`Identifier: ${identifier.text} <= ${kindToString(identifier.parent.kind)}`);
-            this.processIdentifier(identifier);
+            this.addNode(node);
         }
         else if (node.kind === 164 /* PropertyAccessExpression */) {
-            this.processPropertyAccessExpression(node);
-            this.visitChildren = false;
+            return this.addNode(node);
         }
-        if (this.visitChildren) {
-            ts.forEachChild(node, function (node) { return _this.processNode(node); });
-        }
-        this.visitChildren = true;
-        if (node.kind === 216 /* ModuleDeclaration */) {
-            this.moduleStack.pop();
-        }
-    };
-    UsageExtractor.prototype.isInModule = function () {
-        return this.moduleStack.length > 0;
-    };
-    UsageExtractor.prototype.currentModuleFullName = function () {
-        if (this.moduleStack.length) {
-            return this.moduleStack.map(function (moduleDeclaration) { return moduleDeclaration.name.text; }).join('.');
-        }
-        else {
-            return '';
-        }
-    };
-    UsageExtractor.prototype.processIdentifier = function (id) {
-        this.addUsageToCurrentFile(id.text, id);
-        if (this.isInModule()) {
-            this.addUsageToCurrentFile(this.currentModuleFullName() + '.' + id.text, id);
-        }
-    };
-    UsageExtractor.prototype.getDeclarationFullName = function (declaration) {
-        if (!declaration)
-            return "";
-        var name = "";
-        while (declaration) {
-            var cls;
-            if (!declaration.name) {
-                if (declaration.left)
-                    cls = declaration.left + "." + declaration.right;
-                else if (declaration.text)
-                    cls = declaration.text;
-                else
-                    cls = "";
-            }
-            else
-                cls = declaration.name ? declaration.name.text : "";
-            if (cls)
-                name = name + (name ? "." : "") + cls;
-            if (!declaration.parent)
-                declaration = declaration.body;
-            else
-                declaration = declaration.parent;
-        }
-        return name;
+        ts.forEachChild(node, function (node) { return _this.processNode(node); });
     };
     UsageExtractor.prototype.addUsageToCurrentFile = function (usage, file) {
         if (!this.report.hasOwnProperty(this.currentFile.fileName)) {
@@ -245,39 +184,17 @@ var UsageExtractor = (function () {
             this.report[this.currentFile.fileName].push(usage);
         }
     };
-    UsageExtractor.prototype.processPropertyAccessExpression = function (expr) {
-        var fullName = this.getFullNameFromPropertyAccessExpression(expr);
-        if (fullName != null) {
-            var parts = fullName.split('.');
-            for (var max = 1; max < parts.length + 1; max++) {
-                this.addUsageToCurrentFile(parts.slice(0, max).join('.'), expr);
-                if (this.isInModule()) {
-                    //                    this.addUsageToCurrentFile("PPP" + this.currentModuleFullName() + '.' + parts.slice(0, max).join('.'), expr);
-                    var clas = parts.slice(0, max).join('.');
-                    //                    var modName = "";
-                    //                    for (var i = 0; i < this.moduleStack.length; ++i)
-                    //                        if (this.moduleStack[i].name && this.moduleStack[i].name.text) {
-                    //                            modName += this.moduleStack[i].name.text + ".";
-                    //                            this.addUsageToCurrentFile(modName + clas, expr);
-                    //                        }
-                    var modName = this.currentModuleFullName();
-                    this.addUsageToCurrentFile(modName + clas, expr);
-                }
-            }
+    UsageExtractor.prototype.addNode = function (node) {
+        var fullName = this.getFullName(node);
+        if (fullName) {
+            this.addUsageToCurrentFile(this.getFullName(node), node);
         }
     };
-    UsageExtractor.prototype.getFullNameFromPropertyAccessExpression = function (expr) {
-        if (expr.expression.kind === 67 /* Identifier */) {
-            return expr.expression.text + '.' + expr.name.text;
-        }
-        else if (expr.expression.kind === 164 /* PropertyAccessExpression */) {
-            var prop = expr.expression;
-            return this.getFullNameFromPropertyAccessExpression(prop) + '.' + expr.name.text;
-        }
-        else {
-            this.processNode(expr.expression);
+    UsageExtractor.prototype.getFullName = function (node) {
+        var symbol = this.program.getTypeChecker().getSymbolAtLocation(node);
+        if (!symbol)
             return null;
-        }
+        return this.program.getTypeChecker().getFullyQualifiedName(symbol);
     };
     return UsageExtractor;
 })();
