@@ -200,7 +200,6 @@ class DependencyManager {
     }
 
     public getData(): any {
-
         var imports = {};
         for (var file in this.imports.result) {
             var data = this.imports.result[file];

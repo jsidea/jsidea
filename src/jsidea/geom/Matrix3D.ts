@@ -39,28 +39,6 @@ module jsidea.geom {
             return ret;
         }
 
-        public static createOrigin(element: HTMLElement, style: CSSStyleDeclaration = null, ret = new Matrix3D()): Matrix3D {
-            if (element.ownerDocument) {
-                style = style || window.getComputedStyle(element);
-
-                ret.identity();
-
-                var origin = style.transformOrigin ? style.transformOrigin.split(" ") : [];
-                var originX = math.Number.relation(origin[0], element.offsetWidth, element.offsetWidth * 0.5);
-                var originY = math.Number.relation(origin[1], element.offsetHeight, element.offsetHeight * 0.5);
-                var originZ = math.Number.parse(origin[2], 0);
-
-                //not vice versa: not adding than subtracting like some docs mentioned
-                ret.appendPositionRaw(-originX, -originY, -originZ);
-                ret.appendCSS(style.transform);
-                ret.appendPositionRaw(originX, originY, originZ);
-
-                return ret.setCSS(style.transform);
-            }
-            ret.identity();
-            return ret;
-        }
-
         public getData(): number[] {
             return [
                 this.m11, this.m12, this.m13, this.m14,//column 1
@@ -110,26 +88,6 @@ module jsidea.geom {
             this.m42 = matrix.m42;
             this.m43 = matrix.m43;
             this.m44 = matrix.m44;
-            return this;
-        }
-
-        public copyTo(matrix: IMatrix3DValue): Matrix3D {
-            matrix.m11 = this.m11;
-            matrix.m12 = this.m12;
-            matrix.m13 = this.m13;
-            matrix.m14 = this.m14;
-            matrix.m21 = this.m21;
-            matrix.m22 = this.m22;
-            matrix.m23 = this.m23;
-            matrix.m24 = this.m24;
-            matrix.m31 = this.m31;
-            matrix.m32 = this.m32;
-            matrix.m33 = this.m33;
-            matrix.m34 = this.m34;
-            matrix.m41 = this.m41;
-            matrix.m42 = this.m42;
-            matrix.m43 = this.m43;
-            matrix.m44 = this.m44;
             return this;
         }
 
@@ -205,28 +163,6 @@ module jsidea.geom {
             this.scalar(1 / this.m44);
             return this;
         }
-
-        public deltaTransform(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
-            var x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31;
-            var y = point.x * this.m12 + point.y * this.m22 + point.z * this.m32;
-            var z = point.x * this.m13 + point.y * this.m23 + point.z * this.m33;
-            var w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34;
-
-            
-            //            x /= w;
-            //            y /= w;
-            //            z /= w;
-
-            return ret.setTo(x, y, z, w);
-        }
-
-        public deltaTransformRaw(x: number, y: number, z: number, ret: Point3D = new Point3D()): Point3D {
-            return this.deltaTransform(_POINT.setTo(x, y, z), ret);
-        }
-
-        public unprojectInverted(point: IPoint2DValue, ret: Point3D = new Point3D()): Point3D {
-            return _MATRIX3D.copyFrom(this).invert().unproject(point, ret);
-        }
         
         //based on http://code.metager.de/source/xref/mozilla/B2G/gecko/gfx/thebes/gfx3DMatrix.cpp#651
         public unproject(point: IPoint2DValue, ret: Point3D = new Point3D()): Point3D {
@@ -264,10 +200,6 @@ module jsidea.geom {
             return ret.setTo(x, y, z, w);
         }
 
-        public projectInverted(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
-            return _MATRIX3D.copyFrom(this).invert().project(point, ret);
-        }
-
         //from homegeneous (euclid) to cartesian FLATTENED!!!! like a projection
         public project(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
             var z = point.z;
@@ -295,23 +227,6 @@ module jsidea.geom {
                 x += this.m41;
                 y += this.m42;
             }
-
-            return ret.setTo(x, y, z, w);
-        }
-        
-        //from homegeneous (euclid) to cartesian
-        public transform3D(point: IPoint3DValue, ret: Point3D = new Point3D()): Point3D {
-            var x = point.x * this.m11 + point.y * this.m21 + point.z * this.m31 + this.m41;
-            var y = point.x * this.m12 + point.y * this.m22 + point.z * this.m32 + this.m42;
-            var z = point.x * this.m13 + point.y * this.m23 + point.z * this.m33 + this.m43;
-            var w = point.x * this.m14 + point.y * this.m24 + point.z * this.m34 + this.m44;
-
-            if (w == 0)
-                w = 0.0001;
-
-            x /= w;
-            y /= w;
-            z /= w;
 
             return ret.setTo(x, y, z, w);
         }
@@ -923,73 +838,6 @@ module jsidea.geom {
 
             return this;
         }
-        
-        //        public static lookAt(
-        //            position: Point3D,
-        //            scale: Point3D,
-        //            target: Point3D,
-        //            upAxis: Point3D = Point3D.Y_AXIS,
-        //            ret: Matrix3D = new Matrix3D()): Matrix3D {
-        //
-        //            var xAxis: Point3D = Matrix3D.tempAxeX;
-        //            var yAxis: Point3D = Matrix3D.tempAxeY;
-        //            var zAxis: Point3D = Matrix3D.tempAxeZ;
-        //
-        //            zAxis.x = target.x - position.x;
-        //            zAxis.y = target.y - position.y;
-        //            zAxis.z = target.z - position.z;
-        //            zAxis.normalize();
-        //
-        //            xAxis.x = upAxis.y * zAxis.z - upAxis.z * zAxis.y;
-        //            xAxis.y = upAxis.z * zAxis.x - upAxis.x * zAxis.z;
-        //            xAxis.z = upAxis.x * zAxis.y - upAxis.y * zAxis.x;
-        //            xAxis.normalize();
-        //
-        //            if (xAxis.length() < .05) {
-        //                xAxis.x = upAxis.y;
-        //                xAxis.y = upAxis.x;
-        //                xAxis.z = 0;
-        //                xAxis.normalize();
-        //            }
-        //
-        //            yAxis.x = zAxis.y * xAxis.z - zAxis.z * xAxis.y;
-        //            yAxis.y = zAxis.z * xAxis.x - zAxis.x * xAxis.z;
-        //            yAxis.z = zAxis.x * xAxis.y - zAxis.y * xAxis.x;
-        //
-        //            var data: number[];
-        //
-        //            data[0] = scale.x * xAxis.x;
-        //            data[1] = scale.x * xAxis.y;
-        //            data[2] = scale.x * xAxis.z;
-        //            data[3] = 0;
-        //
-        //            data[4] = scale.y * yAxis.x;
-        //            data[5] = scale.y * yAxis.y;
-        //            data[6] = scale.y * yAxis.z;
-        //            data[7] = 0;
-        //
-        //            data[8] = scale.z * zAxis.x;
-        //            data[9] = scale.z * zAxis.y;
-        //            data[10] = scale.z * zAxis.z;
-        //            data[11] = 0;
-        //
-        //            data[12] = position.x;
-        //            data[13] = position.y;
-        //            data[14] = position.z;
-        //            data[15] = 1;
-        //
-        //            ret.setData(data);
-        //
-        //            if (zAxis.z < 0) {
-        //                var r = ret.getRotation();
-        //                r.y = (180 - r.y);
-        //                r.x -= 180;
-        //                r.z -= 180;
-        //                ret.setRotation(r);
-        //            }
-        //
-        //            return ret;
-        //        }
 
         public static multiply(a: IMatrix3DValue, b: IMatrix3DValue, ret: Matrix3D = new Matrix3D()): Matrix3D {
             var m11 = b.m11 * a.m11 + b.m12 * a.m21 + b.m13 * a.m31 + b.m14 * a.m41;

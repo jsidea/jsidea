@@ -1,6 +1,6 @@
 build.path.exportedFolder=
 build.path.sourceFolder=src;build/src
-compiler.codeGenTarget=ECMASCRIPT5
+compiler.codeGenTarget=ECMASCRIPT6
 compiler.compileOnSave=true
 compiler.generateDeclarationFiles=false
 compiler.jsx=NONE

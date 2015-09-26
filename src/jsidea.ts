@@ -82,7 +82,7 @@
 //jsidea.test
 /// <reference path='jsidea/plugins/Plugin.ts' />
 /// <reference path='jsidea/plugins/Test.ts' />
-/// <reference path='jsidea/plugins/Simboxy.ts' />
+/// <reference path='jsidea/plugins/Simbox.ts' />
 /// <reference path='jsidea/plugins/Dependency.ts' />
 /// <reference path='jsidea/plugins/Runner.ts' />
 

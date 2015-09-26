@@ -7,13 +7,51 @@ module jsidea.plugins {
         imports: string[] | IReference[];
     }
     export interface IReference extends IReferenceData {
-        element: HTMLDivElement;
+        ui: DependencyUI;
         relations: IReference[];
         imports: IReference[];
         name: string;
         package: string;
         isDependent: boolean;
         isChecked: boolean;
+    }
+    export class DependencyUI {
+        private _reference: IReference;
+        private _element: HTMLElement;
+
+        constructor(reference: IReference) {
+            this._reference = reference;
+
+            this._element = document.createElement("div");
+            var e = this._element;
+
+            e.className = "entry";
+            e.id = reference.qualifiedName;
+            e.setAttribute("data-checked", "0");
+            e.setAttribute("data-dependent", "0");
+            e.setAttribute("data-kind", reference.kind.toString());
+
+            var chk = document.createElement("div");
+            chk.className = "checkbox";
+            e.appendChild(chk);
+
+            var lab = document.createElement("div");
+            lab.className = "label";
+            lab.textContent = reference.name + " [" + text.Text.fileSize(reference.fileSize) + "]";
+            e.appendChild(lab);
+        }
+
+        public getElement(): HTMLElement {
+            return this._element;
+        }
+
+        public setChecked(checked: boolean): void {
+            this._element.setAttribute("data-checked", checked ? "1" : "0");
+        }
+
+        public setDependent(dependent: boolean): void {
+            this._element.setAttribute("data-dependent", dependent ? "1" : "0");
+        }
     }
     export class Dependency extends Plugin {
 
@@ -24,10 +62,14 @@ module jsidea.plugins {
 
         constructor() {
             super();
-
             this._ajax = new XMLHttpRequest();
             this._ajax.onreadystatechange = (e) => this.onReadyStateChange(e);
-            this._ajax.open("GET", "http://127.0.0.1/eventfive/jsidea/build/dependency.json");
+
+            this.load("http://127.0.0.1/eventfive/jsidea/build/dependency.json");
+        }
+
+        public load(url: string): void {
+            this._ajax.open("GET", url);
             this._ajax.send(null);
         }
 
@@ -54,7 +96,6 @@ module jsidea.plugins {
             var refs: IReference[] = this.references;
             
             //resolve names to IReference objects
-            var l = refs.length;
             for (var ref of refs) {
                 for (var i = 0; i < ref.imports.length; ++i)
                     ref.imports[i] = this.getByQualifiedName(<any>ref.imports[i]);
@@ -76,52 +117,34 @@ module jsidea.plugins {
             
             //multipath(2/2)
             for (var ref of refs) {
-                ref.element = this.createElement(ref);
+                ref.ui = this.createElement(ref);
                 ref.relations = this.createRelations(ref);
             }
         }
 
         private getByQualifiedName(name: string): IReference {
             var refs = this.references;
-            var l = refs.length;
-            for (var i = 0; i < l; ++i)
-                if (refs[i].qualifiedName == name)
-                    return refs[i];
+            for (var ref of refs)
+                if (ref.qualifiedName == name)
+                    return ref;
             return null;
         }
 
         private createRelations(ref: IReference, relations?: IReference[]): IReference[] {
             relations = relations || [];
-            var l = ref.imports.length;
-            for (var i = 0; i < l; ++i) {
-                if (relations.indexOf(ref.imports[i]) < 0) {
-                    relations.push(ref.imports[i]);
-                    this.createRelations(ref.imports[i], relations);
+            for (var imp of ref.imports) {
+                if (relations.indexOf(imp) < 0) {
+                    relations.push(imp);
+                    this.createRelations(imp, relations);
                 }
             }
             return relations;
         }
 
-        private createElement(ref: IReference): HTMLDivElement {
-            var element = document.createElement("div");
-            element.className = "entry";
-            element.id = ref.qualifiedName;
-            element.setAttribute("data-checked", "0");
-            element.setAttribute("data-dependent", "0");
-            element.setAttribute("data-kind", ref.kind.toString());
-            this._list.appendChild(element);
-
-            var chk = document.createElement("div");
-            chk.className = "checkbox";
-            element.appendChild(chk);
-
-            var lab = document.createElement("div");
-            lab.className = "label";
-            lab.textContent = ref.name + " [" + text.Text.fileSize(ref.fileSize) + "]";
-            element.appendChild(lab);
-
-            element.addEventListener("click", () => this.onClickElement(ref));
-
+        private createElement(ref: IReference): DependencyUI {
+            var element = new DependencyUI(ref);
+            this._list.appendChild(element.getElement());
+            element.getElement().addEventListener("click", () => this.onClickElement(ref));
             return element;
         }
 
@@ -131,39 +154,28 @@ module jsidea.plugins {
         }
 
         private refreshDependency(): void {
-            var refs = this.references;
-            var l = refs.length;
-            
             //collect checked
             //and reset dependent
             var checked: IReference[] = [];
-            for (var i = 0; i < l; ++i) {
-                refs[i].isDependent = false;
-                if (refs[i].isChecked)
-                    checked.push(refs[i]);
+            for (var ref of this.references) {
+                ref.isDependent = false;
+                if (ref.isChecked)
+                    checked.push(ref);
             }
             
             //mark dependencies
-            l = checked.length;
-            for (var i = 0; i < l; ++i) {
-                var ref = checked[i];
-                var m = ref.relations.length;
-                for (var j = 0; j < m; ++j) {
-                    ref.relations[j].isDependent = true;
-                }
-            }
+            for (var ref of checked)
+                for (var rel of ref.relations)
+                    rel.isDependent = true;
 
             //refresh the ui-elements
             this.refreshUI();
         }
 
         private refreshUI(): void {
-            var refs = this.references;
-            var l = refs.length;
-            for (var i = 0; i < l; ++i) {
-                var ref = refs[i];
-                ref.element.setAttribute("data-checked", ref.isChecked ? "1" : "0");
-                ref.element.setAttribute("data-dependent", ref.isDependent ? "1" : "0");
+            for (var ref of this.references) {
+                ref.ui.setChecked(ref.isChecked);
+                ref.ui.setDependent(ref.isDependent);
             }
         }
     }
