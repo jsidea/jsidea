@@ -81,9 +81,9 @@
 /// <reference path='jsidea/action/EventCircuit.ts' />
 
 //jsidea.test
-/// <reference path='jsidea/plugin/Test.ts' />
-/// <reference path='jsidea/plugin/Simboxy.ts' />
-/// <reference path='jsidea/plugin/Dependency.ts' />
+/// <reference path='jsidea/plugins/Test.ts' />
+/// <reference path='jsidea/plugins/Simboxy.ts' />
+/// <reference path='jsidea/plugins/Dependency.ts' />
 
 interface HTMLElement {
     matches(selector: string): boolean;
