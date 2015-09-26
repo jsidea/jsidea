@@ -1,10 +1,4 @@
 module jsidea.geom {
-    export interface IQuadValue {
-        p1: jsidea.geom.Point3D;
-        p2: jsidea.geom.Point3D;
-        p3: jsidea.geom.Point3D;
-        p4: jsidea.geom.Point3D;
-    }
     export class Quad implements IQuadValue {
         constructor(
             public p1: geom.Point3D = new geom.Point3D(),

@@ -27,7 +27,6 @@
 /// <reference path='jsidea/geom/Quad.ts' />
 
 //jsidea.layout.BoxModel
-/// <reference path='jsidea/layout/BoxModel/IBoxModel.ts' />
 /// <reference path='jsidea/layout/BoxModel/Margin.ts' />
 /// <reference path='jsidea/layout/BoxModel/Border.ts' />
 /// <reference path='jsidea/layout/BoxModel/Padding.ts' />
@@ -42,14 +41,13 @@
 
 //jsidea.layout
 /// <reference path='jsidea/layout/Box.ts' />
-/// <reference path='jsidea/layout/StyleChain.ts' />
+/// <reference path='jsidea/layout/StyleNode.ts' />
 /// <reference path='jsidea/layout/Move.ts' />
 /// <reference path='jsidea/layout/Transform.ts' />
 /// <reference path='jsidea/layout/Position.ts' />
 /// <reference path='jsidea/layout/Snap.ts' />
 
 //jsidea.layout.MoveMode
-/// <reference path='jsidea/layout/MoveMode/IMoveMode.ts' />
 /// <reference path='jsidea/layout/MoveMode/Transform.ts' />
 /// <reference path='jsidea/layout/MoveMode/Background.ts' />
 /// <reference path='jsidea/layout/MoveMode/BorderBottomRightInner.ts' />
@@ -67,14 +65,12 @@
 /// <reference path='jsidea/layout/MoveMode/TopRight.ts' />
 
 //jsidea.layout.TransformMode
-/// <reference path='jsidea/layout/TransformMode/ITransformMode.ts' />
 /// <reference path='jsidea/layout/TransformMode/Rectangle.ts' />
 /// <reference path='jsidea/layout/TransformMode/Perspective.ts' />
 /// <reference path='jsidea/layout/TransformMode/Test.ts' />
 /// <reference path='jsidea/layout/TransformMode/Planar.ts' />
 
 //jsidea.layout.SnapMode
-/// <reference path='jsidea/layout/SnapMode/ISnapMode.ts' />
 /// <reference path='jsidea/layout/SnapMode/Basic.ts' />
 
 //jsidea.display
@@ -85,9 +81,9 @@
 /// <reference path='jsidea/action/EventCircuit.ts' />
 
 //jsidea.test
-/// <reference path='jsidea/test/Test.ts' />
-/// <reference path='jsidea/test/Simbox.ts' />
-/// <reference path='jsidea/test/Dependency.ts' />
+/// <reference path='jsidea/plugin/Test.ts' />
+/// <reference path='jsidea/plugin/Simboxy.ts' />
+/// <reference path='jsidea/plugin/Dependency.ts' />
 
 interface HTMLElement {
     matches(selector: string): boolean;

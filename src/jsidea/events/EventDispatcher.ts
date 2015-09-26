@@ -1,12 +1,6 @@
 module jsidea.events {
-    export interface IEventListener extends Function {
-        (e?: Event): any;
-    }
-    export interface IEventDispatcher extends EventTarget {
-        removeEventListener(type: string, useCapture?: any): void;
-    }
     export class EventDispatcher implements IEventDispatcher {
-
+        
         private _listener = new model.Dictonary<string, IEventListener[]>();
         private _scope: any;
 

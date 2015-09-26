@@ -3,7 +3,7 @@ module jsidea.layout.TransformMode {
         private static _matrix: geom.Matrix3D = new geom.Matrix3D();
         public extract(transform: Transform, matrix: geom.Matrix3D): void {
             var element = transform.element;
-            var node = layout.StyleChain.create(element);
+            var node = layout.StyleNode.create(element);
             
             //accumulate matrix
             while (node) {
@@ -14,7 +14,7 @@ module jsidea.layout.TransformMode {
             }
         }
 
-        private extractMatrix(node: layout.INode, matrix: geom.Matrix3D = null): geom.Matrix3D {
+        private extractMatrix(node: layout.IStyleNode, matrix: geom.Matrix3D = null): geom.Matrix3D {
             if (!matrix)
                 matrix = new geom.Matrix3D();
             if (!node)

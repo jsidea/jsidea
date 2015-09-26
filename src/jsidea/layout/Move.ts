@@ -1,13 +1,4 @@
 module jsidea.layout {
-    export interface IMoveLimits {
-        minX?: any;
-        maxX?: any;
-        minY?: any;
-        maxY?: any;
-        minZ?: any;
-        maxZ?: any;
-        boxModel?: IBoxModel;
-    }
     export class Move {
         public position: geom.Point3D = new geom.Point3D();
         public limits: IMoveLimits = {};

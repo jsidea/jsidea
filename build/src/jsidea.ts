@@ -2,8 +2,15 @@ import ts = require("typescript");
 import glob = require("glob");
 import fs = require('fs');
 
-type Result = {
-    [fileName: string]: string[];
+interface IReference {
+    qualifiedName: string;
+    node: ts.Node;
+    fileSize: number;
+    file: string;
+}
+
+interface Result {
+    [fileName: string]: IReference[];
 }
 
 abstract class BaseProcessor {
@@ -50,15 +57,26 @@ abstract class BaseProcessor {
         return symbol;
     }
 
-    protected addQualifiedName(qualifiedName: string): void {
+    protected addToResult(qualifiedName: string, node: ts.Node): void {
         if (!qualifiedName)
             return;
         var fileName: string = String(this._file.fileName);
-        if (!this.result.hasOwnProperty(fileName))
+        if (!this.result.hasOwnProperty(fileName)) {
             this.result[fileName] = [];
-        if (this.result[fileName].indexOf(qualifiedName) === -1) {
-            this.result[fileName].push(qualifiedName);
         }
+        if (this.getIndexOfQualifiedName(qualifiedName, this.result[fileName]) === -1) {
+            var stats = fs.statSync(this._file.fileName.replace(".ts", ".js"))
+            var fileSizeInBytes = stats["size"]
+            this.result[fileName].push({ qualifiedName: qualifiedName, node: node, file: this._file.fileName, fileSize: fileSizeInBytes });
+        }
+    }
+
+    private getIndexOfQualifiedName(qualifiedName: string, refs: IReference[]): number {
+        var l = refs.length;
+        for (var i = 0; i < l; ++i)
+            if (refs[i].qualifiedName == qualifiedName)
+                return i;
+        return -1;
     }
 
     protected prepare(sourceFiles: string[]): void {
@@ -69,13 +87,13 @@ abstract class BaseProcessor {
 }
 
 class ExportProcessor extends BaseProcessor {
-    public association: Result = null;
+    //    public association: Result = null;
 
     private _stack: ts.ModuleDeclaration[] = [];
 
     protected prepare(sourceFiles: string[]): void {
         super.prepare(sourceFiles);
-        this.association = {};
+        //        this.association = {};
     }
 
     protected processNode(node: ts.Node): void {
@@ -101,7 +119,7 @@ class ExportProcessor extends BaseProcessor {
 
     private extract(node: ts.Node) {
         if (this.isExported(node)) {
-            this.addQualifiedName(this.getQualifiedName(node));
+            this.addToResult(this.getQualifiedName(node), node);
         }
     }
 
@@ -113,18 +131,18 @@ class ExportProcessor extends BaseProcessor {
         return mod.symbol ? mod.symbol.exports.hasOwnProperty(name) : false;
     }
 
-    protected finalize(): void {
-        Object.keys(this.result).forEach(fileName => {
-            this.result[fileName].forEach(symbol => {
-                if (!this.association.hasOwnProperty(symbol)) {
-                    this.association[symbol] = [];
-                }
-                if (this.association[symbol].indexOf(fileName) === -1) {
-                    this.association[symbol].push(fileName);
-                }
-            });
-        });
-    }
+    //    protected finalize(): void {
+    //        Object.keys(this.result).forEach(fileName => {
+    //            this.result[fileName].forEach(symbol => {
+    //                if (!this.association.hasOwnProperty(symbol)) {
+    //                    this.association[symbol] = [];
+    //                }
+    //                if (this.association[symbol].indexOf(fileName) === -1) {
+    //                    this.association[symbol].push(fileName);
+    //                }
+    //            });
+    //        });
+    //    }
 }
 
 class ImportProcessor extends BaseProcessor {
@@ -145,87 +163,100 @@ class ImportProcessor extends BaseProcessor {
             var l = path.length;
             for (var i = 0; i < l; ++i) {
                 fullName += (fullName ? "." : "") + path[i];
-                this.addQualifiedName(fullName);
+                this.addToResult(fullName, node);
             }
         }
     }
 }
 
-type DependencyTree = {
-    [index: string]: string[];
-}
-
 class DependencyManager {
-    public run(sourceFiles: string[]): DependencyTree {
-        var im = new ImportProcessor();
-        im.run(sourceFiles);
-        var ex = new ExportProcessor();
-        ex.run(sourceFiles);
-        var importResult = im.result;
-        var association = ex.association;
-        var tree: DependencyTree = {};
-        Object.keys(importResult).forEach(fileName => {
-            importResult[fileName].forEach(symbol => {
-                if (association.hasOwnProperty(symbol)) {
-                    this.addDependentFilesToFiles(tree, fileName, association[symbol]);
-                }
-            })
-        });
+    public imports: ImportProcessor = null;
+    public exports: ExportProcessor = null;
 
-        Object.keys(tree).forEach(fileName => {
-            var val = tree[fileName];
-            delete tree[fileName];
-            fileName = this.fileNameToQualifiedName(fileName);
-            tree[fileName] = val;
-            var l = val.length;
-            for (var i = 0; i < l; ++i)
-                val[i] = this.fileNameToQualifiedName(val[i]);
-        });
+    public run(sourceFiles: string[]): void {
+        this.imports = new ImportProcessor();
+        this.imports.run(sourceFiles);
+        this.exports = new ExportProcessor();
+        this.exports.run(sourceFiles);
 
-//        console.log(im.result["../src/jsidea/display/Graphics.ts"]);
-
-        return tree;
-    }
-
-    private fileNameToQualifiedName(fileName: string): string {
-        fileName = fileName.replace("../src/", "");
-        fileName = fileName.replace(/\//gi, ".");
-        var idx = fileName.lastIndexOf(".ts");
-        return fileName.substring(0, idx);
-    }
-
-    private getDependenciesOf(tree: DependencyTree, file: string): string[] {
-        var result = [];
-        tree[file].forEach(dependency => {
-            this.getDependenciesOf(tree, dependency).forEach(res => {
-                if (result.indexOf(res) < 0)
-                    result.push(res);
-            });
-            result.push(dependency);
-        });
-        return result;
-    }
-
-    private addDependentFilesToFiles(tree: DependencyTree, fileName: string, files: string[]) {
-        if (!tree.hasOwnProperty(fileName)) {
-            tree[fileName] = [];
+        //get all exports
+        var exportsAll: string[] = [];
+        for (var file in this.exports.result) {
+            var classes = this.exports.result[file];
+            var l = classes.length;
+            for (var i = 0; i < l; ++i) {
+                var className = classes[i];
+                if (exportsAll.indexOf(className.qualifiedName) < 0)
+                    exportsAll.push(className.qualifiedName);
+            }
         }
-        if (files.indexOf(fileName) === -1) {
-            files.forEach(file => {
-                if (file !== fileName && !tree[fileName].hasOwnProperty(file)) {
-                    if (tree[fileName].indexOf(file) < 0)
-                        tree[fileName].push(file);
+
+        //clean imports
+        for (var file in this.imports.result) {
+            var classes = this.imports.result[file];
+            var l = classes.length;
+            for (var i = 0; i < l; ++i) {
+                var className = classes[i];
+                if (exportsAll.indexOf(className.qualifiedName) < 0) {
+                    classes.splice(i, 1);
+                    i--;
+                    l--;
                 }
-            });
+            }
         }
+
+        for (var file in this.imports.result) {
+            var data = this.imports.result[file];
+            delete this.imports.result[file];
+            this.imports.result[this.finalizeFilePath(file)] = data;
+        }
+
+        for (var file in this.exports.result) {
+            var data = this.exports.result[file];
+            delete this.exports.result[file];
+            this.exports.result[this.finalizeFilePath(file)] = data;
+        }
+    }
+
+    public getData(): any {
+
+        var imports = {};
+        for (var file in this.imports.result) {
+            var data = this.imports.result[file];
+            var res: any = [];
+            for (var r of data)
+                res.push(r.qualifiedName);
+            imports[file] = res;
+        }
+
+        var exports = [];
+        for (var file in this.exports.result) {
+            var data = this.exports.result[file];
+            var res: any = [];
+            for (var r of data) {
+                exports.push({
+                    qualifiedName: r.qualifiedName,
+                    file: r.file.replace("../src/", ""),
+                    fileSize: r.fileSize,
+                    kind: r.node.kind,
+                    imports: imports[file]
+                });
+            }
+        }
+
+        return exports;
+    }
+
+    private finalizeFilePath(file: string): string {
+        return file.replace("../src/", "");
     }
 }
 
 //hook
 var sourceFiles = glob.sync('./../src/jsidea/**/**.ts');
 var dpm = new DependencyManager();
-var tree = dpm.run(sourceFiles);
-fs.writeFile("dependency.json", JSON.stringify(tree, null, 2), function(err) {
+dpm.run(sourceFiles);
+fs.writeFile("dependency.json", JSON.stringify(dpm.getData(), null, 2), function(err) {
     if (err)
         return console.log(err);
 });

@@ -10,7 +10,7 @@ module jsidea.layout.MoveMode {
             var topAuto = style.top == "auto";
             if (leftAuto || topAuto) {
                 if (system.Engine.isWebKit) {
-                    var node = StyleChain.create(element);
+                    var node = StyleNode.create(element);
                     var position = new geom.Point3D();
                     if (node.isRelative) {
                         this._size.update(node.element, node.style);

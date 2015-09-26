@@ -1,16 +1,15 @@
 module jsidea.math {
-    export interface ILimit {
-        minX?: any;
-        maxX?: any;
-        minY?: any;
-        maxY?: any;
-        minZ?: any;
-        maxZ?: any;
-    }
     export class Number {
 
         public static RAD_TO_DEG: number = 180 / Math.PI;
         public static DEG_TO_RAD: number = Math.PI / 180;
+        public static BYTE_TO_KILOBYTE: number = 0.000976563;
+        public static BYTE_TO_MB: number = 9.53674e-7;
+        public static BYTE_TO_GIGABYTE: number = 9.31323e-10;
+
+        public static precision(num: number, precesion: number): number {
+            return Math.round(num * precesion) / precesion;
+        }
 
         public static relation(value: any, relativeSize: number, defaultValue: number): number {
             if (typeof value == "number") {
@@ -67,7 +66,7 @@ module jsidea.math {
             var r: number = value % mod;
             return (r < (mod * 0.5)) ? value - r : value + (mod - r);
         }
-        
+
         public static floorTo(value: number, mod: number): number {
             return value - (value % mod);
         }
@@ -78,8 +77,8 @@ module jsidea.math {
                 dif = (dif < 0) ? dif + 360 : dif - 360;
             return dif;
         }
-        
-        public static limits(point: geom.Point3D, limits: ILimit, width: number, height: number, depth: number = 1000): geom.Point3D {
+
+        public static limits(point: geom.IPoint3DValue, limits: ILimit, width: number, height: number, depth: number = 1000): geom.IPoint3DValue {
             if (limits.minX !== undefined)
                 point.x = Math.max(point.x, Number.relation(limits.minX, width, point.x));
             if (limits.maxX !== undefined)

@@ -1,9 +1,5 @@
 module jsidea.geom {
-    export interface IRectangleValue extends IPoint2DValue {
-        width: number;
-        height: number;
-    }
-    export class Rect2D implements IRectangleValue {
+    export class Rect2D implements IRect2DValue {
         constructor(
             public x: number = 0,
             public y: number = 0,
@@ -63,7 +59,7 @@ module jsidea.geom {
                 + Math.round(this.x) + "px)";
         }
 
-        public copyFrom(value: IRectangleValue): void {
+        public copyFrom(value: IRect2DValue): void {
             this.x = value.x;
             this.y = value.y;
             this.width = value.width;
@@ -74,7 +70,7 @@ module jsidea.geom {
             return ret.setTo(this.x + this.width * 0.5, this.y + this.width * 0.5);
         }
 
-        public equals(value: IRectangleValue, difference: number = 0): boolean {
+        public equals(value: IRect2DValue, difference: number = 0): boolean {
             return Math.abs(this.x - value.x) <= difference
                 && Math.abs(this.y - value.y) <= difference
                 && Math.abs(this.width - value.width) <= difference
@@ -88,7 +84,7 @@ module jsidea.geom {
                 && y <= (this.y + this.height);
         }
 
-        public containsRect(r: IRectangleValue): boolean {
+        public containsRect(r: IRect2DValue): boolean {
             if (!this.contains(r.x, r.y)
                 || !this.contains(r.x + r.width, r.y + r.height)
                 || !this.contains(r.x + r.width, r.y)
@@ -98,7 +94,7 @@ module jsidea.geom {
             return true;
         }
 
-        public intersects(r: IRectangleValue): boolean {
+        public intersects(r: IRect2DValue): boolean {
             if (this.contains(r.x, r.y)
                 || this.contains(r.x + r.width, r.y + r.height)
                 || this.contains(r.x + r.width, r.y)

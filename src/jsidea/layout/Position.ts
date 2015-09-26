@@ -1,23 +1,7 @@
 module jsidea.layout {
-    export interface IPositionTo {
-        x?: any;
-        y?: any;
-        offsetX?: any;
-        offsetY?: any;
-        boxModel?: IBoxModel;
-    }
-    export interface IPositionFrom extends IPositionTo, math.ILimit {
-        element?: HTMLElement;
-    }
-    export interface IPositionBounds extends math.ILimit {
-        element?: HTMLElement;
-        boxModel?: IBoxModel;
-        toBoxModel?: IBoxModel;
-    }
     export class Position {
         public to: IPositionTo = {};
         public from: IPositionFrom = {};
-        public bounds: IPositionBounds = {};
         public snap: Snap = null;
         public move: Move = new Move();
 
@@ -38,7 +22,6 @@ module jsidea.layout {
         public copyFrom(position: Position): Position {
             this.to = position.to;
             this.from = position.from;
-            this.bounds = position.bounds;
             this.move = position.move;
             return this;
         }
@@ -111,7 +94,6 @@ module jsidea.layout {
         public dispose(): void {
             this.to = null;
             this.from = null;
-            this.bounds = null;
             this.move = null;
         }
     }

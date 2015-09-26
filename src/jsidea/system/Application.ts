@@ -85,10 +85,11 @@ module jsidea.system {
             super.dispose();
         }
 
-        public static hook(qualifiedClassName: string): void {
-            if (!qualifiedClassName) {
+        public static hook(plugin: string): void {
+            if (!plugin) {
                 return;
             }
+            var qualifiedClassName = "jsidea.plugins." + plugin;
             var path: string[] = qualifiedClassName.split(".");
             var hook: any = window[<any>path[0]];
             for (var i = 1; i < path.length; ++i) {
@@ -116,5 +117,5 @@ module jsidea.system {
 }
 //hook
 document.addEventListener("DOMContentLoaded", () => {
-    jsidea.system.Application.hook(document.body.getAttribute("data-application"));
+    jsidea.system.Application.hook(document.body.getAttribute("data-plugin"));
 });

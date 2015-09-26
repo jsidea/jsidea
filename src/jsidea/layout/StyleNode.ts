@@ -1,107 +1,35 @@
 module jsidea.layout {
-    export interface INodePosition {
-        element: HTMLElement;
-        style: CSSStyleDeclaration;
-        position: geom.Point2D;
-    }
-
-    export interface INodeLite {
-        element: HTMLElement;
-        style: CSSStyleDeclaration;
-        first: INodeLite;
-        last: INodeLite;
-        child: INodeLite;
-        parent: INodeLite;
-        depth: number;
-        isBody: boolean;
-        isHTML: boolean;
-        isTransformed: boolean;
-        isTransformed3D: boolean;
-        isPreserved3d: boolean;
-        isScrollable: boolean;
-        perspective: number;
-        isForced2D: boolean;
-    }
-
-    export interface INode extends INodeLite {
-        //re-cast
-        first: INode;
-        last: INode;
-        child: INode;
-        parent: INode;
-        offsetParent: INode;
-        offsetParentRaw: INode;
-        parentScroll: INode;
-        offset: geom.Point2D;
-        offsetUnscrolled: geom.Point2D;
-        position: geom.Point2D;
-        scrollOffset: geom.Point2D;
-        offsetLeft: number;
-        offsetTop: number;
-        clientLeft: number;
-        clientTop: number;
-        isRelative: boolean;
-        isAbsolute: boolean;
-        isStatic: boolean;
-        isFixed: boolean;
-        isFixedChild: boolean;
-        isFixedZombie: boolean;
-        isSticked: boolean;
-        isStickedChild: boolean;
-        isTransformedChild: boolean;
-        isPerspectiveChild: boolean;
-        isPreserved3dOrPerspective: boolean;
-        isPreserved3dChild: boolean;
-        isBorderBox: boolean;
-    }
-
-    export class StyleChain {
-        public static create(element: HTMLElement): INode {
+    export class StyleNode {
+        public static create(element: HTMLElement): IStyleNode {
             if (!element)
                 return null;
-            return StyleChain.extractStyleChain(element);
+            return StyleNode.extractStyleChain(element);
         }
 
-        public static createLite(element: HTMLElement): INodeLite {
-            if (!element)
-                return null;
-            return StyleChain.extractStyleChainLite(element);
-        }
-
-        public static createPosition(element: HTMLElement, style?: CSSStyleDeclaration): INodePosition {
-            if (!element)
-                return null;
-
-            style = style || window.getComputedStyle(element);
-
-            return { element: element, style: style, position: null };
-        }
-
-        private static extractStyleChainLite(element: HTMLElement): INodeLite {
+        private static extractStyleChain(element: HTMLElement): IStyleNode {
             var body = element.ownerDocument.body;
             var html = element.ownerDocument.documentElement;
             
             //collect from child to root
-            var nodes: INodeLite[] = [];
+            var nodes: IStyleNode[] = [];
             while (element) {
                 var style = window.getComputedStyle(element);
-                var node: INodeLite = {
-                    element: element,
-                    first: null,
-                    child: null,
-                    parent: null,
-                    last: null,
-                    isTransformed: style.transform != "none",
-                    isTransformed3D: style.transform.indexOf("matrix3d") >= 0,
-                    isPreserved3d: style.transformStyle == "preserve-3d",
-                    isScrollable: style.overflow != "visible",
-                    depth: 0,
-                    perspective: 0,
-                    isHTML: element == html,
-                    isBody: element == body,
-                    style: style,
-                    isForced2D: false
-                }
+                var node: IStyleNode = <any>{};
+                node.element = element;
+                node.first = null;
+                node.child = null;
+                node.parent = null;
+                node.last = null;
+                node.isTransformed = style.transform != "none";
+                node.isTransformed3D = style.transform.indexOf("matrix3d") >= 0;
+                node.isPreserved3d = style.transformStyle == "preserve-3d";
+                node.isScrollable = style.overflow != "visible";
+                node.depth = 0;
+                node.perspective = 0;
+                node.isHTML = element == html;
+                node.isBody = element == body;
+                node.style = style;
+                node.isForced2D = false;
                 
                 //maybe its not needed
                 if (system.Browser.isInternetExplorer)
@@ -110,7 +38,7 @@ module jsidea.layout {
                 //webkit ignores perspective set on scroll elements
                 node.perspective = (system.Engine.isWebKit && node.isTransformed && node.isScrollable) ? 0 : math.Number.parse(style.perspective, 0);
 
-                (<any>element)._node = <INode>node;
+                (<any>element)._node = <IStyleNode>node;
                 nodes.push(node);
                 element = element.parentElement;
             }
@@ -129,13 +57,7 @@ module jsidea.layout {
                 node = node.child;
             }
 
-            return last;
-        }
-
-        private static extractStyleChain(element: HTMLElement, chainLite: INodeLite = null): INode {
-            var chain = chainLite ? chainLite : this.extractStyleChainLite(element);
-            if (!chain)
-                return null;
+            var chain = last;
             
             //run from root to child
             //this should prevent that if the parent element
@@ -147,7 +69,7 @@ module jsidea.layout {
             var isPreserved3dChild = false;
             var isFixedChild = false;
             var isPerspectiveChild = false;
-            var node = <INode>chain.first;
+            var node = <IStyleNode>chain.first;
             while (node) {
                 var style = node.style;
                 var element = node.element;
@@ -207,17 +129,17 @@ module jsidea.layout {
                 node = node.child;
             }
 
-            return <INode>chain;
+            return <IStyleNode>chain;
         }
 
         //returns the local position the direct parent
-        private static getPosition(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        private static getPosition(node: IStyleNode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (node.isSticked || !node.parent)
                 return ret.setTo(node.offset.x, node.offset.y);
             return ret.setTo(node.offset.x - node.parent.offset.x, node.offset.y - node.parent.offset.y);
         }
 
-        private static getOffsetParent(node: INode): INode {
+        private static getOffsetParent(node: IStyleNode): IStyleNode {
             //            if (system.Caps.isFirefox)
             //                return node.element.offsetParent ? node.element.offsetParent._node : null;
 
@@ -256,7 +178,7 @@ module jsidea.layout {
             return null;
         }
 
-        private static getParentScroll(node: INode): INode {
+        private static getParentScroll(node: IStyleNode): IStyleNode {
             //important: if the node is really sticked, then there could not be any scrolling
             if (!node || node.isSticked || !node.parent)
                 return null;
@@ -277,7 +199,7 @@ module jsidea.layout {
             return null;
         }
 
-        private static getParentScrollFirefox(node: INode): INode {
+        private static getParentScrollFirefox(node: IStyleNode): IStyleNode {
             //important: if the node is really sticked, then there could not be any scrolling
             if (!node || node.isSticked || !node.parent)
                 return null;
@@ -298,7 +220,7 @@ module jsidea.layout {
             return null;
         }
 
-        private static getIsStickedChild(node: INode): boolean {
+        private static getIsStickedChild(node: IStyleNode): boolean {
             while (node) {
                 if (node.isSticked)
                     return true;
@@ -307,7 +229,7 @@ module jsidea.layout {
             return false;
         }
 
-        private static getIsSticked(node: INode): boolean {
+        private static getIsSticked(node: IStyleNode): boolean {
             //just skip if the element itself has not fixed
             if (!node.isFixed)
                 return false;
@@ -325,7 +247,7 @@ module jsidea.layout {
 
         //if you subtract the scroll from the accumlated/summed offset
         //you get the real offset to window (initial-containing-block)
-        private static getScrollOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        private static getScrollOffset(node: IStyleNode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node || !node.parent)
                 return ret;
             
@@ -351,7 +273,7 @@ module jsidea.layout {
             return ret;
         }
 
-        private static getOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        private static getOffset(node: IStyleNode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             ret.x = 0;
             ret.y = 0;
 
@@ -383,7 +305,7 @@ module jsidea.layout {
             return ret;
         }
 
-        private static getIsForced2D(node: INodeLite): boolean {
+        private static getIsForced2D(node: IStyleNode): boolean {
             //ie11 has no "working" preserve-3d, but window.getComputedStyle includes the preserve-3d value? 
             if (system.Browser.isInternetExplorer)
                 return false;
@@ -406,7 +328,7 @@ module jsidea.layout {
             return false;
         }
 
-        private static addCorrectOffset(node: INode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
+        private static addCorrectOffset(node: IStyleNode, ret: geom.Point2D = new geom.Point2D()): geom.Point2D {
             if (!node)
                 return ret;
 
@@ -426,7 +348,7 @@ module jsidea.layout {
             return ret;
         }
 
-        private static getCorrectOffsetEdge(node: INode, ret: geom.Point2D): geom.Point2D {
+        private static getCorrectOffsetEdge(node: IStyleNode, ret: geom.Point2D): geom.Point2D {
             if (!node || !node.offsetParent || node.isBody)
                 return ret;
 
@@ -439,7 +361,7 @@ module jsidea.layout {
             ret.y += node.offsetParent.clientTop;
         }
 
-        private static getCorrectOffsetInternetExplorer(node: INode, ret: geom.Point2D): geom.Point2D {
+        private static getCorrectOffsetInternetExplorer(node: IStyleNode, ret: geom.Point2D): geom.Point2D {
             if (!node || !node.offsetParent || node.isBody)
                 return ret;
 
@@ -454,7 +376,7 @@ module jsidea.layout {
             ret.y += node.offsetParent.clientTop;
         }
 
-        private static getCorrectOffsetFirefox(node: INode, ret: geom.Point2D): geom.Point2D {
+        private static getCorrectOffsetFirefox(node: IStyleNode, ret: geom.Point2D): geom.Point2D {
             //no node no value
             if (!node)
                 return ret;
@@ -490,7 +412,7 @@ module jsidea.layout {
             return ret;
         }
 
-        private static getCorrectOffsetWebkit(node: INode, ret: geom.Point2D): geom.Point2D {
+        private static getCorrectOffsetWebkit(node: IStyleNode, ret: geom.Point2D): geom.Point2D {
             if (!node || !node.offsetParent)
                 return ret;
 

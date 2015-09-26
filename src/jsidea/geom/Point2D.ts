@@ -1,8 +1,4 @@
 module jsidea.geom {
-    export interface IPoint2DValue {
-        x: number;
-        y: number;
-    }
     export class Point2D implements IPoint2DValue {
 
         public static X_AXIS: Point2D = new Point2D(1, 0);

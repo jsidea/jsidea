@@ -29,6 +29,10 @@
 	background-color: #00FF00;
 }
 
+.entry[data-kind='213'] {
+	display: none;
+}
+
 .label {
 	display: inline-box;
 	margin-left: 10px;

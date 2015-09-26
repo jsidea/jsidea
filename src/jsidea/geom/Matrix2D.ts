@@ -1,20 +1,4 @@
 module jsidea.geom {
-    export interface IMatrix2DValue {
-        m11: number;
-        m12: number;
-        m21: number;
-        m22: number;
-        m31: number;
-        m32: number;
-    }
-
-    export interface IComposition2D {
-        position: Point2D;
-        scale: Point2D;
-        skew: Point2D;
-        rotation: number;
-    }
-    
     /**
     * Matrix2D math.
     *  

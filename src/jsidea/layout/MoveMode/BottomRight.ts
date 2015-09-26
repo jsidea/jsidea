@@ -20,7 +20,7 @@ module jsidea.layout.MoveMode {
                 }
 
                 if (style.position == "fixed") {
-                    var node = layout.StyleChain.create(element);
+                    var node = layout.StyleNode.create(element);
                     if (node.isSticked) {
                         var body = element.ownerDocument.body;
                         parentWidth = body.clientWidth;
