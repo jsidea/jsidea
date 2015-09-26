@@ -15,7 +15,7 @@ module jsidea.plugins {
         isDependent: boolean;
         isChecked: boolean;
     }
-    export class Dependency extends jsidea.system.Application {
+    export class Dependency extends Plugin {
 
         public references: IReference[] = null;
 

@@ -1,5 +1,5 @@
-module jsidea.system {
-    export class Application extends jsidea.events.EventDispatcher {
+module jsidea.plugins {
+    export class Plugin extends jsidea.events.EventDispatcher {
         private _active: boolean = false;
         private _autoActive: boolean = false;
         private _autoTick: boolean = false;
@@ -84,38 +84,5 @@ module jsidea.system {
         public dispose(): void {
             super.dispose();
         }
-
-        public static hook(plugin: string): void {
-            if (!plugin) {
-                return;
-            }
-            var qualifiedClassName = "jsidea.plugins." + plugin;
-            var path: string[] = qualifiedClassName.split(".");
-            var hook: any = window[<any>path[0]];
-            for (var i = 1; i < path.length; ++i) {
-                if (!hook) {
-                    console.warn("Application '" + qualifiedClassName + "' is undefined.");
-                    return;
-                }
-                
-                hook = hook[path[i]];
-            }
-            if(!hook)
-            {
-                console.warn("Application '" + qualifiedClassName + "' is undefined.");                
-                return;
-            }
-            else if (hook && hook.prototype instanceof jsidea.system.Application) {
-            }
-            else {
-                console.warn("Application " + hook + " does not inherit from jsidea.system.Application");
-                return;
-            }
-            var app = new hook();
-        }
     }
 }
-//hook
-document.addEventListener("DOMContentLoaded", () => {
-    jsidea.system.Application.hook(document.body.getAttribute("data-plugin"));
-});

@@ -10,6 +10,6 @@ compiler.noImplicitAny=false
 compiler.noLib=false
 compiler.outputDirOption=
 compiler.outputFileOption=
-compiler.removeComments=false
+compiler.removeComments=true
 compiler.suppressImplicitAnyIndexErrors=false
 eclipse.preferences.version=1

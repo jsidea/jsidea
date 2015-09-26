@@ -6,7 +6,6 @@
 /// <reference path='jsidea/system/System.ts' />
 /// <reference path='jsidea/system/Browser.ts' />
 /// <reference path='jsidea/system/Engine.ts' />
-/// <reference path='jsidea/system/Application.ts' />
 
 //jsidea.math
 /// <reference path='jsidea/math/Number.ts' />
@@ -81,9 +80,11 @@
 /// <reference path='jsidea/action/EventCircuit.ts' />
 
 //jsidea.test
+/// <reference path='jsidea/plugins/Plugin.ts' />
 /// <reference path='jsidea/plugins/Test.ts' />
 /// <reference path='jsidea/plugins/Simboxy.ts' />
 /// <reference path='jsidea/plugins/Dependency.ts' />
+/// <reference path='jsidea/plugins/Runner.ts' />
 
 interface HTMLElement {
     matches(selector: string): boolean;

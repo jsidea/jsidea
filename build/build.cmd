@@ -1,3 +1,2 @@
 N:
-node "src/jsidea.js"
-pause
+node "src/jsidea-dependency.js"

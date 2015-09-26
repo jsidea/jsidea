@@ -87,14 +87,7 @@ abstract class BaseProcessor {
 }
 
 class ExportProcessor extends BaseProcessor {
-    //    public association: Result = null;
-
     private _stack: ts.ModuleDeclaration[] = [];
-
-    protected prepare(sourceFiles: string[]): void {
-        super.prepare(sourceFiles);
-        //        this.association = {};
-    }
 
     protected processNode(node: ts.Node): void {
         if (node.kind == ts.SyntaxKind.ModuleDeclaration)
@@ -106,6 +99,7 @@ class ExportProcessor extends BaseProcessor {
             case ts.SyntaxKind.InterfaceDeclaration:
             case ts.SyntaxKind.EnumDeclaration:
             case ts.SyntaxKind.VariableDeclaration:
+            case ts.SyntaxKind.FunctionDeclaration:
                 this.extract(node);
         }
 
@@ -130,19 +124,6 @@ class ExportProcessor extends BaseProcessor {
         var mod: any = this._stack[this._stack.length - 1];
         return mod.symbol ? mod.symbol.exports.hasOwnProperty(name) : false;
     }
-
-    //    protected finalize(): void {
-    //        Object.keys(this.result).forEach(fileName => {
-    //            this.result[fileName].forEach(symbol => {
-    //                if (!this.association.hasOwnProperty(symbol)) {
-    //                    this.association[symbol] = [];
-    //                }
-    //                if (this.association[symbol].indexOf(fileName) === -1) {
-    //                    this.association[symbol].push(fileName);
-    //                }
-    //            });
-    //        });
-    //    }
 }
 
 class ImportProcessor extends BaseProcessor {

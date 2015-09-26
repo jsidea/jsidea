@@ -73,25 +73,23 @@ var ExportProcessor = (function (_super) {
         _super.apply(this, arguments);
         this._stack = [];
     }
-    ExportProcessor.prototype.prepare = function (sourceFiles) {
-        _super.prototype.prepare.call(this, sourceFiles);
-    };
     ExportProcessor.prototype.processNode = function (node) {
         var _this = this;
-        if (node.kind == 216)
+        if (node.kind == 216 /* ModuleDeclaration */)
             this._stack.push(node);
         switch (node.kind) {
-            case 216:
-            case 212:
-            case 213:
-            case 215:
-            case 209:
+            case 216 /* ModuleDeclaration */:
+            case 212 /* ClassDeclaration */:
+            case 213 /* InterfaceDeclaration */:
+            case 215 /* EnumDeclaration */:
+            case 209 /* VariableDeclaration */:
+            case 211 /* FunctionDeclaration */:
                 this.extract(node);
         }
-        var skipChildren = node.kind == 212;
+        var skipChildren = node.kind == 212 /* ClassDeclaration */;
         if (!skipChildren)
             ts.forEachChild(node, function (node) { return _this.processNode(node); });
-        if (node.kind == 216)
+        if (node.kind == 216 /* ModuleDeclaration */)
             this._stack.pop();
     };
     ExportProcessor.prototype.extract = function (node) {
@@ -115,10 +113,10 @@ var ImportProcessor = (function (_super) {
     }
     ImportProcessor.prototype.processNode = function (node) {
         var _this = this;
-        if (node.kind === 67) {
+        if (node.kind === 67 /* Identifier */) {
             this.extract(node);
         }
-        else if (node.kind === 164) {
+        else if (node.kind === 164 /* PropertyAccessExpression */) {
             return this.extract(node);
         }
         ts.forEachChild(node, function (node) { return _this.processNode(node); });
@@ -146,6 +144,7 @@ var DependencyManager = (function () {
         this.imports.run(sourceFiles);
         this.exports = new ExportProcessor();
         this.exports.run(sourceFiles);
+        //get all exports
         var exportsAll = [];
         for (var file in this.exports.result) {
             var classes = this.exports.result[file];
@@ -156,6 +155,7 @@ var DependencyManager = (function () {
                     exportsAll.push(className.qualifiedName);
             }
         }
+        //clean imports
         for (var file in this.imports.result) {
             var classes = this.imports.result[file];
             var l = classes.length;
@@ -212,6 +212,7 @@ var DependencyManager = (function () {
     };
     return DependencyManager;
 })();
+//hook
 var sourceFiles = glob.sync('./../src/jsidea/**/**.ts');
 var dpm = new DependencyManager();
 dpm.run(sourceFiles);

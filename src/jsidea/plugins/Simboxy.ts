@@ -14,7 +14,7 @@ module jsidea.plugins {
         progress: number;
         transformNeedle: number[];
     }
-    export class Simbox extends jsidea.system.Application {
+    export class Simbox extends Plugin {
         
         //model/data stuff
         private _host: string = "ws://192.168.1.8:9989";

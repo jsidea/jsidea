@@ -52,7 +52,7 @@
   {
     "qualifiedName": "jsidea.events.Events",
     "file": "jsidea/events/Events.ts",
-    "fileSize": 892,
+    "fileSize": 1009,
     "kind": 212,
     "imports": [
       "jsidea.events.Events"
@@ -79,7 +79,7 @@
   {
     "qualifiedName": "jsidea.geom.AffineFit",
     "file": "jsidea/geom/AffineFit.ts",
-    "fileSize": 6977,
+    "fileSize": 9771,
     "kind": 212,
     "imports": [
       "jsidea.geom.AffineFit",
@@ -169,7 +169,7 @@
   {
     "qualifiedName": "jsidea.geom.Matrix2D",
     "file": "jsidea/geom/Matrix2D.ts",
-    "fileSize": 17363,
+    "fileSize": 22077,
     "kind": 212,
     "imports": [
       "jsidea.geom.Matrix2D",
@@ -183,7 +183,7 @@
   {
     "qualifiedName": "jsidea.geom.Matrix3D",
     "file": "jsidea/geom/Matrix3D.ts",
-    "fileSize": 37288,
+    "fileSize": 46321,
     "kind": 212,
     "imports": [
       "jsidea.geom.Matrix3D",
@@ -199,7 +199,7 @@
   {
     "qualifiedName": "jsidea.geom.Point2D",
     "file": "jsidea/geom/Point2D.ts",
-    "fileSize": 7555,
+    "fileSize": 7579,
     "kind": 212,
     "imports": [
       "jsidea.geom.Point2D",
@@ -210,7 +210,7 @@
   {
     "qualifiedName": "jsidea.geom.Point3D",
     "file": "jsidea/geom/Point3D.ts",
-    "fileSize": 9907,
+    "fileSize": 9941,
     "kind": 212,
     "imports": [
       "jsidea.geom.Point3D",
@@ -236,7 +236,7 @@
   {
     "qualifiedName": "jsidea.geom.Rect2D",
     "file": "jsidea/geom/Rect2D.ts",
-    "fileSize": 6903,
+    "fileSize": 8227,
     "kind": 212,
     "imports": [
       "jsidea.geom.Rect2D",
@@ -252,7 +252,7 @@
   {
     "qualifiedName": "jsidea.layout.Box",
     "file": "jsidea/layout/Box.ts",
-    "fileSize": 8432,
+    "fileSize": 9277,
     "kind": 212,
     "imports": [
       "jsidea.layout.Box",
@@ -267,7 +267,7 @@
   {
     "qualifiedName": "jsidea.layout.BoxModel.ATTACHMENT",
     "file": "jsidea/layout/BoxModel/Attachment.ts",
-    "fileSize": 3241,
+    "fileSize": 3356,
     "kind": 209,
     "imports": [
       "jsidea.layout.BoxModel.Background",
@@ -285,7 +285,7 @@
   {
     "qualifiedName": "jsidea.layout.BoxModel.Background",
     "file": "jsidea/layout/BoxModel/Background.ts",
-    "fileSize": 5344,
+    "fileSize": 5520,
     "kind": 212,
     "imports": [
       "jsidea.layout.BoxModel.Background",
@@ -302,7 +302,7 @@
   {
     "qualifiedName": "jsidea.layout.BoxModel.BACKGROUND",
     "file": "jsidea/layout/BoxModel/Background.ts",
-    "fileSize": 5344,
+    "fileSize": 5520,
     "kind": 209,
     "imports": [
       "jsidea.layout.BoxModel.Background",
@@ -503,7 +503,7 @@
   {
     "qualifiedName": "jsidea.layout.Move",
     "file": "jsidea/layout/Move.ts",
-    "fileSize": 1926,
+    "fileSize": 2114,
     "kind": 212,
     "imports": [
       "jsidea.layout.Move",
@@ -537,7 +537,7 @@
   {
     "qualifiedName": "jsidea.layout.MoveMode.BORDER_BOTTOM_RIGHT_INNER",
     "file": "jsidea/layout/MoveMode/BorderBottomRightInner.ts",
-    "fileSize": 3460,
+    "fileSize": 3733,
     "kind": 209,
     "imports": [
       "jsidea.layout.IMoveMode",
@@ -552,7 +552,7 @@
   {
     "qualifiedName": "jsidea.layout.MoveMode.BORDER_BOTTOM_RIGHT_OUTER",
     "file": "jsidea/layout/MoveMode/BorderBottomRightOuter.ts",
-    "fileSize": 2120,
+    "fileSize": 2240,
     "kind": 209,
     "imports": [
       "jsidea.layout.IMoveMode",
@@ -564,7 +564,7 @@
   {
     "qualifiedName": "jsidea.layout.MoveMode.BORDER_TOP_LEFT",
     "file": "jsidea/layout/MoveMode/BorderTopLeft.ts",
-    "fileSize": 1620,
+    "fileSize": 1653,
     "kind": 209,
     "imports": [
       "jsidea.layout.IMoveMode",
@@ -587,7 +587,7 @@
   {
     "qualifiedName": "jsidea.layout.MoveMode.BOTTOM_RIGHT",
     "file": "jsidea/layout/MoveMode/BottomRight.ts",
-    "fileSize": 4733,
+    "fileSize": 5708,
     "kind": 209,
     "imports": [
       "jsidea.layout.IMoveMode",
@@ -665,7 +665,7 @@
   {
     "qualifiedName": "jsidea.layout.MoveMode.SCROLL",
     "file": "jsidea/layout/MoveMode/Scroll.ts",
-    "fileSize": 1971,
+    "fileSize": 2026,
     "kind": 209,
     "imports": [
       "jsidea.layout.IMoveMode",
@@ -679,7 +679,7 @@
   {
     "qualifiedName": "jsidea.layout.MoveMode.TOP_LEFT",
     "file": "jsidea/layout/MoveMode/TopLeft.ts",
-    "fileSize": 6284,
+    "fileSize": 6548,
     "kind": 209,
     "imports": [
       "jsidea.layout.IMoveMode",
@@ -722,7 +722,7 @@
   {
     "qualifiedName": "jsidea.layout.MoveMode.TRANSFORM",
     "file": "jsidea/layout/MoveMode/Transform.ts",
-    "fileSize": 1516,
+    "fileSize": 1550,
     "kind": 209,
     "imports": [
       "jsidea.layout.IMoveMode",
@@ -735,7 +735,7 @@
   {
     "qualifiedName": "jsidea.layout.Position",
     "file": "jsidea/layout/Position.ts",
-    "fileSize": 4354,
+    "fileSize": 4600,
     "kind": 212,
     "imports": [
       "jsidea.layout.Position",
@@ -756,7 +756,7 @@
   {
     "qualifiedName": "jsidea.layout.Snap",
     "file": "jsidea/layout/Snap.ts",
-    "fileSize": 2519,
+    "fileSize": 2619,
     "kind": 212,
     "imports": [
       "jsidea.layout.Snap",
@@ -803,7 +803,7 @@
   {
     "qualifiedName": "jsidea.layout.StyleNode",
     "file": "jsidea/layout/StyleNode.ts",
-    "fileSize": 16552,
+    "fileSize": 20829,
     "kind": 212,
     "imports": [
       "jsidea.layout.StyleNode",
@@ -817,7 +817,7 @@
   {
     "qualifiedName": "jsidea.layout.Transform",
     "file": "jsidea/layout/Transform.ts",
-    "fileSize": 7396,
+    "fileSize": 7837,
     "kind": 212,
     "imports": [
       "jsidea.layout.Transform",
@@ -847,7 +847,7 @@
   {
     "qualifiedName": "jsidea.layout.TransformMode.PERSPECTIVE",
     "file": "jsidea/layout/TransformMode/Perspective.ts",
-    "fileSize": 3206,
+    "fileSize": 3947,
     "kind": 209,
     "imports": [
       "jsidea.layout.ITransformMode",
@@ -863,7 +863,7 @@
   {
     "qualifiedName": "jsidea.layout.TransformMode.PLANAR",
     "file": "jsidea/layout/TransformMode/Planar.ts",
-    "fileSize": 2876,
+    "fileSize": 3126,
     "kind": 209,
     "imports": [
       "jsidea.layout.ITransformMode",
@@ -892,7 +892,7 @@
   {
     "qualifiedName": "jsidea.layout.TransformMode.TEST",
     "file": "jsidea/layout/TransformMode/Test.ts",
-    "fileSize": 1595,
+    "fileSize": 1760,
     "kind": 209,
     "imports": [
       "jsidea.layout.ITransformMode",
@@ -935,35 +935,54 @@
   {
     "qualifiedName": "jsidea.plugins.IReference",
     "file": "jsidea/plugins/Dependency.ts",
-    "fileSize": 6371,
+    "fileSize": 6713,
     "kind": 213,
     "imports": [
       "jsidea.plugins.IReference",
       "jsidea.plugins.Dependency",
-      "jsidea.system.Application",
+      "jsidea.plugins.Plugin",
       "jsidea.text.Text"
     ]
   },
   {
     "qualifiedName": "jsidea.plugins.Dependency",
     "file": "jsidea/plugins/Dependency.ts",
-    "fileSize": 6371,
+    "fileSize": 6713,
     "kind": 212,
     "imports": [
       "jsidea.plugins.IReference",
       "jsidea.plugins.Dependency",
-      "jsidea.system.Application",
+      "jsidea.plugins.Plugin",
       "jsidea.text.Text"
+    ]
+  },
+  {
+    "qualifiedName": "jsidea.plugins.Plugin",
+    "file": "jsidea/plugins/Plugin.ts",
+    "fileSize": 4283,
+    "kind": 212,
+    "imports": [
+      "jsidea.plugins.Plugin",
+      "jsidea.events.EventDispatcher"
+    ]
+  },
+  {
+    "qualifiedName": "jsidea.plugins.Runner",
+    "file": "jsidea/plugins/Runner.ts",
+    "fileSize": 1119,
+    "kind": 211,
+    "imports": [
+      "jsidea.plugins.Runner"
     ]
   },
   {
     "qualifiedName": "jsidea.plugins.Simbox",
     "file": "jsidea/plugins/Simboxy.ts",
-    "fileSize": 4151,
+    "fileSize": 5071,
     "kind": 212,
     "imports": [
       "jsidea.plugins.Simbox",
-      "jsidea.system.Application",
+      "jsidea.plugins.Plugin",
       "jsidea.geom.Matrix3D",
       "jsidea.geom.Point3D"
     ]
@@ -971,11 +990,11 @@
   {
     "qualifiedName": "jsidea.plugins.Test",
     "file": "jsidea/plugins/Test.ts",
-    "fileSize": 8713,
+    "fileSize": 12857,
     "kind": 212,
     "imports": [
       "jsidea.plugins.Test",
-      "jsidea.system.Application",
+      "jsidea.plugins.Plugin",
       "jsidea.layout.Transform",
       "jsidea.layout.BoxModel.BORDER",
       "jsidea.geom.Point3D",
@@ -997,19 +1016,9 @@
     ]
   },
   {
-    "qualifiedName": "jsidea.system.Application",
-    "file": "jsidea/system/Application.ts",
-    "fileSize": 5549,
-    "kind": 212,
-    "imports": [
-      "jsidea.system.Application",
-      "jsidea.events.EventDispatcher"
-    ]
-  },
-  {
     "qualifiedName": "jsidea.system.Browser",
     "file": "jsidea/system/Browser.ts",
-    "fileSize": 4319,
+    "fileSize": 4411,
     "kind": 212,
     "imports": [
       "jsidea.system.Browser"
@@ -1018,7 +1027,7 @@
   {
     "qualifiedName": "jsidea.system.Engine",
     "file": "jsidea/system/Engine.ts",
-    "fileSize": 1329,
+    "fileSize": 1352,
     "kind": 212,
     "imports": [
       "jsidea.system.Engine",
@@ -1028,58 +1037,10 @@
   {
     "qualifiedName": "jsidea.system.System",
     "file": "jsidea/system/System.ts",
-    "fileSize": 1360,
+    "fileSize": 1393,
     "kind": 212,
     "imports": [
       "jsidea.system.System"
-    ]
-  },
-  {
-    "qualifiedName": "jsidea.test.Dependency",
-    "file": "jsidea/test/Dependency.ts",
-    "fileSize": 6353,
-    "kind": 212,
-    "imports": [
-      "jsidea.test.Dependency",
-      "jsidea.system.Application"
-    ]
-  },
-  {
-    "qualifiedName": "jsidea.test.Simbox",
-    "file": "jsidea/test/Simbox.ts",
-    "fileSize": 4133,
-    "kind": 212,
-    "imports": [
-      "jsidea.test.Simbox",
-      "jsidea.system.Application",
-      "jsidea.geom.Matrix3D",
-      "jsidea.geom.Point3D"
-    ]
-  },
-  {
-    "qualifiedName": "jsidea.test.Test",
-    "file": "jsidea/test/Test.ts",
-    "fileSize": 8695,
-    "kind": 212,
-    "imports": [
-      "jsidea.test.Test",
-      "jsidea.system.Application",
-      "jsidea.layout.Transform",
-      "jsidea.layout.BoxModel.BORDER",
-      "jsidea.geom.Point3D",
-      "jsidea.layout.MoveMode.TRANSFORM",
-      "jsidea.layout.Snap",
-      "jsidea.layout.ISnapGrid",
-      "jsidea.layout.BoxModel.PADDING",
-      "jsidea.layout.ISnapTo",
-      "jsidea.layout.IMoveMode",
-      "jsidea.layout.Position",
-      "jsidea.layout.Move",
-      "jsidea.layout.IPositionTo",
-      "jsidea.geom.Rect2D",
-      "jsidea.layout.Box",
-      "jsidea.display.Graphics",
-      "jsidea.events.EventDispatcher"
     ]
   },
   {
