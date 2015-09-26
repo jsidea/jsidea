@@ -39,35 +39,27 @@ module jsidea.test {
             var cls;
             for (cls in this._data) {
                 this._names.push(cls);
+                console.log(cls);
                 this._dependencies[cls] = this.getDependencies(cls);
             }
             
             //sort names
-            this._names.sort((a:string, b:string):number => {
+            this._names.sort((a: string, b: string): number => {
                 var pkgA = a.substr(0, a.lastIndexOf("."));
                 var clsA = a.substring(a.lastIndexOf(".") + 1);
-                var depthA:number = a.match(/\./gi).length;
                 var pkgB = b.substr(0, b.lastIndexOf("."));
                 var clsB = b.substring(b.lastIndexOf(".") + 1);
-                var depthB:number = b.match(/\./gi).length;
-//                if(depthA != depthB)
-//                    return depthA - depthB;
-                
-                if(pkgA != pkgB)
+                if (pkgA != pkgB)
                     return pkgA.localeCompare(pkgB);
-                if(clsA != clsB)
+                if (clsA != clsB)
                     return clsA.localeCompare(clsB);
-                return a.localeCompare(b);    
+                return a.localeCompare(b);
             });
             var l = this._names.length;
-            for(var i = 0; i < l; ++i)
-            {
+            for (var i = 0; i < l; ++i) {
                 cls = this._names[i];
-                this.addCheckbox(cls);    
+                this.addCheckbox(cls);
             }
-
-            console.log(this.getDependencies("jsidea.layout.Transform"));
-            console.log(this._data["jsidea.layout.Transform"]);
         }
 
         private addCheckbox(cls: string): void {
@@ -136,14 +128,15 @@ module jsidea.test {
         private getDependencies(qualifiedClassName: string): string[] {
             var res = [];
             this.addTo(qualifiedClassName, res);
-            var idx = res.indexOf(qualifiedClassName);
-            res.splice(idx, 1);
-
             return res;
         }
 
         private addTo(qualifiedClassName: string, target: string[]): void {
             var names: string[] = this._data[qualifiedClassName];
+            if (!names) {
+                console.log("MISSING", qualifiedClassName);
+                return;
+            }
             var l = names.length;
             for (var i = 0; i < l; ++i) {
                 var na = names[i];

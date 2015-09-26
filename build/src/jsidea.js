@@ -96,7 +96,7 @@ var ExportProcessor = (function (_super) {
             return false;
         var name = this.getName(node);
         var mod = this._stack[this._stack.length - 1];
-        return mod.symbol ? Boolean(mod.symbol.exports.hasOwnProperty(name)) : false;
+        return mod.symbol ? mod.symbol.exports.hasOwnProperty(name) : false;
     };
     ExportProcessor.prototype.finalize = function () {
         var _this = this;
@@ -129,52 +129,62 @@ var ImportProcessor = (function (_super) {
         ts.forEachChild(node, function (node) { return _this.processNode(node); });
     };
     ImportProcessor.prototype.extract = function (node) {
-        var fullName = this.getQualifiedName(node);
-        if (fullName) {
-            this.addQualifiedName(fullName);
+        var path = this.getPath(node);
+        if (path) {
+            var fullName = "";
+            var l = path.length;
+            for (var i = 0; i < l; ++i) {
+                fullName += (fullName ? "." : "") + path[i];
+                this.addQualifiedName(fullName);
+            }
         }
-    };
-    ImportProcessor.prototype.finalize = function () {
     };
     return ImportProcessor;
 })(BaseProcessor);
-function pushIfNotContained(arr, obj) {
-    if (arr.indexOf(obj) === -1) {
-        arr.push(obj);
-    }
-}
 var DependencyManager = (function () {
     function DependencyManager() {
     }
-    DependencyManager.prototype.createDepdencyTree = function (bySymbolExportReport, usageReport) {
+    DependencyManager.prototype.run = function (sourceFiles) {
         var _this = this;
+        var im = new ImportProcessor();
+        im.run(sourceFiles);
+        var ex = new ExportProcessor();
+        ex.run(sourceFiles);
+        var importResult = im.result;
+        var association = ex.association;
         var tree = {};
-        Object.keys(usageReport).forEach(function (fileName) {
-            usageReport[fileName].forEach(function (symbol) {
-                if (bySymbolExportReport.hasOwnProperty(symbol)) {
-                    _this.addDependentFilesToFiles(tree, fileName, bySymbolExportReport[symbol]);
+        Object.keys(importResult).forEach(function (fileName) {
+            importResult[fileName].forEach(function (symbol) {
+                if (association.hasOwnProperty(symbol)) {
+                    _this.addDependentFilesToFiles(tree, fileName, association[symbol]);
                 }
             });
         });
+        Object.keys(tree).forEach(function (fileName) {
+            var val = tree[fileName];
+            delete tree[fileName];
+            fileName = _this.fileNameToQualifiedName(fileName);
+            tree[fileName] = val;
+            var l = val.length;
+            for (var i = 0; i < l; ++i)
+                val[i] = _this.fileNameToQualifiedName(val[i]);
+        });
+        //        console.log(im.result["../src/jsidea/display/Graphics.ts"]);
         return tree;
     };
-    DependencyManager.prototype.sortFromDepdencyTree = function (tree) {
-        var _this = this;
-        var sortedFiles = [];
-        Object.keys(tree).forEach(function (fileWithDepdendencies) {
-            _this.getDependenciesOf(tree, fileWithDepdendencies).forEach(function (r) {
-                pushIfNotContained(sortedFiles, r);
-            });
-            pushIfNotContained(sortedFiles, fileWithDepdendencies);
-        });
-        return sortedFiles;
+    DependencyManager.prototype.fileNameToQualifiedName = function (fileName) {
+        fileName = fileName.replace("../src/", "");
+        fileName = fileName.replace(/\//gi, ".");
+        var idx = fileName.lastIndexOf(".ts");
+        return fileName.substring(0, idx);
     };
     DependencyManager.prototype.getDependenciesOf = function (tree, file) {
         var _this = this;
         var result = [];
         tree[file].forEach(function (dependency) {
             _this.getDependenciesOf(tree, dependency).forEach(function (res) {
-                pushIfNotContained(result, res);
+                if (result.indexOf(res) < 0)
+                    result.push(res);
             });
             result.push(dependency);
         });
@@ -187,37 +197,19 @@ var DependencyManager = (function () {
         if (files.indexOf(fileName) === -1) {
             files.forEach(function (file) {
                 if (file !== fileName && !tree[fileName].hasOwnProperty(file)) {
-                    pushIfNotContained(tree[fileName], file);
+                    if (tree[fileName].indexOf(file) < 0)
+                        tree[fileName].push(file);
                 }
             });
         }
     };
     return DependencyManager;
 })();
+//hook
 var sourceFiles = glob.sync('./../src/jsidea/**/**.ts');
-var im = new ImportProcessor();
-im.run(sourceFiles);
-var ex = new ExportProcessor();
-ex.run(sourceFiles);
 var dpm = new DependencyManager();
-var tree = dpm.createDepdencyTree(ex.association, im.result);
-function fileNameToQualifiedName(fileName) {
-    fileName = fileName.replace("../src/", "");
-    fileName = fileName.replace(/\//gi, ".");
-    var idx = fileName.lastIndexOf(".ts");
-    return fileName.substring(0, idx);
-}
-Object.keys(tree).forEach(function (fileName) {
-    var val = tree[fileName];
-    delete tree[fileName];
-    fileName = fileNameToQualifiedName(fileName);
-    tree[fileName] = val;
-    var l = val.length;
-    for (var i = 0; i < l; ++i)
-        val[i] = fileNameToQualifiedName(val[i]);
-});
+var tree = dpm.run(sourceFiles);
 fs.writeFile("dependency.json", JSON.stringify(tree, null, 2), function (err) {
-    if (err) {
+    if (err)
         return console.log(err);
-    }
 });
