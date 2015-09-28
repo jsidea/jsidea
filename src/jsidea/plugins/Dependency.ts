@@ -74,7 +74,9 @@ namespace jsidea.plugins {
             this._ajax = new XMLHttpRequest();
             this._ajax.onreadystatechange = (e) => this.onReadyStateChange(e);
 
-            this.load("http://127.0.0.1/eventfive/jsidea/jsidea.dependency.json");
+            var project = "jsidea";
+            var version = "0.0.1";
+            this.load("http://127.0.0.1/eventfive/jsidea-build/release/" + project + "/" + version + "/" + project + ".build.json");
         }
 
         public load(url: string): void {
