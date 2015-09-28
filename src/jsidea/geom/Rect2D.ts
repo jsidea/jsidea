@@ -1,4 +1,4 @@
-module jsidea.geom {
+namespace jsidea.geom {
     export class Rect2D implements IRect2DValue {
         constructor(
             public x: number = 0,

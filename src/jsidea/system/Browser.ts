@@ -1,4 +1,4 @@
-module jsidea.system {
+namespace jsidea.system {
     export class Browser {
         //browsers
         public static isOpera = /opr\//i.test(navigator.userAgent) || /opera/i.test(navigator.userAgent);

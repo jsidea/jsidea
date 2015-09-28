@@ -1,4 +1,4 @@
-module jsidea.layout.MoveMode {
+namespace jsidea.layout.MoveMode {
     class Background implements IMoveMode {
         public boxModel: IBoxModel = BoxModel.BACKGROUND;
         public willChange: string = "contents";

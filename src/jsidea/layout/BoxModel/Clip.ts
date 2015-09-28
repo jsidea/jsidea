@@ -1,4 +1,4 @@
-module jsidea.layout.BoxModel {
+namespace jsidea.layout.BoxModel {
     class Clip implements IBoxModel {
         public name: string = "clip-box";
         private _clip: geom.Rect2D = new geom.Rect2D();

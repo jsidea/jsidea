@@ -1,4 +1,4 @@
-module jsidea.layout.MoveMode {
+namespace jsidea.layout.MoveMode {
    class TopLeft implements IMoveMode {
         public willChange: string = "top, left";
         private _sizeParent: Box = Box.create();

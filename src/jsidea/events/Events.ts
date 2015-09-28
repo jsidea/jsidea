@@ -1,4 +1,4 @@
-module jsidea.events {
+namespace jsidea.events {
     export class Events {
         //element events
         public static BLUR: string = "blur";

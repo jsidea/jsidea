@@ -1,4 +1,4 @@
-module jsidea.layout.BoxModel {
+namespace jsidea.layout.BoxModel {
     export class Background implements IBoxModel {
         public name: string = "background-box";
         private _image = new Image();

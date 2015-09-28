@@ -1,4 +1,4 @@
-module jsidea.layout {
+namespace jsidea.layout {
     export class Transform {
         public element: HTMLElement = null;
         public toBox: IBoxModel = BoxModel.BORDER;

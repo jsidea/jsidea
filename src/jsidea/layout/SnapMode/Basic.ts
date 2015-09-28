@@ -1,4 +1,4 @@
-module jsidea.layout.SnapMode {
+namespace jsidea.layout.SnapMode {
     class BasicSnapMode implements ISnapMode {
         public transform(snap: Snap, transform: Transform, point: geom.Point3D): void {
             point.x = math.Number.roundTo(point.x, 60);

@@ -1,4 +1,4 @@
-module jsidea.layout.BoxModel {
+namespace jsidea.layout.BoxModel {
     class Canvas implements IBoxModel {
         public name: string = "canvas-box";
         private _matrix = new geom.Matrix2D();

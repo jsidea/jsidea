@@ -1,4 +1,4 @@
-module jsidea.layout {
+namespace jsidea.layout {
     export interface IBoxModel {
         name: string;
         fromBorderBox(size: Box, point: geom.Point3D): void;

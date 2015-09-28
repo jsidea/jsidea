@@ -1,4 +1,4 @@
-module jsidea.layout.MoveMode {
+namespace jsidea.layout.MoveMode {
     class BorderBottomRightInner implements IMoveMode {
         public boxModel: IBoxModel = BoxModel.BORDER;
         public willChange: string = "contents";

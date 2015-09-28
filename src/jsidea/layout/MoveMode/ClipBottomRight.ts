@@ -1,4 +1,4 @@
-module jsidea.layout.MoveMode {
+namespace jsidea.layout.MoveMode {
     class ClipBottomRight implements IMoveMode {
         public boxModel: IBoxModel = BoxModel.CLIP;
         public willChange: string = "contents";

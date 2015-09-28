@@ -1,4 +1,4 @@
-module jsidea.layout.BoxModel {
+namespace jsidea.layout.BoxModel {
     class Image implements IBoxModel {
         public name: string = "image-box";
         private check(size: Box): boolean {

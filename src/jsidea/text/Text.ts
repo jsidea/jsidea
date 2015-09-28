@@ -1,4 +1,4 @@
-module jsidea.text {
+namespace jsidea.text {
     export class Text {
         public static fillHead(text: string, length: number, char: string = " "): string {
             if (text.length >= length)

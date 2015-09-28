@@ -1,4 +1,4 @@
-module jsidea.layout {
+namespace jsidea.layout {
     export class Snap {
         public mode: ISnapMode = null;
         public to: ISnapTo = {};

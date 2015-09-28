@@ -1,4 +1,4 @@
-module jsidea.layout {
+namespace jsidea.layout {
     export class StyleNode {
         public static create(element: HTMLElement): IStyleNode {
             if (!element)

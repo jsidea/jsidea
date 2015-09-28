@@ -1,4 +1,4 @@
-module jsidea.model {
+namespace jsidea.model {
     export class Dictonary<K, V> {
         private _keys: K[] = [];
         private _values: V[] = [];

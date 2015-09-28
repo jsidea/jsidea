@@ -1,4 +1,4 @@
-module jsidea.system {
+namespace jsidea.system {
     export class System {
         //operating systems
         public static isWindows = /win/i.test(navigator.appVersion);

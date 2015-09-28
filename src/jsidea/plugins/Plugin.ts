@@ -1,4 +1,4 @@
-module jsidea.plugins {
+namespace jsidea.plugins {
     export class Plugin extends jsidea.events.EventDispatcher {
         private _active: boolean = false;
         private _autoActive: boolean = false;
@@ -78,7 +78,7 @@ module jsidea.plugins {
         private refreshTickInterval(): void {
             clearInterval(this._tickInterval);
             if (this._autoTick && this._frameRate > 0)
-                this._tickInterval = setInterval(() => this.tick(), 1000 / this._frameRate);
+                this._tickInterval = <any> setInterval(() => this.tick(), 1000 / this._frameRate);
         }
 
         public dispose(): void {

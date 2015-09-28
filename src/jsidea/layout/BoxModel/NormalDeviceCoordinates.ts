@@ -1,4 +1,4 @@
-module jsidea.layout.BoxModel {
+namespace jsidea.layout.BoxModel {
     class NormalDeviceCoordinates implements IBoxModel {
         public name: string = "normal-device-coordinates-box";
         public fromBorderBox(size: Box, point: geom.Point3D): void {

@@ -1,4 +1,4 @@
-module jsidea.system {
+namespace jsidea.system {
     export class Engine {
         //engines
         public static isWebKit = !Browser.isInternetExplorer && !Browser.isEdge && /webkit/i.test(navigator.userAgent);

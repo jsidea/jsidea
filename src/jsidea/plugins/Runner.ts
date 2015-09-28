@@ -1,4 +1,4 @@
-module jsidea.plugins {
+namespace jsidea.plugins {
     export function Runner(element: HTMLElement): void {
             var plugin: string = element.getAttribute("data-plugin")
             if (!plugin) {

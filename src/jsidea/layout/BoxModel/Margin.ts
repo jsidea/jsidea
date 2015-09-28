@@ -1,4 +1,4 @@
-module jsidea.layout.BoxModel {
+namespace jsidea.layout.BoxModel {
     class Margin implements IBoxModel {
         public name: string = "margin-box";
         public fromBorderBox(size: Box, point: geom.Point3D): void {

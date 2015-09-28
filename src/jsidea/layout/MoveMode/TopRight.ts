@@ -1,4 +1,4 @@
-module jsidea.layout.MoveMode {
+namespace jsidea.layout.MoveMode {
     class TopRight implements IMoveMode {
         public willChange: string = "top, right";
         public invertX: boolean = true;

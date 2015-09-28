@@ -1,4 +1,4 @@
-module jsidea.geom {
+namespace jsidea.geom {
     export class Quad implements IQuadValue {
         constructor(
             public p1: geom.Point3D = new geom.Point3D(),

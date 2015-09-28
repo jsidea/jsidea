@@ -1,4 +1,4 @@
-module jsidea.geom {
+namespace jsidea.geom {
     /**
     * Matrix2D math.
     *  

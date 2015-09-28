@@ -1,4 +1,4 @@
-module jsidea.plugins {
+namespace jsidea.plugins {
     export class Test extends Plugin {
         constructor() {
             super();

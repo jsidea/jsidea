@@ -1,4 +1,4 @@
-module jsidea.layout.MoveMode {
+namespace jsidea.layout.MoveMode {
     class Transform implements IMoveMode {
         public willChange: string = "transform";
         protected _matrix: geom.Matrix3D = new geom.Matrix3D();

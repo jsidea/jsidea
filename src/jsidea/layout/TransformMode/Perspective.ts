@@ -1,4 +1,4 @@
-module jsidea.layout.TransformMode {
+namespace jsidea.layout.TransformMode {
     class Perspective implements ITransformMode {
         private static _matrix: geom.Matrix3D = new geom.Matrix3D();
         public extract(transform: Transform, matrix: geom.Matrix3D): void {

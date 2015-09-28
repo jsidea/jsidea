@@ -1,4 +1,4 @@
-module jsidea.geom {
+namespace jsidea.geom {
     export interface IMatrix2DValue {
         m11: number;
         m12: number;

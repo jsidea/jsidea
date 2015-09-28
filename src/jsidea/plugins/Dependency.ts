@@ -1,8 +1,15 @@
-module jsidea.plugins {
+namespace jsidea.plugins {
+    interface IFile {
+        name: string;
+        size: number;
+    }
+    interface IData {
+        files: IFile[];
+        symbols: IReference[];
+    }
     interface IReferenceData {
-        qualifiedName: string,
-        file: string,
-        fileSize: number,
+        qualifiedName: string;
+        file: string | IFile;
         kind: number;
         imports: string[] | IReference[];
     }
@@ -10,6 +17,7 @@ module jsidea.plugins {
         ui: DependencyUI;
         relations: IReference[];
         imports: IReference[];
+        file: IFile;
         name: string;
         package: string;
         isDependent: boolean;
@@ -37,7 +45,7 @@ module jsidea.plugins {
 
             var lab = document.createElement("div");
             lab.className = "label";
-            lab.textContent = reference.name + " [" + text.Text.fileSize(reference.fileSize) + "]";
+            lab.textContent = reference.name + " [" + text.Text.fileSize(reference.file.size) + "]";
             e.appendChild(lab);
         }
 
@@ -55,7 +63,8 @@ module jsidea.plugins {
     }
     export class Dependency extends Plugin {
 
-        public references: IReference[] = null;
+        public symbols: IReference[] = null;
+        public files: IFile[] = null;
 
         private _ajax: XMLHttpRequest;
         private _list: HTMLDivElement = null;
@@ -65,7 +74,7 @@ module jsidea.plugins {
             this._ajax = new XMLHttpRequest();
             this._ajax.onreadystatechange = (e) => this.onReadyStateChange(e);
 
-            this.load("http://127.0.0.1/eventfive/jsidea/build/dependency.json");
+            this.load("http://127.0.0.1/eventfive/jsidea/jsidea.dependency.json");
         }
 
         public load(url: string): void {
@@ -84,19 +93,22 @@ module jsidea.plugins {
             }
         }
 
-        private parse(data: IReference[]): void {
+        private parse(dat: IData): void {
+            var data = dat.symbols;
             this._list = document.createElement("div");
             this._list.id = "list";
             document.body.appendChild(this._list);
             
             //get all exports
-            this.references = data;
+            this.symbols = data;
+            this.files = dat.files;
             
             //create/collect references
-            var refs: IReference[] = this.references;
+            var refs: IReference[] = this.symbols;
             
             //resolve names to IReference objects
             for (var ref of refs) {
+                ref.file = this.getFileByName(<any>ref.file);
                 for (var i = 0; i < ref.imports.length; ++i)
                     ref.imports[i] = this.getByQualifiedName(<any>ref.imports[i]);
                 var path = ref.qualifiedName.split(".");
@@ -122,8 +134,15 @@ module jsidea.plugins {
             }
         }
 
+        public getFileByName(name: string): IFile {
+            for (var file of this.files)
+                if (file.name == name)
+                    return file;
+            return null;
+        }
+
         private getByQualifiedName(name: string): IReference {
-            var refs = this.references;
+            var refs = this.symbols;
             for (var ref of refs)
                 if (ref.qualifiedName == name)
                     return ref;
@@ -157,7 +176,7 @@ module jsidea.plugins {
             //collect checked
             //and reset dependent
             var checked: IReference[] = [];
-            for (var ref of this.references) {
+            for (var ref of this.symbols) {
                 ref.isDependent = false;
                 if (ref.isChecked)
                     checked.push(ref);
@@ -173,7 +192,7 @@ module jsidea.plugins {
         }
 
         private refreshUI(): void {
-            for (var ref of this.references) {
+            for (var ref of this.symbols) {
                 ref.ui.setChecked(ref.isChecked);
                 ref.ui.setDependent(ref.isDependent);
             }

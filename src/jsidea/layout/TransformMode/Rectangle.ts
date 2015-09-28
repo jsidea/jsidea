@@ -1,4 +1,4 @@
-module jsidea.layout.TransformMode {
+namespace jsidea.layout.TransformMode {
     class Rectangle implements ITransformMode {
         public extract(transform: Transform, matrix: geom.Matrix3D): void {
             var globalBounds = geom.Rect2D.getBounds(transform.element);

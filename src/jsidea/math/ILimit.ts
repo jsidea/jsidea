@@ -1,4 +1,4 @@
-module jsidea.math {
+namespace jsidea.math {
     export interface ILimit {
         minX?: any;
         maxX?: any;

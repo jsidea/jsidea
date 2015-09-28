@@ -1,4 +1,4 @@
-module jsidea.layout {
+namespace jsidea.layout {
     export class Position {
         public to: IPositionTo = {};
         public from: IPositionFrom = {};

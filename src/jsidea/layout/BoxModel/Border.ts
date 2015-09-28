@@ -1,4 +1,4 @@
-module jsidea.layout.BoxModel {
+namespace jsidea.layout.BoxModel {
     class Border implements IBoxModel {
         public name: string = "border-box";
         public fromBorderBox(size: Box, point: geom.Point3D): void {

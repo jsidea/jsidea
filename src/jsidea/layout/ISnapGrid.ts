@@ -1,4 +1,4 @@
-module jsidea.layout {
+namespace jsidea.layout {
     export interface ISnapGrid {
         element?: HTMLElement;
         boxModel?: IBoxModel;

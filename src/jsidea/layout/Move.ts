@@ -1,4 +1,4 @@
-module jsidea.layout {
+namespace jsidea.layout {
     export class Move {
         public position: geom.Point3D = new geom.Point3D();
         public limits: IMoveLimits = {};

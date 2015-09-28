@@ -1,4 +1,4 @@
-module jsidea.layout.MoveMode {
+namespace jsidea.layout.MoveMode {
     class BorderTopLeft implements IMoveMode {
         public willChange: string = "contents";
         private _boxSizing: Box = Box.create();

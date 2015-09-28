@@ -1,4 +1,4 @@
-module jsidea.events {
+namespace jsidea.events {
     export class EventDispatcher implements IEventDispatcher {
         
         private _listener = new model.Dictonary<string, IEventListener[]>();

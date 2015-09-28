@@ -1,4 +1,4 @@
-module jsidea.plugins {
+namespace jsidea.plugins {
     interface ISimboxData {
         active: boolean;
         camDynamicHandle: number[];

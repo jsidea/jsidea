@@ -1,4 +1,4 @@
-module jsidea.geom {
+namespace jsidea.geom {
     export interface IComposition3D {
         perspective: number;
         position: Point3D;

@@ -1,4 +1,4 @@
-module jsidea.layout.BoxModel {
+namespace jsidea.layout.BoxModel {
     class Content implements IBoxModel {
         public name: string = "content-box";
         public fromBorderBox(size: Box, point: geom.Point3D): void {

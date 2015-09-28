@@ -1,4 +1,4 @@
-module jsidea.math {
+namespace jsidea.math {
     export class Number {
 
         public static RAD_TO_DEG: number = 180 / Math.PI;

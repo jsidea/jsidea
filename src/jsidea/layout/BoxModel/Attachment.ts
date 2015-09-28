@@ -1,4 +1,4 @@
-module jsidea.layout.BoxModel {
+namespace jsidea.layout.BoxModel {
     class Attachment extends Background {
         public name: string = "attachment-box";
         protected getBackgroundBox(size: Box, ret: geom.Rect2D = new geom.Rect2D()): geom.Rect2D {

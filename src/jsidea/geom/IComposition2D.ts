@@ -1,4 +1,4 @@
-module jsidea.geom {
+namespace jsidea.geom {
     export interface IComposition2D {
         position: Point2D;
         scale: Point2D;

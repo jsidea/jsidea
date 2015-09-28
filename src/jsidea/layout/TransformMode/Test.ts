@@ -1,4 +1,4 @@
-module jsidea.layout.TransformMode {
+namespace jsidea.layout.TransformMode {
     class Test implements ITransformMode {
         public extract(transform: Transform, matrix: geom.Matrix3D): void {
             var element = transform.element;

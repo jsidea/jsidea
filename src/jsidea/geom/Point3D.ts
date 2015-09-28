@@ -1,4 +1,4 @@
-module jsidea.geom {
+namespace jsidea.geom {
     export class Point3D implements IPoint3DValue {
 
         public static X_AXIS: Point3D = new Point3D(1, 0, 0);

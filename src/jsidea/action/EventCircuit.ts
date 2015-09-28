@@ -1,4 +1,4 @@
-module jsidea.action {
+namespace jsidea.action {
     export class EventCircuit extends jsidea.events.EventDispatcher implements geom.IPoint2DValue {
 
         public uid: number = 0;

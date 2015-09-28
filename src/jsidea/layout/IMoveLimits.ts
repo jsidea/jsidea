@@ -1,4 +1,4 @@
-module jsidea.layout {
+namespace jsidea.layout {
     export interface IMoveLimits {
         minX?: any;
         maxX?: any;

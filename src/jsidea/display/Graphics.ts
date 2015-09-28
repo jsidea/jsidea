@@ -1,4 +1,4 @@
-module jsidea.display {
+namespace jsidea.display {
     export class Graphics {
 
         private static _instance: Graphics = new Graphics();

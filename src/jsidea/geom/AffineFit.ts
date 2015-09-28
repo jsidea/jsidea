@@ -1,4 +1,4 @@
-module jsidea.geom {
+namespace jsidea.geom {
     /**
     * Based on "Fit an affine transformation to given points", by Jarno Elonen (2007)
     * http://elonen.iki.fi/code/misc-notes/affine-fit/.

@@ -1,4 +1,4 @@
-module jsidea.layout.MoveMode {
+namespace jsidea.layout.MoveMode {
     class Scroll implements IMoveMode {
         public boxModel: IBoxModel = BoxModel.SCROLL;
         public willChange: string = "scroll-position";

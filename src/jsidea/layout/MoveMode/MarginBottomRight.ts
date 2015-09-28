@@ -1,4 +1,4 @@
-module jsidea.layout.MoveMode {
+namespace jsidea.layout.MoveMode {
     class MarginBottomRight implements IMoveMode {
         public willChange: string = "auto";
         public invertX: boolean = true;

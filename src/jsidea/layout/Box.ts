@@ -1,4 +1,4 @@
-module jsidea.layout {
+namespace jsidea.layout {
     export class Box {
 
         public element: HTMLElement = null;

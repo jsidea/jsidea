@@ -1,4 +1,4 @@
-module jsidea.layout.BoxModel {
+namespace jsidea.layout.BoxModel {
     class Scroll implements IBoxModel {
         public name: string = "scroll-box";
         private getScroll(size: Box): geom.Point2D {
