@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE css-source>
-<css_scripts>
-	<src>jsidea-core.css</src>
-	<src>jsidea-test.css</src>
-	<src>jsidea-dependency.css</src>
-	<src>jsidea-simbox.css</src>
-</css_scripts>

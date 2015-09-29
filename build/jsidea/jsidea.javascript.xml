@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE javascript-source>
-<js_scripts>
-	<!-- <src>jquery-2.1.0.js</src> -->
-	<src>canvas_get_transform.js</src>
-	<src>canvas_has_context.js</src>
-</js_scripts>

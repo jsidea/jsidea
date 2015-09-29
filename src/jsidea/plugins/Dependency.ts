@@ -77,7 +77,7 @@ namespace jsidea.plugins {
 
             var project = "jsidea";
             var version = "0.0.1";
-            this.load("http://127.0.0.1/eventfive/jsidea-build/release/" + project + "/" + version + "/" + project + ".build.json");
+            this.load("http://127.0.0.1/eventfive/jsidea-website/build/" + project + "/" + version + "/" + project + ".build.json");
         }
 
         public load(url: string): void {
