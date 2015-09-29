@@ -4,19 +4,20 @@ namespace jsidea.plugins {
         size: number;
     }
     interface IData {
+        project: any;
         files: IFile[];
-        symbols: IReference[];
+        typescript: ISymbol[];
     }
     interface IReferenceData {
-        qualifiedName: string;
+        fullName: string;
         file: string | IFile;
         kind: number;
-        imports: string[] | IReference[];
+        imports: any[];
     }
-    export interface IReference extends IReferenceData {
+    export interface ISymbol extends IReferenceData {
         ui: DependencyUI;
-        relations: IReference[];
-        imports: IReference[];
+        relations: ISymbol[];
+        imports: ISymbol[];
         file: IFile;
         name: string;
         package: string;
@@ -24,17 +25,17 @@ namespace jsidea.plugins {
         isChecked: boolean;
     }
     export class DependencyUI {
-        private _reference: IReference;
+        private _reference: ISymbol;
         private _element: HTMLElement;
 
-        constructor(reference: IReference) {
+        constructor(reference: ISymbol) {
             this._reference = reference;
 
             this._element = document.createElement("div");
             var e = this._element;
 
             e.className = "entry";
-            e.id = reference.qualifiedName;
+            e.id = reference.fullName;
             e.setAttribute("data-checked", "0");
             e.setAttribute("data-dependent", "0");
             e.setAttribute("data-kind", reference.kind.toString());
@@ -63,7 +64,7 @@ namespace jsidea.plugins {
     }
     export class Dependency extends Plugin {
 
-        public symbols: IReference[] = null;
+        public symbols: ISymbol[] = null;
         public files: IFile[] = null;
 
         private _ajax: XMLHttpRequest;
@@ -96,7 +97,7 @@ namespace jsidea.plugins {
         }
 
         private parse(dat: IData): void {
-            var data = dat.symbols;
+            var data = dat.typescript;
             this._list = document.createElement("div");
             this._list.id = "list";
             document.body.appendChild(this._list);
@@ -106,14 +107,14 @@ namespace jsidea.plugins {
             this.files = dat.files;
             
             //create/collect references
-            var refs: IReference[] = this.symbols;
+            var refs: ISymbol[] = this.symbols;
             
             //resolve names to IReference objects
             for (var ref of refs) {
                 ref.file = this.getFileByName(<any>ref.file);
                 for (var i = 0; i < ref.imports.length; ++i)
                     ref.imports[i] = this.getByQualifiedName(<any>ref.imports[i]);
-                var path = ref.qualifiedName.split(".");
+                var path = ref.fullName.split(".");
                 ref.name = path[path.length - 1];
                 ref.package = path.splice(0, path.length - 1).join(".");
                 ref.isDependent = false;
@@ -121,12 +122,12 @@ namespace jsidea.plugins {
             }
             
             //sort names
-            refs.sort((a: IReference, b: IReference): number => {
+            refs.sort((a: ISymbol, b: ISymbol): number => {
                 if (a.package != b.package)
                     return a.package.localeCompare(b.package);
                 if (a.name != b.name)
                     return a.name.localeCompare(b.name);
-                return a.qualifiedName.localeCompare(b.qualifiedName);
+                return a.fullName.localeCompare(b.fullName);
             });
             
             //multipath(2/2)
@@ -143,15 +144,15 @@ namespace jsidea.plugins {
             return null;
         }
 
-        private getByQualifiedName(name: string): IReference {
+        private getByQualifiedName(name: string): ISymbol {
             var refs = this.symbols;
             for (var ref of refs)
-                if (ref.qualifiedName == name)
+                if (ref.fullName == name)
                     return ref;
             return null;
         }
 
-        private createRelations(ref: IReference, relations?: IReference[]): IReference[] {
+        private createRelations(ref: ISymbol, relations?: ISymbol[]): ISymbol[] {
             relations = relations || [];
             for (var imp of ref.imports) {
                 if (relations.indexOf(imp) < 0) {
@@ -162,14 +163,14 @@ namespace jsidea.plugins {
             return relations;
         }
 
-        private createElement(ref: IReference): DependencyUI {
+        private createElement(ref: ISymbol): DependencyUI {
             var element = new DependencyUI(ref);
             this._list.appendChild(element.getElement());
             element.getElement().addEventListener("click", () => this.onClickElement(ref));
             return element;
         }
 
-        private onClickElement(ref: IReference): void {
+        private onClickElement(ref: ISymbol): void {
             ref.isChecked = !ref.isChecked;
             this.refreshDependency();
         }
@@ -177,7 +178,7 @@ namespace jsidea.plugins {
         private refreshDependency(): void {
             //collect checked
             //and reset dependent
-            var checked: IReference[] = [];
+            var checked: ISymbol[] = [];
             for (var ref of this.symbols) {
                 ref.isDependent = false;
                 if (ref.isChecked)
