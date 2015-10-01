@@ -815,7 +815,7 @@ namespace jsidea.geom {
             var y: Point3D = Matrix3D.tempAxeY;
             var z: Point3D = Matrix3D.tempAxeZ;
 
-            z.subSet(eye, target).normalize();
+            z.difference(eye, target).normalize();
             if (z.length() === 0) {
                 z.z = 1;
             }

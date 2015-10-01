@@ -14,7 +14,7 @@ namespace jsidea.layout.MoveMode {
                 //TODO: implement retrieval of the margin values
             }
             else
-                offset.add(
+                offset.translate(
                     math.Number.parse(style.marginRight, 0),
                     math.Number.parse(style.marginBottom, 0),
                     0);

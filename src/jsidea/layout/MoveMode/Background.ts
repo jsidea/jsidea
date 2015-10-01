@@ -10,7 +10,7 @@ namespace jsidea.layout.MoveMode {
             var rect = this._rect;
             this._size.update(element, style);
             this._size.bounds(BoxModel.BACKGROUND, BoxModel.PADDING, rect);
-            return offset.add(
+            return offset.translate(
                 rect.x,
                 rect.y,
                 0);

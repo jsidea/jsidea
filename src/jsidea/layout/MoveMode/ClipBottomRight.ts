@@ -5,7 +5,7 @@ namespace jsidea.layout.MoveMode {
         private _clip: geom.Rect2D = new geom.Rect2D();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             var clip = geom.Rect2D.getClip(element, style, this._clip);
-            offset.add(
+            offset.translate(
                 clip.right,
                 clip.bottom,
                 0);

@@ -15,13 +15,13 @@ class Build {
 		$build = json_decode ( $content );
 		
 		foreach ( $build->css as $key => $url )
-			echo self::encodeCSS ( self::$projectURL . "css/" . $url );
+			echo self::encodeCSS ( self::$projectURL . $url );
 		
 		foreach ( $build->libs as $key => $url )
-			echo self::encodeJavaScript ( self::$projectURL . "libs/" . $url );
+			echo self::encodeJavaScript ( self::$projectURL . $url );
 		
 		foreach ( $build->src as $key => $url )
-			echo self::encodeJavaScript ( self::$projectURL . "src/" . $url );
+			echo self::encodeJavaScript ( self::$projectURL . $url );
 	}
 	private static function encodeCSS($url) {
 		return "<link type='text/css' rel='stylesheet' href='$url' >\n";

@@ -68,29 +68,6 @@ namespace jsidea.layout {
             return this;
         }
 
-        public clamp(
-            to: Transform,
-            pt: geom.Point3D,
-            offsetX: number,
-            offsetY: number,
-            minX: number,
-            maxX: number,
-            minY: number,
-            maxY: number,
-            fromBox?: IBoxModel,
-            toBox?: IBoxModel,
-            ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
-
-            var lc = this.localToLocal(to, pt.x + offsetX, pt.y + offsetY, pt.z, toBox, fromBox, ret);
-            lc.x = math.Number.clamp(lc.x, minX, maxX);
-            lc.y = math.Number.clamp(lc.y, minY, maxY);
-            lc = to.localToLocalPoint(this, lc, fromBox, toBox);
-            lc.z = pt.z;
-            lc.x -= offsetX;
-            lc.y -= offsetY;
-            return lc;
-        }
-
         public localToLocalPoint(
             to: Transform,
             pt: geom.Point3D,
@@ -125,8 +102,8 @@ namespace jsidea.layout {
             ret: geom.Point3D = new geom.Point3D()): geom.Point3D {
 
             ret.setTo(x, y, z);
-            var gl = this.localToGlobalPoint(ret, fromBox, layout.BoxModel.BORDER, ret);
-            return to.globalToLocalPoint(gl, layout.BoxModel.BORDER, toBox, ret);
+            var gl = this.localToGlobalPoint(ret, fromBox, BoxModel.BORDER, ret);
+            return to.globalToLocalPoint(gl, BoxModel.BORDER, toBox, ret);
         }
 
         public globalToLocalPoint(
@@ -162,13 +139,13 @@ namespace jsidea.layout {
             ret.setTo(x, y, z);
             
             //apply box model transformations
-            this.size.transform(ret, fromBox || this.fromBox, layout.BoxModel.BORDER);
+            this.size.transform(ret, fromBox || this.fromBox, BoxModel.BORDER);
             
             //unproject from parent to child
             this.inverseSceneTransform.unproject(ret, ret);
 
             //apply box model transformations
-            this.size.transform(ret, layout.BoxModel.BORDER, toBox || this.toBox);
+            this.size.transform(ret, BoxModel.BORDER, toBox || this.toBox);
 
             return ret;
         }
@@ -205,13 +182,13 @@ namespace jsidea.layout {
             ret.setTo(x, y, z);
             
             //apply from-box model transformations
-            this.size.transform(ret, fromBox || this.fromBox, layout.BoxModel.BORDER);            
+            this.size.transform(ret, fromBox || this.fromBox, BoxModel.BORDER);            
             
             //project from child to parent
             this.sceneTransform.project(ret, ret);
             
             //apply to-box model transformations
-            this.size.transform(ret, layout.BoxModel.BORDER, toBox || this.toBox);
+            this.size.transform(ret, BoxModel.BORDER, toBox || this.toBox);
 
             return ret;
         }

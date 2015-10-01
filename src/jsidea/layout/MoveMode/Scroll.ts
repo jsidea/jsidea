@@ -13,7 +13,7 @@ namespace jsidea.layout.MoveMode {
 
             offset.x *= -1;
             offset.y *= -1;
-            offset.add(
+            offset.translate(
                 scrollLeft,
                 scrollTop,
                 0);

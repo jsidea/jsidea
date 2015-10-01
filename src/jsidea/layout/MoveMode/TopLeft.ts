@@ -47,7 +47,7 @@ namespace jsidea.layout.MoveMode {
                         position.y = node.position.y + this._sizeParent.paddingTop - this._size.marginTop;
                         this._sizeParent.transform(position, BoxModel.BORDER, BoxModel.CONTENT);
                     }
-                    return offset.add(
+                    return offset.translate(
                         position.x,
                         position.y,
                         0);
@@ -77,7 +77,7 @@ namespace jsidea.layout.MoveMode {
                         dx -= this._size.marginLeft;
                         dy -= this._size.marginTop;
                     }
-                    return offset.add(
+                    return offset.translate(
                         math.Number.parse(style.left, dx),
                         math.Number.parse(style.top, dy),
                         0);
@@ -88,7 +88,7 @@ namespace jsidea.layout.MoveMode {
                 }
             }
 
-            return offset.add(
+            return offset.translate(
                 math.Number.parse(style.left, 0),
                 math.Number.parse(style.top, 0),
                 0);

@@ -43,7 +43,7 @@ namespace jsidea.layout {
             mode.transform(snap, transform, point);
 
             var lc = grid.localToLocalPoint(transform, point, gridBox, toBox);
-            lc.subPoint(off);
+            lc.sub(off);
             lc.z = 0;
 
             var matrix = new geom.Matrix3D();

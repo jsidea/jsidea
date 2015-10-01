@@ -4,7 +4,7 @@ namespace jsidea.layout.MoveMode {
         private _boxSizing: Box = Box.create();
         public transform(offset: geom.Point3D, element: HTMLElement, style: CSSStyleDeclaration): geom.Point3D {
             this._boxSizing.update(element, style);
-            return offset.add(
+            return offset.translate(
                 this._boxSizing.borderLeft,
                 this._boxSizing.borderTop,
                 0);

@@ -2,6 +2,8 @@ namespace jsidea.plugins {
     interface IFile {
         name: string;
         size: number;
+        sizeMinified: number;
+        code: string;
     }
     interface IData {
         project: any;
@@ -17,13 +19,16 @@ namespace jsidea.plugins {
     export interface ISymbol extends IReferenceData {
         ui: DependencyUI;
         relations: ISymbol[];
+        usage: ISymbol[];
         imports: ISymbol[];
+        order: number;
         file: IFile;
         name: string;
         package: string;
         isDependent: boolean;
         isChecked: boolean;
     }
+    type SortFunction = (a: ISymbol, b: ISymbol) => number;
     export class DependencyUI {
         private _reference: ISymbol;
         private _element: HTMLElement;
@@ -46,7 +51,8 @@ namespace jsidea.plugins {
 
             var lab = document.createElement("div");
             lab.className = "label";
-            lab.textContent = reference.name + " [" + text.Text.fileSize(reference.file.size) + "]";
+            lab.textContent = reference.name + " [" + text.Text.fileSize(reference.file.size) + " " + text.Text.fileSize(reference.file.sizeMinified) + "]";
+            //            lab.textContent = reference.name + " [" + reference.file.size + " " + reference.file.sizeMinified + "]";
             e.appendChild(lab);
         }
 
@@ -69,6 +75,22 @@ namespace jsidea.plugins {
 
         private _ajax: XMLHttpRequest;
         private _list: HTMLDivElement = null;
+
+        public static SORT_ORDER: SortFunction = (a, b) => {
+            return a.file.size - b.file.size;
+        };
+
+        public static SORT_USAGE: SortFunction = (a, b) => {
+            return a.order - b.order;
+        };
+
+        public static SORT_MODULE: SortFunction = (a, b) => {
+            if (a.package != b.package)
+                return a.package.localeCompare(b.package);
+            if (a.name != b.name)
+                return a.name.localeCompare(b.name);
+            return a.fullName.localeCompare(b.fullName);
+        };
 
         constructor() {
             super();
@@ -106,6 +128,9 @@ namespace jsidea.plugins {
             this.symbols = data;
             this.files = dat.files;
             
+            //            for (var file of dat.files)
+            //                file.sizeMinified = text.Text.byteLengthUTF8(file.code);
+            
             //create/collect references
             var refs: ISymbol[] = this.symbols;
             
@@ -119,22 +144,64 @@ namespace jsidea.plugins {
                 ref.package = path.splice(0, path.length - 1).join(".");
                 ref.isDependent = false;
                 ref.isChecked = false;
+                ref.ui = this.createElement(ref);
+                if (!ref.usage)
+                    ref.usage = [];
+                for (var chi of ref.imports) {
+                    if (!chi.usage)
+                        chi.usage = [];
+                    if (chi.usage.indexOf(ref) === -1)
+                        chi.usage.push(ref);
+                }
             }
             
-            //sort names
-            refs.sort((a: ISymbol, b: ISymbol): number => {
-                if (a.package != b.package)
-                    return a.package.localeCompare(b.package);
-                if (a.name != b.name)
-                    return a.name.localeCompare(b.name);
-                return a.fullName.localeCompare(b.fullName);
-            });
-            
-            //multipath(2/2)
+            //multipath(2/3)
             for (var ref of refs) {
-                ref.ui = this.createElement(ref);
                 ref.relations = this.createRelations(ref);
             }
+            
+            this.sort(Dependency.SORT_MODULE);
+            
+            //multipath(3/3)
+            var ordered = this.getOrderedSymbols();
+            var i = 0;
+            for (var ref of ordered) {
+                ref.order = i++;
+            }
+
+            this.sort(Dependency.SORT_USAGE);
+        }
+
+        private getOrderedSymbols(): ISymbol[] {
+            function addAt(ary: any[], data: any, index: number): any[] {
+                var head = ary.slice(0, index);
+                var tail = ary.slice(index);
+                ary.splice(0, ary.length);
+                for (var da of head)
+                    ary.push(da);
+                ary.push(data);
+                for (var da of tail)
+                    ary.push(da);
+                return ary;
+            }
+
+            var symbols = this.symbols;
+            var res: ISymbol[] = [];
+            for (var ref of symbols) {
+                var l = res.length;
+                for (var i = 0; i < l; ++i) {
+                    //if its used by
+                    if (res[i] == ref)
+                        continue;
+                    if (res[i].relations.indexOf(ref) >= 0) {
+                        addAt(res, ref, i);
+                        break;
+                    }
+                }
+                if (res.indexOf(ref) === -1)
+                    res.push(ref);
+            }
+            return res;
         }
 
         public getFileByName(name: string): IFile {
@@ -157,6 +224,8 @@ namespace jsidea.plugins {
             for (var imp of ref.imports) {
                 if (relations.indexOf(imp) < 0) {
                     relations.push(imp);
+//                    if (imp.usage.indexOf(ref) === -1)
+//                        imp.usage.push(ref);
                     this.createRelations(imp, relations);
                 }
             }
@@ -189,9 +258,34 @@ namespace jsidea.plugins {
             for (var ref of checked)
                 for (var rel of ref.relations)
                     rel.isDependent = true;
+            
+            //size
+            var size = this.getSize();
+            console.log("SIZE", text.Text.fileSize(size.bytesMinified));
 
             //refresh the ui-elements
             this.refreshUI();
+        }
+
+        private getSize(): { bytes: number, bytesMinified: number } {
+            var files: IFile[] = [];
+            for (var ref of this.symbols)
+                if (ref.isDependent)
+                    if (files.indexOf(ref.file) === -1)
+                        files.push(ref.file);
+            var bytesMinified = 0;
+            var bytes = 0;
+            for (var file of files) {
+                bytes += file.size;
+                bytesMinified += file.sizeMinified;
+            }
+            return { bytes: bytes, bytesMinified: bytesMinified };
+        }
+
+        public sort(f: SortFunction): void {
+            this.symbols.sort(f);
+            for (var symbol of this.symbols)
+                this._list.appendChild(symbol.ui.getElement());
         }
 
         private refreshUI(): void {

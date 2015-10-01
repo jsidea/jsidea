@@ -8,7 +8,7 @@ namespace jsidea.layout.MoveMode {
                 //TODO: implement retrieval of the margin values
             }
             else
-                offset.add(
+                offset.translate(
                     math.Number.parse(style.marginLeft, 0),
                     math.Number.parse(style.marginTop, 0),
                     0);

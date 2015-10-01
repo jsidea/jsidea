@@ -73,13 +73,7 @@ namespace jsidea.geom {
             return this;
         }
 
-        public mulRaw(x: number, y: number): Point2D {
-            this.x *= x;
-            this.y *= y;
-            return this;
-        }
-
-        public setMul(factorA: IPoint2DValue, factorB: IPoint2DValue): Point2D {
+        public product(factorA: IPoint2DValue, factorB: IPoint2DValue): Point2D {
             this.x = factorA.x * factorB.x;
             this.y = factorA.y * factorB.y;
             return this;
@@ -91,13 +85,7 @@ namespace jsidea.geom {
             return this;
         }
 
-        public divRaw(x: number, y: number): Point2D {
-            this.x /= x;
-            this.y /= y;
-            return this;
-        }
-
-        public setDiv(divident: IPoint2DValue, divisor: IPoint2DValue): Point2D {
+        public quotient(divident: IPoint2DValue, divisor: IPoint2DValue): Point2D {
             this.x = divident.x / divisor.x;
             this.y = divident.y / divisor.y;
             return this;
@@ -112,14 +100,14 @@ namespace jsidea.geom {
             this.y += pt.y;
             return this;
         }
-
-        public addRaw(x: number, y: number): Point2D {
+        
+        public translate(x: number, y: number): Point2D {
             this.x += x;
             this.y += y;
             return this;
         }
 
-        public setAdd(sumA: IPoint2DValue, sumB: IPoint2DValue): Point2D {
+        public sum(sumA: IPoint2DValue, sumB: IPoint2DValue): Point2D {
             this.x = sumA.x + sumB.x;
             this.y = sumA.y + sumB.y;
             return this;
@@ -131,13 +119,7 @@ namespace jsidea.geom {
             return this;
         }
 
-        public subRaw(x: number, y: number): Point2D {
-            this.x -= x;
-            this.y -= y;
-            return this;
-        }
-
-        public setSub(minuend: IPoint2DValue, subtrahend: IPoint2DValue): Point2D {
+        public difference(minuend: IPoint2DValue, subtrahend: IPoint2DValue): Point2D {
             this.x = minuend.x - subtrahend.x;
             this.y = minuend.y - subtrahend.y;
             return this;
@@ -208,12 +190,6 @@ namespace jsidea.geom {
             if (isNaN(xInt) || isNaN(yInt))
                 return null;
             return ret.setTo(xInt, yInt);
-        }
-        
-        public toString(): string {
-            return "[ jsidea.geom.Point2D" +
-                " x=" + this.x +
-                " y=" + this.y + "]";
         }
     }
 }
