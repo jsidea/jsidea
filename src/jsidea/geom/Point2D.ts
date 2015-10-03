@@ -6,41 +6,50 @@ namespace jsidea.geom {
 
         constructor(
             public x: number = 0,
-            public y: number = 0) {
+            public y: number = 0,
+            public w: number = 1) {
         }
 
         public static create(
             x: number = 0,
-            y: number = 0): Point2D {
-            return new Point2D(x, y);
+            y: number = 0,
+            w: number = 1): Point2D {
+            return new Point2D(x, y, w);
         }
 
-        public getData(): number[] {
+        public getData(length: number = 2): number[] {
+            if (length > 2)
+                return [this.x, this.y, this.w];
             return [this.x, this.y];
         }
 
-        public setData(data: number[], offset: number = 0): Point2D {
+        public setData(data: number[], offset: number = 0, length: number = 2): Point2D {
             if (data === undefined)
                 return;
             this.x = data[0 + offset];
             this.y = data[1 + offset];
+            if (length > 2)
+                this.w = data[2 + offset];
             return this;
         }
 
         public copyFrom(pt: IPoint2DValue): Point2D {
             this.x = pt.x;
             this.y = pt.y;
+            this.w = pt.w === undefined ? 1 : pt.w;
             return this;
         }
 
         public copyTo(target: IPoint2DValue): Point2D {
             target.x = this.x;
             target.y = this.y;
+            if (target.w !== undefined)
+                target.w = this.w;
             return this;
         }
 
         public equals(point: IPoint2DValue): boolean {
-            return point.x == this.x && point.y == this.y;
+            return point.x == this.x && point.y == this.y && this.w == (point.w === undefined ? 1 : point.w);
         }
 
         public length(): number {
@@ -100,7 +109,7 @@ namespace jsidea.geom {
             this.y += pt.y;
             return this;
         }
-        
+
         public translate(x: number, y: number): Point2D {
             this.x += x;
             this.y += y;
@@ -129,9 +138,10 @@ namespace jsidea.geom {
             return new Point2D(this.x, this.y);
         }
 
-        public setTo(x: number, y: number): Point2D {
+        public setTo(x: number, y: number, w: number = 1): Point2D {
             this.x = x;
             this.y = y;
+            this.w = w;
             return this;
         }
 

@@ -9,10 +9,15 @@ namespace jsidea.geom {
 
         public m11: number = 1;
         public m12: number = 0;
+        public m13: number = 0;
+
         public m21: number = 0;
         public m22: number = 1;
+        public m23: number = 0;
+
         public m31: number = 0;
         public m32: number = 0;
+        public m33: number = 1;
 
         constructor() {
         }
@@ -27,42 +32,76 @@ namespace jsidea.geom {
             return ret.setCSS(cssStr);
         }
 
-        public getData(): number[] {
+        public getData(length: number = 6): number[] {
+            if (length == 9)
+                return [this.m11, this.m12, this.m13, this.m21, this.m22, this.m23, this.m31, this.m32, this.m33];
             return [this.m11, this.m12, this.m21, this.m22, this.m31, this.m32];
         }
 
         public setData(data: number[]): Matrix2D {
             if (data === undefined)
-                return;
-            this.m11 = data[0]
-            this.m12 = data[1]
-            this.m21 = data[2]
-            this.m22 = data[3]
-            this.m31 = data[4]
-            this.m32 = data[5]
+                return this.identity();
 
+            var l = data.length;
+            if (l == 6) {
+                this.m11 = data[0];
+                this.m12 = data[1];
+                this.m13 = 0;
+                this.m21 = data[2];
+                this.m22 = data[3];
+                this.m23 = 0;
+                this.m31 = data[4];
+                this.m32 = data[5];
+                this.m33 = 1;
+            }
+            else if (l == 9) {
+                this.m11 = data[0];
+                this.m12 = data[1];
+                this.m13 = data[2];
+                this.m21 = data[3];
+                this.m22 = data[4];
+                this.m23 = data[5];
+                this.m31 = data[6];
+                this.m32 = data[7];
+                this.m33 = data[8];
+            }
+            else if (l == 16) {
+                this.m11 = data[0];
+                this.m12 = data[1];
+                this.m13 = data[3];
+                this.m21 = data[4];
+                this.m22 = data[5];
+                this.m23 = data[7];
+                this.m31 = data[12];
+                this.m32 = data[13];
+                this.m33 = data[15];
+            }
             return this;
         }
 
         public copyFrom(matrix: IMatrix2DValue): Matrix2D {
             this.m11 = matrix.m11;
             this.m12 = matrix.m12;
+            this.m13 = matrix.m13;
             this.m21 = matrix.m21;
             this.m22 = matrix.m22;
+            this.m23 = matrix.m23;
             this.m31 = matrix.m31;
             this.m32 = matrix.m32;
-
+            this.m33 = matrix.m33;
             return this;
         }
 
         public copyTo(matrix: IMatrix2DValue): Matrix2D {
             matrix.m11 = this.m11;
             matrix.m12 = this.m12;
+            matrix.m12 = this.m13;
             matrix.m21 = this.m21;
             matrix.m22 = this.m22;
+            matrix.m23 = this.m23;
             matrix.m31 = this.m31;
             matrix.m32 = this.m32;
-
+            matrix.m33 = this.m33;
             return this;
         }
 
@@ -75,30 +114,40 @@ namespace jsidea.geom {
         public identity(): Matrix2D {
             this.m11 = 1;
             this.m12 = 0;
+            this.m13 = 0;
             this.m21 = 0;
             this.m22 = 1;
+            this.m23 = 0;
             this.m31 = 0;
             this.m32 = 0;
-
+            this.m33 = 1;
             return this;
         }
 
         public isIdentity(): boolean {
             return this.m11 == 1 &&
                 this.m12 == 0 &&
+                this.m13 == 0 &&
                 this.m21 == 0 &&
                 this.m22 == 1 &&
+                this.m23 == 0 &&
                 this.m31 == 0 &&
-                this.m32 == 0;
+                this.m32 == 0 &&
+                this.m33 == 1;
         }
 
         public scalar(scalar: number): Matrix2D {
             this.m11 *= scalar;
             this.m12 *= scalar;
+            this.m13 *= scalar;
+            
             this.m21 *= scalar;
             this.m22 *= scalar;
+            this.m23 *= scalar;
+            
             this.m31 *= scalar;
             this.m32 *= scalar;
+            this.m33 *= scalar;
             return this;
         }
 
@@ -110,30 +159,27 @@ namespace jsidea.geom {
             return this;
         }
 
-        public deltaTransform(x: number, y: number, ret: Point2D = new Point2D()): Point2D {
+        public deltaTransform(point: IPoint2DValue, ret: Point2D = new Point2D()): Point2D {
             return ret.setTo(
-                this.m11 * x + this.m21 * y,
-                this.m12 * x + this.m22 * y);
+                this.m11 * point.x + this.m21 * point.y,
+                this.m12 * point.x + this.m22 * point.y,
+                this.m13 * point.x + this.m23 * point.y);
         }
 
         public transform(point: IPoint2DValue, ret: Point2D = new Point2D()): Point2D {
-            return this.transformRaw(point.x, point.y, ret);
-        }
-
-        public transformRaw(x: number, y: number, ret: Point2D = new Point2D()): Point2D {
+            var w = math.Number.parse(point.w, 1);
             return ret.setTo(
-                this.m11 * x + this.m21 * y + this.m31,
-                this.m12 * x + this.m22 * y + this.m32);
+                this.m11 * point.x + this.m21 * point.y + this.m31 * w,
+                this.m12 * point.x + this.m22 * point.y + this.m32 * w,
+                this.m13 * point.x + this.m23 * point.y + this.m33 * w);
         }
 
         public append(matrix: IMatrix2DValue): Matrix2D {
-            Matrix2D.multiply(this, matrix, this);
-            return this;
+            return Matrix2D.multiply(this, matrix, this);
         }
 
         public prepend(matrix: IMatrix2DValue): Matrix2D {
-            Matrix2D.multiply(matrix, this, this);
-            return this;
+            return Matrix2D.multiply(matrix, this, this);
         }
 
         /**
@@ -465,6 +511,10 @@ namespace jsidea.geom {
             this.m31 = (m21 * this.m32 - m22 * m31) / n;
             this.m32 = -(m11 * this.m32 - m12 * m31) / n;
 
+            this.m13 = 0;
+            this.m23 = 0;
+            this.m33 = 1;
+
             return this;
         }
 
@@ -478,68 +528,117 @@ namespace jsidea.geom {
                 + this.m32.toFixed(fractionalDigits) + ")";
         }
 
+        public getCSS3D(fractionalDigits: number = 6): string {
+            return "matrix3d("
+                + this.m11.toFixed(fractionalDigits) + ","
+                + this.m12.toFixed(fractionalDigits) + ","
+                + 0 + ","
+                + this.m13.toFixed(fractionalDigits) + ","
+                
+                + this.m21.toFixed(fractionalDigits) + ","
+                + this.m22.toFixed(fractionalDigits) + ","
+                + 0 + ","
+                + this.m23.toFixed(fractionalDigits) + ","
+                
+                + 0 + ","
+                + 0 + ","
+                + 1 + ","
+                + 0 + ","
+                
+                + this.m31.toFixed(fractionalDigits) + ","
+                + this.m32.toFixed(fractionalDigits) + ","
+                + 0 + ","
+                + this.m33.toFixed(fractionalDigits) + ")";
+        }
+
         public setCSS(cssString: string): Matrix2D {
             if (!cssString || cssString == "none") {
                 return this.identity();
             }
 
-            if (cssString.indexOf("matrix3d") >= 0) {
-                var trans = cssString.replace("matrix3d(", "").replace(")", "").split(",");
-                this.m11 = math.Number.parse(trans[0], 1);
-                this.m12 = math.Number.parse(trans[1], 0);
-                this.m21 = math.Number.parse(trans[4], 0);
-                this.m22 = math.Number.parse(trans[5], 1);
-                this.m31 = math.Number.parse(trans[12], 0);
-                this.m32 = math.Number.parse(trans[13], 0);
-                return this;
-            }
-
-            var trans = cssString.replace("matrix(", "").replace(")", "").split(",");
-            this.m11 = math.Number.parse(trans[0], 1);
-            this.m12 = math.Number.parse(trans[1], 0);
-            this.m21 = math.Number.parse(trans[2], 0);
-            this.m22 = math.Number.parse(trans[3], 1);
-            this.m31 = math.Number.parse(trans[4], 0);
-            this.m32 = math.Number.parse(trans[5], 0);
-            return this;
-        }
-
-        public originBox(
-            x: number = 0,
-            y: number = 0,
-            originX: number = 0,
-            originY: number = 0,
-            scaleX: number = 1,
-            scaleY: number = 1,
-            rotation: number = 0): Matrix2D {
-
-            //pivotX/pivotY is 'lost in transformation'
-
-            rotation *= 0.017453292519943295;
-            originX *= scaleX;
-            originY *= scaleY;
-            var theta: number = Math.cos(rotation);
-            var gamma: number = Math.sin(rotation);
-
-            this.m11 = theta * scaleX;
-            this.m12 = gamma * scaleX;
-            this.m21 = -gamma * scaleY;
-            this.m22 = theta * scaleY;
-            this.m31 = theta * -originX + gamma * originY + x;
-            this.m32 = gamma * -originX + theta * -originY + y;
+            var trans: any[] = cssString.replace("matrix3d(", "").replace("matrix(", "").replace(")", "").split(",");
+            var l = trans.length;
+            if (l < 6)
+                return this.identity();
+            for (var i = 0; i < l; ++i)
+                trans[i] = math.Number.parse(trans[i], 0);
+            this.setData(trans);
 
             return this;
         }
-
+        
         public static multiply(a: IMatrix2DValue, b: IMatrix2DValue, ret: Matrix2D = new Matrix2D()): Matrix2D {
             var data: number[] = [];
-            data[0] = b.m11 * a.m11 + b.m12 * a.m21;
-            data[1] = b.m11 * a.m12 + b.m12 * a.m22;
-            data[2] = b.m21 * a.m11 + b.m22 * a.m21;
-            data[3] = b.m21 * a.m12 + b.m22 * a.m22;
-            data[4] = b.m31 * a.m11 + b.m32 * a.m21 + a.m31;
-            data[5] = b.m31 * a.m12 + b.m32 * a.m22 + a.m32;
+            data[0] = b.m11 * a.m11 + b.m12 * a.m21 + b.m13 * a.m31;
+            data[1] = b.m11 * a.m12 + b.m12 * a.m22 + b.m13 * a.m32;
+            data[2] = b.m11 * a.m13 + b.m12 * a.m23 + b.m13 * a.m33;
+            
+            data[3] = b.m21 * a.m11 + b.m22 * a.m21 + b.m23 * a.m31;
+            data[4] = b.m21 * a.m12 + b.m22 * a.m22 + b.m23 * a.m32;
+            data[5] = b.m21 * a.m13 + b.m22 * a.m23 + b.m23 * a.m33;
+            
+            data[6] = b.m31 * a.m11 + b.m32 * a.m21 + b.m33 * a.m31;
+            data[7] = b.m31 * a.m12 + b.m32 * a.m22 + b.m33 * a.m32;
+            data[8] = b.m31 * a.m13 + b.m32 * a.m23 + b.m33 * a.m33;
             return ret.setData(data);
+        }
+        
+        public static adjugate(matrix: Matrix2D, ret: Matrix2D = new Matrix2D()): Matrix2D {
+            var data: number[] = [];
+            data[0] = matrix.m22 * matrix.m33 - matrix.m32 * matrix.m23;
+            data[1] = matrix.m32 * matrix.m13 - matrix.m12 * matrix.m33;
+            data[2] = matrix.m12 * matrix.m23 - matrix.m22 * matrix.m13;
+            
+            data[3] = matrix.m31 * matrix.m23 - matrix.m21 * matrix.m33;
+            data[4] = matrix.m11 * matrix.m33 - matrix.m31 * matrix.m13;
+            data[5] = matrix.m21 * matrix.m13 - matrix.m11 * matrix.m23;
+            
+            data[6] = matrix.m21 * matrix.m32 - matrix.m31 * matrix.m22;
+            data[7] = matrix.m31 * matrix.m12 - matrix.m11 * matrix.m32;
+            data[8] = matrix.m11 * matrix.m22 - matrix.m21 * matrix.m12;
+            return ret.setData(data);
+        }
+
+        public static basis(quad: IQuadValue): Matrix2D {
+            var m = new Matrix2D();
+            m.m11 = quad.p1.x;
+            m.m21 = quad.p2.x;
+            m.m31 = quad.p3.x;
+            m.m12 = quad.p1.y;
+            m.m22 = quad.p2.y;
+            m.m32 = quad.p3.y;
+            m.m13 = 1;
+            m.m23 = 1;
+            m.m33 = 1;
+            var adj = Matrix2D.adjugate(m);
+            var v = adj.transform(quad.p4);
+            var ma = new Matrix2D();
+            ma.m11 = v.x;
+            ma.m22 = v.y;
+            ma.m33 = math.Number.parse(v.w, 1);
+            return m.append(ma);
+        }
+
+        public static generalProjection(a: IQuadValue, b: IQuadValue): Matrix2D {
+            var s = Matrix2D.basis(a);
+            var d = Matrix2D.basis(b);
+            var ad = Matrix2D.adjugate(s);
+            d.append(ad);
+            d.scalar(1 / d.m33);
+            return d;
+        }
+
+        public static fromQuad(width: number, height: number, quad: IQuadValue): Matrix2D {
+            var a = new geom.Quad();
+            a.p1.x = 0;
+            a.p1.y = 0;
+            a.p2.x = width;
+            a.p2.y = 0;
+            a.p3.x = 0;
+            a.p3.y = height;
+            a.p4.x = width;
+            a.p4.y = height;
+            return Matrix2D.generalProjection(a, quad);
         }
 
         public toStringTable(fractionDigits: number = 3): string {
@@ -549,15 +648,9 @@ namespace jsidea.geom {
                 + "\nm12=" + this.m12.toFixed(fractionDigits)
                 + "\tm22=" + this.m22.toFixed(fractionDigits)
                 + "\tm32=" + this.m32.toFixed(fractionDigits)
-                + "\nm13=" + (0).toFixed(fractionDigits)
-                + "\tm23=" + (0).toFixed(fractionDigits)
-                + "\tm33=" + (1).toFixed(fractionDigits);
-        }
-
-        public toString(fractionDigits: number = 3): string {
-            return "[ jsidea.geom.Matrix2D \n"
-                + this.toStringTable(fractionDigits)
-                + "\n]";
+                + "\nm13=" + this.m13.toFixed(fractionDigits)
+                + "\tm23=" + this.m23.toFixed(fractionDigits)
+                + "\tm33=" + this.m33.toFixed(fractionDigits);
         }
     }
 

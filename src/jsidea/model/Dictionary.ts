@@ -57,13 +57,5 @@ namespace jsidea.model {
         public length(): number {
             return this._keys.length;
         }
-
-        public qualifiedClassName(): string {
-            return "jsidea.model.Dictonary";
-        }
-
-        public toString(): string {
-            return "[" + this.qualifiedClassName() + "]";
-        }
     }
 }

@@ -6,6 +6,6 @@
 <title>jsidea</title>
 <?php include (realpath ( dirname ( __FILE__ ) . '/../php/Build.php')); Build::debug ( "jsidea" );?>
 </head>
-<body data-plugin="Dependency">
+<body data-plugin="Test">
 </body>
 </html>

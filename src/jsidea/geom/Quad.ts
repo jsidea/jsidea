@@ -1,11 +1,13 @@
 namespace jsidea.geom {
     export class Quad implements IQuadValue {
+        public points:geom.Point3D[] = [];
         constructor(
             public p1: geom.Point3D = new geom.Point3D(),
             public p2: geom.Point3D = new geom.Point3D(),
             public p3: geom.Point3D = new geom.Point3D(),
             public p4: geom.Point3D = new geom.Point3D()
         ) {
+            this.points = [this.p1, this.p2, this.p3, this.p4];
         }
 
         public clone(): Quad {
@@ -16,16 +18,24 @@ namespace jsidea.geom {
                 this.p4.clone());
         }
 
+        public setData(
+            data: IPoint3DValue[]): Quad {
+            this.p1.copyFrom(data[0]);
+            this.p2.copyFrom(data[1]);
+            this.p3.copyFrom(data[2]);
+            this.p4.copyFrom(data[3]);
+            return this;
+        }
+
         public setTo(
-            p1: geom.Point3D,
-            p2: geom.Point3D,
-            p3: geom.Point3D,
-            p4: geom.Point3D): Quad {
+            p1: geom.IPoint3DValue,
+            p2: geom.IPoint3DValue,
+            p3: geom.IPoint3DValue,
+            p4: geom.IPoint3DValue): Quad {
             this.p1.copyFrom(p1);
             this.p2.copyFrom(p2);
             this.p3.copyFrom(p3);
             this.p4.copyFrom(p4);
-
             return this;
         }
 

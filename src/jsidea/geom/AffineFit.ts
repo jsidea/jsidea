@@ -20,7 +20,7 @@ namespace jsidea.geom {
          * @param to Vector of 2D points in target coordinate system
          * @return A 2D matrix which transform from source to target.
          */
-        public static solve2D(from: Point2D[], to: Point2D[]): Matrix2D {
+        public static solve2D(from: IPoint2DValue[], to: IPoint2DValue[]): Matrix2D {
             if (from.length != to.length || from.length < 1)
                 throw new Error("Size missmatch: 'from' and 'to' must be of same size.");
 
@@ -54,7 +54,7 @@ namespace jsidea.geom {
          * @param to Vector of 3D points in target coordinate system
          * @return A 3D matrix which transform from source to target.
          */
-        public static solve3D(from: Point3D[], to: Point3D[]): Matrix3D {
+        public static solve3D(from: IPoint3DValue[], to: IPoint3DValue[]): Matrix3D {
             if (from.length != to.length || from.length < 1)
                 throw new Error("Size missmatch: 'from' and 'to' must be of same size.");
 

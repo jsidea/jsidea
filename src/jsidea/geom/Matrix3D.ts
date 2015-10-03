@@ -241,7 +241,7 @@ namespace jsidea.geom {
         }
 
         public transformRaw(x: number, y: number, z: number, ret: Point3D = new Point3D()): Point3D {
-            return this.transform(_POINT.setTo(x, y, z), ret);
+            return this.transform(Matrix3D._POINT.setTo(x, y, z), ret);
         }
 
         public append(b: IMatrix3DValue): Matrix3D {
@@ -309,7 +309,7 @@ namespace jsidea.geom {
         * @return this-chained.
         */
         public appendPosition(position: IPoint3DValue): Matrix3D {
-            return this.append(Matrix3D.makePosition(position, _MATRIX3D));
+            return this.append(Matrix3D.makePosition(position, Matrix3D._MATRIX3D));
         }
         
         /**
@@ -320,7 +320,7 @@ namespace jsidea.geom {
         * @return this-chained.
         */
         public appendPositionRaw(x: number, y: number, z: number): Matrix3D {
-            return this.appendPosition(_POINT.setTo(x, y, z));
+            return this.appendPosition(Matrix3D._POINT.setTo(x, y, z));
         }
 
         /**
@@ -329,7 +329,7 @@ namespace jsidea.geom {
         * @return this-chained.
         */
         public prependPosition(position: IPoint3DValue): Matrix3D {
-            return this.prepend(Matrix3D.makePosition(position, _MATRIX3D));
+            return this.prepend(Matrix3D.makePosition(position, Matrix3D._MATRIX3D));
         }   
         
         /**
@@ -341,7 +341,7 @@ namespace jsidea.geom {
         */
 
         public prependPositionRaw(x: number, y: number, z: number): Matrix3D {
-            return this.prependPosition(_POINT.setTo(x, y, z, 0));
+            return this.prependPosition(Matrix3D._POINT.setTo(x, y, z, 0));
         }
         
         /**
@@ -385,7 +385,7 @@ namespace jsidea.geom {
         * @return this-chained.
         */
         public appendScale(scale: IPoint3DValue): Matrix3D {
-            return this.append(Matrix3D.makeScale(scale, _MATRIX3D));
+            return this.append(Matrix3D.makeScale(scale, Matrix3D._MATRIX3D));
         }
         
         /**
@@ -394,7 +394,7 @@ namespace jsidea.geom {
         * @return this-chained.
         */
         public appendScaleRaw(x: number, y: number, z: number): Matrix3D {
-            return this.appendScale(_POINT.setTo(x, y, z));
+            return this.appendScale(Matrix3D._POINT.setTo(x, y, z));
         }
 
         /**
@@ -403,7 +403,7 @@ namespace jsidea.geom {
         * @return this-chained.
         */
         public prependScale(scale: IPoint3DValue): Matrix3D {
-            return this.prepend(Matrix3D.makeScale(scale, _MATRIX3D));
+            return this.prepend(Matrix3D.makeScale(scale, Matrix3D._MATRIX3D));
         }
         
         /**
@@ -414,7 +414,7 @@ namespace jsidea.geom {
         * @return this-chained.
         */
         public prependScaleRaw(x: number, y: number, z: number): Matrix3D {
-            return this.prependScale(_POINT.setTo(x, y, z));
+            return this.prependScale(Matrix3D._POINT.setTo(x, y, z));
         }
         
         /**
@@ -452,7 +452,7 @@ namespace jsidea.geom {
         */
 
         public setSkewRaw(x: number, y: number, z: number): Matrix3D {
-            return this.setSkew(_POINT.setTo(x, y, z));
+            return this.setSkew(Matrix3D._POINT.setTo(x, y, z));
         }
 
         /**
@@ -472,7 +472,7 @@ namespace jsidea.geom {
         * @return this-chained.
         */
         public appendSkew(skew: IPoint3DValue): Matrix3D {
-            return this.append(Matrix3D.makeSkew(skew, _MATRIX3D));
+            return this.append(Matrix3D.makeSkew(skew, Matrix3D._MATRIX3D));
         }
 
         /**
@@ -481,7 +481,7 @@ namespace jsidea.geom {
         * @return this-chained.
         */
         public prependSkew(skew: IPoint3DValue): Matrix3D {
-            return this.prepend(Matrix3D.makeSkew(skew, _MATRIX3D));
+            return this.prepend(Matrix3D.makeSkew(skew, Matrix3D._MATRIX3D));
         }
         
         /**
@@ -490,7 +490,7 @@ namespace jsidea.geom {
         * @return The rotation-point.
         */
         public getRotation(ret: Point3D = new Point3D()): Point3D {
-            var m = this.getRotationMatrix(_MATRIX3D);
+            var m = this.getRotationMatrix(Matrix3D._MATRIX3D);
             ret.y = -Math.asin(math.Number.clamp(m.m13, -1, 1)) * math.Number.RAD_TO_DEG;
             if (Math.abs(this.m13) < 0.99999) {
                 ret.x = Math.atan2(-m.m23, m.m33) * math.Number.RAD_TO_DEG;
@@ -590,7 +590,7 @@ namespace jsidea.geom {
         public appendPerspective(perspective: number): Matrix3D {
             if (!perspective)
                 return this;
-            return this.append(Matrix3D.makePerspective(perspective, _MATRIX3D));
+            return this.append(Matrix3D.makePerspective(perspective, Matrix3D._MATRIX3D));
         }
 
         /**
@@ -599,7 +599,7 @@ namespace jsidea.geom {
         * @return this-chained.
         */
         public prependPerspective(perspective: number): Matrix3D {
-            return this.prepend(Matrix3D.makePerspective(perspective, _MATRIX3D));
+            return this.prepend(Matrix3D.makePerspective(perspective, Matrix3D._MATRIX3D));
         }
 
         public getPerspective(): number {
@@ -759,16 +759,16 @@ namespace jsidea.geom {
             if (!cssString || cssString == "none")
                 return this;
             if (force2D && cssString.indexOf("matrix3d") >= 0)
-                return this.append(_MATRIX3D.setCSS(cssString).flatten());
-            return this.append(_MATRIX3D.setCSS(cssString));
+                return this.append(Matrix3D._MATRIX3D.setCSS(cssString).flatten());
+            return this.append(Matrix3D._MATRIX3D.setCSS(cssString));
         }
 
         public prependCSS(cssString: string, force2D: boolean = false): Matrix3D {
             if (!cssString || cssString == "none")
                 return this;
             if (force2D && cssString.indexOf("matrix3d") >= 0)
-                return this.prepend(_MATRIX3D.setCSS(cssString).flatten());
-            return this.prepend(_MATRIX3D.setCSS(cssString));
+                return this.prepend(Matrix3D._MATRIX3D.setCSS(cssString).flatten());
+            return this.prepend(Matrix3D._MATRIX3D.setCSS(cssString));
         }
 
         public flatten(): Matrix3D {
@@ -876,33 +876,27 @@ namespace jsidea.geom {
 
             return ret;
         }
-        
-        public toStringTable(fractionDigits: number = 3): string {
-            return "m11=" + this.m11.toFixed(fractionDigits)
-                + "\tm21=" + this.m21.toFixed(fractionDigits)
-                + "\tm31=" + this.m31.toFixed(fractionDigits)
-                + "\tm41=" + this.m41.toFixed(fractionDigits)
-                + "\nm12=" + this.m12.toFixed(fractionDigits)
-                + "\tm22=" + this.m22.toFixed(fractionDigits)
-                + "\tm32=" + this.m32.toFixed(fractionDigits)
-                + "\tm42=" + this.m42.toFixed(fractionDigits)
-                + "\nm13=" + this.m13.toFixed(fractionDigits)
-                + "\tm23=" + this.m23.toFixed(fractionDigits)
-                + "\tm33=" + this.m33.toFixed(fractionDigits)
-                + "\tm43=" + this.m43.toFixed(fractionDigits)
-                + "\nm14=" + this.m14.toFixed(fractionDigits)
-                + "\tm24=" + this.m24.toFixed(fractionDigits)
-                + "\tm34=" + this.m34.toFixed(fractionDigits)
-                + "\tm44=" + this.m44.toFixed(fractionDigits);
+
+        public toStringTable(fractionalDigits: number = 3): string {
+            return "m11=" + this.m11.toFixed(fractionalDigits)
+                + "\tm21=" + this.m21.toFixed(fractionalDigits)
+                + "\tm31=" + this.m31.toFixed(fractionalDigits)
+                + "\tm41=" + this.m41.toFixed(fractionalDigits)
+                + "\nm12=" + this.m12.toFixed(fractionalDigits)
+                + "\tm22=" + this.m22.toFixed(fractionalDigits)
+                + "\tm32=" + this.m32.toFixed(fractionalDigits)
+                + "\tm42=" + this.m42.toFixed(fractionalDigits)
+                + "\nm13=" + this.m13.toFixed(fractionalDigits)
+                + "\tm23=" + this.m23.toFixed(fractionalDigits)
+                + "\tm33=" + this.m33.toFixed(fractionalDigits)
+                + "\tm43=" + this.m43.toFixed(fractionalDigits)
+                + "\nm14=" + this.m14.toFixed(fractionalDigits)
+                + "\tm24=" + this.m24.toFixed(fractionalDigits)
+                + "\tm34=" + this.m34.toFixed(fractionalDigits)
+                + "\tm44=" + this.m44.toFixed(fractionalDigits);
         }
 
-        public toString(fractionDigits: number = 3): string {
-            return "[ jsidea.geom.Matrix3D \n"
-                + this.toStringTable(fractionDigits)
-                + "\n]";
-        }
+        private static _POINT: Point3D = new Point3D();
+        private static _MATRIX3D = new Matrix3D();
     }
-
-    var _POINT: Point3D = new Point3D();
-    var _MATRIX3D = new Matrix3D();
 }
