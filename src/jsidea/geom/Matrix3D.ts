@@ -6,9 +6,6 @@ namespace jsidea.geom {
     * 
     */
     export class Matrix3D implements IMatrix3DValue {
-        private static tempAxeX: Point3D = new Point3D();
-        private static tempAxeY: Point3D = new Point3D();
-        private static tempAxeZ: Point3D = new Point3D();
 
         public m11: number = 1;
         public m12: number = 0;
@@ -31,12 +28,9 @@ namespace jsidea.geom {
         }
 
         public static create(element: HTMLElement, style: CSSStyleDeclaration = null, ret = new Matrix3D()): Matrix3D {
-            if (element.ownerDocument) {
-                style = style || window.getComputedStyle(element);
-                return ret.setCSS(style.transform);
-            }
-            ret.identity();
-            return ret;
+            if (element && element.ownerDocument)
+                return ret.setCSS((style || window.getComputedStyle(element)).transform);
+            return ret.identity();
         }
 
         public getData(): number[] {
@@ -51,22 +45,62 @@ namespace jsidea.geom {
         public setData(data: number[]): Matrix3D {
             if (data === undefined)
                 return;
-            this.m11 = data[0];
-            this.m12 = data[1];
-            this.m13 = data[2];
-            this.m14 = data[3];
-            this.m21 = data[4];
-            this.m22 = data[5];
-            this.m23 = data[6];
-            this.m24 = data[7];
-            this.m31 = data[8];
-            this.m32 = data[9];
-            this.m33 = data[10];
-            this.m34 = data[11];
-            this.m41 = data[12];
-            this.m42 = data[13];
-            this.m43 = data[14];
-            this.m44 = data[15];
+
+            var l = data.length;
+            if (l == 16) {
+                this.m11 = data[0];
+                this.m12 = data[1];
+                this.m13 = data[2];
+                this.m14 = data[3];
+                this.m21 = data[4];
+                this.m22 = data[5];
+                this.m23 = data[6];
+                this.m24 = data[7];
+                this.m31 = data[8];
+                this.m32 = data[9];
+                this.m33 = data[10];
+                this.m34 = data[11];
+                this.m41 = data[12];
+                this.m42 = data[13];
+                this.m43 = data[14];
+                this.m44 = data[15];
+            }
+            else if (l == 6) {
+                this.m11 = data[0];
+                this.m12 = data[1];
+                this.m13 = 0;
+                this.m14 = 0;
+                this.m21 = data[2];
+                this.m22 = data[3];
+                this.m23 = 0;
+                this.m24 = 0;
+                this.m31 = 0;
+                this.m32 = 0;
+                this.m33 = 1;
+                this.m34 = 0;
+                this.m41 = data[4];
+                this.m42 = data[5];
+                this.m43 = 0;
+                this.m44 = 1;
+            }
+            else if (l == 9) {
+                this.m11 = data[0];
+                this.m12 = data[1];
+                this.m13 = 0;
+                this.m14 = data[2];
+                this.m21 = data[3];
+                this.m22 = data[4];
+                this.m23 = 0;
+                this.m24 = data[5];
+                this.m31 = 0;
+                this.m32 = 0;
+                this.m33 = 1;
+                this.m34 = 0;
+                this.m41 = data[6];
+                this.m42 = data[7];
+                this.m43 = 0;
+                this.m44 = data[8];
+            }
 
             return this;
         }
@@ -92,9 +126,7 @@ namespace jsidea.geom {
         }
 
         public clone(): Matrix3D {
-            var cl = new Matrix3D();
-            cl.copyFrom(this);
-            return cl;
+            return (new Matrix3D()).copyFrom(this);
         }
 
         public identity(): Matrix3D {
@@ -158,10 +190,7 @@ namespace jsidea.geom {
         }
 
         public normalize(): Matrix3D {
-            if (this.m44 === 0)
-                return this;
-            this.scalar(1 / this.m44);
-            return this;
+            return this.scalar(1 / (this.m44 || 0.0001));
         }
         
         //based on http://code.metager.de/source/xref/mozilla/B2G/gecko/gfx/thebes/gfx3DMatrix.cpp#651
@@ -245,11 +274,11 @@ namespace jsidea.geom {
         }
 
         public append(b: IMatrix3DValue): Matrix3D {
-            return Matrix3D.multiply(b, this, this);
+            return Matrix3D.multiply(this, b, this);
         }
 
         public prepend(b: IMatrix3DValue): Matrix3D {
-            return Matrix3D.multiply(this, b, this);
+            return Matrix3D.multiply(b, this, this);
         }
         
         /**
@@ -719,40 +748,13 @@ namespace jsidea.geom {
         }
 
         public setCSS(cssString: string): Matrix3D {
-            if (!cssString || cssString == "none") {
+            if (!cssString || cssString == "none")
                 return this.identity();
-            }
-
-            if (cssString.indexOf("matrix3d") < 0) {
-                var trans = cssString.replace("matrix(", "").replace(")", "").split(",");
-                this.identity();
-                this.m11 = math.Number.parse(trans[0], 1);
-                this.m12 = math.Number.parse(trans[1], 0);
-                this.m21 = math.Number.parse(trans[2], 0);
-                this.m22 = math.Number.parse(trans[3], 1);
-                this.m41 = math.Number.parse(trans[4], 0);
-                this.m42 = math.Number.parse(trans[5], 0);
-                return this;
-            }
-
-            var trans = cssString.replace("matrix3d(", "").replace(")", "").split(",");
-            this.m11 = math.Number.parse(trans[0], 1);
-            this.m12 = math.Number.parse(trans[1], 0);
-            this.m13 = math.Number.parse(trans[2], 0);
-            this.m14 = math.Number.parse(trans[3], 0);
-            this.m21 = math.Number.parse(trans[4], 0);
-            this.m22 = math.Number.parse(trans[5], 1);
-            this.m23 = math.Number.parse(trans[6], 0);
-            this.m24 = math.Number.parse(trans[7], 0);
-            this.m31 = math.Number.parse(trans[8], 0);
-            this.m32 = math.Number.parse(trans[9], 0);
-            this.m33 = math.Number.parse(trans[10], 1);
-            this.m34 = math.Number.parse(trans[11], 0);
-            this.m41 = math.Number.parse(trans[12], 0);
-            this.m42 = math.Number.parse(trans[13], 0);
-            this.m43 = math.Number.parse(trans[14], 0);
-            this.m44 = math.Number.parse(trans[15], 1);
-            return this;
+            var trans: any = cssString.replace("matrix3d(", "").replace("matrix(", "").replace(")", "").split(",");
+            var l = trans.length;
+            for (var i = 0; i < l; ++i)
+                trans[i] = math.Number.parse(trans[i], 0);
+            return this.setData(trans);
         }
 
         public appendCSS(cssString: string, force2D: boolean = false): Matrix3D {
@@ -810,52 +812,23 @@ namespace jsidea.geom {
             return ret.setTo(x, y, width, height);
         }
 
-        public lookAt(eye: Point3D, target: Point3D, up: Point3D): Matrix3D {
-            var x: Point3D = Matrix3D.tempAxeX;
-            var y: Point3D = Matrix3D.tempAxeY;
-            var z: Point3D = Matrix3D.tempAxeZ;
-
-            z.difference(eye, target).normalize();
-            if (z.length() === 0) {
-                z.z = 1;
-            }
-            x.crossSet(up, z).normalize();
-            if (x.length() === 0) {
-                z.x += 0.0001;
-                x.crossSet(up, z).normalize();
-            }
-            y.crossSet(z, x);
-
-            this.m11 = x.x;
-            this.m12 = x.y;
-            this.m13 = x.z;
-            this.m21 = y.x;
-            this.m22 = y.y;
-            this.m23 = y.z;
-            this.m31 = z.x;
-            this.m32 = z.y;
-            this.m33 = z.z;
-
-            return this;
-        }
-
         public static multiply(a: IMatrix3DValue, b: IMatrix3DValue, ret: Matrix3D = new Matrix3D()): Matrix3D {
-            var m11 = b.m11 * a.m11 + b.m12 * a.m21 + b.m13 * a.m31 + b.m14 * a.m41;
-            var m12 = b.m11 * a.m12 + b.m12 * a.m22 + b.m13 * a.m32 + b.m14 * a.m42;
-            var m13 = b.m11 * a.m13 + b.m12 * a.m23 + b.m13 * a.m33 + b.m14 * a.m43;
-            var m14 = b.m11 * a.m14 + b.m12 * a.m24 + b.m13 * a.m34 + b.m14 * a.m44;
-            var m21 = b.m21 * a.m11 + b.m22 * a.m21 + b.m23 * a.m31 + b.m24 * a.m41;
-            var m22 = b.m21 * a.m12 + b.m22 * a.m22 + b.m23 * a.m32 + b.m24 * a.m42;
-            var m23 = b.m21 * a.m13 + b.m22 * a.m23 + b.m23 * a.m33 + b.m24 * a.m43;
-            var m24 = b.m21 * a.m14 + b.m22 * a.m24 + b.m23 * a.m34 + b.m24 * a.m44;
-            var m31 = b.m31 * a.m11 + b.m32 * a.m21 + b.m33 * a.m31 + b.m34 * a.m41;
-            var m32 = b.m31 * a.m12 + b.m32 * a.m22 + b.m33 * a.m32 + b.m34 * a.m42;
-            var m33 = b.m31 * a.m13 + b.m32 * a.m23 + b.m33 * a.m33 + b.m34 * a.m43;
-            var m34 = b.m31 * a.m14 + b.m32 * a.m24 + b.m33 * a.m34 + b.m34 * a.m44;
-            var m41 = b.m41 * a.m11 + b.m42 * a.m21 + b.m43 * a.m31 + b.m44 * a.m41;
-            var m42 = b.m41 * a.m12 + b.m42 * a.m22 + b.m43 * a.m32 + b.m44 * a.m42;
-            var m43 = b.m41 * a.m13 + b.m42 * a.m23 + b.m43 * a.m33 + b.m44 * a.m43;
-            var m44 = b.m41 * a.m14 + b.m42 * a.m24 + b.m43 * a.m34 + b.m44 * a.m44;
+            var m11 = a.m11 * b.m11 + a.m12 * b.m21 + a.m13 * b.m31 + a.m14 * b.m41;
+            var m12 = a.m11 * b.m12 + a.m12 * b.m22 + a.m13 * b.m32 + a.m14 * b.m42;
+            var m13 = a.m11 * b.m13 + a.m12 * b.m23 + a.m13 * b.m33 + a.m14 * b.m43;
+            var m14 = a.m11 * b.m14 + a.m12 * b.m24 + a.m13 * b.m34 + a.m14 * b.m44;
+            var m21 = a.m21 * b.m11 + a.m22 * b.m21 + a.m23 * b.m31 + a.m24 * b.m41;
+            var m22 = a.m21 * b.m12 + a.m22 * b.m22 + a.m23 * b.m32 + a.m24 * b.m42;
+            var m23 = a.m21 * b.m13 + a.m22 * b.m23 + a.m23 * b.m33 + a.m24 * b.m43;
+            var m24 = a.m21 * b.m14 + a.m22 * b.m24 + a.m23 * b.m34 + a.m24 * b.m44;
+            var m31 = a.m31 * b.m11 + a.m32 * b.m21 + a.m33 * b.m31 + a.m34 * b.m41;
+            var m32 = a.m31 * b.m12 + a.m32 * b.m22 + a.m33 * b.m32 + a.m34 * b.m42;
+            var m33 = a.m31 * b.m13 + a.m32 * b.m23 + a.m33 * b.m33 + a.m34 * b.m43;
+            var m34 = a.m31 * b.m14 + a.m32 * b.m24 + a.m33 * b.m34 + a.m34 * b.m44;
+            var m41 = a.m41 * b.m11 + a.m42 * b.m21 + a.m43 * b.m31 + a.m44 * b.m41;
+            var m42 = a.m41 * b.m12 + a.m42 * b.m22 + a.m43 * b.m32 + a.m44 * b.m42;
+            var m43 = a.m41 * b.m13 + a.m42 * b.m23 + a.m43 * b.m33 + a.m44 * b.m43;
+            var m44 = a.m41 * b.m14 + a.m42 * b.m24 + a.m43 * b.m34 + a.m44 * b.m44;
 
             ret.m11 = m11;
             ret.m12 = m12;

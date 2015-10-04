@@ -11,7 +11,7 @@ namespace jsidea.plugins {
             vie.appendChild(con);
 
             //            this.testGeometryUtils();
-            this.testAffineFit();
+            this.testMatrixFit();
             //asfd - de:keyboard :)
         }
 
@@ -170,60 +170,23 @@ namespace jsidea.plugins {
             document.addEventListener("keyup", setTest);
         }
 
-        private testPerspectiveFit(): void {
-
-        }
-
-        private transform2d(q: geom.Quad): void {
-
-        }
-
-//        private general2DProjection(
-//            x1s, y1s, x1d, y1d,
-//            x2s, y2s, x2d, y2d,
-//            x3s, y3s, x3d, y3d,
-//            x4s, y4s, x4d, y4d
-//        ) {
-//            var s = basisToPoints(x1s, y1s, x2s, y2s, x3s, y3s, x4s, y4s);
-//            var d = basisToPoints(x1d, y1d, x2d, y2d, x3d, y3d, x4d, y4d);
-//            return multmm(d, adj(s));
-//        }
-
-        private testAffineFit(): void {
-            //            var view = document.getElementById("view");
-            //            var cont = document.getElementById("content");
-            //            var a = document.createElement("div");
-            //            a.id = "x-cont";
-            //
-            //            view.style.perspective = "500px";
-            //            cont.style.transform = "perspective(-300px) rotateY(-45deg)";
-            //            //            cont.style.transformStyle = "preserve-3d";
-            //            //            a.style.transform = "rotateY(45deg)";
-            //            cont.appendChild(a);
-            
-            
-            var to = [
-                new geom.Point3D(100, 100, 0),
-                new geom.Point3D(300, 100, 0),
+        private testMatrixFit(): void {
+            var q = new geom.Quad(
+                new geom.Point3D(0, 0, 0),
+                new geom.Point3D(200, 50, 0),
                 new geom.Point3D(100, 300, 0),
-                new geom.Point3D(300, 400, 0)
-            ];
-            var q = new geom.Quad();
-            q.setData(to);
-           
+                new geom.Point3D(300, 300, 0));
+
             var el = document.createElement("div");
             el.style.backgroundColor = "#FFFF00";
-            el.style.transformOrigin  = "0px 0px";
             el.style.position = "absolute";
             el.style.width = "150px";
             el.style.height = "120px";
-            document.body.appendChild(el);            
-            
-            var res = geom.Matrix2D.fromQuad(el.offsetWidth, el.offsetHeight, q);
+            document.body.appendChild(el);
+            var origin = new geom.Point2D(0, 0);
+            el.style.transformOrigin = origin.x + "px " + origin.y + "px";
+            var res = geom.MatrixFit.fromQuad(origin, el.offsetWidth, el.offsetHeight, q);
             el.style.transform = res.getCSS3D();
-            
-            //            var pts = [new Poi];
-            //            fit.
         }
 
         private testMutationObserver(): void {

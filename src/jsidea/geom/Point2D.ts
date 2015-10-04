@@ -32,6 +32,13 @@ namespace jsidea.geom {
                 this.w = data[2 + offset];
             return this;
         }
+        
+        public setTo(x: number, y: number, w: number = 1): Point2D {
+            this.x = x;
+            this.y = y;
+            this.w = w;
+            return this;
+        }
 
         public copyFrom(pt: IPoint2DValue): Point2D {
             this.x = pt.x;
@@ -60,17 +67,17 @@ namespace jsidea.geom {
             var len: number = this.length();
             if (!len)
                 return;
-            this.scaleBy(length / len);
+            this.scalar(length / len);
         }
 
         public clamp(length: number): Point2D {
             var len: number = this.length();
             if (!len || len <= length)
                 return;
-            this.scaleBy(length / len);
+            this.scalar(length / len);
         }
 
-        public scaleBy(scale: number): Point2D {
+        public scalar(scale: number): Point2D {
             this.x *= scale;
             this.y *= scale;
             return this;
@@ -136,13 +143,6 @@ namespace jsidea.geom {
 
         public clone(): Point2D {
             return new Point2D(this.x, this.y);
-        }
-
-        public setTo(x: number, y: number, w: number = 1): Point2D {
-            this.x = x;
-            this.y = y;
-            this.w = w;
-            return this;
         }
 
         public cross(pt: IPoint2DValue): Point2D {

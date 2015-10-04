@@ -1,26 +1,51 @@
 namespace jsidea.geom {
     /**
-    * Based on "Fit an affine transformation to given points", by Jarno Elonen (2007)
-    * http://elonen.iki.fi/code/misc-notes/affine-fit/.
-    * That code based on the paper "Fitting affine and orthogonal transformations
-    * between two sets of points" by Helmuth Späth (2003).
     *  
     * @author Jöran Benker
     * 
     */
-    export class AffineFit {
+    export class MatrixFit {
+        public static quad(from: IQuadValue, to: IQuadValue): Matrix2D {
+            var s = MatrixFit.basis(from);
+            var d = MatrixFit.basis(to);
+            var ad = Matrix2D.adjugate(s);
+            return d.append(ad).normalize();
+        }
 
-        /**
-         * Maximal allowed deviation. Its not necessary to change it. 
-         */
-        private static deviation: number = 1e-10;
+        public static fromQuad(origin: IPoint2DValue, width: number, height: number, to: IQuadValue): Matrix2D {
+            var from = new geom.Quad();
+            from.setRect(-origin.x, -origin.y, width, height);
+            var m = MatrixFit.quad(from, to);
+            m.prependPositionRaw(-origin.x, -origin.y);
+            return m;
+        }
+
+        private static basis(quad: IQuadValue): Matrix2D {
+            var m = new Matrix2D();
+            m.m11 = quad.p1.x;
+            m.m12 = quad.p1.y;
+            m.m13 = 1;
+            m.m21 = quad.p2.x;
+            m.m22 = quad.p2.y;
+            m.m23 = 1;
+            m.m31 = quad.p3.x;
+            m.m32 = quad.p3.y;
+            m.m33 = 1;
+            var adj = Matrix2D.adjugate(m);
+            var v = adj.transform(quad.p4);
+            var ma = new Matrix2D();
+            ma.m11 = v.x;
+            ma.m22 = v.y;
+            ma.m33 = v.w;
+            return m.append(ma);
+        }
         
         /**
          * @param from Vector of 2D points in source coordinate system
          * @param to Vector of 2D points in target coordinate system
          * @return A 2D matrix which transform from source to target.
          */
-        public static solve2D(from: IPoint2DValue[], to: IPoint2DValue[]): Matrix2D {
+        public static affine2D(from: IPoint2DValue[], to: IPoint2DValue[]): Matrix2D {
             if (from.length != to.length || from.length < 1)
                 throw new Error("Size missmatch: 'from' and 'to' must be of same size.");
 
@@ -46,7 +71,7 @@ namespace jsidea.geom {
                     //column_2
                     sol[2][0],
                     sol[2][1]]
-                );
+            );
         }
         
         /**
@@ -54,7 +79,7 @@ namespace jsidea.geom {
          * @param to Vector of 3D points in target coordinate system
          * @return A 3D matrix which transform from source to target.
          */
-        public static solve3D(from: IPoint3DValue[], to: IPoint3DValue[]): Matrix3D {
+        public static affine3D(from: IPoint3DValue[], to: IPoint3DValue[]): Matrix3D {
             if (from.length != to.length || from.length < 1)
                 throw new Error("Size missmatch: 'from' and 'to' must be of same size.");
 
@@ -97,12 +122,17 @@ namespace jsidea.geom {
         }
         
         /**
+         * Based on "Fit an affine transformation to given points", by Jarno Elonen (2007)
+         * http://elonen.iki.fi/code/misc-notes/affine-fit/.
+         * That code based on the paper "Fitting affine and orthogonal transformations
+         * between two sets of points" by Helmuth Späth (2003).
+         * 
          * Its ordered by columns. To access an entry use this format 'matrix[column_index][row_index]'.
          * @param from Vector of N-dimensional points in source coordinate system
          * @param to Vector of N-dimensional points in target coordinate system
          * @return A reduced (N+1)x(N) matrix which transform N-dimensional vectors from source to target.
          */
-        public static solve(from: number[][], to: number[][]): number[][] {
+        private static solve(from: number[][], to: number[][]): number[][] {
             //check pre-conditions
             if (from.length != to.length || from.length < 1)
                 throw new Error("Size missmatch: 'from' and 'to' must be of same size.");
@@ -183,7 +213,7 @@ namespace jsidea.geom {
          * @param result A pointer for the result to write in.
          * @return The transformed vector.         * 
          */
-        public static transform(
+        private static transform(
             matrix: number[][],
             vector: number[],
             result: number[] = null): number[] {
@@ -220,7 +250,7 @@ namespace jsidea.geom {
                 matrix[i] = tmp;
                 
                 //if singular return false
-                if (Math.abs(matrix[i][i]) <= this.deviation)
+                if (Math.abs(matrix[i][i]) <= 1e-10)
                     return false;
                 
                 //eliminate column y

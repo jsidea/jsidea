@@ -22,14 +22,10 @@ namespace jsidea.geom {
         constructor() {
         }
 
-        public static create(element: HTMLElement = null, ret = new Matrix2D()): Matrix2D {
+        public static create(element: HTMLElement = null, style: CSSStyleDeclaration = null, ret = new Matrix2D()): Matrix2D {
             if (element && element.ownerDocument)
-                return ret.setCSS(window.getComputedStyle(element).transform);
+                return ret.setCSS((style || window.getComputedStyle(element)).transform);
             return ret.identity();
-        }
-
-        public static parse(cssStr: string, ret = new Matrix2D()): Matrix2D {
-            return ret.setCSS(cssStr);
         }
 
         public getData(length: number = 6): number[] {
@@ -140,11 +136,11 @@ namespace jsidea.geom {
             this.m11 *= scalar;
             this.m12 *= scalar;
             this.m13 *= scalar;
-            
+
             this.m21 *= scalar;
             this.m22 *= scalar;
             this.m23 *= scalar;
-            
+
             this.m31 *= scalar;
             this.m32 *= scalar;
             this.m33 *= scalar;
@@ -152,11 +148,8 @@ namespace jsidea.geom {
         }
 
         public normalize(): Matrix2D {
-            var m33 = 1;
-            if (m33 === 0)
-                return this;
-            this.scalar(1 / m33);
-            return this;
+            var m33 = this.m33 || 0.0001;
+            return this.scalar(1 / m33);
         }
 
         public deltaTransform(point: IPoint2DValue, ret: Point2D = new Point2D()): Point2D {
@@ -224,16 +217,6 @@ namespace jsidea.geom {
         public appendPosition(offset: IPoint2DValue): Matrix2D {
             return this.append(this.makePosition(offset, _MATRIX2D));;
         }
-        
-        /**
-        * Appends position/offset.
-        * @param x The x-offset.
-        * @param y The y-offset.
-        * @return this-chained.
-        */
-        public appendPositionRaw(x: number, y: number): Matrix2D {
-            return this.appendPosition(_POINT.setTo(x, y));
-        }
 
         /**
         * Prepends position/offset.
@@ -248,6 +231,7 @@ namespace jsidea.geom {
         * Prepends position/offset.
         * @param x The x-offset.
         * @param y The y-offset.
+        * @param w The w-offset.
         * @return this-chained.
         */
         public prependPositionRaw(x: number, y: number): Matrix2D {
@@ -295,16 +279,6 @@ namespace jsidea.geom {
         public appendScale(scale: IPoint2DValue): Matrix2D {
             this.append(this.makeScale(scale, _MATRIX2D));
             return this;
-        }
-        
-        /**
-        * Appends scaling-factors.
-        * @param x The x-scaling factor.
-        * @param y The y-scaling factor.
-        * @return this-chained.
-        */
-        public appendScaleRaw(x: number, y: number): Matrix2D {
-            return this.appendScale(_POINT.setTo(x, y));
         }
 
         /**
@@ -370,16 +344,6 @@ namespace jsidea.geom {
         public appendSkew(skew: IPoint2DValue): Matrix2D {
             return this.append(this.makeSkew(skew, _MATRIX2D));
         }
-        
-        /**
-        * Appends the given skewing-angles in degree.
-        * @param x The x-angle.
-        * @param y The y-angle.
-        * @return this-chained.
-        */
-        public appendSkewRaw(x: number, y: number): Matrix2D {
-            return this.appendSkew(_POINT.setTo(x, y));
-        }
 
         /**
         * Prepends the given skewing-angles in degree.
@@ -388,16 +352,6 @@ namespace jsidea.geom {
         */
         public prependSkew(skew: IPoint2DValue): Matrix2D {
             return this.prepend(this.makeSkew(skew, _MATRIX2D));
-        }
-        
-        /**
-        * Prepends the given skewing-angles in degree.
-        * @param x The x-angle.
-        * @param y The y-angle.
-        * @return this-chained.
-        */
-        public prependSkewRaw(x: number, y: number): Matrix2D {
-            return this.prependSkew(_POINT.setTo(x, y));
         }
         
         /**
@@ -534,17 +488,14 @@ namespace jsidea.geom {
                 + this.m12.toFixed(fractionalDigits) + ","
                 + 0 + ","
                 + this.m13.toFixed(fractionalDigits) + ","
-                
                 + this.m21.toFixed(fractionalDigits) + ","
                 + this.m22.toFixed(fractionalDigits) + ","
                 + 0 + ","
                 + this.m23.toFixed(fractionalDigits) + ","
-                
                 + 0 + ","
                 + 0 + ","
                 + 1 + ","
                 + 0 + ","
-                
                 + this.m31.toFixed(fractionalDigits) + ","
                 + this.m32.toFixed(fractionalDigits) + ","
                 + 0 + ","
@@ -552,9 +503,8 @@ namespace jsidea.geom {
         }
 
         public setCSS(cssString: string): Matrix2D {
-            if (!cssString || cssString == "none") {
+            if (!cssString || cssString == "none")
                 return this.identity();
-            }
 
             var trans: any[] = cssString.replace("matrix3d(", "").replace("matrix(", "").replace(")", "").split(",");
             var l = trans.length;
@@ -566,79 +516,37 @@ namespace jsidea.geom {
 
             return this;
         }
-        
+
         public static multiply(a: IMatrix2DValue, b: IMatrix2DValue, ret: Matrix2D = new Matrix2D()): Matrix2D {
-            var data: number[] = [];
+            var data: number[] = _ARRAY;
             data[0] = b.m11 * a.m11 + b.m12 * a.m21 + b.m13 * a.m31;
             data[1] = b.m11 * a.m12 + b.m12 * a.m22 + b.m13 * a.m32;
             data[2] = b.m11 * a.m13 + b.m12 * a.m23 + b.m13 * a.m33;
-            
+
             data[3] = b.m21 * a.m11 + b.m22 * a.m21 + b.m23 * a.m31;
             data[4] = b.m21 * a.m12 + b.m22 * a.m22 + b.m23 * a.m32;
             data[5] = b.m21 * a.m13 + b.m22 * a.m23 + b.m23 * a.m33;
-            
+
             data[6] = b.m31 * a.m11 + b.m32 * a.m21 + b.m33 * a.m31;
             data[7] = b.m31 * a.m12 + b.m32 * a.m22 + b.m33 * a.m32;
             data[8] = b.m31 * a.m13 + b.m32 * a.m23 + b.m33 * a.m33;
             return ret.setData(data);
         }
-        
+
         public static adjugate(matrix: Matrix2D, ret: Matrix2D = new Matrix2D()): Matrix2D {
-            var data: number[] = [];
+            var data: number[] = _ARRAY;
             data[0] = matrix.m22 * matrix.m33 - matrix.m32 * matrix.m23;
             data[1] = matrix.m32 * matrix.m13 - matrix.m12 * matrix.m33;
             data[2] = matrix.m12 * matrix.m23 - matrix.m22 * matrix.m13;
-            
+
             data[3] = matrix.m31 * matrix.m23 - matrix.m21 * matrix.m33;
             data[4] = matrix.m11 * matrix.m33 - matrix.m31 * matrix.m13;
             data[5] = matrix.m21 * matrix.m13 - matrix.m11 * matrix.m23;
-            
+
             data[6] = matrix.m21 * matrix.m32 - matrix.m31 * matrix.m22;
             data[7] = matrix.m31 * matrix.m12 - matrix.m11 * matrix.m32;
             data[8] = matrix.m11 * matrix.m22 - matrix.m21 * matrix.m12;
             return ret.setData(data);
-        }
-
-        public static basis(quad: IQuadValue): Matrix2D {
-            var m = new Matrix2D();
-            m.m11 = quad.p1.x;
-            m.m21 = quad.p2.x;
-            m.m31 = quad.p3.x;
-            m.m12 = quad.p1.y;
-            m.m22 = quad.p2.y;
-            m.m32 = quad.p3.y;
-            m.m13 = 1;
-            m.m23 = 1;
-            m.m33 = 1;
-            var adj = Matrix2D.adjugate(m);
-            var v = adj.transform(quad.p4);
-            var ma = new Matrix2D();
-            ma.m11 = v.x;
-            ma.m22 = v.y;
-            ma.m33 = math.Number.parse(v.w, 1);
-            return m.append(ma);
-        }
-
-        public static generalProjection(a: IQuadValue, b: IQuadValue): Matrix2D {
-            var s = Matrix2D.basis(a);
-            var d = Matrix2D.basis(b);
-            var ad = Matrix2D.adjugate(s);
-            d.append(ad);
-            d.scalar(1 / d.m33);
-            return d;
-        }
-
-        public static fromQuad(width: number, height: number, quad: IQuadValue): Matrix2D {
-            var a = new geom.Quad();
-            a.p1.x = 0;
-            a.p1.y = 0;
-            a.p2.x = width;
-            a.p2.y = 0;
-            a.p3.x = 0;
-            a.p3.y = height;
-            a.p4.x = width;
-            a.p4.y = height;
-            return Matrix2D.generalProjection(a, quad);
         }
 
         public toStringTable(fractionDigits: number = 3): string {
@@ -654,6 +562,7 @@ namespace jsidea.geom {
         }
     }
 
+    var _ARRAY = [1, 0, 0, 0, 1, 0, 0, 0, 1];
     var _MATRIX2D = new Matrix2D();
     var _POINT = new Point2D();
 }

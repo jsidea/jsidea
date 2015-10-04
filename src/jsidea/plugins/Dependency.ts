@@ -17,33 +17,68 @@ namespace jsidea.plugins {
         imports: any[];
     }
     export interface ISymbol extends IReferenceData {
-        ui: DependencyUI;
+        ui: SymbolUI;
         relations: ISymbol[];
         usage: ISymbol[];
         imports: ISymbol[];
-        order: number;
+        usageOrder: number;
         file: IFile;
         name: string;
-        package: string;
+        module: IModule;
         isDependent: boolean;
         isChecked: boolean;
     }
+    export interface IModule {
+        ui: ModuleUI;
+        fullName: string;
+        name: string;
+        symbols: ISymbol[];
+    }
     type SortFunction = (a: ISymbol, b: ISymbol) => number;
-    export class DependencyUI {
-        private _reference: ISymbol;
-        private _element: HTMLElement;
+    export class ModuleUI {
+        private _data: IModule;
+        public element: HTMLElement;
+        public list: HTMLDivElement;
+        private _header: HTMLDivElement;
 
-        constructor(reference: ISymbol) {
-            this._reference = reference;
+        constructor(data: IModule) {
+            this._data = data;
 
-            this._element = document.createElement("div");
-            var e = this._element;
+            var list = document.createElement("div");
+            var header = document.createElement("div");
+            var element = document.createElement("div");
 
-            e.className = "entry";
-            e.id = reference.fullName;
+            list.className = "list";
+            header.className = "header";
+            header.textContent = data.fullName.replace("jsidea.", "");            
+            
+            element.className = "module";
+            element.id = data.fullName;
+            
+            element.appendChild(header);
+            element.appendChild(list);
+            
+            this.element = element;
+            this.list = list;
+            this._header = header;
+        }
+    }
+    export class SymbolUI {
+        private _data: ISymbol;
+        public element: HTMLElement;
+
+        constructor(data: ISymbol) {
+            this._data = data;
+
+            this.element = document.createElement("div");
+            
+            var e = this.element;
+
+            e.className = "symbol";
+            e.id = data.fullName;
             e.setAttribute("data-checked", "0");
             e.setAttribute("data-dependent", "0");
-            e.setAttribute("data-kind", reference.kind.toString());
+            e.setAttribute("data-kind", data.kind.toString());
 
             var chk = document.createElement("div");
             chk.className = "checkbox";
@@ -51,45 +86,46 @@ namespace jsidea.plugins {
 
             var lab = document.createElement("div");
             lab.className = "label";
-            lab.textContent = reference.name + " [" + text.Text.fileSize(reference.file.size) + " " + text.Text.fileSize(reference.file.sizeMinified) + "]";
+            lab.textContent = data.name;// + " [" + text.Text.fileSize(data.file.size) + " " + text.Text.fileSize(data.file.sizeMinified) + "]";
             //            lab.textContent = reference.name + " [" + reference.file.size + " " + reference.file.sizeMinified + "]";
             e.appendChild(lab);
         }
 
-        public getElement(): HTMLElement {
-            return this._element;
-        }
-
         public setChecked(checked: boolean): void {
-            this._element.setAttribute("data-checked", checked ? "1" : "0");
+            this.element.setAttribute("data-checked", checked ? "1" : "0");
         }
 
         public setDependent(dependent: boolean): void {
-            this._element.setAttribute("data-dependent", dependent ? "1" : "0");
+            this.element.setAttribute("data-dependent", dependent ? "1" : "0");
         }
     }
     export class Dependency extends Plugin {
 
         public symbols: ISymbol[] = null;
         public files: IFile[] = null;
+        public modules: IModule[] = null;
 
         private _ajax: XMLHttpRequest;
-        private _list: HTMLDivElement = null;
+        private _content: HTMLDivElement = null;
 
-        public static SORT_ORDER: SortFunction = (a, b) => {
+        public static SORT_FILESIZE: SortFunction = (a, b) => {
             return a.file.size - b.file.size;
         };
 
         public static SORT_USAGE: SortFunction = (a, b) => {
-            return a.order - b.order;
+            return a.usageOrder - b.usageOrder;
         };
 
         public static SORT_MODULE: SortFunction = (a, b) => {
-            if (a.package != b.package)
-                return a.package.localeCompare(b.package);
+            if (a.module != b.module)
+                return a.module.fullName.localeCompare(b.module.fullName);
             if (a.name != b.name)
                 return a.name.localeCompare(b.name);
             return a.fullName.localeCompare(b.fullName);
+        };
+
+        public static SORT_NAME: SortFunction = (a, b) => {
+            return a.name.localeCompare(b.name);
         };
 
         constructor() {
@@ -120,13 +156,14 @@ namespace jsidea.plugins {
 
         private parse(dat: IData): void {
             var data = dat.typescript;
-            this._list = document.createElement("div");
-            this._list.id = "list";
-            document.body.appendChild(this._list);
+            this._content = document.createElement("div");
+            this._content.id = "dependency";
+            document.body.appendChild(this._content);
             
             //get all exports
             this.symbols = data;
             this.files = dat.files;
+            this.modules = [];
             
             //            for (var file of dat.files)
             //                file.sizeMinified = text.Text.byteLengthUTF8(file.code);
@@ -135,16 +172,30 @@ namespace jsidea.plugins {
             var refs: ISymbol[] = this.symbols;
             
             //resolve names to IReference objects
+            var moduleLookup: any = {};
+            var modules: IModule[] = this.modules;
             for (var ref of refs) {
                 ref.file = this.getFileByName(<any>ref.file);
                 for (var i = 0; i < ref.imports.length; ++i)
                     ref.imports[i] = this.getByQualifiedName(<any>ref.imports[i]);
                 var path = ref.fullName.split(".");
                 ref.name = path[path.length - 1];
-                ref.package = path.splice(0, path.length - 1).join(".");
+                ref.module = null;//
                 ref.isDependent = false;
                 ref.isChecked = false;
-                ref.ui = this.createElement(ref);
+
+
+                var moduleName = path.slice(0, path.length - 1).join(".");
+                if (!moduleLookup[moduleName]) {
+                    ref.module = { fullName: moduleName, name: path[path.length - 2], symbols: [ref], ui: null };
+                    moduleLookup[moduleName] = ref.module;
+                    modules.push(ref.module);
+                }
+                else {
+                    ref.module = moduleLookup[moduleName];
+                    ref.module.symbols.push(ref);
+                }
+
                 if (!ref.usage)
                     ref.usage = [];
                 for (var chi of ref.imports) {
@@ -154,22 +205,34 @@ namespace jsidea.plugins {
                         chi.usage.push(ref);
                 }
             }
+
+            modules.sort((a, b) => {
+                return a.name.localeCompare(b.name);
+            });
+
+            for (var mod of modules) {
+                mod.symbols.sort(Dependency.SORT_NAME);
+                mod.ui = this.createModuleUI(mod);
+                for (var sym of mod.symbols) {
+                    sym.ui = this.createSymbolUI(sym);
+                }
+            }
             
             //multipath(2/3)
             for (var ref of refs) {
                 ref.relations = this.createRelations(ref);
             }
-            
+
             this.sort(Dependency.SORT_MODULE);
             
             //multipath(3/3)
             var ordered = this.getOrderedSymbols();
             var i = 0;
             for (var ref of ordered) {
-                ref.order = i++;
+                ref.usageOrder = i++;
             }
 
-            this.sort(Dependency.SORT_USAGE);
+            this.sort(Dependency.SORT_MODULE);
         }
 
         private getOrderedSymbols(): ISymbol[] {
@@ -224,19 +287,26 @@ namespace jsidea.plugins {
             for (var imp of ref.imports) {
                 if (relations.indexOf(imp) < 0) {
                     relations.push(imp);
-//                    if (imp.usage.indexOf(ref) === -1)
-//                        imp.usage.push(ref);
+                    //                    if (imp.usage.indexOf(ref) === -1)
+                    //                        imp.usage.push(ref);
                     this.createRelations(imp, relations);
                 }
             }
             return relations;
         }
 
-        private createElement(ref: ISymbol): DependencyUI {
-            var element = new DependencyUI(ref);
-            this._list.appendChild(element.getElement());
-            element.getElement().addEventListener("click", () => this.onClickElement(ref));
-            return element;
+        private createModuleUI(mod: IModule): ModuleUI {
+            var ui = new ModuleUI(mod);
+            this._content.appendChild(ui.element);
+            //            ui.element.addEventListener("click", () => this.onClickElement(ref));
+            return ui;
+        }
+
+        private createSymbolUI(ref: ISymbol): SymbolUI {
+            var ui = new SymbolUI(ref);
+            ref.module.ui.list.appendChild(ui.element);
+            ui.element.addEventListener("click", () => this.onClickElement(ref));
+            return ui;
         }
 
         private onClickElement(ref: ISymbol): void {
@@ -261,7 +331,7 @@ namespace jsidea.plugins {
             
             //size
             var size = this.getSize();
-            console.log("SIZE", text.Text.fileSize(size.bytesMinified));
+            //            console.log("SIZE", text.Text.fileSize(size.bytesMinified));
 
             //refresh the ui-elements
             this.refreshUI();
@@ -284,8 +354,12 @@ namespace jsidea.plugins {
 
         public sort(f: SortFunction): void {
             this.symbols.sort(f);
-            for (var symbol of this.symbols)
-                this._list.appendChild(symbol.ui.getElement());
+            
+            //            var display = this._list.style.display;
+            //            this._list.style.display = "none";
+            //            for (var symbol of this.symbols)
+            //                this._list.appendChild(symbol.ui.getElement());
+            //            this._list.style.display = display;
         }
 
         private refreshUI(): void {

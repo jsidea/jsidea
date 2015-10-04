@@ -61,17 +61,17 @@ namespace jsidea.geom {
             var len: number = this.length();
             if (!len)
                 return;
-            this.scaleBy(length / len);
+            this.scalar(length / len);
         }
 
         public clamp(length: number): Point3D {
             var len: number = this.length();
             if (!len || len <= length)
                 return;
-            this.scaleBy(length / len);
+            this.scalar(length / len);
         }
 
-        public scaleBy(scale: number): Point3D {
+        public scalar(scale: number): Point3D {
             this.x *= scale;
             this.y *= scale;
             this.z *= scale;
