@@ -28,7 +28,7 @@ namespace jsidea.layout {
             mode = mode || TransformMode.RECTANGLE;
             
             //FORCE FOR TESTING
-            mode = TransformMode.PLANAR;
+            mode = TransformMode.PERSPECTIVE;
 
             var style = window.getComputedStyle(element);
             this.size.update(element, style);

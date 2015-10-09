@@ -7,7 +7,9 @@
   ],
   "libs": [
     "libs/canvas_get_transform.js",
-    "libs/canvas_has_context.js"
+    "libs/canvas_has_context.js",
+    "libs/typescript.js",
+    "libs/typescriptServices.js"
   ],
   "php": [],
   "src": [
@@ -67,10 +69,10 @@
     "src/jsidea/layout/MoveMode/Transform.js",
     "src/jsidea/layout/ITransformMode.js",
     "src/jsidea/layout/Transform.js",
-    "src/jsidea/layout/TransformMode/Planar.js",
+    "src/jsidea/layout/TransformMode/Perspective.js",
     "src/jsidea/layout/TransformMode/Rectangle.js",
     "src/jsidea/layout/TransformMode/Test.js",
-    "src/jsidea/layout/TransformMode/Perspective.js",
+    "src/jsidea/layout/TransformMode/Planar.js",
     "src/jsidea/layout/Move.js",
     "src/jsidea/layout/ISnapMode.js",
     "src/jsidea/layout/Snap.js",
@@ -88,9 +90,11 @@
     "src/jsidea/events/EventDispatcher.js",
     "src/jsidea/plugins/Plugin.js",
     "src/jsidea/plugins/Simbox.js",
+    "src/jsidea/action/Drag.js",
     "src/jsidea/plugins/Dependency.js",
     "src/jsidea/display/Graphics.js",
     "src/jsidea/plugins/Test.js",
+    "src/jsidea/build/VirtualHost.js",
     "src/jsidea/action/EventCircuit.js",
     "src/jsidea/action/Cursor.js"
   ]

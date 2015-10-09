@@ -10,8 +10,8 @@ namespace jsidea.plugins {
             con.id = "content";
             vie.appendChild(con);
 
-            //            this.testGeometryUtils();
-            this.testMatrixFit();
+            this.testGeometryUtils();
+            //            this.testMatrixFit();
             //asfd - de:keyboard :)
         }
 

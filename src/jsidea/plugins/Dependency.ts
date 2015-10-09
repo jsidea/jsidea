@@ -1,16 +1,16 @@
 namespace jsidea.plugins {
-    interface IFile {
+    export interface IFile {
         name: string;
         size: number;
         sizeMinified: number;
         code: string;
     }
-    interface IData {
+    export interface IData {
         project: any;
         files: IFile[];
         typescript: ISymbol[];
     }
-    interface IReferenceData {
+    export interface IReferenceData {
         fullName: string;
         file: string | IFile;
         kind: number;
@@ -24,6 +24,7 @@ namespace jsidea.plugins {
         usageOrder: number;
         file: IFile;
         name: string;
+        url: string;
         module: IModule;
         isDependent: boolean;
         isChecked: boolean;
@@ -36,42 +37,58 @@ namespace jsidea.plugins {
     }
     type SortFunction = (a: ISymbol, b: ISymbol) => number;
     export class ModuleUI {
-        private _data: IModule;
         public element: HTMLElement;
         public list: HTMLDivElement;
+        private _data: IModule;
         private _header: HTMLDivElement;
+        private _docs: HTMLAnchorElement;
 
         constructor(data: IModule) {
             this._data = data;
 
-            var list = document.createElement("div");
-            var header = document.createElement("div");
             var element = document.createElement("div");
-
-            list.className = "list";
-            header.className = "header";
-            header.textContent = data.fullName.replace("jsidea.", "");            
-            
             element.className = "module";
             element.id = data.fullName;
+            this.element = element;
+
+            var header = document.createElement("div");
+            header.className = "header";
+            header.textContent = data.fullName.replace("jsidea.", "");
+            this._header = header;
+
+            var list = document.createElement("div");
+            list.className = "list";
+            this.list = list;
+
+            //            var docs = document.createElement("a");
+            //            docs.className = "docs";
+            //            docs.href = data.;
+            //            this._docs = docs;
             
             element.appendChild(header);
+            //            header.appendChild(docs);
             element.appendChild(list);
+
+            header.addEventListener("click", () => {
+                element.classList.toggle("collapsed");
+            });
             
-            this.element = element;
-            this.list = list;
-            this._header = header;
+            
+            //            docs.addEventListener("click", () => {
+            //                
+            //            });            
         }
     }
     export class SymbolUI {
         private _data: ISymbol;
         public element: HTMLElement;
+        private _docs: HTMLAnchorElement;
 
         constructor(data: ISymbol) {
             this._data = data;
 
             this.element = document.createElement("div");
-            
+
             var e = this.element;
 
             e.className = "symbol";
@@ -89,6 +106,16 @@ namespace jsidea.plugins {
             lab.textContent = data.name;// + " [" + text.Text.fileSize(data.file.size) + " " + text.Text.fileSize(data.file.sizeMinified) + "]";
             //            lab.textContent = reference.name + " [" + reference.file.size + " " + reference.file.sizeMinified + "]";
             e.appendChild(lab);
+
+            var docs = document.createElement("a");
+            docs.className = "docs";
+            docs.href = data.url;
+            e.appendChild(docs);
+            this._docs = docs;
+
+            docs.addEventListener("click", (e) => {
+                e.stopPropagation();
+            });
         }
 
         public setChecked(checked: boolean): void {
@@ -130,8 +157,11 @@ namespace jsidea.plugins {
 
         constructor() {
             super();
+
             this._ajax = new XMLHttpRequest();
             this._ajax.onreadystatechange = (e) => this.onReadyStateChange(e);
+            
+            var drag = new action.Drag();
 
             var project = "jsidea";
             var version = "0.0.1";
@@ -147,6 +177,28 @@ namespace jsidea.plugins {
             if (this._ajax.readyState == 4) {
                 if (this._ajax.status == 200) {
                     this.parse(JSON.parse(this._ajax.responseText));
+
+                    //                    var tar: HTMLElement = null;
+                    //                    var el = document.createElement("div");
+                    //                    el.style.top = "0px";
+                    //                    el.style.left = "0px";
+                    //                    //            el.style.width = "200px";
+                    //                    //            el.style.height = "200px";
+                    //                    //            el.style.backgroundColor = "#FFFF00";
+                    //                    el.style.position = "fixed";
+                    //                    document.body.appendChild(el);
+                    //                    document.addEventListener("click", (e) => {
+                    //                        tar = <HTMLElement>e.target;
+                    //                    });
+                    //                    var trans = new layout.Transform();
+                    //                    document.addEventListener("mousemove", (e) => {
+                    //                        if (!tar)
+                    //                            return;
+                    //
+                    //                        trans.update(tar);
+                    //                        var local = trans.globalToLocal(e.pageX, e.pageY, 0);
+                    //                        el.textContent = local.x + " " + local.y;
+                    //                    });
                 }
                 else {
                     console.log(this._ajax.statusText);
@@ -159,6 +211,9 @@ namespace jsidea.plugins {
             this._content = document.createElement("div");
             this._content.id = "dependency";
             document.body.appendChild(this._content);
+            
+            //            var host = ts.createCompilerHost({ noLib: true });
+            //            console.log(host);
             
             //get all exports
             this.symbols = data;
@@ -183,8 +238,6 @@ namespace jsidea.plugins {
                 ref.module = null;//
                 ref.isDependent = false;
                 ref.isChecked = false;
-
-
                 var moduleName = path.slice(0, path.length - 1).join(".");
                 if (!moduleLookup[moduleName]) {
                     ref.module = { fullName: moduleName, name: path[path.length - 2], symbols: [ref], ui: null };
@@ -204,12 +257,14 @@ namespace jsidea.plugins {
                     if (chi.usage.indexOf(ref) === -1)
                         chi.usage.push(ref);
                 }
+                ref.url = this.getURL(ref);
             }
 
             modules.sort((a, b) => {
                 return a.name.localeCompare(b.name);
             });
 
+            //create ui
             for (var mod of modules) {
                 mod.symbols.sort(Dependency.SORT_NAME);
                 mod.ui = this.createModuleUI(mod);
@@ -233,6 +288,44 @@ namespace jsidea.plugins {
             }
 
             this.sort(Dependency.SORT_MODULE);
+
+            
+            var host = new build.VirtualHost(this.files);
+            //TEST TYPESCRIPT
+            var opt:ts.CompilerOptions = {};
+//            opt.inlineSourceMap = true;
+            opt.declaration = true;
+            opt.sourceMap = true;
+            var source = this.symbols[0].file.code;
+            var tc = {compilerOptions:opt};
+//            var result = ts.transpile(source, opt);
+            var result = ts.transpileModule(source, tc);
+            
+            var names = [];
+            for(var f of this.files)
+                names.push(f.name);
+            var program = ts.createProgram(names, opt, host);
+            var em = program.emit();
+            console.log(em);
+//            console.log(program.getSourceFiles());
+            
+//            console.log(result);
+        }
+
+        private getURL(sym: ISymbol): string {
+            var base = "http://127.0.0.1/eventfive/jsidea-build/bin/";
+            if (sym.kind == 213)
+                base += "interfaces/";
+            else if (sym.kind == 212)
+                base += "classes/";
+            else if (sym.kind == 209)
+                base += "modules/";
+            base += sym.module.fullName.toLowerCase();
+            if (sym.kind == 209)//variable declaration
+                base += ".html#" + sym.name.toLowerCase();
+            else if (sym.kind == 212 || sym.kind == 213)//class or interface
+                base += "." + sym.name.toLowerCase() + ".html";
+            return base;
         }
 
         private getOrderedSymbols(): ISymbol[] {
