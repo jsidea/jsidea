@@ -167,7 +167,7 @@ namespace jsidea.plugins {
             req.onError.add((e) => console.log("ERROR", e));
             req.onComplete.add((data) => this.parse(data));
             req.send();
-
+            
             var drag = new action.Drag();
 
         }
