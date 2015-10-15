@@ -1,6 +1,5 @@
 namespace jsidea.model {
-    export interface IConverter {
-        read(data: string): any
+    export interface IWriter {
         write(data: any): string;
     }
 }

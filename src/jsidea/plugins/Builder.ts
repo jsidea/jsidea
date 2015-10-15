@@ -132,7 +132,6 @@ namespace jsidea.plugins {
         public files: IFile[] = null;
         public modules: IModule[] = null;
 
-        private _ajax: XMLHttpRequest;
         private _content: HTMLDivElement = null;
 
         public static SORT_FILESIZE: SortFunction = (a, b) => {
@@ -161,61 +160,16 @@ namespace jsidea.plugins {
             var project = "jsidea";
             var version = "0.0.1";
             var url = "http://127.0.0.1/eventfive/jsidea-website/build/" + project + "/" + version + "/" + project + ".build.json";
-            var req = model.URLRequest.create(url);
-            req.reader = model.Converter.Json;
-            req.addEventListener("complete", () => {
-                console.log("COMPLETE", req.response);
-            });
-            req.addEventListener("error", () => {
-                console.log("ERROR");
-            });
-            console.log("URL", req.url);
+            
+            var req = new model.Request<IData>(url);
+            req.method = model.RequestMethod.GET;
+            req.reader = model.Reader.Json;
+            req.onError.add((e) => console.log("ERROR", e));
+            req.onComplete.add((data) => this.parse(data));
             req.send();
-
-            this._ajax = new XMLHttpRequest();
-            this._ajax.onreadystatechange = (e) => this.onReadyStateChange(e);
 
             var drag = new action.Drag();
 
-            this.load("http://127.0.0.1/eventfive/jsidea-website/build/" + project + "/" + version + "/" + project + ".build.json");
-        }
-
-        public load(url: string): void {
-            this._ajax.open("GET", url);
-            this._ajax.send(null);
-        }
-
-        private onReadyStateChange(e: ProgressEvent): void {
-            if (this._ajax.readyState == 4) {
-                if (this._ajax.status == 200) {
-                    this.parse(JSON.parse(this._ajax.responseText));
-
-                    //                    var tar: HTMLElement = null;
-                    //                    var el = document.createElement("div");
-                    //                    el.style.top = "0px";
-                    //                    el.style.left = "0px";
-                    //                    //            el.style.width = "200px";
-                    //                    //            el.style.height = "200px";
-                    //                    //            el.style.backgroundColor = "#FFFF00";
-                    //                    el.style.position = "fixed";
-                    //                    document.body.appendChild(el);
-                    //                    document.addEventListener("click", (e) => {
-                    //                        tar = <HTMLElement>e.target;
-                    //                    });
-                    //                    var trans = new layout.Transform();
-                    //                    document.addEventListener("mousemove", (e) => {
-                    //                        if (!tar)
-                    //                            return;
-                    //
-                    //                        trans.update(tar);
-                    //                        var local = trans.globalToLocal(e.pageX, e.pageY, 0);
-                    //                        el.textContent = local.x + " " + local.y;
-                    //                    });
-                }
-                else {
-                    console.log(this._ajax.statusText);
-                }
-            }
         }
 
         private parse(dat: IData): void {

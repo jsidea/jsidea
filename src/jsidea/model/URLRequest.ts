@@ -1,68 +1,34 @@
 namespace jsidea.model {
-    export enum URLMethod {
+    export enum RequestMethod {
         GET,
         POST
     }
-    export class URLRequest extends events.EventDispatcher {
-        private static _parser: HTMLAnchorElement = document.createElement("a");
-
-        public method: URLMethod = URLMethod.GET;
-        public protocol: string;
-        public host: string;
-        public path: string;
-        public port: string;
+    export class Request<ResponseType> {
+        public url: string;
         public upload: any = null;
-        public response: any = null;
-        public responseText: string;
-        public writer: IConverter = null;
-        public errors: any[];
-        public reader: IConverter = Converter.Json;
+        public method: RequestMethod = RequestMethod.GET;
+        public writer: IWriter = null;
+        public reader: IReader = Reader.Json;
 
-        constructor(url?: string) {
-            super();
-            if (url)
-                this.url = url;
-        }
+        public onError = events.Signal.create<any>();
+        public onComplete = events.Signal.create<ResponseType>();
 
-        public set url(url: string) {
-            var p = URLRequest._parser;
-            p.href = url;
-            this.port = p.port;
-            this.protocol = p.protocol;
-            this.host = p.host;
-            this.path = p.pathname;
-        }
-
-        public get url(): string {
-            var p = URLRequest._parser;
-            p.port = this.port;
-            p.protocol = this.protocol;
-            p.host = this.host;
-            p.pathname = this.path;
-            return p.href;
+        constructor(url: string) {
+            this.url = url;
         }
 
         public send(): void {
-            URLRequest.send(this);
+            Request.send(this);
         }
 
-        public static create(url: string): URLRequest {
-            return new URLRequest(url);
-        }
-
-        private static send(request: URLRequest): void {
+        private static send(request: Request<any>): void {
             var uploadData = request.upload;
-            
-            request.errors = [];
-            request.response = null;
-            request.responseText = "";
-            
+
             if (uploadData && request.writer) {
                 try {
                     uploadData = request.writer.write(request.upload);
-                } catch (e) {
-                    request.errors.push(e);
-                    request.dispatchEvent(new Event("error"));
+                } catch (exc) {
+                    request.onError.dispatch(exc);
                     return;
                 }
             }
@@ -73,24 +39,22 @@ namespace jsidea.model {
                 //                console.log("PROGRESS", ajax.readyState, ajax.status);
                 if (ajax.readyState == 4) {
                     if (ajax.status == 200) {
-                        request.responseText = ajax.responseText;
+                        var responseText = ajax.responseText;
 
-                        var responseData = request.responseText;
+                        var responseData = responseText;
                         if (request.reader) {
                             try {
-                                responseData = request.reader.read(request.responseText);
-                            } catch (e) {
-                                request.errors.push(e);
-                                request.dispatchEvent(new Event("error"));
+                                responseData = request.reader.read(responseText);
+                            } catch (exc) {
+                                request.onError.dispatch(exc);
                                 return;
                             }
                         }
-                        request.response = responseData;
-                        request.dispatchEvent(new Event("complete"));
+                        var response = responseData;
+                        request.onComplete.dispatch(response);
                     }
                     else {
-                        request.errors.push(e);
-                        request.dispatchEvent(new Event("error"));
+                        request.onError.dispatch("404");
                     }
                 }
                 else if (ajax.readyState == 0) {
@@ -98,7 +62,7 @@ namespace jsidea.model {
                 }
             }
 
-            ajax.open(URLMethod[request.method], request.url);
+            ajax.open(RequestMethod[request.method], request.url);
             ajax.send(request.upload);
         }
     }

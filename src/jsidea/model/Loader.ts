@@ -4,11 +4,11 @@ namespace jsidea.model {
         POST
     }
     export class Loader extends events.EventDispatcher {
-        private _stack: URLRequest[] = [];
+        private _stack: Request<any>[] = [];
         constructor() {
             super();
         }
-        public load(request: URLRequest): void {
+        public load(request: Request<any>): void {
             var ajax = new XMLHttpRequest();
             ajax.onreadystatechange = (e: ProgressEvent) => {
                 if (ajax.readyState == 4) {
