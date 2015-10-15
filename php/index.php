@@ -7,6 +7,6 @@
 <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300italic,600,600italic' rel='stylesheet' type='text/css'>
 <?php include (realpath ( dirname ( __FILE__ ) . '/../php/Build.php')); Build::debug ( "jsidea" );?>
 </head>
-<body data-plugin="Dependency">
+<body data-plugin="Builder">
 </body>
 </html>

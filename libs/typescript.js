@@ -46862,8 +46862,8 @@ var ts;
                 case 246 /* SourceFile */:
                     return 4 /* Namespace */ | 1 /* Value */;
             }
-            return 1 /* Value */ | 2 /* Type */ | 4 /* Namespace */;
             ts.Debug.fail("Unknown declaration type");
+            return 1 /* Value */ | 2 /* Type */ | 4 /* Namespace */;
         }
         function isTypeReference(node) {
             if (ts.isRightSideOfQualifiedNameOrPropertyAccess(node)) {

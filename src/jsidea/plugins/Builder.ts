@@ -2,8 +2,8 @@ namespace jsidea.plugins {
     export interface IFile {
         name: string;
         size: number;
-        sizeMinified: number;
         code: string;
+        sizeMinified?: number;
     }
     export interface IData {
         project: any;
@@ -126,7 +126,7 @@ namespace jsidea.plugins {
             this.element.setAttribute("data-dependent", dependent ? "1" : "0");
         }
     }
-    export class Dependency extends Plugin {
+    export class Builder extends Plugin {
 
         public symbols: ISymbol[] = null;
         public files: IFile[] = null;
@@ -158,13 +158,25 @@ namespace jsidea.plugins {
         constructor() {
             super();
 
-            this._ajax = new XMLHttpRequest();
-            this._ajax.onreadystatechange = (e) => this.onReadyStateChange(e);
-            
-            var drag = new action.Drag();
-
             var project = "jsidea";
             var version = "0.0.1";
+            var url = "http://127.0.0.1/eventfive/jsidea-website/build/" + project + "/" + version + "/" + project + ".build.json";
+            var req = model.URLRequest.create(url);
+            req.reader = model.Converter.Json;
+            req.addEventListener("complete", () => {
+                console.log("COMPLETE", req.response);
+            });
+            req.addEventListener("error", () => {
+                console.log("ERROR");
+            });
+            console.log("URL", req.url);
+            req.send();
+
+            this._ajax = new XMLHttpRequest();
+            this._ajax.onreadystatechange = (e) => this.onReadyStateChange(e);
+
+            var drag = new action.Drag();
+
             this.load("http://127.0.0.1/eventfive/jsidea-website/build/" + project + "/" + version + "/" + project + ".build.json");
         }
 
@@ -266,7 +278,7 @@ namespace jsidea.plugins {
 
             //create ui
             for (var mod of modules) {
-                mod.symbols.sort(Dependency.SORT_NAME);
+                mod.symbols.sort(Builder.SORT_NAME);
                 mod.ui = this.createModuleUI(mod);
                 for (var sym of mod.symbols) {
                     sym.ui = this.createSymbolUI(sym);
@@ -278,7 +290,7 @@ namespace jsidea.plugins {
                 ref.relations = this.createRelations(ref);
             }
 
-            this.sort(Dependency.SORT_MODULE);
+            this.sort(Builder.SORT_MODULE);
             
             //multipath(3/3)
             var ordered = this.getOrderedSymbols();
@@ -287,31 +299,62 @@ namespace jsidea.plugins {
                 ref.usageOrder = i++;
             }
 
-            this.sort(Dependency.SORT_MODULE);
-
+            this.sort(Builder.SORT_MODULE);
             
-            var host = new build.VirtualHost(this.files);
+            //            console.log(SourceMapGenerator);
+            //            return;
+            
+            //---------------
             //TEST TYPESCRIPT
-            var opt:ts.CompilerOptions = {};
-//            opt.inlineSourceMap = true;
-            opt.declaration = true;
-            opt.sourceMap = true;
-            var source = this.symbols[0].file.code;
-            var tc = {compilerOptions:opt};
-//            var result = ts.transpile(source, opt);
-            var result = ts.transpileModule(source, tc);
+            //---------------
             
-            var names = [];
-            for(var f of this.files)
-                names.push(f.name);
-            var program = ts.createProgram(names, opt, host);
-            var em = program.emit();
-            console.log(em);
-//            console.log(program.getSourceFiles());
-            
-//            console.log(result);
-        }
+            //            var filesToCompile = this.files;
+            //            var opt: ts.CompilerOptions = {};
+            //            opt.declaration = true;
+            //            opt.sourceMap = true;
+            //            opt.outFile = "jsidea.js";
+            //            var host = new build.VirtualHost(filesToCompile);
+            //            var names = [];
+            //            for (var f of this.files)
+            //                names.push(f.name);
+            //            var program = ts.createProgram(names, opt, host);
+            //            var em = program.emit();
+            //            console.log(host.results);
 
+            //            var s = new build.SymbolProcessor();
+            //            s.run(this.files);
+            //            console.log("EXPORTS", s.exports);
+            
+            
+            var host = new build.FileSystem(this.files);
+            //            var filesToCompile = host.match("*.ts");
+            //            
+            //            var opt: ts.CompilerOptions = {};
+            //            opt.declaration = true;
+            //            opt.sourceMap = true;
+            //            opt.outFile = "jsidea.js";
+            //            
+            //            var names = [];
+            //            for (var f of filesToCompile)
+            //                names.push(f.name);
+            //            
+            //            var program = ts.createProgram(names, opt, host);
+            //            var em = program.emit();
+
+            //            console.log("MATCH", host.match("*.map"));
+            
+            var result = build.Usage.TYPESCRIPT.apply(host.match("*.ts"));
+            console.log("SYMBOLS", result.symbols);
+            
+            
+
+            //            var options: any = {};
+            //            var ot: any = {};
+            //            //            ot.inSourceMap = host.results[0].code;
+            //            //            ot.outSourceMap = true;
+            //            var min = UglifyJS.minify(host.results[1].name, host, ot);
+            //            console.log(min);
+        }
         private getURL(sym: ISymbol): string {
             var base = "http://127.0.0.1/eventfive/jsidea-build/bin/";
             if (sym.kind == 213)

@@ -1,16 +1,16 @@
 namespace jsidea.model {
-    export class Dictonary<K, V> {
-        private _keys: K[] = [];
-        private _values: V[] = [];
+    export class Dictonary<Key, Value> {
+        private _keys: Key[] = [];
+        private _values: Value[] = [];
 
         constructor() {
         }
 
-        public getValue(key: K): V {
+        public getValue(key: Key): Value {
             return this._values[this._keys.indexOf(key)];
         }
 
-        public setValue(key: K, value: V): V {
+        public setValue(key: Key, value: Value): Value {
             var index = this._keys.indexOf(key);
             if (index < 0) {
                 this._keys.push(key);
@@ -21,12 +21,12 @@ namespace jsidea.model {
             return value;
         }
         
-        public hasKey(key: K):boolean
+        public hasKey(key: Key):boolean
         {
             return this._keys.indexOf(key) >= 0;    
         }
         
-        public hasValue(value: V):boolean
+        public hasValue(value: Value):boolean
         {
             return this._values.indexOf(value) >= 0;    
         }
@@ -36,18 +36,18 @@ namespace jsidea.model {
             this._values.splice(0, this._values.length);
         }
 
-        public removeKey(key: K): V {
+        public removeKey(key: Key): Value {
             var index = this._keys.indexOf(key);
             if (index < 0)
                 return null;
-            var value: V = this._values[index];
+            var value: Value = this._values[index];
             this._keys.splice(index, 1);
             this._values.splice(index, 1);
             return value;
         }
         
-        public getKeys(value: V): K[] {
-            var res:K[] = [];
+        public getKeys(value: Value): Key[] {
+            var res:Key[] = [];
             var index = 0; 
             while((index = this._values.indexOf(value, index)) >= 0)
                 res.push(this._keys[index]);
