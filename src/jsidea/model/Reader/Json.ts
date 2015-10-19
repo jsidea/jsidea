@@ -1,9 +1,12 @@
 namespace jsidea.model.Reader {
-    class JsonReader implements IReader {
-        public read(data: string): any {
-            return JSON.parse(data);
+    class JSONReader implements IReader {
+        public responseType: string = "json";
+        public read(data: string | any): any {
+            if (typeof data == "string")
+                return window.JSON.parse(data);
+            return data;
         }
     }
 
-    export var Json: IReader = new JsonReader();
+    export var JSON: IReader = new JSONReader();
 }

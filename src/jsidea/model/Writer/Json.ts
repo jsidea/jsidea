@@ -1,9 +1,9 @@
 namespace jsidea.model.Writer {
     class JsonWriter implements IWriter {
         public write(data: any): string {
-            return JSON.stringify(data);
+            return window.JSON.stringify(data);
         }
     }
 
-    export var Json: IWriter = new JsonWriter();
+    export var JSON: IWriter = new JsonWriter();
 }

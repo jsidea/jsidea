@@ -16,7 +16,7 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1442725926898</id>
+			<id>1445044132899</id>
 			<name></name>
 			<type>22</type>
 			<matcher>
@@ -25,7 +25,16 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1442725926898</id>
+			<id>1445044132901</id>
+			<name></name>
+			<type>22</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-location-matches-false-true-.*[^bin].*jsidea[\/\\]src[\/\\].*\.map</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1445044132903</id>
 			<name></name>
 			<type>22</type>
 			<matcher>

@@ -1,5 +1,6 @@
 namespace jsidea.model {
     export interface IReader {
-        read(data: string): any
+        responseType: string;
+        read(data: any): any
     }
 }

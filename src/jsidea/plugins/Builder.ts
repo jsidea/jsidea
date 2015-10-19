@@ -160,15 +160,26 @@ namespace jsidea.plugins {
             var project = "jsidea";
             var version = "0.0.1";
             var url = "http://127.0.0.1/eventfive/jsidea-website/build/" + project + "/" + version + "/" + project + ".build.json";
-            
+            var klaus = "PETER";
+
             var req = new model.Request<IData>(url);
-            req.method = model.RequestMethod.GET;
-            req.reader = model.Reader.Json;
-            req.onError.add((e) => console.log("ERROR", e));
-            req.onComplete.add((data) => this.parse(data));
-            req.send();
+            //            req.method = model.RequestMethod.GET;
+            //            req.reader = model.Reader.JSON;
+            req.onFail.add((e) => console.log("ERROR", e));
+            req.onSuccess.add((data) => this.parse(data));
+            req.load();
+
+//            var u = new model.URL(url);
+//            var params = u.parameters;
+//            params["TEST"] = "HELLO WORLD 1";
+//            params["TEST"] = "HELLO WORLD 2";
+//            u.parameters = params;
+//            u.addParameters({ "asfasdf": 5 });
+//            console.log(u.url);
             
-            var drag = new action.Drag();
+            //            console.log(t.scope == Builder);
+            
+//            var drag = new action.Drag();
 
         }
 
@@ -227,7 +238,7 @@ namespace jsidea.plugins {
             }
 
             modules.sort((a, b) => {
-                return a.name.localeCompare(b.name);
+                return a.fullName.localeCompare(b.fullName);
             });
 
             //create ui

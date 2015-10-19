@@ -1,5 +1,5 @@
 namespace jsidea.build.Minify {
-    export interface IJavaScriptOptions extends UglifyJS.IOptions{
+    export interface IJavaScriptOptions extends UglifyJS.IOptions {
 
     }
     class JavaScriptMinify {
@@ -20,8 +20,8 @@ namespace jsidea.build.Minify {
 
             // 1. parse
             var haveScope = false;
-            var toplevel = null,
-                sourcesContent = {};
+            var toplevel: any = null;
+            var sourcesContent: any = {};
 
             files.forEach(function(file, i) {
                 var code = file.code;
@@ -102,4 +102,4 @@ namespace jsidea.build.Minify {
 }
 
 if (UglifyJS)
-    UglifyJS.AST_Node.warn_function = (txt) => console.warn(txt);
+    UglifyJS.AST_Node.warn_function = (txt: string) => console.warn(txt);
