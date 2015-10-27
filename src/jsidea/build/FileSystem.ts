@@ -55,26 +55,55 @@ module jsidea.build {
                     code: data
                 });
         }
-        
+
         private static globToRegex(glob: string): RegExp {
-            var specialChars = "\\^$*+?.()|{}[]";
+            //            var specialChars = "\\^$*+?.()|{}[]";
+            //            var regexChars = ["^"];
+            //            for (var i = 0; i < glob.length; ++i) {
+            //                var c = glob.charAt(i);
+            //                switch (c) {
+            //                    case '?':
+            //                        regexChars.push(".");
+            //                        break;
+            //                    case '*':
+            //                        regexChars.push(".*");
+            //                        break;
+            //                    default:
+            //                        if (specialChars.indexOf(c) >= 0)
+            //                            regexChars.push("\\");
+            //                        regexChars.push(c);
+            //                }
+            //            }
+            //            regexChars.push("$");
+            //            return new RegExp(regexChars.join(""));
+            
+            var globs = glob.indexOf("|") >= 0 ? glob.split("|") : [glob];
+
+            var specialChars = "\\^$*+?.(){}[]";
             var regexChars = ["^"];
-            for (var i = 0; i < glob.length; ++i) {
-                var c = glob.charAt(i);
-                switch (c) {
-                    case '?':
-                        regexChars.push(".");
-                        break;
-                    case '*':
-                        regexChars.push(".*");
-                        break;
-                    default:
-                        if (specialChars.indexOf(c) >= 0)
-                            regexChars.push("\\");
-                        regexChars.push(c);
+            for (var glob of globs) {
+                if (regexChars.length > 1)
+                    regexChars.push("|");
+                regexChars.push("(");
+                for (var i = 0; i < glob.length; ++i) {
+                    var c = glob.charAt(i);
+                    switch (c) {
+                        case '?':
+                            regexChars.push(".");
+                            break;
+                        case '*':
+                            regexChars.push(".*");
+                            break;
+                        default:
+                            if (specialChars.indexOf(c) >= 0)
+                                regexChars.push("\\");
+                            regexChars.push(c);
+                    }
                 }
+                regexChars.push(")");
             }
             regexChars.push("$");
+//            console.log("REG", regexChars.join(""));
             return new RegExp(regexChars.join(""));
         }
     }

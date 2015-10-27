@@ -5,7 +5,7 @@ namespace jsidea.build.Minify {
     class JavaScriptMinify {
         //SOURCE: https://gist.github.com/jpillora/5652641
         //SOURCE: https://github.com/mishoo/UglifyJS2/blob/master/tools/node.js#L52
-        public apply(files: IFile[], options: IJavaScriptOptions): IMinifyResult {
+        public apply(files: IFile[], options?: IJavaScriptOptions): IMinifyResult {
             options = UglifyJS.defaults(options, {
                 outSourceMap: null,
                 sourceRoot: null,
@@ -20,42 +20,44 @@ namespace jsidea.build.Minify {
 
             // 1. parse
             var haveScope = false;
-            var toplevel: any = null;
+            var topLevel: any = null;
             var sourcesContent: any = {};
 
             files.forEach(function(file, i) {
                 var code = file.code;
                 sourcesContent[file.name] = code;
-                toplevel = UglifyJS.parse(code, {
+                topLevel = UglifyJS.parse(code, {
                     filename: options.fromString ? i : file.name,
-                    toplevel: toplevel
+                    toplevel: topLevel
                 });
             });
 
+            console.log(topLevel);
+            
             if (options.wrap)
-                toplevel = toplevel.wrap_commonjs(options.wrap, options.exportAll);
+                topLevel = topLevel.wrap_commonjs(options.wrap, options.exportAll);
 
             // 2. compress
             if (options.compress) {
                 var compress = { warnings: options.warnings };
                 UglifyJS.merge(compress, options.compress);
-                toplevel.figure_out_scope();
+                topLevel.figure_out_scope();
                 haveScope = true;
                 var sq = UglifyJS.Compressor(compress);
-                toplevel = toplevel.transform(sq);
+                topLevel = topLevel.transform(sq);
             }
 
             // 3. mangle
             if (options.mangle) {
-                toplevel.figure_out_scope(options.mangle);
+                topLevel.figure_out_scope(options.mangle);
                 haveScope = true;
-                toplevel.compute_char_frequency(options.mangle);
-                toplevel.mangle_names(options.mangle);
+                topLevel.compute_char_frequency(options.mangle);
+                topLevel.mangle_names(options.mangle);
             }
 
             // 4. scope (if needed)
             if (!haveScope)
-                toplevel.figure_out_scope();
+                topLevel.figure_out_scope();
 
             // 5. output
             var inMap = options.inSourceMap;
@@ -81,7 +83,7 @@ namespace jsidea.build.Minify {
                 UglifyJS.merge(output, options.output);
 
             var stream = UglifyJS.OutputStream(output);
-            toplevel.print(stream);
+            topLevel.print(stream);
 
             stream = stream.toString();
             if (options.outSourceMap && "string" === typeof options.outSourceMap)

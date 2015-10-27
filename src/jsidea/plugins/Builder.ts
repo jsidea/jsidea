@@ -164,22 +164,22 @@ namespace jsidea.plugins {
 
             var req = new model.Request<IData>(url);
             //            req.method = model.RequestMethod.GET;
-            //            req.reader = model.Reader.JSON;
+            req.reader = model.Reader.JSON;
             req.onFail.add((e) => console.log("ERROR", e));
             req.onSuccess.add((data) => this.parse(data));
             req.load();
 
-//            var u = new model.URL(url);
-//            var params = u.parameters;
-//            params["TEST"] = "HELLO WORLD 1";
-//            params["TEST"] = "HELLO WORLD 2";
-//            u.parameters = params;
-//            u.addParameters({ "asfasdf": 5 });
-//            console.log(u.url);
+            //            var u = new model.URL(url);
+            //            var params = u.parameters;
+            //            params["TEST"] = "HELLO WORLD 1";
+            //            params["TEST"] = "HELLO WORLD 2";
+            //            u.parameters = params;
+            //            u.addParameters({ "asfasdf": 5 });
+            //            console.log(u.url);
             
             //            console.log(t.scope == Builder);
             
-//            var drag = new action.Drag();
+            //            var drag = new action.Drag();
 
         }
 
@@ -290,35 +290,69 @@ namespace jsidea.plugins {
             //            s.run(this.files);
             //            console.log("EXPORTS", s.exports);
             
-            
+            //            console.log("INIT");
             var host = new build.FileSystem(this.files);
-            //            var filesToCompile = host.match("*.ts");
-            //            
-            //            var opt: ts.CompilerOptions = {};
-            //            opt.declaration = true;
-            //            opt.sourceMap = true;
-            //            opt.outFile = "jsidea.js";
-            //            
-            //            var names = [];
-            //            for (var f of filesToCompile)
-            //                names.push(f.name);
-            //            
-            //            var program = ts.createProgram(names, opt, host);
-            //            var em = program.emit();
 
-            //            console.log("MATCH", host.match("*.map"));
-            
-            var result = build.Usage.TYPESCRIPT.apply(host.match("*.ts"));
-            console.log("SYMBOLS", result.symbols);
-            
-            
+            //            console.log(document.querySelector("script[src~='src/jsidea/system/System.js']"));
+            //            console.log(document.querySelectorAll("script[src*='System']"));
+            var tsFiles = host.match("*.ts");
+            var requests: model.Request<string>[] = [];
+            var z = 0;
+            for (var file of tsFiles) {
+                var jsFileName = file.name.replace(".ts", ".js");
+                var script: HTMLScriptElement = <HTMLScriptElement>document.querySelector("script[src*='" + jsFileName + "']");
+                if (!script)
+                    continue;
+                requests.push(new model.Request<string>(script.src));
+                //                if (z++ > 1)
+                //                    break;
+            }
+            model.Request.bulk(requests, () => {
+                for (var r of requests) {
 
-            //            var options: any = {};
-            //            var ot: any = {};
-            //            //            ot.inSourceMap = host.results[0].code;
-            //            //            ot.outSourceMap = true;
-            //            var min = UglifyJS.minify(host.results[1].name, host, ot);
-            //            console.log(min);
+                    host.write(r.url.path, r.response);
+                }
+                
+                //            console.log("TS FILES", tsFiles);
+                //
+                //            console.log("START");
+            
+                //            var filesToCompile = host.match("*.ts");
+                //            
+                //            var opt: ts.CompilerOptions = {};
+                //            opt.declaration = true;
+                //            opt.sourceMap = true;
+                //            opt.outFile = "jsidea.js";
+                //            
+                //            var names = [];
+                //            for (var f of filesToCompile)
+                //                names.push(f.name);
+                //            
+                //            var program = ts.createProgram(names, opt, host);
+                //            var em = program.emit();
+
+                //            console.log("MATCH", host.match("*.map"));
+            
+                //            var result = build.Usage.TYPESCRIPT.apply(host.match("*.ts"));
+                //            console.log("SYMBOLS", result.symbols);
+
+                //                console.log("TEST");//, fi);
+                //                console.log("WHY");
+                //                return;
+                
+//                var jsFiles = host.match("*layout/Transform.js|*Border.js|*Number.js");
+                var jsFiles = host.match("*.js");
+                var usage = build.Usage.JAVASCRIPT.apply(jsFiles);
+
+                //            console.log(topLevel);
+
+                //            var options: any = {};
+                //            var ot: any = {};
+                //            //            ot.inSourceMap = host.results[0].code;
+                //            //            ot.outSourceMap = true;
+                //            var min = UglifyJS.minify(host.results[1].name, host, ot);
+                //            console.log(min);
+            });
         }
         private getURL(sym: ISymbol): string {
             var base = "http://127.0.0.1/eventfive/jsidea-build/bin/";

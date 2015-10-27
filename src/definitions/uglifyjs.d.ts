@@ -1,5 +1,5 @@
 declare module UglifyJS {
-    export interface IOptions{
+    export interface IOptions {
         outSourceMap?: boolean,
         sourceRoot?: string,
         inSourceMap?: string,
@@ -21,4 +21,9 @@ declare module UglifyJS {
     export var parse: any;
     export var defaults: any;
     export var SourceMap: any;
+    export var TreeWalker: any;
+    export var string_template: any;
+    export var AST_Defun: any;
+    export var AST_SymbolRef: any;
+    
 }

@@ -39,14 +39,15 @@ namespace jsidea.events {
             return this;
         }
 
-        public invoke(args: any[]): Slot {
-            if (this._time && Date.now() > this._time)
-                return this.dispose();
+        public invoke(args: any[]): void {
+            if (this._time && Date.now() > this._time) {
+                this.dispose();
+                return;
+            }
             this._listener.apply(this._scope, args);
             this._count++;
             if (this._once || (this._maxCount && this._count >= this._maxCount))
-                return this.dispose();
-            return this;
+                this.dispose();
         }
 
         public dispose(): Slot {

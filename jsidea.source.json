@@ -118,6 +118,7 @@
     "src/jsidea/build/IFileSystem.js",
     "src/jsidea/build/FileSystem.js",
     "src/jsidea/build/CompilerHost.js",
+    "src/jsidea/build/Usage/JavaScript.js",
     "src/jsidea/build/Usage/TypeScript.js",
     "src/jsidea/plugins/Builder.js",
     "src/jsidea/build/Builder.js",

@@ -35,7 +35,11 @@ namespace jsidea.events {
             var l = this._slots.length;
             for (var i = 0; i < l; ++i) {
                 var slot = this._slots[i];
-                slot.invoke(args);
+                try {
+                    slot.invoke(args);
+                } catch (exc) {
+                    
+                }
                 if (l != this._slots.length) {
                     i--;
                     l--;

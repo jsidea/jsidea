@@ -19,6 +19,7 @@ namespace jsidea.model.Loader {
                         return;
                     }
                 }
+                request.response = responseData;
                 request.state = RequestState.SUCCESS;
                 request.onSuccess.invoke(responseData);
             }; 

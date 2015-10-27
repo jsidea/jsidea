@@ -18,13 +18,12 @@ namespace jsidea.model.Loader {
             ajax.onreadystatechange = (e: ProgressEvent) => {
                 if (ajax.readyState == 4) {
                     if (ajax.status == 200) {
-                        var responseText = ajax.responseText;
+                        var response = ajax.response;
                         
                         //parse/read the data
-                        var responseData = <any>responseText;
                         if (request.reader) {
                             try {
-                                responseData = request.reader.read(responseText);
+                                response = request.reader.read(response);
                             } catch (exc) {
                                 request.state = RequestState.FAILED;
                                 request.onFail.invoke(exc);
@@ -32,8 +31,9 @@ namespace jsidea.model.Loader {
                             }
                         }
 
+                        request.response = response;
                         request.state = RequestState.SUCCESS;
-                        request.onSuccess.invoke(responseData);
+                        request.onSuccess.invoke(response);
                     }
                     else {
                         request.state = RequestState.FAILED;
@@ -45,6 +45,7 @@ namespace jsidea.model.Loader {
                 }
             }
 
+            ajax.responseType = request.reader ? request.reader.responseType : "text";
             ajax.open(RequestMethod[request.method], request.url.href);
             ajax.send(request.upload);
         }

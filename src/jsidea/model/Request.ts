@@ -5,10 +5,10 @@ namespace jsidea.model {
         PUT
     }
     export enum RequestState {
-        UNSENT,
-        LOADING,
-        FAILED,
-        SUCCESS
+        UNSENT = 0,
+        LOADING = 2,
+        FAILED = 4,
+        SUCCESS = 8
     }
     export class Request<ResponseType> {
         private _state: RequestState = RequestState.UNSENT;
@@ -17,18 +17,17 @@ namespace jsidea.model {
         public upload: any = null;
         public method: RequestMethod = RequestMethod.GET;
         public writer: IWriter = null;
-        public reader: IReader = Reader.JSON;
+        public reader: IReader = Reader.TEXT;
         public loader: ILoader = Loader.AJAX;
+        public response: ResponseType;
 
         public onFail = events.Signal.create<any>();
         public onSuccess = events.Signal.create<ResponseType>();
         public onStateChange = events.Signal.create<RequestState>();
+        public onProgress = events.Signal.create<number, number>();
 
         constructor(href: string) {
             this.url.href = href;
-//            var p = new Promise<string>((resolve, reject) => {
-//                    
-//            });
         }
 
         public get state(): RequestState {
@@ -45,6 +44,24 @@ namespace jsidea.model {
         public load(): void {
             this.state = RequestState.LOADING;
             this.loader.load(this);
+        }
+
+        public static bulk(requests: Request<any>[], onSuccess: () => void): void {
+            var count = 0;
+            var maxCount = requests.length;
+            var onSuccessRequest = (r: any) => {
+                count++;
+                if (count == maxCount) {
+                    for (var slot of slots)
+                        slot.dispose();
+                    onSuccess();
+                }
+            }
+            var slots: events.Slot[] = [];
+            for (var r of requests) {
+                slots.push(r.onSuccess.add(onSuccessRequest));
+                r.load();
+            }
         }
     }
 }
