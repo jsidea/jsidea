@@ -1,4 +1,4 @@
-module jsidea.build {
+namespace jsidea.build {
     export class FileSystem implements IFileSystem {
         public files: IFile[] = null;
 

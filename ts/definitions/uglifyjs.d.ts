@@ -1,3 +1,4 @@
+//@REQUIRE[libs/uglify.js]
 declare module UglifyJS {
     export interface IOptions {
         outSourceMap?: boolean,
@@ -24,6 +25,8 @@ declare module UglifyJS {
     export var TreeWalker: any;
     export var string_template: any;
     export var AST_Defun: any;
+    export var AST_Symbol: any;
     export var AST_SymbolRef: any;
+    export var AST_SymbolDefun: any;
     
 }

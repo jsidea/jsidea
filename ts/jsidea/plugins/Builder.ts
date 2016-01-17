@@ -3,20 +3,22 @@ namespace jsidea.plugins {
         name: string;
         size: number;
         code: string;
-        sizeMinified?: number;
     }
     export interface IData {
+        //TODO: implement project in Source.php output
         project: any;
-        files: IFile[];
-        typescript: ISymbol[];
+        ts: IFile[];
+        css: IFile[];
+        php: IFile[];
+        js: IFile[];
     }
-    export interface IReferenceData {
+    export interface IModule {
+        ui: ModuleUI;
         fullName: string;
-        file: string | IFile;
-        kind: number;
-        imports: any[];
+        name: string;
+        symbols: ISymbol[];
     }
-    export interface ISymbol extends IReferenceData {
+    export interface ISymbol extends build.ISymbol {
         ui: SymbolUI;
         relations: ISymbol[];
         usage: ISymbol[];
@@ -28,12 +30,6 @@ namespace jsidea.plugins {
         module: IModule;
         isDependent: boolean;
         isChecked: boolean;
-    }
-    export interface IModule {
-        ui: ModuleUI;
-        fullName: string;
-        name: string;
-        symbols: ISymbol[];
     }
     type SortFunction = (a: ISymbol, b: ISymbol) => number;
     export class ModuleUI {
@@ -53,7 +49,7 @@ namespace jsidea.plugins {
 
             var header = document.createElement("div");
             header.className = "header";
-            header.textContent = data.fullName.replace("jsidea.", "");
+            header.textContent = data.name;//data.fullName.replace("jsidea.", "");
             this._header = header;
 
             var list = document.createElement("div");
@@ -82,10 +78,13 @@ namespace jsidea.plugins {
     export class SymbolUI {
         private _data: ISymbol;
         public element: HTMLElement;
-        private _docs: HTMLAnchorElement;
+//        private _docs: HTMLAnchorElement;
 
         constructor(data: ISymbol) {
             this._data = data;
+            
+            if(data.fullName == "Window")
+             console.log("AHHH", data);
 
             this.element = document.createElement("div");
 
@@ -96,6 +95,7 @@ namespace jsidea.plugins {
             e.setAttribute("data-checked", "0");
             e.setAttribute("data-dependent", "0");
             e.setAttribute("data-kind", data.kind.toString());
+            e.setAttribute("title", data.file.name);
 
             var chk = document.createElement("div");
             chk.className = "checkbox";
@@ -107,15 +107,15 @@ namespace jsidea.plugins {
             //            lab.textContent = reference.name + " [" + reference.file.size + " " + reference.file.sizeMinified + "]";
             e.appendChild(lab);
 
-            var docs = document.createElement("a");
-            docs.className = "docs";
-            docs.href = data.url;
-            e.appendChild(docs);
-            this._docs = docs;
+//            var docs = document.createElement("a");
+//            docs.className = "docs";
+//            docs.href = data.url;
+//            e.appendChild(docs);
+//            this._docs = docs;
 
-            docs.addEventListener("click", (e) => {
-                e.stopPropagation();
-            });
+//            docs.addEventListener("click", (e) => {
+//                e.stopPropagation();
+//            });
         }
 
         public setChecked(checked: boolean): void {
@@ -159,14 +159,20 @@ namespace jsidea.plugins {
 
             var project = "jsidea";
             var version = "0.0.1";
-            var url = "http://127.0.0.1/eventfive/jsidea-website/build/" + project + "/" + version + "/" + project + ".build.json";
+            //            var url = "http://127.0.0.1/eventfive/jsidea-website/build/" + project + "/" + version + "/" + project + ".build.json";
+            var url = 'http://127.0.0.1/eventfive/jsidea/php/jsidea/model/Source.php?project=eventfive.framework';
             var klaus = "PETER";
 
             var req = new model.Request<IData>(url);
-            //            req.method = model.RequestMethod.GET;
+            req.method = model.RequestMethod.GET;
             req.reader = model.Reader.JSON;
             req.onFail.add((e) => console.log("ERROR", e));
-            req.onSuccess.add((data) => this.parse(data));
+            req.onSuccess.add((data) => {
+                if (data.hasOwnProperty('error')) {
+                    alert((<any>data)['error']);
+                    return;
+                } this.parse(data);
+            });
             req.load();
 
             //            var u = new model.URL(url);
@@ -184,40 +190,47 @@ namespace jsidea.plugins {
         }
 
         private parse(dat: IData): void {
-            var data = dat.typescript;
+            //            console.log("LOADED");
+            //            if (true)
+            //                return;
+            //            this.symbols = dat.typescript;
+            var opt: build.Usage.ITypeScriptOptions = {};
+            opt.compilerHost = new build.CompilerHost(dat.ts);
+            this.symbols = build.Usage.TYPESCRIPT.apply(dat.ts, opt).symbols as ISymbol[];
+            var jsFiles = opt.compilerHost.match("*/definitions/*.js");
+            console.log("FILES", jsFiles);
+
             this._content = document.createElement("div");
             this._content.id = "dependency";
             document.body.appendChild(this._content);
-            
-            //            var host = ts.createCompilerHost({ noLib: true });
-            //            console.log(host);
-            
-            //get all exports
-            this.symbols = data;
-            this.files = dat.files;
+            this.files = dat.ts;
             this.modules = [];
-            
-            //            for (var file of dat.files)
-            //                file.sizeMinified = text.Text.byteLengthUTF8(file.code);
-            
-            //create/collect references
-            var refs: ISymbol[] = this.symbols;
-            
             //resolve names to IReference objects
             var moduleLookup: any = {};
             var modules: IModule[] = this.modules;
-            for (var ref of refs) {
-                ref.file = this.getFileByName(<any>ref.file);
-                for (var i = 0; i < ref.imports.length; ++i)
-                    ref.imports[i] = this.getByQualifiedName(<any>ref.imports[i]);
+            for (var ref of this.symbols) {
+                //                ref.file = this.getFileByName(<any>ref.file);
+                //                for (var i = 0; i < ref.imports.length; ++i)
+                //                if(ref.imports[i])
+                //                    ref.imports[i] = this.getByQualifiedName(<any>ref.imports[i]);
+                
+                //                console.log(ref.file.code);
+                
                 var path = ref.fullName.split(".");
                 ref.name = path[path.length - 1];
                 ref.module = null;//
                 ref.isDependent = false;
                 ref.isChecked = false;
                 var moduleName = path.slice(0, path.length - 1).join(".");
+
+                if (!moduleName.trim())
+                    moduleName = 'global';
+
+//                console.log("PATH", ref.fullName, path);
+                
                 if (!moduleLookup[moduleName]) {
-                    ref.module = { fullName: moduleName, name: path[path.length - 2], symbols: [ref], ui: null };
+//                    var name = path.le
+                    ref.module = { fullName: moduleName, name: moduleName, symbols: [ref], ui: null };
                     moduleLookup[moduleName] = ref.module;
                     modules.push(ref.module);
                 }
@@ -234,7 +247,7 @@ namespace jsidea.plugins {
                     if (chi.usage.indexOf(ref) === -1)
                         chi.usage.push(ref);
                 }
-                ref.url = this.getURL(ref);
+                //                ref.url = this.getURL(ref);
             }
 
             modules.sort((a, b) => {
@@ -251,7 +264,7 @@ namespace jsidea.plugins {
             }
             
             //multipath(2/3)
-            for (var ref of refs) {
+            for (var ref of this.symbols) {
                 ref.relations = this.createRelations(ref);
             }
 
@@ -265,6 +278,9 @@ namespace jsidea.plugins {
             }
 
             this.sort(Builder.SORT_MODULE);
+
+            if (true)
+                return;
             
             //            console.log(SourceMapGenerator);
             //            return;
@@ -340,9 +356,12 @@ namespace jsidea.plugins {
                 //                console.log("WHY");
                 //                return;
                 
-//                var jsFiles = host.match("*layout/Transform.js|*Border.js|*Number.js");
-                var jsFiles = host.match("*.js");
-                var usage = build.Usage.JAVASCRIPT.apply(jsFiles);
+                //                var jsFiles = host.match("*layout/Transform.js|*Border.js|*Number.js|*Box.js");
+                //                var jsFiles = host.match("*layout/Transform.js|*Point2D.js");
+                //                var jsFiles = host.match("*Point2D.js");
+                //                var jsFiles = host.match("*layout/Transform.js|*Border.js|*Matrix3D.js|*Point2D.js");
+                //                var jsFiles = host.match("*.js");
+                //                var usage = build.Usage.JAVASCRIPT.apply(jsFiles);
 
                 //            console.log(topLevel);
 
@@ -354,21 +373,21 @@ namespace jsidea.plugins {
                 //            console.log(min);
             });
         }
-        private getURL(sym: ISymbol): string {
-            var base = "http://127.0.0.1/eventfive/jsidea-build/bin/";
-            if (sym.kind == 213)
-                base += "interfaces/";
-            else if (sym.kind == 212)
-                base += "classes/";
-            else if (sym.kind == 209)
-                base += "modules/";
-            base += sym.module.fullName.toLowerCase();
-            if (sym.kind == 209)//variable declaration
-                base += ".html#" + sym.name.toLowerCase();
-            else if (sym.kind == 212 || sym.kind == 213)//class or interface
-                base += "." + sym.name.toLowerCase() + ".html";
-            return base;
-        }
+        //        private getURL(sym: ISymbol): string {
+        //            var base = "http://127.0.0.1/eventfive/jsidea-build/bin/";
+        //            if (sym.kind == 213)
+        //                base += "interfaces/";
+        //            else if (sym.kind == 212)
+        //                base += "classes/";
+        //            else if (sym.kind == 209)
+        //                base += "modules/";
+        //            base += sym.module.fullName.toLowerCase();
+        //            if (sym.kind == 209)//variable declaration
+        //                base += ".html#" + sym.name.toLowerCase();
+        //            else if (sym.kind == 212 || sym.kind == 213)//class or interface
+        //                base += "." + sym.name.toLowerCase() + ".html";
+        //            return base;
+        //        }
 
         private getOrderedSymbols(): ISymbol[] {
             function addAt(ary: any[], data: any, index: number): any[] {
@@ -472,7 +491,7 @@ namespace jsidea.plugins {
             this.refreshUI();
         }
 
-        private getSize(): { bytes: number, bytesMinified: number } {
+        private getSize(): { bytes: number } {
             var files: IFile[] = [];
             for (var ref of this.symbols)
                 if (ref.isDependent)
@@ -482,9 +501,9 @@ namespace jsidea.plugins {
             var bytes = 0;
             for (var file of files) {
                 bytes += file.size;
-                bytesMinified += file.sizeMinified;
+                //                bytesMinified += file.sizeMinified;
             }
-            return { bytes: bytes, bytesMinified: bytesMinified };
+            return { bytes: bytes };
         }
 
         public sort(f: SortFunction): void {

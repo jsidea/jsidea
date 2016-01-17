@@ -1,6 +1,6 @@
 namespace jsidea.build.Usage {
     export interface ITypeScriptOptions extends ts.CompilerOptions {
-
+        compilerHost?: CompilerHost;
     }
     class TypeScriptUsage implements IUsage {
 
@@ -10,31 +10,42 @@ namespace jsidea.build.Usage {
         private _file: IFile;
 
         public apply(files: IFile[], options?: ITypeScriptOptions): IUsageResult {
+
             options = options || { noLib: true };
             this._stack = [];
             this._symbols = [];
 
             //create program
-            var host = new CompilerHost(files);
+            var host = options.compilerHost || new CompilerHost(files);
             var names: string[] = [];
-            for (var f of files)
+
+            for (var f of host.files)
                 names.push(f.name);
+
+            //            try {
             this._program = ts.createProgram(names, options, host);
+            //            } catch (e) {
+            //                console.log("TypeScript program created", e);
+            //            }
             
-            //process exports
+            
+            //process exports (do it before import!)
             this._program.getSourceFiles().forEach(node => {
                 this._file = host.find(node.fileName);
-                if (node.fileName.indexOf(".d.ts") === -1)
-                    this.processExport(node);
+                //                if (node.fileName.indexOf(".d.ts") === -1)
+                this.processExport(node);
             });
             
             //process imports
             this._stack = [];
             this._program.getSourceFiles().forEach(node => {
                 this._file = host.find(node.fileName);
-                if (node.fileName.indexOf(".d.ts") === -1)
-                    this.processImport(node);
+                //                if (node.fileName.indexOf(".d.ts") === -1)
+                this.processImport(node);
             });
+
+            //TODO: this should be optional
+            this._program.emit();
 
             return {
                 symbols: this._symbols
@@ -91,6 +102,12 @@ namespace jsidea.build.Usage {
                 var lastModule: any = this._stack[this._stack.length - 1];
                 isNodeExported = lastModule.symbol ? lastModule.symbol.exports.hasOwnProperty(name) : false;
             }
+            
+            //keep track of declarations on the global scope
+            if (!isNodeExported && this._stack.length == 0 && node.kind != ts.SyntaxKind.ModuleDeclaration) {
+                isNodeExported = true;
+            }
+
             if (isNodeExported) {
                 var fullName = this.getFullName(node);
                 this.addExport(fullName, node.kind);
@@ -107,14 +124,14 @@ namespace jsidea.build.Usage {
             if (node.kind == ts.SyntaxKind.ModuleDeclaration)
                 this._stack.push(<ts.ModuleDeclaration>node);
             
-            //TODO: remove of integrate some filter option
+            //TODO: integrate some filter option
             switch (node.kind) {
-//                case ts.SyntaxKind.Identifier:
-//                case ts.SyntaxKind.ExtendsKeyword:
-//                case ts.SyntaxKind.ClassKeyword:
-//                case ts.SyntaxKind.ClassExpression:
-//                case ts.SyntaxKind.ClassDeclaration:
-//                case ts.SyntaxKind.PropertyAccessExpression:
+                //                case ts.SyntaxKind.Identifier:
+                //                case ts.SyntaxKind.ExtendsKeyword:
+                //                case ts.SyntaxKind.ClassKeyword:
+                //                case ts.SyntaxKind.ClassExpression:
+                //                case ts.SyntaxKind.ClassDeclaration:
+                //                case ts.SyntaxKind.PropertyAccessExpression:
                 default:
                     this.extractImportNames(node);
             }

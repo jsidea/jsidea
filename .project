@@ -6,40 +6,42 @@
 	</projects>
 	<buildSpec>
 		<buildCommand>
+			<name>org.eclipse.wst.validation.validationbuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.dltk.core.scriptbuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
 			<name>com.palantir.typescript.typeScriptBuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
 	</buildSpec>
 	<natures>
+		<nature>org.eclipse.php.core.PHPNature</nature>
 		<nature>com.palantir.typescript.typeScriptNature</nature>
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1445044132899</id>
+			<id>1452988808153</id>
 			<name></name>
 			<type>22</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
-				<arguments>1.0-location-matches-false-true-.*[^bin].*jsidea[\/\\]src[\/\\].*\.js</arguments>
+				<arguments>1.0-projectRelativePath-matches-false-true-ts[\/\\].*\.js</arguments>
 			</matcher>
 		</filter>
 		<filter>
-			<id>1445044132901</id>
+			<id>1452988808159</id>
 			<name></name>
 			<type>22</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
-				<arguments>1.0-location-matches-false-true-.*[^bin].*jsidea[\/\\]src[\/\\].*\.map</arguments>
-			</matcher>
-		</filter>
-		<filter>
-			<id>1445044132903</id>
-			<name></name>
-			<type>22</type>
-			<matcher>
-				<id>org.eclipse.ui.ide.multiFilter</id>
-				<arguments>1.0-name-matches-false-false-references.typescript.js</arguments>
+				<arguments>1.0-projectRelativePath-matches-false-true-ts[\/\\].*\.map</arguments>
 			</matcher>
 		</filter>
 	</filteredResources>

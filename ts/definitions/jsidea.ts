@@ -1,3 +1,5 @@
+//@REQUIRE[libs/canvas_get_transform.js]
+//@REQUIRE[libs/canvas_has_context.js]
 interface HTMLElement {
     matches(selector: string): boolean;
 }

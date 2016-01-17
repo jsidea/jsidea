@@ -1,4 +1,4 @@
-build.path.exportedFolder=
+build.path.exportedFolder=src
 build.path.sourceFolder=src
 compiler.codeGenTarget=ECMASCRIPT5
 compiler.compileOnSave=true

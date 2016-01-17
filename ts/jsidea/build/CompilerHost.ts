@@ -1,4 +1,4 @@
-module jsidea.build {
+namespace jsidea.build {
     export class CompilerHost extends FileSystem implements ts.CompilerHost {
 
         constructor(files?: IFile[]) {
