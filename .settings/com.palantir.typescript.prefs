@@ -1,5 +1,5 @@
-build.path.exportedFolder=src
-build.path.sourceFolder=src
+build.path.exportedFolder=ts
+build.path.sourceFolder=ts
 compiler.codeGenTarget=ECMASCRIPT5
 compiler.compileOnSave=true
 compiler.generateDeclarationFiles=false

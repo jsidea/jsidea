@@ -2,6 +2,12 @@
 
 namespace jsidea\build;
 
+const R_KIND = 'kind';
+const R_NAME = 'name';
+const R_USE_ALIAS = 'alias';
+const R_NAMESPACE_USE = 'use';
+const R_CONTEXT_IMPLEMENTS = 'implements';
+const R_CONTEXT_EXTENDS = 'extends';
 class ReflectUtil {
 	public static function file_get_php_classes($filepath) {
 		$php_code = file_get_contents ( $filepath );
@@ -15,11 +21,13 @@ class ReflectUtil {
 		
 		// the global namespace
 		$namespace = array ();
-		$namespace ['type'] = T_NAMESPACE;
-		$namespace ['name'] = '';
-		$namespace ['use'] = array ();
+		$namespace [R_KIND] = T_NAMESPACE;
+		$namespace [R_NAME] = '';
+		$namespace [R_NAMESPACE_USE] = array ();
 		
-		//the context can be a namespace, a class, a interface or a trait
+		//TODO: sort tokens by "use"-statements directly under namespaces first (?)
+		
+		// the context can be a namespace, a class, a interface or a trait
 		$context = &$namespace;
 		$has_namespace = false;
 		$match = function () use($count, $tokens_all, &$index) {
@@ -42,27 +50,27 @@ class ReflectUtil {
 		};
 		
 		$qname = function ($namespace, $name) {
-			$name = trim($name);
+			$name = trim ( $name );
 			if ($name [0] == '\\') {
 				$short_name = substr ( $name, 1 );
 				// $key = array_search ( $short_name, $namespace ['use'] );
 				// if ($key === false) {
 				// $namespace ['use'] [] = $short_name;
 				// }
-// 				echo "AHH";
+				// echo "AHH";
 				return $short_name;
 			}
-			if (isset ( $namespace ['use'] )) {
-				foreach ( $namespace ['use'] as $use ) {
-					$use_name = $use ['name'];
-					if ($name == $use['alias']) {
+			if (isset ( $namespace [R_NAMESPACE_USE] )) {
+				foreach ( $namespace [R_NAMESPACE_USE] as $use ) {
+					$use_name = $use [R_NAME];
+					if ($name == $use [R_USE_ALIAS]) {
 						return $use_name;
 					}
 				}
-				return ($namespace && $namespace['name']) ? $namespace ['name'] . '\\' . $name : $name;
+				return ($namespace && $namespace [R_NAME]) ? $namespace [R_NAME] . '\\' . $name : $name;
 			} else {
 				
-				return ($namespace && $namespace['name']) ? $namespace ['name'] . '\\' . $name : $name;
+				return ($namespace && $namespace [R_NAME]) ? $namespace [R_NAME] . '\\' . $name : $name;
 			}
 		};
 		
@@ -88,15 +96,17 @@ class ReflectUtil {
 					
 					// $namespace = array ();
 					
-					$namespace ['type'] = T_NAMESPACE;
-					$namespace ['name'] = $namespace_name;
-					$namespace ['use'] = array ();
+					$namespace [R_KIND] = T_NAMESPACE;
+					$namespace [R_NAME] = $namespace_name;
+					$namespace [R_NAMESPACE_USE] = array ();
 					
 					$context = &$namespace;
 				}
 			}
 			
 			if (
+			// in namespace only
+			$context [R_KIND] == T_NAMESPACE && 
 			// use
 			($tokens = $match ( T_USE, T_WHITESPACE ))) {
 				$use_names = '';
@@ -112,15 +122,15 @@ class ReflectUtil {
 				for($i = 0; $i < count ( $use_names_array ); ++ $i) {
 					$e = explode ( ' as ', trim ( $use_names_array [$i] ) );
 					$use_array = array ();
-					$use_array ['name'] = trim ( $e [0] );
+					$use_array [R_NAME] = trim ( $e [0] );
 					if (count ( $e ) > 1)
-						$use_array ['alias'] = trim ( $e [1] );
+						$use_array [R_USE_ALIAS] = trim ( $e [1] );
 					else {
 						$expl = explode ( '\\', $e [0] );
 						$use_name = array_pop ( $expl );
-						$use_array ['alias'] = trim ( $use_name );
+						$use_array [R_USE_ALIAS] = trim ( $use_name );
 					}
-					$namespace ['use'] [] = $use_array;
+					$namespace [R_NAMESPACE_USE] [] = $use_array;
 				}
 			}
 			
@@ -134,8 +144,8 @@ class ReflectUtil {
 				$name = $tokens [2] [1];
 				$declarations [] = array ();
 				$context = &$declarations [count ( $declarations ) - 1];
-				$context ['type'] = $tokens [0] [0];
-				$context ['name'] = $qname ( $namespace, $name );
+				$context [R_KIND] = $tokens [0] [0];
+				$context [R_NAME] = $qname ( $namespace, $name );
 			}
 			if (
 			// extends
@@ -171,15 +181,15 @@ class ReflectUtil {
 					}
 				}
 				if ($tokens [0] [0] == T_EXTENDS) {
-					$context ['extends'] = $res;
+					$context [R_CONTEXT_EXTENDS] = $res;
 				} else {
-					$context ['implements'] = $res;
+					$context [R_CONTEXT_IMPLEMENTS] = $res;
 				}
 			}
 			
 			if (
 			// in namespace only
-			$context ['type'] == T_NAMESPACE && 
+			$context [R_KIND] == T_NAMESPACE && 
 			// constant
 			(($tokens = $match ( T_CONST, T_WHITESPACE, T_STRING )) || 
 			// function
@@ -187,8 +197,8 @@ class ReflectUtil {
 				$name = $tokens [2] [1];
 				$declarations [] = array ();
 				$constant = &$declarations [count ( $declarations ) - 1];
-				$constant ['type'] = $tokens [0] [0];
-				$constant ['name'] = $qname ( $namespace, $name );
+				$constant [R_KIND] = $tokens [0] [0];
+				$constant [R_NAME] = $qname ( $namespace, $name );
 			}
 		}
 		
@@ -201,22 +211,21 @@ class ReflectUtil {
 				$name_lookup [$value] = $key;
 			}
 		}
-		if(!$has_namespace)
-		{
-			array_unshift($declarations, $namespace);
+		if (! $has_namespace) {
+			array_unshift ( $declarations, $namespace );
 		}
 		foreach ( $declarations as &$declaration ) {
-			$declaration ['type'] = $name_lookup [$declaration ['type']];
+			$declaration [R_KIND] = $name_lookup [$declaration [R_KIND]];
 			// if (isset ( $declaration ['use'] ) && ! $declaration ['use'])
 			// unset ( $declaration ['use'] );
 		}
-
+		
 		return $declarations;
 	}
 }
 
-// print_r ( ReflectUtil::file_get_php_classes ( __DIR__ . '/ReflectTextPHPFile.php' ) );
+print_r ( ReflectUtil::file_get_php_classes ( __DIR__ . '/ReflectTextPHPFile.php' ) );
 // print_r ( ReflectUtil::file_get_php_classes ( __DIR__ . '/Build.php' ) );
-print_r ( ReflectUtil::file_get_php_classes ( __DIR__ . '/../model/Source.php' ) );
+// print_r ( ReflectUtil::file_get_php_classes ( __DIR__ . '/../model/Source.php' ) );
 
 ?>
