@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name.0
 Bundle-SymbolicName: jsidea;singleton:=true
 Bundle-Version: 1.0.1.qualifier
-Bundle-Activator: jsidea.eclipsebridge.Activator
+Bundle-Activator: jsidea.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources;bundle-version="3.10.1",
@@ -11,7 +11,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: jsidea.core,
- jsidea.eclipsebridge;
+ jsidea;
   uses:="org.osgi.framework,
    org.eclipse.ui,
    jsidea.core,

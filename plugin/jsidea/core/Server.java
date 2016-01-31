@@ -7,7 +7,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.nio.charset.Charset;
 
 public class Server {
 	public static ISocketReceiver receiver = null;
@@ -34,19 +33,19 @@ public class Server {
 
 class ConnectionHandler implements CompletionHandler<AsynchronousSocketChannel, Client> {
 	@Override
-	public void completed(AsynchronousSocketChannel client, Client attach) {
+	public void completed(AsynchronousSocketChannel socket, Client client) {
 		try {
-			SocketAddress clientAddr = client.getRemoteAddress();
+			SocketAddress clientAddr = socket.getRemoteAddress();
 			// System.out.format("Accepted a connection from %s%n", clientAddr);
-			attach.server.accept(attach, this);
-			ReadWriteHandler rwHandler = new ReadWriteHandler();
+			client.server.accept(client, this);
+
 			Client newAttach = new Client();
-			newAttach.server = attach.server;
-			newAttach.socket = client;
+			newAttach.server = client.server;
+			newAttach.socket = socket;
 			newAttach.buffer = ByteBuffer.allocate(2048);
-			newAttach.isRead = true;
 			newAttach.clientAddr = clientAddr;
-			client.read(newAttach.buffer, newAttach, rwHandler);
+			newAttach.read();
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -55,47 +54,6 @@ class ConnectionHandler implements CompletionHandler<AsynchronousSocketChannel, 
 	@Override
 	public void failed(Throwable e, Client attach) {
 		System.out.println("Failed to accept a  connection.");
-		e.printStackTrace();
-	}
-}
-
-class ReadWriteHandler implements CompletionHandler<Integer, Client> {
-	@Override
-	public void completed(Integer result, Client attach) {
-		if (result == -1) {
-			try {
-				attach.socket.close();
-				System.out.format("[stop] socket %s%n", attach.clientAddr);
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-			return;
-		}
-
-		if (attach.isRead) {
-			attach.buffer.flip();
-			int limits = attach.buffer.limit();
-			byte bytes[] = new byte[limits];
-			attach.buffer.get(bytes, 0, limits);
-			Charset cs = Charset.forName("UTF-8");
-			String msg = new String(bytes, cs);
-			Server.receiver.input(attach, msg);
-			// System.out.format("Client at %s says: %s%n", attach.clientAddr,
-			// msg);
-			attach.isRead = false; // It is a write
-			attach.buffer.rewind();
-
-		} else {
-			// Write to the socket
-			attach.socket.write(attach.buffer, attach, this);
-			attach.isRead = true;
-			attach.buffer.clear();
-			attach.socket.read(attach.buffer, attach, this);
-		}
-	}
-
-	@Override
-	public void failed(Throwable e, Client attach) {
 		e.printStackTrace();
 	}
 }

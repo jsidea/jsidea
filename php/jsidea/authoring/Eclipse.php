@@ -1,47 +1,33 @@
 <?php
-function send_command($command) {
+function send_command($plugin, $method, $options) {
 	$host = "localhost";
 	$port = "3008";
-	$timeout = 15; // timeout in seconds
 	
 	$socket = socket_create ( AF_INET, SOCK_STREAM, SOL_TCP ) or die ( "Unable to create socket\n" );
-	
-	// socket_set_nonblock ( $socket ) or die ( "Unable to set nonblock on socket\n" );
-	
-	set_time_limit ( 0 );
 	
 	$time = time ();
 	if (! @socket_connect ( $socket, $host, $port )) {
 		$err = socket_last_error ( $socket );
-		// if ($err == 115 || $err == 114) {
-		// if ((time () - $time) >= $timeout) {
-		// socket_close ( $socket );
-		// die ( "Connection timed out.\n" );
-		// }
-		// sleep ( 1 );
-		// continue;
-		// }
 		die ( socket_strerror ( $err ) . " - ERRORED\n" . $err );
 	}
 	
-	$in = $command;
-	$file = "/wfb/sixcms_template_checkout_dir/bo-framework/sites/wfb/components/views/wfb_navigation_v1_v_d.cmst";
-// 	$file = "/TestProject/hello_world.txt";
-	$line_number = 132;
 	$in = array (
-			'plugin' => 'filesystem',
-			'method' => 'openFile',
-			'options' => array (
-					'file' => $file,
-					'line-number' => $line_number 
-			) 
+			'plugin' => $plugin,
+			'method' => $method,
+			'options' => $options 
 	);
 	$in = json_encode ( $in );
 	
-	// socket_send($socket, $buf, $len, $flags);
-	socket_write ( $socket, $in, strlen ( $in ) );
-	
-	// socket_set_block ( $this->socket ) or die ( "Unable to set block on socket\n" );
+	socket_write ( $socket, $in, strlen ( $in ) + 1 );
+	$buffer = socket_read ( $socket, 8192 );
+	socket_close($socket);
+	echo $buffer;
 }
-send_command ( "TEST" );
+
+$file = "/wfb/sixcms_template_checkout_dir/bo-framework/sites/wfb/components/views/wfb_navigation_v1_v_d.cmst";
+$line_number = 132;
+send_command ( 'filesystem', 'openFile', array (
+		'file' => $file,
+		'line-number' => $line_number 
+) );
 ?>

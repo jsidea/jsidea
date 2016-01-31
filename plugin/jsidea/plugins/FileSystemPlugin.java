@@ -49,6 +49,10 @@ public class FileSystemPlugin extends BasePlugin {
 
 		System.out.println("The file could not be found: " + filename);
 
+		// String[] p = new String[1];
+		// p[0] = "HELLO WORLD TO 1000";
+		// return p;//new JSONObject("{'test' : 'hello world'}");//"The file
+		// could not be found: " + filename;
 		return null;
 	}
 

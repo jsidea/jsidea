@@ -1,4 +1,4 @@
-package jsidea.eclipsebridge;
+package jsidea;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -138,8 +138,9 @@ public class Activator extends AbstractUIPlugin implements IStartup, ISocketRece
 		if (pluginInstance != null) {
 			JSONObject ret = pluginInstance.execute(pluginMethod, options);
 			String retString = ret.toString(4);
-			System.out.println("[jsidea] Coming Soon ... Return value write:");
-			System.out.println(retString);
+			client.write(retString);
+//			System.out.println("[jsidea] Coming Soon | DONE ... Return value write:");
+//			System.out.println(retString);
 
 		} else {
 			System.out.println("[jsidea] Failed to create plugin!");

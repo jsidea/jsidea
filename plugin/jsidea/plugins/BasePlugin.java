@@ -9,15 +9,18 @@ abstract public class BasePlugin {
 	public abstract void init();
 
 	public JSONObject execute(String method, JSONObject options) {
+		JSONObject jsonResult = new JSONObject();
 		try {
 			// invoke the method by reflection
 			Method m = this.getClass().getMethod(method, new Class[] { JSONObject.class });
 			Object ret = m.invoke(this, options);
 
 			// convert the result to json, end return it
-			JSONObject jsonResult = new JSONObject();
-			jsonResult.put("result", ret);
-			return jsonResult;
+
+			if (ret != null)
+				jsonResult.put("result", ret);
+			else
+				jsonResult.put("result", "void");
 
 			// Class<?> rt = m.getReturnType();
 			// if (rt == String.class) {
@@ -25,16 +28,22 @@ abstract public class BasePlugin {
 			// }
 
 		} catch (NoSuchMethodException e) {
+			jsonResult.put("error", e);
 			e.printStackTrace();
 		} catch (SecurityException e) {
+			jsonResult.put("error", e);
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
+			jsonResult.put("error", e);
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
+			jsonResult.put("error", e);
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
+			jsonResult.put("error", e);
 			e.printStackTrace();
 		}
-		return null;
+
+		return jsonResult;
 	}
 }
