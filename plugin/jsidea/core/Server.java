@@ -9,20 +9,19 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.charset.Charset;
 
-
-public class PluginServer {
+public class Server {
 	public static ISocketReceiver receiver = null;
 
 	public static void start(ISocketReceiver hook) throws Exception {
-		PluginServer.receiver = hook;
+		Server.receiver = hook;
 		AsynchronousServerSocketChannel server = AsynchronousServerSocketChannel.open();
 
 		String host = "localhost";
 		int port = 3008;
 		InetSocketAddress sAddr = new InetSocketAddress(host, port);
 		server.bind(sAddr);
-//		System.out.format("Server is listening at %s%n", sAddr);
-		Attachment attach = new Attachment();
+		// System.out.format("Server is listening at %s%n", sAddr);
+		Client attach = new Client();
 		attach.server = server;
 		server.accept(attach, new ConnectionHandler());
 		// Thread.currentThread().join();
@@ -33,25 +32,17 @@ public class PluginServer {
 	}
 }
 
-class Attachment {
-	AsynchronousServerSocketChannel server;
-	AsynchronousSocketChannel client;
-	ByteBuffer buffer;
-	SocketAddress clientAddr;
-	boolean isRead;
-}
-
-class ConnectionHandler implements CompletionHandler<AsynchronousSocketChannel, Attachment> {
+class ConnectionHandler implements CompletionHandler<AsynchronousSocketChannel, Client> {
 	@Override
-	public void completed(AsynchronousSocketChannel client, Attachment attach) {
+	public void completed(AsynchronousSocketChannel client, Client attach) {
 		try {
 			SocketAddress clientAddr = client.getRemoteAddress();
-//			System.out.format("Accepted a  connection from  %s%n", clientAddr);
+			// System.out.format("Accepted a connection from %s%n", clientAddr);
 			attach.server.accept(attach, this);
 			ReadWriteHandler rwHandler = new ReadWriteHandler();
-			Attachment newAttach = new Attachment();
+			Client newAttach = new Client();
 			newAttach.server = attach.server;
-			newAttach.client = client;
+			newAttach.socket = client;
 			newAttach.buffer = ByteBuffer.allocate(2048);
 			newAttach.isRead = true;
 			newAttach.clientAddr = clientAddr;
@@ -62,19 +53,19 @@ class ConnectionHandler implements CompletionHandler<AsynchronousSocketChannel, 
 	}
 
 	@Override
-	public void failed(Throwable e, Attachment attach) {
+	public void failed(Throwable e, Client attach) {
 		System.out.println("Failed to accept a  connection.");
 		e.printStackTrace();
 	}
 }
 
-class ReadWriteHandler implements CompletionHandler<Integer, Attachment> {
+class ReadWriteHandler implements CompletionHandler<Integer, Client> {
 	@Override
-	public void completed(Integer result, Attachment attach) {
+	public void completed(Integer result, Client attach) {
 		if (result == -1) {
 			try {
-				attach.client.close();
-				System.out.format("[stop] client %s%n", attach.clientAddr);
+				attach.socket.close();
+				System.out.format("[stop] socket %s%n", attach.clientAddr);
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
@@ -88,22 +79,23 @@ class ReadWriteHandler implements CompletionHandler<Integer, Attachment> {
 			attach.buffer.get(bytes, 0, limits);
 			Charset cs = Charset.forName("UTF-8");
 			String msg = new String(bytes, cs);
-			PluginServer.receiver.input(attach.clientAddr, msg);
-//			System.out.format("Client at  %s  says: %s%n", attach.clientAddr, msg);
+			Server.receiver.input(attach, msg);
+			// System.out.format("Client at %s says: %s%n", attach.clientAddr,
+			// msg);
 			attach.isRead = false; // It is a write
 			attach.buffer.rewind();
 
 		} else {
-			// Write to the client
-			attach.client.write(attach.buffer, attach, this);
+			// Write to the socket
+			attach.socket.write(attach.buffer, attach, this);
 			attach.isRead = true;
 			attach.buffer.clear();
-			attach.client.read(attach.buffer, attach, this);
+			attach.socket.read(attach.buffer, attach, this);
 		}
 	}
 
 	@Override
-	public void failed(Throwable e, Attachment attach) {
+	public void failed(Throwable e, Client attach) {
 		e.printStackTrace();
 	}
 }

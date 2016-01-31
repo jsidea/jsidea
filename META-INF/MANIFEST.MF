@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: jsidea
+Bundle-Name: %Bundle-Name.0
 Bundle-SymbolicName: jsidea;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.1.qualifier
 Bundle-Activator: jsidea.eclipsebridge.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -17,7 +17,7 @@ Export-Package: jsidea.core,
    jsidea.core,
    org.eclipse.jface.resource,
    org.eclipse.ui.plugin",
- jsidea.eclipsebridge.handlers;uses:="org.eclipse.core.commands",
- jsidea.plugins
-Bundle-Vendor: jsidea
+ jsidea.plugins,
+ org.json
+Bundle-Vendor: %Bundle-Vendor
 Bundle-ClassPath: .,libs/json-20151123.jar

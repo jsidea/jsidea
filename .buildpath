@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <buildpath>
 	<buildpathentry including="*.php" kind="src" path="php"/>
+	<buildpathentry kind="src" path="plugin"/>
 	<buildpathentry kind="con" path="org.eclipse.php.core.LANGUAGE"/>
 </buildpath>

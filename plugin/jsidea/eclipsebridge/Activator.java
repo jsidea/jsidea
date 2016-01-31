@@ -1,6 +1,7 @@
 package jsidea.eclipsebridge;
 
-import java.net.SocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IStartup;
@@ -8,8 +9,10 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
 
+import jsidea.core.Client;
 import jsidea.core.ISocketReceiver;
-import jsidea.core.PluginServer;
+import jsidea.core.Server;
+import jsidea.plugins.BasePlugin;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -17,14 +20,24 @@ import jsidea.core.PluginServer;
 public class Activator extends AbstractUIPlugin implements IStartup, ISocketReceiver {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "jsidea"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "jsidea";
 
 	// The shared instance
 	private static Activator plugin;
 
-	/**
-	 * The constructor
-	 */
+	// all active plugins
+	private Map<String, BasePlugin> plugins = new HashMap<String, BasePlugin>();
+
+	// TODO: put this in a config file
+	private Map<String, String> pluginsAvailable = new HashMap<String, String>() {
+		private static final long serialVersionUID = 1L;
+
+		{
+			put("filesystem", "jsidea.plugins.FileSystemPlugin");
+			put("build", "jsidea.plugins.BuildPlugin");
+		}
+	};
+
 	public Activator() {
 	}
 
@@ -37,7 +50,7 @@ public class Activator extends AbstractUIPlugin implements IStartup, ISocketRece
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 
-		PluginServer.start(this);
+		Server.start(this);
 
 		plugin = this;
 	}
@@ -49,7 +62,7 @@ public class Activator extends AbstractUIPlugin implements IStartup, ISocketRece
 	 * BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
-		PluginServer.stop();
+		Server.stop();
 
 		plugin = null;
 		super.stop(context);
@@ -76,14 +89,62 @@ public class Activator extends AbstractUIPlugin implements IStartup, ISocketRece
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
-	public void input(SocketAddress add, String in) {
+	public void input(Client client, String in) {
 		JSONObject o = new JSONObject(in);
-		// String inp = "";
-		if (o.has("plugin"))
-			System.out.println(o.get("plugin").toString());
-		if (o.has("method"))
-			System.out.println(o.get("method").toString());
-		System.out.println(o.toString(4));
+
+		// some simple validation
+
+		if (!o.has("plugin")) {
+			System.out.println("[jsidea] Missing plugin property in json data.");
+			return;
+		}
+
+		if (!o.has("method")) {
+			System.out.println("[jsidea] Missing method property in json data.");
+			return;
+		}
+
+		if (!o.has("options")) {
+			System.out.println("[jsidea] Missing options property in json data.");
+			return;
+		}
+
+		String plugin = o.getString("plugin");
+		String pluginMethod = o.getString("method");
+		JSONObject options = o.getJSONObject("options");
+
+		BasePlugin pluginInstance = null;
+		if (this.plugins.containsKey(plugin)) {
+			pluginInstance = this.plugins.get(plugin);
+		} else if (this.pluginsAvailable.containsKey(plugin)) {
+
+			String className = this.pluginsAvailable.get(plugin);
+
+			try {
+				Class<?> myClass = Class.forName(className);
+				pluginInstance = (BasePlugin) myClass.newInstance();
+				pluginInstance.init();
+				this.plugins.put(plugin, pluginInstance);
+				System.out.println("[jsidea] Plugin created: " + plugin + " => " + className);
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+
+		if (pluginInstance != null) {
+			JSONObject ret = pluginInstance.execute(pluginMethod, options);
+			String retString = ret.toString(4);
+			System.out.println("[jsidea] Coming Soon ... Return value write:");
+			System.out.println(retString);
+
+		} else {
+			System.out.println("[jsidea] Failed to create plugin!");
+			System.out.println(o.toString(4));
+		}
 	}
 
 	@Override

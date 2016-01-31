@@ -25,8 +25,9 @@ function send_command($command) {
 	}
 	
 	$in = $command;
-	$file = "PUT YOUR ABSOLUTE OR RELATIVE PATH HERE";
-	$line_number = 105;
+	$file = "/wfb/sixcms_template_checkout_dir/bo-framework/sites/wfb/components/views/wfb_navigation_v1_v_d.cmst";
+// 	$file = "/TestProject/hello_world.txt";
+	$line_number = 132;
 	$in = array (
 			'plugin' => 'filesystem',
 			'method' => 'openFile',
