@@ -1,7 +1,7 @@
 <?php
 function send_command($command) {
 	$host = "localhost";
-	$port = "3004";
+	$port = "3008";
 	$timeout = 15; // timeout in seconds
 	
 	$socket = socket_create ( AF_INET, SOCK_STREAM, SOL_TCP ) or die ( "Unable to create socket\n" );
@@ -25,7 +25,7 @@ function send_command($command) {
 	}
 	
 	$in = $command;
-	$file = "G:/software/xampp-portable/htdocs/eventfive/wfb/sixcms_template_checkout_dir/bo-framework/sites/wfb/components/views/wfb_navigation_v1_v_d.cmst";
+	$file = "PUT YOUR ABSOLUTE OR RELATIVE PATH HERE";
 	$line_number = 105;
 	$in = array (
 			'plugin' => 'filesystem',
