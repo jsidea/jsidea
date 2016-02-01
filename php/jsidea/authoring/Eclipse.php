@@ -35,9 +35,16 @@ function send_command($plugin, $method, $options) {
 
 // TEST CONSOLE
 // send_command ( 'console', 'log', array (
-// 		'message' => 'HELLO WORLD FROM PHP' 
+// 'message' => 'HELLO WORLD FROM PHP'
 // ) );
- send_command ( 'console', 'clear', array (
- 		'message' => 'HELLO WORLD FROM PHP'
- ) );
+// send_command ( 'console', 'clear', array (
+// 'message' => 'HELLO WORLD FROM PHP'
+// ) );
+// send_command ( 'console', 'error', array (
+// 'message' => 'HELLO WORLD FROM PHP'
+// ) );
+send_command ( 'console', 'log', array (
+		'message' => 'HELLO WORLD FROM PHP',
+		'color' => 0x00FF00 
+) );
 ?>

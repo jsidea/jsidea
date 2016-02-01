@@ -1,5 +1,7 @@
 package jsidea.plugins;
 
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -15,7 +17,15 @@ public class Console extends BasePlugin {
 	}
 
 	public void _log(JSONObject options) {
-		this.log(options.getString("message"));
+		String message = options.getString("message");
+		if (options.has("color")) {
+			this.log(message, options.getInt("color"));
+		} else
+			this.log(message);
+	}
+
+	public void _error(JSONObject options) {
+		this.log(options.getString("message"), 255, 0, 255);
 	}
 
 	public void _clear(JSONObject options) {
@@ -31,7 +41,30 @@ public class Console extends BasePlugin {
 		MessageConsole myConsole = findConsole("jsidea-console");
 		MessageConsoleStream out = myConsole.newMessageStream();
 		out.println(message);
-		System.out.println("Output message: " + message);
+	}
+
+	public void log(String message, int hex) {
+		int r = (hex & 0xFF0000) >> 16;
+		int g = (hex & 0xFF00) >> 8;
+		int b = (hex & 0xFF);
+		this.log(message, r, g, b);
+	}
+
+	public void log(String message, int r, int g, int b) {
+		MessageConsole myConsole = findConsole("jsidea-console");
+		MessageConsoleStream out = myConsole.newMessageStream();
+
+		Display d = Display.getDefault();
+		d.syncExec(new Runnable() {
+			public void run() {
+				Color colorBefore = out.getColor();
+				Color color = new Color(d, r, g, b);
+				out.setColor(color);
+				out.println(message);
+				if (colorBefore != null)
+					out.setColor(colorBefore);
+			}
+		});
 	}
 
 	// SOURCE:
