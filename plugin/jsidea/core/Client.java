@@ -39,7 +39,7 @@ public class Client {
 //		buffer.put((byte) null);
 		socket.write(buffer, this, _writer);
 
-		System.out.println("WRITE: " + message);
+//		System.out.println("WRITE: " + message);
 		// Write to the socket
 //		socket.write(this.buffer, this, this._writer);
 //		buffer.compact();

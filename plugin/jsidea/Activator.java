@@ -1,5 +1,7 @@
 package jsidea;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,14 +12,14 @@ import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
 
 import jsidea.core.Client;
-import jsidea.core.ISocketReceiver;
+import jsidea.core.IReceiver;
 import jsidea.core.Server;
 import jsidea.plugins.BasePlugin;
 
 /**
  * The activator class controls the plug-in life cycle
  */
-public class Activator extends AbstractUIPlugin implements IStartup, ISocketReceiver {
+public class Activator extends AbstractUIPlugin implements IStartup, IReceiver {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "jsidea";
@@ -33,8 +35,9 @@ public class Activator extends AbstractUIPlugin implements IStartup, ISocketRece
 		private static final long serialVersionUID = 1L;
 
 		{
-			put("filesystem", "jsidea.plugins.FileSystemPlugin");
-			put("build", "jsidea.plugins.BuildPlugin");
+			put("editor", "jsidea.plugins.Editor");
+			put("build", "jsidea.plugins.Build");
+			put("console", "jsidea.plugins.Console");
 		}
 	};
 
@@ -136,16 +139,61 @@ public class Activator extends AbstractUIPlugin implements IStartup, ISocketRece
 		}
 
 		if (pluginInstance != null) {
-			JSONObject ret = pluginInstance.execute(pluginMethod, options);
+			JSONObject ret = this.execute(pluginInstance, pluginMethod, options);
 			String retString = ret.toString(4);
 			client.write(retString);
-//			System.out.println("[jsidea] Coming Soon | DONE ... Return value write:");
-//			System.out.println(retString);
-
 		} else {
 			System.out.println("[jsidea] Failed to create plugin!");
 			System.out.println(o.toString(4));
+
+			JSONObject jsonResult = new JSONObject();
+			jsonResult.put("error", "Error creating plugin: " + plugin);
+			client.write(jsonResult.toString(4));
 		}
+	}
+
+	private JSONObject execute(BasePlugin plugin, String method, JSONObject options) {
+		JSONObject jsonResult = new JSONObject();
+		try {
+			// invoke the method by reflection
+			Method m = plugin.getClass().getMethod("_" + method, new Class[] { JSONObject.class });
+			Object ret = m.invoke(plugin, options);
+
+			// convert the result to json, end return it
+
+			if (ret != null)
+				jsonResult.put("result", ret);
+			else
+				jsonResult.put("result", "void");
+
+			// Class<?> rt = m.getReturnType();
+			// if (rt == String.class) {
+			// jsonResult.put("result", jsonString);
+			// }
+
+		} catch (NoSuchMethodException e) {
+			jsonResult.put("error", e);
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			jsonResult.put("error", e);
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			jsonResult.put("error", e);
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			jsonResult.put("error", e);
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// if(e.getCause() instanceof PluginException)
+			// {
+			// PluginException exc = (PluginException) e.getCause();
+			// jsonResult.put("error", exc);
+			// }
+			jsonResult.put("error", e.getCause().getMessage());
+			// e.printStackTrace();
+		}
+
+		return jsonResult;
 	}
 
 	@Override

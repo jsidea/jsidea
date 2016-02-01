@@ -1,6 +1,6 @@
 package jsidea.plugins;
 
-public class BuildPlugin extends BasePlugin {
+public class Build extends BasePlugin {
 	@Override
 	public void init() {
 	}

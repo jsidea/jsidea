@@ -9,9 +9,9 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 
 public class Server {
-	public static ISocketReceiver receiver = null;
+	public static IReceiver receiver = null;
 
-	public static void start(ISocketReceiver hook) throws Exception {
+	public static void start(IReceiver hook) throws Exception {
 		Server.receiver = hook;
 		AsynchronousServerSocketChannel server = AsynchronousServerSocketChannel.open();
 
