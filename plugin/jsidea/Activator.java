@@ -38,6 +38,7 @@ public class Activator extends AbstractUIPlugin implements IStartup, IReceiver {
 			put("editor", "jsidea.plugins.Editor");
 			put("build", "jsidea.plugins.Build");
 			put("console", "jsidea.plugins.Console");
+			put("prompt", "jsidea.plugins.Prompt");
 		}
 	};
 

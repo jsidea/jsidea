@@ -43,8 +43,11 @@ function send_command($plugin, $method, $options) {
 // send_command ( 'console', 'error', array (
 // 'message' => 'HELLO WORLD FROM PHP'
 // ) );
-send_command ( 'console', 'log', array (
-		'message' => 'HELLO WORLD FROM PHP',
-		'color' => 0x00FF00 
+// send_command ( 'console', 'log', array (
+// 'message' => 'HELLO WORLD FROM PHP',
+// 'color' => 0x00FF00
+// ) );
+send_command ( 'prompt', 'messageBox', array (
+		'message' => 'HELLO WORLD FROM PHP' 
 ) );
 ?>
