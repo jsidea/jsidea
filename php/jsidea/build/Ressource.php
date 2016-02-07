@@ -2,7 +2,7 @@
 
 namespace jsidea\build;
 
-class Build {
+class Ressource {
 	private static $projectPath;
 	private static $projectURL;
 	public static function debug($projectName) {

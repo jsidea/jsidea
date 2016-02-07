@@ -25,7 +25,7 @@ class ReflectUtil {
 		$namespace [R_NAME] = '';
 		$namespace [R_NAMESPACE_USE] = array ();
 		
-		//TODO: sort tokens by "use"-statements directly under namespaces first (?)
+		// TODO: sort tokens by "use"-statements directly under namespaces first (?)
 		
 		// the context can be a namespace, a class, a interface or a trait
 		$context = &$namespace;

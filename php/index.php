@@ -1,3 +1,9 @@
+<?php
+function __autoload($class_name) {
+	$path = preg_replace ( '/\\\/', '/', $class_name );
+	include $path . '.php';
+}
+?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -8,10 +14,16 @@
 	href='https://fonts.googleapis.com/css?family=Open+Sans:400,300italic,600,600italic'
 	rel='stylesheet' type='text/css'>
 <?php
-include (realpath ( dirname ( __FILE__ ) . '/../php/jsidea/build/Build.php' ));
-echo jsidea\build\Build::debug ( "jsidea" );
+use jsidea\build\Ressource;
+
+// echo Ressource::debug ( "jsidea" );
 ?>
 </head>
 <body data-plugin="Builder">
+<?php
+use jsidea\build\Grunt;
+
+echo Grunt::setup ();
+?>
 </body>
 </html>
