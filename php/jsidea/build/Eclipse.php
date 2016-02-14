@@ -1,7 +1,7 @@
 <?php
 function send_command($plugin, $method, $options) {
 	$host = "localhost";
-	$port = "3008";
+	$port = "3009";
 	
 	$socket = socket_create ( AF_INET, SOCK_STREAM, SOL_TCP ) or die ( "Unable to create socket\n" );
 	
@@ -18,10 +18,24 @@ function send_command($plugin, $method, $options) {
 	);
 	$in = json_encode ( $in );
 	
+	// Write the request.
 	socket_write ( $socket, $in, strlen ( $in ) );
-	$buffer = socket_read ( $socket, 8192 );
+	// Get the response.
+	$response = socket_read ( $socket, 8192 );
+	$json_result = json_decode($response, true);
+	
+	//If the result is async, just wait for the response
+	if($json_result['kind'] == 'async')
+	{
+		// Get the response.
+		$async_response = socket_read ( $socket, 8192 );
+//  		$async_response = mb_convert_encoding($async_response, "UTF-8");
+		$json_result = json_decode($async_response, true);
+	}
+	
 	socket_close ( $socket );
-	echo $buffer;
+	
+	print_r($json_result);
 }
 
 // TEST EDITOR
@@ -47,6 +61,7 @@ function send_command($plugin, $method, $options) {
 // 'message' => 'HELLO WORLD FROM PHP',
 // 'color' => 0x00FF00
 // ) );
+header('Content-Type: text/html; charset=utf-8');
 send_command ( 'prompt', 'messageBox', array (
 		'message' => 'HELLO WORLD FROM PHP' 
 ) );

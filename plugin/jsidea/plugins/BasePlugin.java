@@ -1,44 +1,46 @@
 package jsidea.plugins;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import org.eclipse.swt.widgets.Display;
+
+import jsidea.core.AsyncToken;
+
 abstract public class BasePlugin {
 	public abstract void init();
 
-//	public JSONObject execute(String method, JSONObject options) {
-//		JSONObject jsonResult = new JSONObject();
-//		try {
-//			// invoke the method by reflection
-//			Method m = this.getClass().getMethod(method, new Class[] { JSONObject.class });
-//			Object ret = m.invoke(this, options);
-//
-//			// convert the result to json, end return it
-//
-//			if (ret != null)
-//				jsonResult.put("result", ret);
-//			else
-//				jsonResult.put("result", "void");
-//
-//			// Class<?> rt = m.getReturnType();
-//			// if (rt == String.class) {
-//			// jsonResult.put("result", jsonString);
-//			// }
-//
-//		} catch (NoSuchMethodException e) {
-//			jsonResult.put("error", e);
-//			e.printStackTrace();
-//		} catch (SecurityException e) {
-//			jsonResult.put("error", e);
-//			e.printStackTrace();
-//		} catch (IllegalAccessException e) {
-//			jsonResult.put("error", e);
-//			e.printStackTrace();
-//		} catch (IllegalArgumentException e) {
-//			jsonResult.put("error", e);
-//			e.printStackTrace();
-//		} catch (InvocationTargetException e) {
-//			jsonResult.put("error", e);
-//			e.printStackTrace();
-//		}
-//
-//		return jsonResult;
-//	}
+	protected AsyncToken async(String method, Object... options) {
+		AsyncToken token = new AsyncToken();
+		Display display = Display.getDefault();
+		BasePlugin plugin = this;
+		display.asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				Object result = plugin.call(method, options);
+				token.execute(result);
+			}
+		});
+		return token;
+	}
+
+	protected Object call(String method, Object... options) {
+		try {
+			@SuppressWarnings("rawtypes")
+			Class[] signature = new Class[options.length];
+			for (int i = 0; i < signature.length; i++) {
+				signature[i] = options[i].getClass();
+			}
+			Method m = this.getClass().getMethod(method, signature);
+			return m.invoke(this, options);
+
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchMethodException | SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
 }

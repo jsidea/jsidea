@@ -34,8 +34,9 @@ public class Client {
 
 		// buffer.rewind();
 		// buffer.compact();
-
-		ByteBuffer buffer = ByteBuffer.wrap(message.getBytes());
+		
+		Charset cs = Charset.forName("UTF-8");
+		ByteBuffer buffer = ByteBuffer.wrap(message.getBytes(cs));
 //		buffer.put((byte) null);
 		socket.write(buffer, this, _writer);
 

@@ -11,6 +11,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
 
+import jsidea.core.AsyncToken;
 import jsidea.core.Client;
 import jsidea.core.IReceiver;
 import jsidea.core.Server;
@@ -140,7 +141,7 @@ public class Activator extends AbstractUIPlugin implements IStartup, IReceiver {
 		}
 
 		if (pluginInstance != null) {
-			JSONObject ret = this.execute(pluginInstance, pluginMethod, options);
+			JSONObject ret = this.execute(client, pluginInstance, pluginMethod, options);
 			String retString = ret.toString(4);
 			client.write(retString);
 		} else {
@@ -153,7 +154,7 @@ public class Activator extends AbstractUIPlugin implements IStartup, IReceiver {
 		}
 	}
 
-	private JSONObject execute(BasePlugin plugin, String method, JSONObject options) {
+	private JSONObject execute(Client client, BasePlugin plugin, String method, JSONObject options) {
 		JSONObject jsonResult = new JSONObject();
 		try {
 			// invoke the method by reflection
@@ -161,11 +162,21 @@ public class Activator extends AbstractUIPlugin implements IStartup, IReceiver {
 			Object ret = m.invoke(plugin, options);
 
 			// convert the result to json, end return it
-
-			if (ret != null)
+			if (ret instanceof AsyncToken) {
+				AsyncToken token = (AsyncToken) ret;
+				token.setClient(client);
+				jsonResult.put("kind", "async");
+				jsonResult.put("async", token.getId());
+			} else if (ret != null)
+			{
+				jsonResult.put("kind", "result");
 				jsonResult.put("result", ret);
+			}
 			else
+			{
+				jsonResult.put("kind", "result");
 				jsonResult.put("result", "void");
+			}
 
 			// Class<?> rt = m.getReturnType();
 			// if (rt == String.class) {
@@ -185,13 +196,7 @@ public class Activator extends AbstractUIPlugin implements IStartup, IReceiver {
 			jsonResult.put("error", e);
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
-			// if(e.getCause() instanceof PluginException)
-			// {
-			// PluginException exc = (PluginException) e.getCause();
-			// jsonResult.put("error", exc);
-			// }
-			jsonResult.put("error", e.getCause().getMessage());
-			// e.printStackTrace();
+			jsonResult.put("error", e.getCause());
 		}
 
 		return jsonResult;

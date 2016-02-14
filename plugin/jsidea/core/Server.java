@@ -16,7 +16,7 @@ public class Server {
 		AsynchronousServerSocketChannel server = AsynchronousServerSocketChannel.open();
 
 		String host = "localhost";
-		int port = 3008;
+		int port = 3009;
 		InetSocketAddress sAddr = new InetSocketAddress(host, port);
 		server.bind(sAddr);
 		// System.out.format("Server is listening at %s%n", sAddr);
