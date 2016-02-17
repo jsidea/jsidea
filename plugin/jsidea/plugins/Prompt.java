@@ -15,34 +15,31 @@ public class Prompt extends BasePlugin {
 	}
 
 	public Object _messageBox(JSONObject options) {
-//		return this.async("messageBox", options.getString("message"));
+		return this.async("messageBox", options.getString("message"));
+	}
+
+	public Object _loginDialog(JSONObject options) {
 		return this.async("loginDialog", options.getString("message"));
 	}
 
-	public int messageBox(String message) {
+	public JSONObject messageBox(String message) {
 		Shell shell = new Shell(Display.getDefault());
-		// create a dialog with ok and cancel buttons and a question
-		// icon
 		MessageBox dialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.OK | SWT.CANCEL);
 		dialog.setText("My info");
 		dialog.setMessage(message);
-
-		// open dialog and await user selection
 		int returnCode = dialog.open();
-
-		return returnCode;
+		JSONObject res = new JSONObject();
+		res.put("returnCode", returnCode);
+		return res;
 	}
 
 	public JSONObject loginDialog(String message) {
 		Shell shell = new Shell(Display.getDefault());
-		// Create a dialog with ok and cancel buttons and a question
-		// icon
 		LoginDialog dialog = new LoginDialog(shell);
-
-		// Open dialog and await user selection
-		dialog.open();
-
-		return dialog.toJSON();
+		int returnCode = dialog.open();
+		JSONObject res = dialog.toJSON();
+		res.put("returnCode", returnCode);
+		return res;
 	}
 
 }

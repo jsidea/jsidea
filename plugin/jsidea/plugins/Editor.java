@@ -20,10 +20,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import jsidea.core.PluginException;
 
 public class Editor extends BasePlugin {
 	private static final String JAVA_EDITOR_ID = "org.eclipse.jdt.internal.ui.javaeditor.JavaEditor"; //$NON-NLS-1$
@@ -33,18 +30,18 @@ public class Editor extends BasePlugin {
 
 	}
 
-	public Object _openFile(JSONObject options) throws JSONException, PluginException {
+	public Object _openFile(JSONObject options) throws Exception {
 		String filename = options.getString("file");
 		if (options.has("line-number"))
 			return this.openFile(filename, options.getInt("line-number"));
 		return this.openFile(filename);
 	}
 
-	public Object openFile(String filename) throws PluginException {
+	public Object openFile(String filename) throws Exception {
 		return this.openFile(filename, 1);
 	}
 
-	public Object openFile(String filename, int lineNumber) throws PluginException {
+	public Object openFile(String filename, int lineNumber) throws Exception {
 		final IFile file = getEclipseFile(filename);
 		if (file != null) {
 			final IWorkbench workbench = PlatformUI.getWorkbench();
@@ -63,7 +60,7 @@ public class Editor extends BasePlugin {
 
 		File f = new File(filename);
 		if (!f.exists())
-			throw new PluginException("File not found: " + filename);
+			throw new Exception("File not found: " + filename);
 
 		// SOURCE:
 		// https://github.com/marook/eclipse-remote-control/blob/master/workspaces/erc/com.github.marook.eclipse_remote_control.run/src/com/github/marook/eclipse_remote_control/run/runner/impl/simple/atom/OpenFileCommandRunner.java

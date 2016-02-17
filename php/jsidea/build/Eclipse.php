@@ -62,7 +62,10 @@ function send_command($plugin, $method, $options) {
 // 'color' => 0x00FF00
 // ) );
 header('Content-Type: text/html; charset=utf-8');
-send_command ( 'prompt', 'messageBox', array (
-		'message' => 'HELLO WORLD FROM PHP' 
+// send_command ( 'prompt', 'messageBox', array (
+// 		'message' => 'HELLO WORLD FROM PHP' 
+// ) );
+send_command ( 'prompt', 'loginDialog', array (
+		'message' => 'HELLO WORLD FROM PHP'
 ) );
 ?>
