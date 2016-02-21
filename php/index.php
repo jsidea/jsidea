@@ -1,29 +1,20 @@
 <?php
+use jsidea\build\MySQL;
+use jsidea\core\File;
+
 function __autoload($class_name) {
 	$path = preg_replace ( '/\\\/', '/', $class_name );
 	include $path . '.php';
 }
-?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" /> -->
-<title>jsidea</title>
-<link
-	href='https://fonts.googleapis.com/css?family=Open+Sans:400,300italic,600,600italic'
-	rel='stylesheet' type='text/css'>
-<?php
-use jsidea\build\Ressource;
 
-// echo Ressource::debug ( "jsidea" );
-?>
-</head>
-<body data-plugin="Builder">
-<?php
-use jsidea\build\Grunt;
+// echo MySQL::dump ( array (
+// 		'user' => '',
+// 		'password' => '',
+// 		'host' => '127.0.0.1',
+// 		'database' => '',
+// 		'output' => File::project ( ' ) 
+// ) );
 
-echo Grunt::setup ();
+echo File::toURL(File::project ( 'jsidea/sql/ecomat.sql' ));
+
 ?>
-</body>
-</html>

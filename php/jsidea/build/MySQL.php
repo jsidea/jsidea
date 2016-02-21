@@ -2,6 +2,8 @@
 
 namespace jsidea\build;
 
+use jsidea\core\File;
+
 class MySQL {
 	public static function dump($options) {
 		// For windows operation systems
@@ -43,6 +45,8 @@ class MySQL {
 		
 		ignore_user_abort ( 1 );
 		$cmd = "$mysqldump -u $user -p$password -h $host $database";
+		$tab = ' --tab ' . __DIR__ . '/test';
+		// $cmd .= $tab;
 		$process = proc_open ( $cmd, array (
 				array (
 						"pipe", // STDIN
@@ -60,6 +64,7 @@ class MySQL {
 		
 		// Output std-out and std-error
 		$sql_string = stream_get_contents ( $pipes [1] );
+		// echo $sql_string;
 		$err = stream_get_contents ( $pipes [2] );
 		if ($err) {
 			return 'Error: ' . print_r ( $err, true );
@@ -76,16 +81,13 @@ class MySQL {
 		ignore_user_abort ( 0 );
 		
 		// save the sql-file
-		file_put_contents ( $output, $sql_string );
+		if ($sql_string) {
+			file_put_contents ( $output, $sql_string );
+		} else {
+			return "File empty";
+		}
 		
 		return 'Done';
 	}
 }
-echo MySQL::dump ( array (
-		'user' => '',
-		'password' => '',
-		'host' => '127.0.0.1',
-		'database' => '',
-		'output' => '' 
-) );
 ?>
