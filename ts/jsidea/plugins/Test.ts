@@ -3,16 +3,43 @@ namespace jsidea.plugins {
         constructor() {
             super();
 
-            var vie = document.createElement("div");
-            vie.id = "view";
-            document.body.appendChild(vie);
-            var con = document.createElement("div");
-            con.id = "content";
-            vie.appendChild(con);
+            //            var vie = document.createElement("div");
+            //            vie.id = "view";
+            //            document.body.appendChild(vie);
+            //            var con = document.createElement("div");
+            //            con.id = "content";
+            //            vie.appendChild(con);
 
-            this.testGeometryUtils();
+            //            this.testGeometryUtils();
             //            this.testMatrixFit();
             //asfd - de:keyboard :)
+            this.testMapTransform();
+        }
+
+        private testMapTransform(): void {
+            var fromPts: geom.Point2D[] = [
+                new geom.Point2D(53.603367, 8.507701),
+                new geom.Point2D(53.226772, 8.481535),
+                new geom.Point2D(53.151894, 8.942961)
+            ];
+            var toPts: geom.Point2D[] = [
+                new geom.Point2D(328, 164),
+                new geom.Point2D(320, 665),
+                new geom.Point2D(683, 763)
+            ];
+            for (var pt of toPts) {
+                pt.x = (pt.x / 1024) * 120 - 60;
+                pt.y = (pt.y / 1024) * 80 - 40;
+            }
+            var m = geom.MatrixFit.affine2D(fromPts, toPts);
+            console.log(m.toStringTable());
+            //            console.log(m.g            
+            //            var x = this.m11 * point.x + this.m21 * point.y + this.m31;
+            //            var y = this.m12 * point. *hi        
+            
+            
+            console.log("var tx = ", m.m11, "*", "x", "+", m.m21, "*", "y", "+", m.m31);
+            console.log("var ty = ", m.m12, "*", "x", "+", m.m22, "*", "y", "+", m.m32);
         }
 
         private testGeometryUtils(): void {
@@ -88,7 +115,7 @@ namespace jsidea.plugins {
             var transform = layout.Transform.create();
             var size: layout.Box = layout.Box.create();
             var cursor = new geom.Point3D();
-            
+
             //drag begin
             document.addEventListener("mousedown", (evt) => {
                 target = <HTMLElement>evt.target;
@@ -233,21 +260,21 @@ namespace jsidea.plugins {
                     text.Text.conc(10, " ", node.element.id ? node.element.id : node.element.nodeName),
                     //                    text.Text.conc(16, " ", "PARENT", ofp ? (ofp.id ? ofp.id : ofp.nodeName) : "NONE"),
                     //                    text.Text.conc(16, " ", "PARENT_C", calcedOff ? (calcedOff.id ? calcedOff.id : calcedOff.nodeName) : "NONE"),
-                    
+
                     //                    text.Text.conc(18, " ", "SCROLL_C", scaleOff ? (scaleOff.id ? scaleOff.id : scaleOff.nodeName) : "NONE"),
                     //                    text.Text.conc(18, " ", "PARENT_B", calcedPar ? (calcedPar.id ? calcedPar.id : calcedPar.nodeName) : "NONE"),
-                    
+
                     //                    text.Text.conc(18, " ", "OFFSET", node.offsetLeft, node.offsetTop),
                     //                    text.Text.conc(18, " ", "OFFSET_C", node.offset.x, node.offset.y),
                     //                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3d),
-                    
+
                     //                    text.Text.conc(12, " ", "DISPLAY", node.style.display),
                     text.Text.conc(12, " ", "FORCED_2D", node.isForced2D),
                     //                    text.Text.conc(18, " ", "SCROLL", node.element.scrollLeft, node.element.scrollTop),
                     //                    text.Text.conc(18, " ", "TRANSFORMED", node.isTransformed, node.style.perspective),
                     //                    text.Text.conc(18, " ", "TRANSFORMED", node.style.transform),
                     //                    text.Text.conc(18, " ", "PRESERVED", node.isPreserved3dOrPerspective),//, node.style.transformStyle),
-                    
+
                     //                    text.Text.conc(18, " ", "MARGIN", node.style.marginLeft, node.style.marginTop),
                     //                    text.Text.conc(18, " ", "BORDER", node.style.borderLeftWidth, node.style.borderTopWidth),
                     //                    text.Text.conc(18, " ", "PADDING", node.style.paddingLeft, node.style.paddingTop),
