@@ -183,7 +183,6 @@ namespace jsidea.layout {
             if (!node || node.isSticked || !node.parent)
                 return null;
 
-            //TODO: FIND THE BUG
             //if its forced to have another parent
             if (node.isFixedZombie)
                 return node.offsetParent;
@@ -194,7 +193,8 @@ namespace jsidea.layout {
                     return node;
                 if (excludeStaticParent && (node.isStatic && !node.isTransformed))
                     continue;
-                return node;
+                if (node.isScrollable)
+                    return node;
             }
             return null;
         }
@@ -204,7 +204,6 @@ namespace jsidea.layout {
             if (!node || node.isSticked || !node.parent)
                 return null;
 
-            //TODO: FIND THE BUG
             //if its forced to have another parent
             if (node.isFixedZombie)
                 return node.offsetParent;
@@ -215,7 +214,8 @@ namespace jsidea.layout {
                     return node;
                 if (excludeStaticParent && (node.isStatic && !node.isTransformedChild))
                     continue;
-                return node;
+                if (node.isScrollable)
+                    return node;
             }
             return null;
         }
